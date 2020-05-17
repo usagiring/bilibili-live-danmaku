@@ -2,7 +2,7 @@
   <div class="layout">
     <Layout :style="{minHeight: '100vh'}">
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
-        <Menu active-name="1-2" theme="dark" width="auto" :class="menuitemClasses">
+        <Menu active-name="1-1" theme="dark" width="auto" :class="menuitemClasses">
           <MenuItem name="1-1">
             <Icon type="ios-navigate"></Icon>
             <router-link class="link" to="/setting">设置</router-link>

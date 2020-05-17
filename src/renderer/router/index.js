@@ -30,6 +30,11 @@ export default new Router({
       component: () => import('@/components/Danmaku.vue')
     },
     {
+      path: '/danmaku-example',
+      name: 'DanmakuExample',
+      component: () => import('@/components/DanmakuExample.vue')
+    },
+    {
       path: '*',
       redirect: () => import('@/components/NotFound.vue')
     }
