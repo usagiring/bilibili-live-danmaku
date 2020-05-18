@@ -155,7 +155,11 @@
     </i-col>
     <i-col span="12">
       <p>预览</p>
-      <span @click="openNewWindow">独立窗口</span>
+      <span>独立窗口</span>
+      <i-switch v-model="isShowPreview" @on-change="showPreview"></i-switch>
+      <div @click="sendTestComment">发送测试弹幕</div>
+      <span>窗口置顶</span>
+      <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
       <DanmakuExample />
     </i-col>
   </Row>
@@ -165,7 +169,7 @@
 import { remote } from "electron";
 const { BrowserWindow } = remote;
 import DanmakuExample from "./DanmakuExample.vue";
-import emitter, { init } from "../../service/bilibili-live-ws";
+import emitter, { init, close } from "../../service/bilibili-live-ws";
 
 emitter.on("message", data => {
   console.log(data);
@@ -183,7 +187,11 @@ export default {
       repeatMS: 5000,
       collapse: ["1", "2", "3"],
       isShowMemberShipIcon: true,
+      isShowPreview: false,
+      isAlwaysOnTop: false,
+      win: null,
       normalFrontColor: "#FFFFFF",
+
       messageStyleNormal: {
         background: "#FFFFFF"
       },
@@ -263,12 +271,13 @@ export default {
   methods: {
     async connect(status) {
       if (status && !this.roomId) {
-        return;
+        if (!this.roomId) return;
+        this.roomId = 11588230;
+        await init({ roomId: this.roomId });
+        this.isConnected = status;
+      } else {
+        close();
       }
-
-      this.roomId = 11588230;
-      await init({ roomId: this.roomId });
-      this.isConnected = status;
     },
     showMemberShipIcon(status) {
       this.isShowMemberShipIcon = status;
@@ -285,26 +294,44 @@ export default {
         return this.nameStyleJianzhang;
       }
     },
-    openNewWindow() {
-      console.log("123");
-      const win = new BrowserWindow({
-        width: 320,
-        height: 320,
-        frame: false,
-        transparent: true,
-        titleBarStyle: "hidden"
-        // backgroundColor: '#FFFFFFFF',
-        // opacity: 0.1,
+    showPreview(status) {
+      if (status) {
+        if (!this.win) {
+          this.win = new BrowserWindow({
+            width: 320,
+            height: 320,
+            x: 0,
+            y: 0,
+            frame: false,
+            transparent: true
+          });
+
+          const winURL =
+            process.env.NODE_ENV === "development"
+              ? `http://localhost:9080/#/danmaku-example`
+              : `file://${__dirname}/index.html/#/danmaku-example`;
+          this.win.loadURL(winURL);
+        } else {
+          this.win.showInactive();
+        }
+      } else {
+        this.win.hide();
+      }
+    },
+    alwaysOnTop(status) {
+      this.win.setFocusable(!status);
+      this.win.setAlwaysOnTop(status);
+      this.win.setIgnoreMouseEvents(status);
+    },
+    async sendTestComment() {
+      console.log(123);
+      await this.$store.dispatch("addExampleComment", {
+        id: Math.floor(Math.random() * 100),
+        uid: "12345",
+        name: "其妙",
+        comment: "草",
+        role: "jianzhang"
       });
-      win.on("closed", () => {});
-      setTimeout(() => {
-        const winURL =
-          process.env.NODE_ENV === "development"
-            ? `http://localhost:9080/#/danmaku-example`
-            : `file://${__dirname}/index.html/#/danmaku-example`;
-        win.loadURL(winURL);
-        // win.show()
-      }, 2000);
     }
   }
 };

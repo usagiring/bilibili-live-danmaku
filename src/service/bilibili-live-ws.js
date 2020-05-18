@@ -3,22 +3,26 @@ class Emitter extends EventEmitter { }
 const emitter = new Emitter()
 
 const URI = "wss://broadcastlv.chat.bilibili.com:2245/sub";
+let ws
 let HEART_BEAT_TIMER = null;
 
 export default emitter
 export {
   init,
   parseDanmaku,
-  parseGift
+  parseGift,
+  close
+}
+
+function close() {
+  if (!ws) return
+  ws.close();
 }
 
 function init(options) {
   const { uid = 0, roomId } = options
 
   if (!roomId) throw new Error('roomId is null')
-
-  const ws = new WebSocket(URI);
-  ws.binaryType = "arraybuffer";
 
   const authParams = {
     uid,
@@ -29,35 +33,38 @@ function init(options) {
   };
 
   return new Promise((resolve, reject) => {
+    ws = new WebSocket(URI);
+    ws.binaryType = "arraybuffer";
+
     ws.onopen = function () {
       const data = JSON.stringify(authParams);
       const byte = convertToArrayBuffer(data, 7);
       ws.send(byte);
       resolve(emitter)
     };
-  
+
     ws.onmessage = function (evt) {
       const result = convertToObject(evt.data);
-  
+
       result.body.forEach &&
         result.body.forEach(function (item) {
           emitter.emit('message', item)
         });
-  
+
       if (result.op === 8) {
         heartBeat();
       }
     };
-  
+
     ws.onclose = function () {
       console.log('close')
     };
-  
+
     ws.onerror = function (err) {
       console.error('error', err)
     };
   })
-  
+
   function heartBeat() {
     clearInterval(HEART_BEAT_TIMER);
     HEART_BEAT_TIMER = setInterval(() => {

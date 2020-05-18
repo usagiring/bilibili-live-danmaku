@@ -30,67 +30,26 @@ export default {
   beforeCreate() {
     document
       .getElementsByTagName("body")[0]
-      .setAttribute("style", "background-color:rgba(0,0,0,0);");
+      .setAttribute(
+        "style",
+        "background-color:rgba(0,0,0,0);-webkit-app-region: drag;"
+      );
   },
 
   data() {
     return {
-      messageStyleNormal: {
-        background: "#FFFFFF"
-      },
-      messageStyleJianzhang: {
-        background: "#FFFFFF"
-      },
+      messageStyleNormal: {},
+      messageStyleJianzhang: {},
       nameStyleNormal: {
         color: "black"
       },
       commentStyleNormal: {
-        color: "#FFFFFF"
+        color: "black"
       },
       nameStyleJianzhang: {
         color: "green"
       },
 
-      messages: [
-        {
-          id: 1,
-          uid: "12345",
-          name: "其妙",
-          comment: "草",
-          role: "jianzhang"
-        },
-        {
-          id: 2,
-          uid: "12346",
-          name: "马自立",
-          type: "comment",
-          comment: "我就是Hololive！！！",
-          role: "tidu"
-        },
-        {
-          id: 3,
-          uid: "12346",
-          name: "马自立",
-          type: "gift",
-          comment: "我就是Hololive！！！",
-          role: "normal"
-        },
-        {
-          id: 4,
-          uid: "12346",
-          name: "马自立",
-          type: "super-chat",
-          comment: "我就是Hololive！！！",
-          role: "normal"
-        },
-        {
-          id: 5,
-          uid: "12345",
-          name: "Res",
-          comment: "草",
-          role: "normal"
-        }
-      ],
       superChats: [
         {
           uid: "12346",
@@ -103,6 +62,11 @@ export default {
         }
       ]
     };
+  },
+  computed: {
+    messages() {
+      return this.$store.state.Comment.exampleComments
+    }
   },
   methods: {
     showMemberShipIcon(status) {
