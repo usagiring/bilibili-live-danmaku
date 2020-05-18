@@ -27,6 +27,12 @@
 
 <script>
 export default {
+  beforeCreate() {
+    document
+      .getElementsByTagName("body")[0]
+      .setAttribute("style", "background-color:rgba(0,0,0,0);");
+  },
+
   data() {
     return {
       messageStyleNormal: {
@@ -119,7 +125,13 @@ export default {
 </script>
 
 <style scoped>
-#app html body {
-  background: yellow
+.danmaku-example {
+  /* position: absolute; */
+  /* width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0); */
 }
 </style>
