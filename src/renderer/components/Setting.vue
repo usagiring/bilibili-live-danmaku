@@ -14,10 +14,87 @@
       </div>
       <Collapse simple :value="collapse">
         <Panel name="1">
-          文本
+          普通
+          <div slot="content">
+            <div>
+              <span class="setting-key-text">名称大小</span>
+              <InputNumber
+                :value="normal_name_size"
+                @on-change="change_normal_name_size"
+                :min="0"
+                :formatter="pxFormatter"
+                :parser="pxParser"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">名称描边大小</span>
+              <InputNumber
+                :value="normal_name_board_size"
+                @on-change="change_normal_name_board_size"
+                :min="0"
+                :formatter="pxFormatter"
+                :parser="pxParser"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">名称描边颜色</span>
+              <ColorPicker
+                :value="normal_name_board_color"
+                @on-change="change_normal_name_board_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">名称前景色</span>
+              <ColorPicker
+                :value="normal_name_color"
+                @on-change="change_normal_name_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">评论大小</span>
+              <InputNumber
+                :value="normal_comment_size"
+                @on-change="change_normal_comment_size"
+                :min="0"
+                :formatter="pxFormatter"
+                :parser="pxParser"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">评论前景色</span>
+              <ColorPicker
+                :value="normal_comment_color"
+                @on-change="change_normal_comment_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">消息背景色</span>
+              <ColorPicker
+                :value="normal_name_color"
+                @on-change="change_normal_name_color"
+                size="small"
+              />
+            </div>
+          </div>
+        </Panel>
+        <Panel name="2">
+          舰长
           <div slot="content">
             <div>
               <span class="setting-key-text">文字大小</span>
+              <InputNumber
+                :value="message_size"
+                @on-change="change_message_size"
+                :formatter="pxFormatter"
+                :parser="pxParser"
+                size="small"
+              />
             </div>
             <div>
               <span class="setting-key-text">描边大小</span>
@@ -26,99 +103,33 @@
               <span class="setting-key-text">描边颜色</span>
               <ColorPicker v-model="normalFrontColor" size="small" />
             </div>
-
-            <Collapse simple>
-              <Panel name="1-1">
-                名称前景色
-                <div slot="content">
-                  <div>
-                    <span class="setting-key-text">普通</span>
-                    <ColorPicker v-model="nameStyleNormal.color" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">舰长</span>
-                    <ColorPicker v-model="nameStyleJianzhang.color" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">提督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">总督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">管理员</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">主播</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                </div>
-              </Panel>
-              <Panel name="1-2">
-                评论前景色
-                <div slot="content">
-                  <div>
-                    <span class="setting-key-text">普通</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">舰长</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">提督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">总督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">管理员</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">主播</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                </div>
-              </Panel>
-              <Panel name="1-3">
-                消息背景色
-                <div slot="content">
-                  <div>
-                    <span class="setting-key-text">普通</span>
-                    <ColorPicker v-model="messageStyleNormal.background" alpha size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">舰长</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">提督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">总督</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">管理员</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                  <div>
-                    <span class="setting-key-text">主播</span>
-                    <ColorPicker v-model="normalFrontColor" size="small" />
-                  </div>
-                </div>
-              </Panel>
-            </Collapse>
+            <div>
+              <span class="setting-key-text">名称前景色</span>
+              <ColorPicker
+                :value="normal_name_color"
+                @on-change="change_normal_name_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">评论前景色</span>
+              <ColorPicker
+                :value="normal_name_color"
+                @on-change="change_normal_name_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">消息背景色</span>
+              <ColorPicker
+                :value="normal_name_color"
+                @on-change="change_normal_name_color"
+                size="small"
+              />
+            </div>
           </div>
         </Panel>
-        <Panel name="2">
+        <Panel name="3">
           图标
           <div slot="content">
             <div>
@@ -135,7 +146,7 @@
             </div>
           </div>
         </Panel>
-        <Panel name="3">
+        <Panel name="4">
           其他
           <div slot="content">
             <div>
@@ -158,9 +169,12 @@
       <span>独立窗口</span>
       <i-switch v-model="isShowPreview" @on-change="showPreview"></i-switch>
       <div @click="sendTestComment">发送测试弹幕</div>
-      <span>窗口置顶</span>
+      <div @click="clear">清空Storage</div>
+      <span @click="alwaysOnTop">窗口置顶</span>
       <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
-      <DanmakuExample />
+      <div class="danmmaku-example-wrapper">
+        <DanmakuExample />
+      </div>
     </i-col>
   </Row>
 </template>
@@ -170,6 +184,7 @@ import { remote } from "electron";
 const { BrowserWindow } = remote;
 import DanmakuExample from "./DanmakuExample.vue";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
+import Store from "electron-store";
 
 emitter.on("message", data => {
   console.log(data);
@@ -198,75 +213,38 @@ export default {
       messageStyleJianzhang: {
         background: "#FFFFFF"
       },
-      nameStyleNormal: {
-        color: "black"
-      },
       commentStyleNormal: {
         color: "#FFFFFF"
       },
       nameStyleJianzhang: {
         color: "green"
-      },
-
-      messages: [
-        {
-          id: 1,
-          uid: "12345",
-          name: "其妙",
-          comment: "草",
-          role: "jianzhang"
-        },
-        {
-          id: 2,
-          uid: "12346",
-          name: "马自立",
-          type: "comment",
-          comment: "我就是Hololive！！！",
-          role: "tidu"
-        },
-        {
-          id: 3,
-          uid: "12346",
-          name: "马自立",
-          type: "gift",
-          comment: "我就是Hololive！！！",
-          role: "normal"
-        },
-        {
-          id: 4,
-          uid: "12346",
-          name: "马自立",
-          type: "super-chat",
-          comment: "我就是Hololive！！！",
-          role: "normal"
-        },
-        {
-          id: 5,
-          uid: "12345",
-          name: "Res",
-          comment: "草",
-          role: "normal"
-        }
-      ],
-      superChats: [
-        {
-          uid: "12346",
-          name: "马自立",
-          type: "super-chat",
-          number: 100,
-          unit: "RMB",
-          comment: "我就是Hololive！！！",
-          role: "normal"
-        }
-      ]
+      }
     };
   },
   computed: {
-    // getMessageStyleByRole() {
-    //   // if (message.role === "normal") {
-    //     return this.messageNormalStyle
-    //   // }
-    // }
+    message_size() {
+      return this.pxParser(this.$store.state.Config.message["font-size"]);
+    },
+    normal_name_color() {
+      return this.$store.state.Config.normal_name.color;
+    },
+    normal_name_size() {
+      return this.pxParser(this.$store.state.Config.normal_name["font-size"]);
+    },
+    normal_name_board_color() {
+      return this.$store.state.Config.normal_name["-webkit-text-stroke-color"];
+    },
+    normal_name_board_size() {
+      return this.pxParser(
+        this.$store.state.Config.normal_name["-webkit-text-stroke-width"]
+      );
+    },
+    normal_comment_size() {
+      return this.pxParser(this.$store.state.Config.normal_comment["font-size"]);
+    },
+    normal_comment_color() {
+      return this.$store.state.Config.normal_comment.color;
+    }
   },
   methods: {
     async connect(status) {
@@ -301,7 +279,7 @@ export default {
             width: 320,
             height: 320,
             x: 0,
-            y: 0,
+            y: 300,
             frame: false,
             transparent: true
           });
@@ -324,7 +302,6 @@ export default {
       this.win.setIgnoreMouseEvents(status);
     },
     async sendTestComment() {
-      console.log(123);
       await this.$store.dispatch("addExampleComment", {
         id: Math.floor(Math.random() * 100),
         uid: "12345",
@@ -332,32 +309,85 @@ export default {
         comment: "草",
         role: "jianzhang"
       });
-    }
+    },
+    clear() {
+      const store = new Store({ name: "vuex" });
+      store.clear();
+    },
+
+    pxFormatter: value => `${value}px`,
+    pxParser: value => Number(value.replace("px", "")),
+    change_message_size(number) {
+      this.$store.dispatch("UPDATE_MESSAGE_STYLE", {
+        "font-size": this.pxFormatter(number)
+      });
+    },
+    change_normal_name_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "name",
+        style: {
+          color
+        }
+      });
+    },
+    change_normal_name_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "name",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_normal_name_board_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-width": this.pxFormatter(number)
+        }
+      });
+    },
+    change_normal_name_board_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-color": color
+        }
+      });
+    },
+    change_normal_comment_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "comment",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_normal_comment_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "normal",
+        type: "comment",
+        style: {
+          color
+        }
+      });
+    },
+    change_jianzhang_name_color() {}
   }
 };
 </script>
 
 <style scoped>
-.super-chat-avatar {
-  transform: translate(0%, -5%);
-}
-.super-chat-in-top {
-  display: inline-block;
-  height: 32px;
-  border-radius: 20px;
-  padding: 0px 10px;
-  font-size: 18px;
-  line-height: 32px;
-}
-.super-chat-text {
-}
-
-.message-normal {
-  background: silver;
-}
 .setting-key-text {
   display: inline-block;
   width: 140px;
   text-align: right;
+}
+.danmmaku-example-wrapper {
+  background: rgba(0, 0, 0, 0.3);
 }
 </style>

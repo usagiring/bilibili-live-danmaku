@@ -43,11 +43,11 @@ const state = {
 }
 
 const mutations = {
-  ADD_EXAMPLE_COMMENT(state, payload) {
-    state.exampleComments.push(payload)
+  ADD_EXAMPLE_COMMENT({ exampleComments }, payload) {
+    exampleComments.push(payload)
   },
-  ADD_COMMENT(comment) {
-    comments.push(comment)
+  ADD_COMMENT({ comments }, payload) {
+    comments.push(payload)
   },
   POP() {
     comments.pop()

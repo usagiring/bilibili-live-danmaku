@@ -1,5 +1,5 @@
 <template>
-  <div class="danmaku-example">
+  <div>
     <div>
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
@@ -18,8 +18,11 @@
         :key="message.id"
         v-for="message in messages"
       >
-        <span :class="`name-${message.role}`" :style="getNameStyleByRole(message)">{{message.name}}</span>:
-        <span :class="`comment-${message.role}`">{{message.comment}}</span>
+        <span :class="`name-${message.role}`" :style="getNameStyleByRole(message)">{{message.name}}:</span>
+        <span
+          :class="`comment-${message.role}`"
+          :style="getCommentStyleByRole(message)"
+        >{{message.comment}}</span>
       </p>
     </div>
   </div>
@@ -32,22 +35,40 @@ export default {
       .getElementsByTagName("body")[0]
       .setAttribute(
         "style",
-        "background-color:rgba(0,0,0,0);-webkit-app-region: drag;"
+        "background-color:rgba(0,0,0,0.3);-webkit-app-region: drag;"
       );
   },
 
   data() {
     return {
-      messageStyleNormal: {},
       messageStyleJianzhang: {},
-      nameStyleNormal: {
-        color: "black"
-      },
-      commentStyleNormal: {
-        color: "black"
-      },
+      messageStyleTidu: {},
+      messageStyleZongdu: {},
+
+      // nameStyleNormal: {
+      //   color: "white"
+      // },
       nameStyleJianzhang: {
         color: "green"
+      },
+      nameStyleTidu: {
+        color: "white"
+      },
+      nameStyleZongdu: {
+        color: "white"
+      },
+
+      commentStyleNormal: {
+        color: "white"
+      },
+      commentStyleJianzhang: {
+        color: "white"
+      },
+      commentStyleTidu: {
+        color: "white"
+      },
+      commentStyleZongdu: {
+        color: "white"
       },
 
       superChats: [
@@ -65,7 +86,26 @@ export default {
   },
   computed: {
     messages() {
-      return this.$store.state.Comment.exampleComments
+      return this.$store.state.Comment.exampleComments;
+    },
+
+    messageStyle() {
+      return this.$store.state.Config.message;
+    },
+    normal_message() {
+      return this.$store.state.Config.normal_message;
+    },
+    normal_name() {
+      return this.$store.state.Config.normal_name;
+    },
+    normal_comment() {
+      return this.$store.state.Config.normal_comment;
+    },
+    tidu_name() {
+      return this.$store.state.Config.normal_name;
+    },
+    zongdu_name() {
+      return this.$store.state.Config.normal_name;
     }
   },
   methods: {
@@ -73,16 +113,13 @@ export default {
       this.isShowMemberShipIcon = status;
     },
     getMessageStyleByRole(message) {
-      if (message.role === "normal") {
-        return this.messageStyleNormal;
-      }
+      return this[`${message.role}_message`];
     },
     getNameStyleByRole(message) {
-      if (message.role === "normal") {
-        return this.nameStyleNormal;
-      } else if (message.role === "jianzhang") {
-        return this.nameStyleJianzhang;
-      }
+      return this[`${message.role}_name`];
+    },
+    getCommentStyleByRole(message) {
+      return this[`${message.role}_comment`];
     }
   }
 };
@@ -90,12 +127,22 @@ export default {
 
 <style scoped>
 .danmaku-example {
-  /* position: absolute; */
-  /* width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0); */
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.super-chat-avatar {
+  transform: translate(0%, -5%);
+}
+.super-chat-in-top {
+  display: inline-block;
+  height: 32px;
+  border-radius: 20px;
+  padding: 0px 10px;
+  font-size: 18px;
+  line-height: 32px;
+}
+.super-chat-text {
+}
+
+.message-normal {
 }
 </style>
