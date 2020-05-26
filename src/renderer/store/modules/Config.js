@@ -12,7 +12,18 @@ const state = {
   normal_comment: {
     'font-size': '12px',
     color: 'white'
-  }
+  },
+
+  captain_name: {
+    'font-size': '12px',
+    '-webkit-text-stroke-width': '1px',
+    '-webkit-text-stroke-color': 'green',
+    color: 'white'
+  },
+  captain_comment: {
+    'font-size': '12px',
+    color: 'white'
+  },
 }
 
 const mutations = {

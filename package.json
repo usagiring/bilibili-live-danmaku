@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "axios": "^0.18.1",
+    "pako": "^1.0.11",
     "view-design": "^4.2.0",
     "vue": "^2.6.11",
     "vue-electron": "^1.0.6",

@@ -3,7 +3,7 @@
     <i-col span="12">
       <div>
         <span class="setting-key-text">连接直播间</span>
-        <Input
+        <InputNumber
           v-model="roomId"
           placeholder="请输入房间号"
           size="small"
@@ -87,43 +87,67 @@
           舰长
           <div slot="content">
             <div>
-              <span class="setting-key-text">文字大小</span>
+              <span class="setting-key-text">名称大小</span>
               <InputNumber
-                :value="message_size"
-                @on-change="change_message_size"
+                :value="captain_name_size"
+                @on-change="change_captain_name_size"
+                :min="0"
                 :formatter="pxFormatter"
                 :parser="pxParser"
                 size="small"
               />
             </div>
             <div>
-              <span class="setting-key-text">描边大小</span>
+              <span class="setting-key-text">名称描边大小</span>
+              <InputNumber
+                :value="captain_name_board_size"
+                @on-change="change_captain_name_board_size"
+                :min="0"
+                :formatter="pxFormatter"
+                :parser="pxParser"
+                size="small"
+              />
             </div>
             <div>
-              <span class="setting-key-text">描边颜色</span>
-              <ColorPicker v-model="normalFrontColor" size="small" />
+              <span class="setting-key-text">名称描边颜色</span>
+              <ColorPicker
+                :value="captain_name_board_color"
+                @on-change="change_captain_name_board_color"
+                size="small"
+              />
             </div>
             <div>
               <span class="setting-key-text">名称前景色</span>
               <ColorPicker
-                :value="normal_name_color"
-                @on-change="change_normal_name_color"
+                :value="captain_name_color"
+                @on-change="change_captain_name_color"
+                size="small"
+              />
+            </div>
+            <div>
+              <span class="setting-key-text">评论大小</span>
+              <InputNumber
+                :value="captain_comment_size"
+                @on-change="change_captain_comment_size"
+                :min="0"
+                :formatter="pxFormatter"
+                :parser="pxParser"
                 size="small"
               />
             </div>
             <div>
               <span class="setting-key-text">评论前景色</span>
               <ColorPicker
-                :value="normal_name_color"
-                @on-change="change_normal_name_color"
+                :value="captain_comment_color"
+                @on-change="change_captain_comment_color"
                 size="small"
               />
             </div>
             <div>
               <span class="setting-key-text">消息背景色</span>
               <ColorPicker
-                :value="normal_name_color"
-                @on-change="change_normal_name_color"
+                :value="captain_name_color"
+                @on-change="change_captain_name_color"
                 size="small"
               />
             </div>
@@ -240,18 +264,41 @@ export default {
       );
     },
     normal_comment_size() {
-      return this.pxParser(this.$store.state.Config.normal_comment["font-size"]);
+      return this.pxParser(
+        this.$store.state.Config.normal_comment["font-size"]
+      );
     },
     normal_comment_color() {
       return this.$store.state.Config.normal_comment.color;
-    }
+    },
+
+    captain_name_color() {
+      return this.$store.state.Config.captain_name.color;
+    },
+    captain_name_size() {
+      return this.pxParser(this.$store.state.Config.captain_name["font-size"]);
+    },
+    captain_name_board_color() {
+      return this.$store.state.Config.captain_name["-webkit-text-stroke-color"];
+    },
+    captain_name_board_size() {
+      return this.pxParser(
+        this.$store.state.Config.captain_name["-webkit-text-stroke-width"]
+      );
+    },
+    captain_comment_size() {
+      return this.pxParser(
+        this.$store.state.Config.captain_comment["font-size"]
+      );
+    },
+    captain_comment_color() {
+      return this.$store.state.Config.captain_comment.color;
+    },
   },
   methods: {
     async connect(status) {
-      if (status && !this.roomId) {
-        if (!this.roomId) return;
-        this.roomId = 11588230;
-        await init({ roomId: this.roomId });
+      if (status && this.roomId) {
+        await init({ roomId: Number(this.roomId) });
         this.isConnected = status;
       } else {
         close();
@@ -376,7 +423,62 @@ export default {
         }
       });
     },
-    change_jianzhang_name_color() {}
+
+    change_captain_name_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "name",
+        style: {
+          color
+        }
+      });
+    },
+    change_captain_name_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "name",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_captain_name_board_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-width": this.pxFormatter(number)
+        }
+      });
+    },
+    change_captain_name_board_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-color": color
+        }
+      });
+    },
+    change_captain_comment_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "comment",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_captain_comment_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "captain",
+        type: "comment",
+        style: {
+          color
+        }
+      });
+    },
+    
   }
 };
 </script>

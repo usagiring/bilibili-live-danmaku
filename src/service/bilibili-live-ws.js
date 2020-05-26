@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+import { inflate } from 'pako';
 class Emitter extends EventEmitter { }
 const emitter = new Emitter()
 
@@ -27,9 +28,9 @@ function init(options) {
   const authParams = {
     uid,
     roomid: roomId,
-    protover: 1,
+    protover: 2,
     platform: "web",
-    clientver: "1.4.0"
+    clientver: "1.5.15"
   };
 
   return new Promise((resolve, reject) => {
@@ -159,7 +160,7 @@ function convertToObject(arraybuffer) {
       try {
         if (output.ver === 2) {
           const l = arraybuffer.slice(i + u, i + o);
-          const f = new Uint8Array(l);
+          const f = inflate(l);
           c = convertToObject(f.buffer).body;
         } else {
           c = JSON.parse(decoder.decode(arraybuffer.slice(i + u, i + o)));

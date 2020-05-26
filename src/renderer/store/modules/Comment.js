@@ -6,7 +6,7 @@ const state = {
       uid: "12345",
       name: "其妙",
       comment: "草",
-      role: "jianzhang"
+      role: "captain"
     },
     {
       id: 2,
@@ -14,7 +14,7 @@ const state = {
       name: "马自立",
       type: "comment",
       comment: "我就是Hololive！！！",
-      role: "tidu"
+      role: "normal"
     },
     {
       id: 3,
@@ -37,7 +37,7 @@ const state = {
       uid: "12345",
       name: "Res",
       comment: "草",
-      role: "normal"
+      role: "captain"
     }
   ],
 }

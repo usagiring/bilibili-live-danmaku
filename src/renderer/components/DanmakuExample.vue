@@ -41,36 +41,6 @@ export default {
 
   data() {
     return {
-      messageStyleJianzhang: {},
-      messageStyleTidu: {},
-      messageStyleZongdu: {},
-
-      // nameStyleNormal: {
-      //   color: "white"
-      // },
-      nameStyleJianzhang: {
-        color: "green"
-      },
-      nameStyleTidu: {
-        color: "white"
-      },
-      nameStyleZongdu: {
-        color: "white"
-      },
-
-      commentStyleNormal: {
-        color: "white"
-      },
-      commentStyleJianzhang: {
-        color: "white"
-      },
-      commentStyleTidu: {
-        color: "white"
-      },
-      commentStyleZongdu: {
-        color: "white"
-      },
-
       superChats: [
         {
           uid: "12346",
@@ -89,9 +59,6 @@ export default {
       return this.$store.state.Comment.exampleComments;
     },
 
-    messageStyle() {
-      return this.$store.state.Config.message;
-    },
     normal_message() {
       return this.$store.state.Config.normal_message;
     },
@@ -101,12 +68,16 @@ export default {
     normal_comment() {
       return this.$store.state.Config.normal_comment;
     },
-    tidu_name() {
-      return this.$store.state.Config.normal_name;
+
+    captain_message() {
+      return this.$store.state.Config.captain_message;
     },
-    zongdu_name() {
-      return this.$store.state.Config.normal_name;
-    }
+    captain_name() {
+      return this.$store.state.Config.captain_name;
+    },
+    captain_comment() {
+      return this.$store.state.Config.captain_comment;
+    },
   },
   methods: {
     showMemberShipIcon(status) {
