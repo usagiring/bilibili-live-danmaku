@@ -24,6 +24,29 @@ const state = {
     'font-size': '12px',
     color: 'white'
   },
+
+  admiral_name: {
+    'font-size': '12px',
+    '-webkit-text-stroke-width': '1px',
+    '-webkit-text-stroke-color': 'green',
+    color: 'white'
+  },
+  admiral_comment: {
+    'font-size': '12px',
+    color: 'white'
+  },
+
+  governor_name: {
+    'font-size': '12px',
+    '-webkit-text-stroke-width': '1px',
+    '-webkit-text-stroke-color': 'green',
+    color: 'white'
+  },
+  governor_comment: {
+    'font-size': '12px',
+    color: 'white'
+  },
+
 }
 
 const mutations = {

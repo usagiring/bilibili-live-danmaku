@@ -189,23 +189,22 @@
       </Collapse>
     </i-col>
     <i-col span="12">
-      <p>预览</p>
-      <span>独立窗口</span>
+      <span>预览</span>
       <i-switch v-model="isShowPreview" @on-change="showPreview"></i-switch>
       <div @click="sendTestComment">发送测试弹幕</div>
       <div @click="clear">清空Storage</div>
       <span @click="alwaysOnTop">窗口置顶</span>
       <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
-      <div class="danmmaku-example-wrapper">
+      <!-- <div class="danmmaku-example-wrapper">
         <DanmakuExample />
-      </div>
+      </div> -->
     </i-col>
   </Row>
 </template>
 
 <script>
 import { remote } from "electron";
-const { BrowserWindow } = remote;
+const { BrowserWindow, screen } = remote;
 import DanmakuExample from "./DanmakuExample.vue";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
@@ -294,6 +293,54 @@ export default {
     captain_comment_color() {
       return this.$store.state.Config.captain_comment.color;
     },
+
+    admiral_name_color() {
+      return this.$store.state.Config.admiral_name.color;
+    },
+    admiral_name_size() {
+      return this.pxParser(this.$store.state.Config.admiral_name["font-size"]);
+    },
+    admiral_name_board_color() {
+      return this.$store.state.Config.admiral_name["-webkit-text-stroke-color"];
+    },
+    admiral_name_board_size() {
+      return this.pxParser(
+        this.$store.state.Config.admiral_name["-webkit-text-stroke-width"]
+      );
+    },
+    admiral_comment_size() {
+      return this.pxParser(
+        this.$store.state.Config.admiral_comment["font-size"]
+      );
+    },
+    admiral_comment_color() {
+      return this.$store.state.Config.admiral_comment.color;
+    },
+
+    governor_name_color() {
+      return this.$store.state.Config.governor_name.color;
+    },
+    governor_name_size() {
+      return this.pxParser(this.$store.state.Config.governor_name["font-size"]);
+    },
+    governor_name_board_color() {
+      return this.$store.state.Config.governor_name[
+        "-webkit-text-stroke-color"
+      ];
+    },
+    governor_name_board_size() {
+      return this.pxParser(
+        this.$store.state.Config.governor_name["-webkit-text-stroke-width"]
+      );
+    },
+    governor_comment_size() {
+      return this.pxParser(
+        this.$store.state.Config.governor_comment["font-size"]
+      );
+    },
+    governor_comment_color() {
+      return this.$store.state.Config.governor_comment.color;
+    }
   },
   methods: {
     async connect(status) {
@@ -320,13 +367,15 @@ export default {
       }
     },
     showPreview(status) {
+      const { x, y } = screen.getCursorScreenPoint();
+
       if (status) {
         if (!this.win) {
           this.win = new BrowserWindow({
             width: 320,
             height: 320,
-            x: 0,
-            y: 300,
+            x,
+            y,
             frame: false,
             transparent: true
           });
@@ -349,12 +398,13 @@ export default {
       this.win.setIgnoreMouseEvents(status);
     },
     async sendTestComment() {
-      await this.$store.dispatch("addExampleComment", {
+      const lastest = this.$store.state.Message.exampleComments;
+      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
         id: Math.floor(Math.random() * 100),
         uid: "12345",
         name: "其妙",
         comment: "草",
-        role: "jianzhang"
+        role: "captain"
       });
     },
     clear() {
@@ -478,7 +528,116 @@ export default {
         }
       });
     },
-    
+
+    change_admiral_name_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "name",
+        style: {
+          color
+        }
+      });
+    },
+    change_admiral_name_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "name",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_admiral_name_board_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-width": this.pxFormatter(number)
+        }
+      });
+    },
+    change_admiral_name_board_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-color": color
+        }
+      });
+    },
+    change_admiral_comment_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "comment",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_admiral_comment_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "admiral",
+        type: "comment",
+        style: {
+          color
+        }
+      });
+    },
+
+    change_governor_name_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "name",
+        style: {
+          color
+        }
+      });
+    },
+    change_governor_name_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "name",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_governor_name_board_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-width": this.pxFormatter(number)
+        }
+      });
+    },
+    change_governor_name_board_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "name",
+        style: {
+          "-webkit-text-stroke-color": color
+        }
+      });
+    },
+    change_governor_comment_size(number) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "comment",
+        style: {
+          "font-size": this.pxFormatter(number)
+        }
+      });
+    },
+    change_governor_comment_color(color) {
+      this.$store.dispatch("UPDATE_STYLE", {
+        role: "governor",
+        type: "comment",
+        style: {
+          color
+        }
+      });
+    }
   }
 };
 </script>

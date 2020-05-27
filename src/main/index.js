@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron'
-// import '../renderer/store'
+import '../renderer/store'
 
 /**
  * Set `__static` path to static files in production

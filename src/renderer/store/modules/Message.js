@@ -1,6 +1,6 @@
 const state = {
-  comments: [],
-  exampleComments: [
+  messages: [],
+  exampleMessages: [
     {
       id: 1,
       uid: "12345",
@@ -43,14 +43,14 @@ const state = {
 }
 
 const mutations = {
-  ADD_EXAMPLE_COMMENT({ exampleComments }, payload) {
-    exampleComments.push(payload)
+  ADD_EXAMPLE_MESSAGE({ exampleMessages }, payload) {
+    exampleMessages.push(payload)
   },
-  ADD_COMMENT({ comments }, payload) {
-    comments.push(payload)
+  ADD_MESSAGE({ messages }, payload) {
+    messages.push(payload)
   },
   POP() {
-    comments.pop()
+    messages.pop()
   }
 }
 
@@ -58,8 +58,8 @@ const actions = {
   someAsyncTask(comment) {
   },
 
-  async addExampleComment({ commit }, payload) {
-    commit('ADD_EXAMPLE_COMMENT', payload)
+  async ADD_EXAMPLE_MESSAGE({ commit }, payload) {
+    commit('ADD_EXAMPLE_MESSAGE', payload)
   },
 }
 

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div>
+  <div class="danmaku-example-wrapper">
+    <div class="super-chat-content">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
           class="super-chat-avatar"
@@ -10,20 +10,24 @@
         <span class="super-chat-text">$100</span>
       </span>
     </div>
-    <!-- <Divider size="small" /> -->
-    <div>
-      <p
-        :class="`message message-${message.role}`"
-        :style="getMessageStyleByRole(message)"
-        :key="message.id"
-        v-for="message in messages"
-      >
-        <span :class="`name-${message.role}`" :style="getNameStyleByRole(message)">{{message.name}}:</span>
-        <span
-          :class="`comment-${message.role}`"
-          :style="getCommentStyleByRole(message)"
-        >{{message.comment}}</span>
-      </p>
+    <div class="message-content-wrapper">
+      <div class="message-content">
+        <p
+          :class="`message message-${message.role}`"
+          :style="getMessageStyleByRole(message)"
+          :key="message.id"
+          v-for="message in messages"
+        >
+          <span
+            :class="`name-${message.role}`"
+            :style="getNameStyleByRole(message)"
+          >{{message.name}}:</span>
+          <span
+            :class="`comment-${message.role}`"
+            :style="getCommentStyleByRole(message)"
+          >{{message.comment}}</span>
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -33,10 +37,7 @@ export default {
   beforeCreate() {
     document
       .getElementsByTagName("body")[0]
-      .setAttribute(
-        "style",
-        "background-color:rgba(0,0,0,0.3);-webkit-app-region: drag;"
-      );
+      .setAttribute("style", "background-color:rgba(0,0,0,0);");
   },
 
   data() {
@@ -56,7 +57,7 @@ export default {
   },
   computed: {
     messages() {
-      return this.$store.state.Comment.exampleComments;
+      return this.$store.state.Message.exampleMessages;
     },
 
     normal_message() {
@@ -77,7 +78,7 @@ export default {
     },
     captain_comment() {
       return this.$store.state.Config.captain_comment;
-    },
+    }
   },
   methods: {
     showMemberShipIcon(status) {
@@ -97,8 +98,40 @@ export default {
 </script>
 
 <style scoped>
-.danmaku-example {
+.layout {
+  position: relative;
+  overflow: hidden;
+}
+.layout-logo {
+  float: left;
+  position: relative;
+}
+.layout-nav {
+  margin: 0 auto;
+}
+.layout-footer-center {
+  text-align: center;
+}
+
+.danmaku-example-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
   background-color: rgba(0, 0, 0, 0.3);
+  -webkit-app-region: drag;
+}
+.super-chat-content {
+  height: 30px;
+}
+.message-content-wrapper {
+  width: 100%;
+}
+.message-content {
+  position: absolute;
+  bottom: 0px;
 }
 .super-chat-avatar {
   transform: translate(0%, -5%);
