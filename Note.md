@@ -19,3 +19,22 @@ import Store from "electron-store";
 const store = new Store({ name: "vuex" });
 store.clear();
 ```
+
+cmd
+:
+"ROOM_REAL_TIME_MESSAGE_UPDATE"
+data
+:
+fans
+:
+2752288
+fans_club
+:
+180814
+red_notice
+:
+-1
+roomid
+:
+5050
+

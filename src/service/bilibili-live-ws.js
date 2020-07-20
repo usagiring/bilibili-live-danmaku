@@ -47,10 +47,22 @@ function init(options) {
     ws.onmessage = function (evt) {
       const result = convertToObject(evt.data);
 
-      result.body.forEach &&
+      if (result.op === 3) {
+        // {
+        //   body: { count: 1 },
+        //   headerLen: 16,
+        //   op: 3,
+        //   packetLen: 20,
+        //   seq: 1,
+        //   ver: 1
+        // }
+        emitter.emit('ninki', result.body)
+      }
+      if (Array.isArray(result.body)) {
         result.body.forEach(function (item) {
           emitter.emit('message', item)
         });
+      }
 
       if (result.op === 8) {
         heartBeat();
@@ -69,6 +81,7 @@ function init(options) {
   function heartBeat() {
     clearInterval(HEART_BEAT_TIMER);
     HEART_BEAT_TIMER = setInterval(() => {
+      // TODO 报错重连
       ws.send(convertToArrayBuffer({}, 2));
     }, 30000);
   }

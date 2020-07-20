@@ -14,7 +14,9 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": ""
+    "postinstall": "",
+    "ui": "vue ui",
+    "cnpmi": "npm --registry https://registry.npm.taobao.org install"
   },
   "build": {
     "productName": "bilibili-danmaku",
@@ -52,6 +54,7 @@
   },
   "dependencies": {
     "axios": "^0.18.1",
+    "nedb": "^1.8.0",
     "pako": "^1.0.11",
     "view-design": "^4.2.0",
     "vue": "^2.6.11",

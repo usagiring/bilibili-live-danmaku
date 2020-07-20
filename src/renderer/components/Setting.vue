@@ -154,23 +154,6 @@
           </div>
         </Panel>
         <Panel name="3">
-          图标
-          <div slot="content">
-            <div>
-              <span class="setting-key-text">是否显示头像</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
-            <div>
-              <span class="setting-key-text">是否显示舰队图标</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
-            <div>
-              <span class="setting-key-text">是否显示合并弹幕数量</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
-          </div>
-        </Panel>
-        <Panel name="4">
           其他
           <div slot="content">
             <div>
@@ -182,6 +165,22 @@
             </div>
             <div>
               <span class="setting-key-text">是否显示SC区域</span>
+              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+            </div>
+                 <div>
+              <span class="setting-key-text">是否显示头像</span>
+              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+            </div>
+            <div>
+              <span class="setting-key-text">是否显示舰队图标</span>
+              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+            </div>
+            <div>
+              <span class="setting-key-text">是否显示合并弹幕数量</span>
+              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+            </div>
+            <div>
+              <span class="setting-key-text">显示原弹幕颜色</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
           </div>
@@ -403,7 +402,7 @@ export default {
         id: Math.floor(Math.random() * 100),
         uid: "12345",
         name: "其妙",
-        comment: "草",
+        comment: `草${new Date()}`,
         role: "captain"
       });
     },
