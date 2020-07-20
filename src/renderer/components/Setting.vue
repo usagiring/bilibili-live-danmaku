@@ -167,7 +167,7 @@
               <span class="setting-key-text">是否显示SC区域</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
-                 <div>
+            <div>
               <span class="setting-key-text">是否显示头像</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
@@ -196,7 +196,7 @@
       <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
       <!-- <div class="danmmaku-example-wrapper">
         <DanmakuExample />
-      </div> -->
+      </div>-->
     </i-col>
   </Row>
 </template>
@@ -376,7 +376,10 @@ export default {
             x,
             y,
             frame: false,
-            transparent: true
+            transparent: true,
+            webPreferences: {
+              nodeIntegration: true
+            }
           });
 
           const winURL =
