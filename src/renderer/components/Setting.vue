@@ -1,17 +1,6 @@
 <template>
   <Row>
     <i-col span="12">
-      <div>
-        <span class="setting-key-text">连接直播间</span>
-        <InputNumber
-          v-model="roomId"
-          placeholder="请输入房间号"
-          size="small"
-          :disabled="isConnected"
-          style="width: 150px"
-        />
-        <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />
-      </div>
       <Collapse simple :value="collapse">
         <Panel name="1">
           普通

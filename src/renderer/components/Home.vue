@@ -2,29 +2,38 @@
   <div class="layout">
     <Layout :style="{minHeight: '100vh'}">
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
-        <Menu active-name="1-1" theme="dark" width="auto" :class="menuitemClasses">
-          <MenuItem name="1-1">
-            <Icon type="ios-navigate"></Icon>
-            <router-link class="link" to="/setting">设置</router-link>
+        <Menu theme="dark" width="auto" :class="menuitemClasses">
+          <MenuItem name="1-1" to="/setting">
+            <Icon type="md-build" />
+            <span v-if="!isCollapsed">设置</span>
           </MenuItem>
-          <MenuItem name="1-2">
-            <Icon type="search"></Icon>
-            <router-link class="link" to="/danmaku">弹幕</router-link>
-          </MenuItem>
-          <MenuItem name="1-3">
-            <Icon type="settings"></Icon>
-            <span>Option 3</span>
+          <MenuItem name="1-2" to="/danmaku">
+            <Icon type="md-chatboxes" />
+            <span v-if="!isCollapsed">弹幕</span>
           </MenuItem>
         </Menu>
       </Sider>
       <Layout>
-        <Header :style="{background: '#fff', boxShadow: '0 2px 3px 2px rgba(0,0,0,.1)'}"></Header>
+        <Header :style="{background: '#fff'}">
+          <div>
+            <span class="setting-key-text">连接直播间</span>
+            <InputNumber
+              v-model="roomId"
+              placeholder="请输入房间号"
+              size="small"
+              :disabled="isConnected"
+              style="width: 150px"
+            />
+            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />
+          </div>
+        </Header>
+
         <Content>
           <!-- <Breadcrumb :style="{margin: '16px 0'}">
             <BreadcrumbItem>Home</BreadcrumbItem>
             <BreadcrumbItem>Components</BreadcrumbItem>
             <BreadcrumbItem>Layout</BreadcrumbItem>
-          </Breadcrumb> -->
+          </Breadcrumb>-->
           <Card>
             <div style="height: 600px">
               <router-view></router-view>
@@ -37,17 +46,36 @@
 </template>
 
 <script>
+import emitter, { init, close } from "../../service/bilibili-live-ws";
+import Store from "electron-store";
+
+// emitter.on("message", data => {
+//   console.log(data);
+// });
+
 export default {
   data() {
     return {
-      isCollapsed: false
+      isCollapsed: false,
+      roomId: null,
+      isConnected: false,
     };
   },
   computed: {
-    menuitemClasses: function() {
+    menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
-    }
-  }
+    },
+  },
+  methods: {
+    async connect(status) {
+      if (status && this.roomId) {
+        await init({ roomId: Number(this.roomId) });
+        this.isConnected = status;
+      } else {
+        close();
+      }
+    },
+  },
 };
 </script>
 

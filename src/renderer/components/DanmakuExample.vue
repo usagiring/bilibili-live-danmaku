@@ -1,5 +1,5 @@
 <template>
-  <div class="danmaku-example-wrapper">
+  <WindowTemplate>
     <div class="super-chat-content">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
@@ -29,17 +29,16 @@
         </p>
       </div>
     </div>
-  </div>
+  </WindowTemplate>
 </template>
 
 <script>
-export default {
-  beforeCreate() {
-    document
-      .getElementsByTagName("body")[0]
-      .setAttribute("style", "background-color:rgba(0,0,0,0);");
-  },
+import WindowTemplate from "./WindowTemplate.vue";
 
+export default {
+  components: {
+    WindowTemplate,
+  },
   data() {
     return {
       superChats: [
@@ -50,9 +49,9 @@ export default {
           number: 100,
           unit: "RMB",
           comment: "我就是Hololive！！！",
-          role: "normal"
-        }
-      ]
+          role: "normal",
+        },
+      ],
     };
   },
   computed: {
@@ -78,7 +77,7 @@ export default {
     },
     captain_comment() {
       return this.$store.state.Config.captain_comment;
-    }
+    },
   },
   methods: {
     showMemberShipIcon(status) {
@@ -92,8 +91,8 @@ export default {
     },
     getCommentStyleByRole(message) {
       return this[`${message.role}_comment`];
-    }
-  }
+    },
+  },
 };
 </script>
 
