@@ -61,11 +61,11 @@ const message = {
   senderBrandLv: 0,
   senderBrandName: '',
   sendAt: new Date(),
-  
+
   // comment
   color: '',
   content: '',
-  
+
   // gift
   giftType: '', // gold | silver
   giftValue: '',

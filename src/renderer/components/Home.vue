@@ -7,14 +7,14 @@
             <Icon type="md-build" />
             <span v-if="!isCollapsed">设置</span>
           </MenuItem>
-          <MenuItem name="1-2" to="/danmaku">
+          <MenuItem name="1-2" to="/message">
             <Icon type="md-chatboxes" />
-            <span v-if="!isCollapsed">弹幕</span>
+            <span v-if="!isCollapsed">消息</span>
           </MenuItem>
         </Menu>
       </Sider>
       <Layout>
-        <Header :style="{background: '#fff'}">
+        <Header class="layout-header">
           <div>
             <span class="setting-key-text">连接直播间</span>
             <InputNumber
@@ -25,20 +25,22 @@
               style="width: 150px"
             />
             <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />
+            <span class="setting-key-text">弹幕窗</span>
+            <i-switch v-model="isShowDanmakuWindow" @on-change="showDanmakuWindow"></i-switch>
+            <span @click="alwaysOnTop">窗口置顶</span>
+            <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
           </div>
         </Header>
 
-        <Content>
+        <Content class="layout-content">
           <!-- <Breadcrumb :style="{margin: '16px 0'}">
             <BreadcrumbItem>Home</BreadcrumbItem>
             <BreadcrumbItem>Components</BreadcrumbItem>
             <BreadcrumbItem>Layout</BreadcrumbItem>
           </Breadcrumb>-->
-          <Card>
-            <div style="height: 600px">
-              <router-view></router-view>
-            </div>
-          </Card>
+          <div>
+            <router-view></router-view>
+          </div>
         </Content>
       </Layout>
     </Layout>
@@ -46,6 +48,8 @@
 </template>
 
 <script>
+import { remote } from "electron";
+const { BrowserWindow, screen } = remote;
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
 
@@ -56,9 +60,11 @@ import Store from "electron-store";
 export default {
   data() {
     return {
-      isCollapsed: false,
+      isCollapsed: true,
       roomId: null,
       isConnected: false,
+      isShowDanmakuWindow: false,
+      isAlwaysOnTop: false,
     };
   },
   computed: {
@@ -75,14 +81,54 @@ export default {
         close();
       }
     },
+    showDanmakuWindow(status) {
+      const { x, y } = screen.getCursorScreenPoint();
+
+      if (status) {
+        if (!this.win) {
+          this.win = new BrowserWindow({
+            width: 320,
+            height: 320,
+            x,
+            y,
+            frame: false,
+            transparent: true,
+            webPreferences: {
+              nodeIntegration: true,
+            },
+          });
+
+          const winURL =
+            process.env.NODE_ENV === "development"
+              ? `http://localhost:9080/#/danmaku`
+              : `file://${__dirname}/index.html/#/danmaku`;
+          this.win.loadURL(winURL);
+        } else {
+          this.win.showInactive();
+        }
+      } else {
+        // this.win.hide();
+        this.win.close();
+        this.win = null;
+      }
+    },
+    alwaysOnTop(status) {
+      this.win.setFocusable(!status);
+      this.win.setAlwaysOnTop(status);
+      this.win.setIgnoreMouseEvents(status);
+    },
   },
 };
 </script>
 
 <style scoped>
-.layout-con {
+.layout-header {
+  background: white;
+}
+.layout-content {
   height: 100%;
   width: 100%;
+  background: white;
 }
 .menu-item span {
   display: inline-block;

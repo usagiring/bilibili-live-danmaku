@@ -1,6 +1,6 @@
 <template>
   <Row>
-    <i-col span="12">
+    <i-col span="8">
       <Collapse simple :value="collapse">
         <Panel name="1">
           普通
@@ -176,16 +176,14 @@
         </Panel>
       </Collapse>
     </i-col>
-    <i-col span="12">
-      <span>预览</span>
-      <i-switch v-model="isShowPreview" @on-change="showPreview"></i-switch>
-      <div @click="sendTestComment">发送测试弹幕</div>
-      <div @click="clear">清空Storage</div>
-      <span @click="alwaysOnTop">窗口置顶</span>
-      <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
-      <!-- <div class="danmmaku-example-wrapper">
-        <DanmakuExample />
-      </div>-->
+    <i-col span="16">
+      <div class="setting-right">
+        <div class="setting-right-header">
+          <div @click="sendTestComment">发送测试弹幕</div>
+          <div @click="clear">清空Storage</div>
+        </div>
+        <div class="setting-right-content"></div>
+      </div>
     </i-col>
   </Row>
 </template>
@@ -197,14 +195,14 @@ import DanmakuExample from "./DanmakuExample.vue";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
 
-emitter.on("message", data => {
+emitter.on("message", (data) => {
   console.log(data);
 });
 
 // TODO 配置读写文件
 export default {
   components: {
-    DanmakuExample
+    DanmakuExample,
   },
   data() {
     return {
@@ -219,17 +217,17 @@ export default {
       normalFrontColor: "#FFFFFF",
 
       messageStyleNormal: {
-        background: "#FFFFFF"
+        background: "#FFFFFF",
       },
       messageStyleJianzhang: {
-        background: "#FFFFFF"
+        background: "#FFFFFF",
       },
       commentStyleNormal: {
-        color: "#FFFFFF"
+        color: "#FFFFFF",
       },
       nameStyleJianzhang: {
-        color: "green"
-      }
+        color: "green",
+      },
     };
   },
   computed: {
@@ -328,7 +326,7 @@ export default {
     },
     governor_comment_color() {
       return this.$store.state.Config.governor_comment.color;
-    }
+    },
   },
   methods: {
     async connect(status) {
@@ -367,8 +365,8 @@ export default {
             frame: false,
             transparent: true,
             webPreferences: {
-              nodeIntegration: true
-            }
+              nodeIntegration: true,
+            },
           });
 
           const winURL =
@@ -395,7 +393,7 @@ export default {
         uid: "12345",
         name: "其妙",
         comment: `草${new Date()}`,
-        role: "captain"
+        role: "captain",
       });
     },
     clear() {
@@ -403,11 +401,11 @@ export default {
       store.clear();
     },
 
-    pxFormatter: value => `${value}px`,
-    pxParser: value => Number(value.replace("px", "")),
+    pxFormatter: (value) => `${value}px`,
+    pxParser: (value) => Number(value.replace("px", "")),
     change_message_size(number) {
       this.$store.dispatch("UPDATE_MESSAGE_STYLE", {
-        "font-size": this.pxFormatter(number)
+        "font-size": this.pxFormatter(number),
       });
     },
     change_normal_name_color(color) {
@@ -415,8 +413,8 @@ export default {
         role: "normal",
         type: "name",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
     change_normal_name_size(number) {
@@ -424,8 +422,8 @@ export default {
         role: "normal",
         type: "name",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_normal_name_board_size(number) {
@@ -433,8 +431,8 @@ export default {
         role: "normal",
         type: "name",
         style: {
-          "-webkit-text-stroke-width": this.pxFormatter(number)
-        }
+          "-webkit-text-stroke-width": this.pxFormatter(number),
+        },
       });
     },
     change_normal_name_board_color(color) {
@@ -442,8 +440,8 @@ export default {
         role: "normal",
         type: "name",
         style: {
-          "-webkit-text-stroke-color": color
-        }
+          "-webkit-text-stroke-color": color,
+        },
       });
     },
     change_normal_comment_size(number) {
@@ -451,8 +449,8 @@ export default {
         role: "normal",
         type: "comment",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_normal_comment_color(color) {
@@ -460,8 +458,8 @@ export default {
         role: "normal",
         type: "comment",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
 
@@ -470,8 +468,8 @@ export default {
         role: "captain",
         type: "name",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
     change_captain_name_size(number) {
@@ -479,8 +477,8 @@ export default {
         role: "captain",
         type: "name",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_captain_name_board_size(number) {
@@ -488,8 +486,8 @@ export default {
         role: "captain",
         type: "name",
         style: {
-          "-webkit-text-stroke-width": this.pxFormatter(number)
-        }
+          "-webkit-text-stroke-width": this.pxFormatter(number),
+        },
       });
     },
     change_captain_name_board_color(color) {
@@ -497,8 +495,8 @@ export default {
         role: "captain",
         type: "name",
         style: {
-          "-webkit-text-stroke-color": color
-        }
+          "-webkit-text-stroke-color": color,
+        },
       });
     },
     change_captain_comment_size(number) {
@@ -506,8 +504,8 @@ export default {
         role: "captain",
         type: "comment",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_captain_comment_color(color) {
@@ -515,8 +513,8 @@ export default {
         role: "captain",
         type: "comment",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
 
@@ -525,8 +523,8 @@ export default {
         role: "admiral",
         type: "name",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
     change_admiral_name_size(number) {
@@ -534,8 +532,8 @@ export default {
         role: "admiral",
         type: "name",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_admiral_name_board_size(number) {
@@ -543,8 +541,8 @@ export default {
         role: "admiral",
         type: "name",
         style: {
-          "-webkit-text-stroke-width": this.pxFormatter(number)
-        }
+          "-webkit-text-stroke-width": this.pxFormatter(number),
+        },
       });
     },
     change_admiral_name_board_color(color) {
@@ -552,8 +550,8 @@ export default {
         role: "admiral",
         type: "name",
         style: {
-          "-webkit-text-stroke-color": color
-        }
+          "-webkit-text-stroke-color": color,
+        },
       });
     },
     change_admiral_comment_size(number) {
@@ -561,8 +559,8 @@ export default {
         role: "admiral",
         type: "comment",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_admiral_comment_color(color) {
@@ -570,8 +568,8 @@ export default {
         role: "admiral",
         type: "comment",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
 
@@ -580,8 +578,8 @@ export default {
         role: "governor",
         type: "name",
         style: {
-          color
-        }
+          color,
+        },
       });
     },
     change_governor_name_size(number) {
@@ -589,8 +587,8 @@ export default {
         role: "governor",
         type: "name",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_governor_name_board_size(number) {
@@ -598,8 +596,8 @@ export default {
         role: "governor",
         type: "name",
         style: {
-          "-webkit-text-stroke-width": this.pxFormatter(number)
-        }
+          "-webkit-text-stroke-width": this.pxFormatter(number),
+        },
       });
     },
     change_governor_name_board_color(color) {
@@ -607,8 +605,8 @@ export default {
         role: "governor",
         type: "name",
         style: {
-          "-webkit-text-stroke-color": color
-        }
+          "-webkit-text-stroke-color": color,
+        },
       });
     },
     change_governor_comment_size(number) {
@@ -616,8 +614,8 @@ export default {
         role: "governor",
         type: "comment",
         style: {
-          "font-size": this.pxFormatter(number)
-        }
+          "font-size": this.pxFormatter(number),
+        },
       });
     },
     change_governor_comment_color(color) {
@@ -625,11 +623,11 @@ export default {
         role: "governor",
         type: "comment",
         style: {
-          color
-        }
+          color,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -639,7 +637,32 @@ export default {
   width: 140px;
   text-align: right;
 }
+/* .setting-right {
+  position: relative;
+  height: 100%;
+  width: 100%;
+} */
+.setting-right-header {
+  height: 50px;
+}
+.setting-right-content {
+  top: 50px;
+  width: 90%;
+  margin: 20px;
+  height: 300px;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+
+  border-radius: 24px;
+  border: solid 3px gray;
+  background: rgba(0, 0, 0, 0.3);
+}
 .danmmaku-example-wrapper {
+  width: 100px;
+  height: 100px;
+  border-radius: 24px;
+  border: 1px;
   background: rgba(0, 0, 0, 0.3);
 }
 </style>

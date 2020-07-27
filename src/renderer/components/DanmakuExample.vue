@@ -44,11 +44,11 @@ export default {
       superChats: [
         {
           uid: "12346",
-          name: "马自立",
+          name: "sc",
           type: "super-chat",
           number: 100,
           unit: "RMB",
-          comment: "我就是Hololive！！！",
+          comment: "!!!!!!!!!!!!!!!",
           role: "normal",
         },
       ],

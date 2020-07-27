@@ -5,6 +5,7 @@ const db = require('../src/service/nedb');
 // })
 
 (async () => {
+
   const results = await db.insert([{ a: 5 }, { a: 42 }])
   console.log(results)
 })()

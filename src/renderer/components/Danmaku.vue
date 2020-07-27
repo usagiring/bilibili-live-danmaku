@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <WindowTemplate>
     <div class="super-chat-content">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
@@ -29,7 +29,7 @@
         </p>
       </div>
     </div>
-  </div>
+  </WindowTemplate>
 </template>
 
 <script>
@@ -44,11 +44,11 @@ export default {
       superChats: [
         {
           uid: "12346",
-          name: "马自立",
+          name: "sc",
           type: "super-chat",
           number: 100,
           unit: "RMB",
-          comment: "我就是Hololive！！！",
+          comment: "!!!!!!!!!!!!!!!",
           role: "normal",
         },
       ],

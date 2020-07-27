@@ -15,12 +15,8 @@ export default new Router({
           component: () => import('@/components/Setting.vue')
         },
         {
-          path: 'danmaku',
-          component: () => import('@/components/Danmaku.vue')
-        },
-        {
-          path: 'css-generator',
-          component: () => import('@/components/CssGenerator.vue')
+          path: 'message',
+          component: () => import('@/components/Message.vue')
         }
       ]
     },
