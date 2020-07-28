@@ -51,11 +51,12 @@
 import { remote } from "electron";
 const { BrowserWindow, screen } = remote;
 import emitter, { init, close } from "../../service/bilibili-live-ws";
+import { getRoomInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 
-// emitter.on("message", data => {
-//   console.log(data);
-// });
+emitter.on("message", (data) => {
+  console.log(data);
+});
 
 export default {
   data() {
@@ -77,6 +78,12 @@ export default {
       if (status && this.roomId) {
         await init({ roomId: Number(this.roomId) });
         this.isConnected = status;
+        const { roomData } = await getRoomInfo(this.roomId);
+        const { uid, room_id: roomId, title, cover, tags, background, description, live_status, live_start_time, online } = roomData.room_info
+        const { uname, face, gender, } = roomData.anchor_info.base_info
+        const { level, level_color } = roomData.anchor_info.live_info
+        const { attention } = roomData.anchor_info.relation_info
+        const { medal_name, medal_id, fansclub } = roomData.anchor_info.medal_info
       } else {
         close();
       }

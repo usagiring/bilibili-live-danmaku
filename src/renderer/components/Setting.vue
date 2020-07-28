@@ -195,9 +195,9 @@ import DanmakuExample from "./DanmakuExample.vue";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
 
-emitter.on("message", (data) => {
-  console.log(data);
-});
+// emitter.on("message", (data) => {
+//   console.log(data);
+// });
 
 // TODO 配置读写文件
 export default {

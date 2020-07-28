@@ -26,21 +26,5 @@ https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=5050
 
 https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/giftConfig?platform=pc&room_id=5050
 
-cmd
-:
-"ROOM_REAL_TIME_MESSAGE_UPDATE"
-data
-:
-fans
-:
-2752288
-fans_club
-:
-180814
-red_notice
-:
--1
-roomid
-:
-5050
+
 

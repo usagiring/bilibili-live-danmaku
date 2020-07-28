@@ -10,9 +10,11 @@ let HEART_BEAT_TIMER = null;
 export default emitter
 export {
   init,
-  parseDanmaku,
+  close,
+
+  parseComment,
   parseGift,
-  close
+  parseRoomInfo,
 }
 
 function close() {
@@ -258,17 +260,45 @@ function getEncoder() {
     };
 }
 
-function parseDanmaku(item) {
-  if (item.cmd !== "DANMU_MSG") return
-  const [uid, name] = item.info[2];
+// const message = {
+//   roomId: 0,
+//   type: '', // comment | gift
+//   uid: 0,
+//   name: '',
+//   brandLevel: 0,
+//   brandName: '',
+//   sendAt: new Date(),
+
+//   // comment
+//   color: '',
+//   comment: '',
+
+//   // gift
+//   giftType: '', // gold | silver
+//   giftValue: '',
+//   giftName: '',
+// }
+function parseComment(msg) {
+  if (msg.cmd !== "DANMU_MSG") return
+  const [uid, name] = msg.info[2];
+  const [brandLevel, brandName] = msg.info[3]
   return {
+    sendAt: msg.info[0][4],
     uid,
     name,
-    msg: item.info[1]
+    brandLevel,
+    brandName,
+    comment: msg.info[1]
   }
-  console.log(`${name}(${uid}): ${msg}`)
 }
 
-function parseGift(item) {
+function parseGift(msg) {
 
+}
+
+// ROOM_REAL_TIME_MESSAGE_UPDATE
+function parseRoomInfo(msg) {
+  if (msg.cmd !== "ROOM_REAL_TIME_MESSAGE_UPDATE") return
+  const { fans, fans_club: fansClub, room_id: roomId } = msg.data
+  return { fans, fansClub, roomId }
 }

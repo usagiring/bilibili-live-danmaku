@@ -51,25 +51,3 @@ function wrapper(db) {
     }
   }
 }
-
-
-const message = {
-  roomId: 0,
-  type: '', // comment | gift
-  senderUid: 0,
-  senderName: '',
-  senderBrandLv: 0,
-  senderBrandName: '',
-  sendAt: new Date(),
-
-  // comment
-  color: '',
-  content: '',
-
-  // gift
-  giftType: '', // gold | silver
-  giftValue: '',
-  giftName: '',
-
-
-}
