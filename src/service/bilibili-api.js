@@ -1,6 +1,6 @@
 const axios = require('axios')
 
-module.exports = {
+export {
   getRoomInfo,
   getDamankuInfo,
   getGiftConfig

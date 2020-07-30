@@ -50,12 +50,23 @@
 <script>
 import { remote } from "electron";
 const { BrowserWindow, screen } = remote;
-import emitter, { init, close } from "../../service/bilibili-live-ws";
+import emitter, {
+  init,
+  close,
+  parseComment,
+} from "../../service/bilibili-live-ws";
 import { getRoomInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
+import nedb from "../../service/nedb";
 
-emitter.on("message", (data) => {
-  console.log(data);
+emitter.on("message", async (data) => {
+  const msgs = data.map(parseComment).filter(Boolean);
+  await Promise.all(
+    msgs.map(async (msg) => {
+      console.log(`${msg.name}(${msg.uid}): ${msg.comment}`);
+      await nedb.insert(msg);
+    })
+  );
 });
 
 export default {
@@ -79,11 +90,26 @@ export default {
         await init({ roomId: Number(this.roomId) });
         this.isConnected = status;
         const { roomData } = await getRoomInfo(this.roomId);
-        const { uid, room_id: roomId, title, cover, tags, background, description, live_status, live_start_time, online } = roomData.room_info
-        const { uname, face, gender, } = roomData.anchor_info.base_info
-        const { level, level_color } = roomData.anchor_info.live_info
-        const { attention } = roomData.anchor_info.relation_info
-        const { medal_name, medal_id, fansclub } = roomData.anchor_info.medal_info
+        const {
+          uid,
+          room_id: roomId,
+          title,
+          cover,
+          tags,
+          background,
+          description,
+          live_status,
+          live_start_time,
+          online,
+        } = roomData.room_info;
+        const { uname, face, gender } = roomData.anchor_info.base_info;
+        const { level, level_color } = roomData.anchor_info.live_info;
+        const { attention } = roomData.anchor_info.relation_info;
+        const {
+          medal_name,
+          medal_id,
+          fansclub,
+        } = roomData.anchor_info.medal_info;
       } else {
         close();
       }

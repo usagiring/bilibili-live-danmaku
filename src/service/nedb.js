@@ -5,7 +5,7 @@ db.loadDatabase(function (err) {    // Callback is optional
   console.error(err)
 });
 
-module.exports = wrapper(db)
+export default wrapper(db)
 
 function wrapper(db) {
   return {

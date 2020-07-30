@@ -265,8 +265,8 @@ function getEncoder() {
 //   type: '', // comment | gift
 //   uid: 0,
 //   name: '',
-//   brandLevel: 0,
-//   brandName: '',
+//   medalLevel: 0,
+//   medalName: '',
 //   sendAt: new Date(),
 
 //   // comment
@@ -281,13 +281,13 @@ function getEncoder() {
 function parseComment(msg) {
   if (msg.cmd !== "DANMU_MSG") return
   const [uid, name] = msg.info[2];
-  const [brandLevel, brandName] = msg.info[3]
+  const [medalLevel, medalName] = msg.info[3]
   return {
     sendAt: msg.info[0][4],
     uid,
     name,
-    brandLevel,
-    brandName,
+    medalLevel,
+    medalName,
     comment: msg.info[1]
   }
 }
