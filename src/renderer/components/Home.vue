@@ -54,19 +54,31 @@ import emitter, {
   init,
   close,
   parseComment,
+  parseInteractWord,
 } from "../../service/bilibili-live-ws";
 import { getRoomInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import nedb from "../../service/nedb";
 
 emitter.on("message", async (data) => {
-  const msgs = data.map(parseComment).filter(Boolean);
-  await Promise.all(
-    msgs.map(async (msg) => {
-      console.log(`${msg.name}(${msg.uid}): ${msg.comment}`);
-      await nedb.insert(msg);
-    })
-  );
+  if (Array.isArray(data)) {
+    const comments = data
+      .filter((msg) => msg.cmd === "DANMU_MSG")
+      .map(parseComment);
+    await Promise.all(
+      comments.map(async (comment) => {
+        console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
+        await nedb.insert(comment);
+      })
+    );
+
+    const interactWords = data
+      .filter((msg) => msg.cmd === "INTERACT_WORD")
+      .map(parseInteractWord);
+    interactWords.forEach((interactWord) => {
+      console.log(`${interactWord.uname}(${interactWord.uid}) 进入了直播间`)
+    });
+  }
 });
 
 export default {

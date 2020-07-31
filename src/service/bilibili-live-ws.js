@@ -15,6 +15,7 @@ export {
   parseComment,
   parseGift,
   parseRoomInfo,
+  parseInteractWord
 }
 
 function close() {
@@ -48,6 +49,7 @@ function init(options) {
 
     ws.onmessage = function (evt) {
       const result = convertToObject(evt.data);
+      // console.log(result)
 
       if (result.op === 3) {
         // {
@@ -289,6 +291,21 @@ function parseComment(msg) {
     medalLevel,
     medalName,
     comment: msg.info[1]
+  }
+}
+
+function parseInteractWord(msg) {
+  if (msg.cmd !== "INTERACT_WORD") return
+  const { identities, msg_type: msgType, roomid: roomId, score, timestamp, uid, uname, uname_color: unameColor } = msg.data
+  return {
+    identities,
+    roomId,
+    score,
+    msgType,
+    timestamp,
+    uid,
+    uname,
+    unameColor
   }
 }
 
