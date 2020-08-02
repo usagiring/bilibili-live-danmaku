@@ -1,11 +1,17 @@
 const Datastore = require('nedb')
-const db = new Datastore({ filename: './data/nedb', autoload: true });
+const commentDB = new Datastore({ filename: './data/comment', autoload: true });
+const giftDB = new Datastore({ filename: './data/gift', autoload: true });
+const interactDB = new Datastore({ filename: './data/interact', autoload: true });
 
-db.loadDatabase(function (err) {    // Callback is optional
-  console.error(err)
-});
+commentDB.loadDatabase();
+giftDB.loadDatabase();
+interactDB.loadDatabase();
 
-export default wrapper(db)
+export default {
+  commentDB: wrapper(commentDB),
+  giftDB: wrapper(giftDB),
+  interactDB: wrapper(interactDB)
+}
 
 function wrapper(db) {
   return {

@@ -1,5 +1,5 @@
 <template>
-  <div class="danmaku-example-wrapper">
+  <div class="container" :style="{ background: background }">
     <slot></slot>
   </div>
 </template>
@@ -11,19 +11,23 @@ export default {
       .getElementsByTagName("body")[0]
       .setAttribute("style", "background-color:rgba(0,0,0,0);");
   },
+  computed: {
+    background() {
+      return this.$store.state.Config["container_style"]["background"];
+    },
+  },
 };
 </script>
 
 <style scoped>
-
-.danmaku-example-wrapper {
+.container {
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
   overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.3);
+  /* background-color: rgba(0, 0, 0, 0.3); */
   -webkit-app-region: drag;
 }
 </style>

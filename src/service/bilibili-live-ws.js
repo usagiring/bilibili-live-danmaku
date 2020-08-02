@@ -6,6 +6,7 @@ const emitter = new Emitter()
 const URI = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 let ws
 let HEART_BEAT_TIMER = null;
+let __roomId
 
 export default emitter
 export {
@@ -26,6 +27,7 @@ function close() {
 function init(options) {
   const { uid = 0, roomId } = options
 
+  __roomId = roomId
   if (!roomId) throw new Error('roomId is null')
 
   const authParams = {
@@ -49,7 +51,7 @@ function init(options) {
 
     ws.onmessage = function (evt) {
       const result = convertToObject(evt.data);
-      // console.log(result)
+      console.log(result)
 
       if (result.op === 3) {
         // {
@@ -262,29 +264,12 @@ function getEncoder() {
     };
 }
 
-// const message = {
-//   roomId: 0,
-//   type: '', // comment | gift
-//   uid: 0,
-//   name: '',
-//   medalLevel: 0,
-//   medalName: '',
-//   sendAt: new Date(),
-
-//   // comment
-//   color: '',
-//   comment: '',
-
-//   // gift
-//   giftType: '', // gold | silver
-//   giftValue: '',
-//   giftName: '',
-// }
 function parseComment(msg) {
   if (msg.cmd !== "DANMU_MSG") return
   const [uid, name] = msg.info[2];
   const [medalLevel, medalName] = msg.info[3]
   return {
+    roomId: __roomId,
     sendAt: msg.info[0][4],
     uid,
     name,
@@ -313,7 +298,6 @@ function parseGift(msg) {
 
 }
 
-// ROOM_REAL_TIME_MESSAGE_UPDATE
 function parseRoomInfo(msg) {
   if (msg.cmd !== "ROOM_REAL_TIME_MESSAGE_UPDATE") return
   const { fans, fans_club: fansClub, room_id: roomId } = msg.data

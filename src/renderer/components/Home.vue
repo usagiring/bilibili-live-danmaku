@@ -58,7 +58,8 @@ import emitter, {
 } from "../../service/bilibili-live-ws";
 import { getRoomInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
-import nedb from "../../service/nedb";
+import db from "../../service/nedb";
+const { commentDB, interactDB } = db
 
 emitter.on("message", async (data) => {
   if (Array.isArray(data)) {
@@ -68,24 +69,40 @@ emitter.on("message", async (data) => {
     await Promise.all(
       comments.map(async (comment) => {
         console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-        await nedb.insert(comment);
+        await commentDB.insert(comment);
       })
     );
 
     const interactWords = data
       .filter((msg) => msg.cmd === "INTERACT_WORD")
       .map(parseInteractWord);
-    interactWords.forEach((interactWord) => {
-      console.log(`${interactWord.uname}(${interactWord.uid}) 进入了直播间`)
-    });
+    await Promise.all(
+      interactWords.map(async (interactWord) => {
+        console.log(`${interactWord.uname}(${interactWord.uid}) 进入了直播间`);
+        await interactDB.insert(interactWord);
+      })
+    );
+
+    data.forEach(msg => {
+      if(msg.cmd === "INTERACT_WORD") return 
+      if(msg.cmd === "DANMU_MSG") return 
+      console.log(msg)
+    })
+  } else {
+  console.log(data)
+    
   }
+});
+
+emitter.on("ninki", async (data) => {
+  console.log(data)
 });
 
 export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: null,
+      roomId: 11588230,
       isConnected: false,
       isShowDanmakuWindow: false,
       isAlwaysOnTop: false,
@@ -99,7 +116,7 @@ export default {
   methods: {
     async connect(status) {
       if (status && this.roomId) {
-        await init({ roomId: Number(this.roomId) });
+        await init({ roomId: Number(this.roomId), uid: 0 });
         this.isConnected = status;
         const { roomData } = await getRoomInfo(this.roomId);
         const {

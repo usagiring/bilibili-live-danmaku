@@ -1,7 +1,10 @@
-// {role}_{type}: { [property: string]: string }
+// {role}_{prop}: { [property: string]: string }
 const state = {
-  message: {
-    'font-size': '12px'
+  container_style: {
+    background: "rgba(0, 0, 0, 0.3)"
+  },
+  normal_message: {
+
   },
   normal_name: {
     'font-size': '12px',
@@ -14,6 +17,9 @@ const state = {
     color: 'white'
   },
 
+  captain_message: {
+
+  },
   captain_name: {
     'font-size': '12px',
     '-webkit-text-stroke-width': '1px',
@@ -51,22 +57,24 @@ const state = {
 
 const mutations = {
   UPDATE_STYLE(state, payload) {
-    const objKey = `${payload.role}_${payload.type}`
+    const objKey = `${payload.role}_${payload.prop}`
     state[objKey] = { ...state[objKey], ...payload.style }
   },
-  UPDATE_MESSAGE_STYLE(state, payload) {
-    state.message = { ...state.message, ...payload }
+
+  UPDATE_CONTAINER_STYLE(state, payload) {
+    state['container_style'] = { ...state['container_style'], ...payload.style }
   }
 }
 
 const actions = {
-  UPDATE_MESSAGE_STYLE({ commit }, payload) {
-    commit('UPDATE_MESSAGE_STYLE', payload)
-  },
 
   async UPDATE_STYLE({ commit }, payload) {
     commit('UPDATE_STYLE', payload)
   },
+
+  async UPDATE_CONTAINER_STYLE({ commit }, payload) {
+    commit('UPDATE_CONTAINER_STYLE', payload)
+  }
 }
 
 export default {

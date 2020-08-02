@@ -27,4 +27,3 @@ https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=5050
 https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/giftConfig?platform=pc&room_id=5050
 
 
-
