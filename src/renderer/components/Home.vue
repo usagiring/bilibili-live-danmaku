@@ -15,29 +15,34 @@
       </Sider>
       <Layout>
         <Header class="layout-header">
+          <Avatar icon="ios-person" size="large" />
+          <span>name</span>
+          <Icon type="md-flame" />人气值
+          <Icon type="md-star" />关注
+          <Icon type="md-heart" />粉丝团
+        </Header>
+        <div class="layout-header2">
           <div>
-            <span class="setting-key-text">连接直播间</span>
+            <span>连接直播间</span>
             <InputNumber
               v-model="roomId"
               placeholder="请输入房间号"
               size="small"
               :disabled="isConnected"
-              style="width: 150px"
+              style="width: 120px"
             />
             <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />
-            <span class="setting-key-text">弹幕窗</span>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span>弹幕窗</span>
             <i-switch v-model="isShowDanmakuWindow" @on-change="showDanmakuWindow"></i-switch>
-            <span @click="alwaysOnTop">窗口置顶</span>
-            <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+            &nbsp;&nbsp;&nbsp;
+            <template v-if="isShowDanmakuWindow">
+              <span @click="alwaysOnTop">窗口置顶</span>
+              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+            </template>
           </div>
-        </Header>
-
+        </div>
         <Content class="layout-content">
-          <!-- <Breadcrumb :style="{margin: '16px 0'}">
-            <BreadcrumbItem>Home</BreadcrumbItem>
-            <BreadcrumbItem>Components</BreadcrumbItem>
-            <BreadcrumbItem>Layout</BreadcrumbItem>
-          </Breadcrumb>-->
           <div>
             <router-view></router-view>
           </div>
@@ -59,7 +64,7 @@ import emitter, {
 import { getRoomInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
-const { commentDB, interactDB } = db
+const { commentDB, interactDB } = db;
 
 emitter.on("message", async (data) => {
   if (Array.isArray(data)) {
@@ -83,19 +88,18 @@ emitter.on("message", async (data) => {
       })
     );
 
-    data.forEach(msg => {
-      if(msg.cmd === "INTERACT_WORD") return 
-      if(msg.cmd === "DANMU_MSG") return 
-      console.log(msg)
-    })
+    data.forEach((msg) => {
+      if (msg.cmd === "INTERACT_WORD") return;
+      if (msg.cmd === "DANMU_MSG") return;
+      console.log(msg);
+    });
   } else {
-  console.log(data)
-    
+    console.log(data);
   }
 });
 
 emitter.on("ninki", async (data) => {
-  console.log(data)
+  console.log(data);
 });
 
 export default {
@@ -118,7 +122,8 @@ export default {
       if (status && this.roomId) {
         await init({ roomId: Number(this.roomId), uid: 0 });
         this.isConnected = status;
-        const { roomData } = await getRoomInfo(this.roomId);
+        const { data } = await getRoomInfo(this.roomId);
+        console.log(data);
         const {
           uid,
           room_id: roomId,
@@ -130,15 +135,11 @@ export default {
           live_status,
           live_start_time,
           online,
-        } = roomData.room_info;
-        const { uname, face, gender } = roomData.anchor_info.base_info;
-        const { level, level_color } = roomData.anchor_info.live_info;
-        const { attention } = roomData.anchor_info.relation_info;
-        const {
-          medal_name,
-          medal_id,
-          fansclub,
-        } = roomData.anchor_info.medal_info;
+        } = data.room_info;
+        const { uname, face, gender } = data.anchor_info.base_info;
+        const { level, level_color } = data.anchor_info.live_info;
+        const { attention } = data.anchor_info.relation_info;
+        const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info;
       } else {
         close();
       }
@@ -151,8 +152,8 @@ export default {
           this.win = new BrowserWindow({
             width: 320,
             height: 320,
-            x,
-            y,
+            // x, y,
+            x: 0, y: 0,
             frame: false,
             transparent: true,
             webPreferences: {
@@ -186,6 +187,11 @@ export default {
 <style scoped>
 .layout-header {
   background: white;
+}
+.layout-header2 {
+  height: 48px;
+  line-height: 48px;
+  padding: 0 50px;
 }
 .layout-content {
   height: 100%;
