@@ -15,11 +15,29 @@
       </Sider>
       <Layout>
         <Header class="layout-header">
-          <Avatar icon="ios-person" size="large" />
-          <span>name</span>
-          <Icon type="md-flame" />人气值
-          <Icon type="md-star" />关注
-          <Icon type="md-heart" />粉丝团
+          <div class="avatar-wrapper">
+            <Avatar
+              :icon="avatar? undefined : 'ios-person'"
+              :src="avatar? avatar: undefined"
+              size="large"
+            />&nbsp;&nbsp;
+            <span>{{ username? username: '未连接'}}</span>
+          </div>
+
+          <div class="status-wrapper">
+            <div class="bar">
+              <Icon type="md-flame" />
+              {{ninkiNumber}}
+            </div>
+            <div>
+              <Icon type="md-star" />
+              {{fansNumber}}
+            </div>
+            <div>
+              <Icon type="md-heart" />
+              {{fansClubNumber}}
+            </div>
+          </div>
         </Header>
         <div class="layout-header2">
           <div>
@@ -31,11 +49,9 @@
               :disabled="isConnected"
               style="width: 120px"
             />
-            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
-            <i-switch v-model="isShowDanmakuWindow" @on-change="showDanmakuWindow"></i-switch>
-            &nbsp;&nbsp;&nbsp;
+            <i-switch v-model="isShowDanmakuWindow" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span @click="alwaysOnTop">窗口置顶</span>
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
@@ -61,56 +77,95 @@ import emitter, {
   parseComment,
   parseInteractWord,
 } from "../../service/bilibili-live-ws";
-import { getRoomInfo } from "../../service/bilibili-api";
+import { getRoomInfo, getUserInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
-const { commentDB, interactDB } = db;
+const { commentDB, interactDB, userDB } = db;
 
-emitter.on("message", async (data) => {
-  if (Array.isArray(data)) {
-    const comments = data
-      .filter((msg) => msg.cmd === "DANMU_MSG")
-      .map(parseComment);
-    await Promise.all(
-      comments.map(async (comment) => {
-        console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-        await commentDB.insert(comment);
-      })
-    );
-
-    const interactWords = data
-      .filter((msg) => msg.cmd === "INTERACT_WORD")
-      .map(parseInteractWord);
-    await Promise.all(
-      interactWords.map(async (interactWord) => {
-        console.log(`${interactWord.uname}(${interactWord.uid}) 进入了直播间`);
-        await interactDB.insert(interactWord);
-      })
-    );
-
-    data.forEach((msg) => {
-      if (msg.cmd === "INTERACT_WORD") return;
-      if (msg.cmd === "DANMU_MSG") return;
-      console.log(msg);
-    });
-  } else {
-    console.log(data);
-  }
-});
-
-emitter.on("ninki", async (data) => {
-  console.log(data);
-});
+const GUARD_LEVEL_MAP = {
+  "0": "normal",
+  "1": "governor",
+  "2": "admiral",
+  "3": "captain",
+};
 
 export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 11588230,
+      roomId: 14917277,
       isConnected: false,
       isShowDanmakuWindow: false,
       isAlwaysOnTop: false,
+
+      username: "",
+      avatar: null,
+      ninkiNumber: 0,
+      fansNumber: 0,
+      fansClubNumber: 0,
     };
+  },
+  created() {
+    emitter.on("message", async (data) => {
+      if (Array.isArray(data)) {
+        const comments = data
+          .filter((msg) => msg.cmd === "DANMU_MSG")
+          .map(parseComment);
+        await Promise.all(
+          comments.map(async (comment) => {
+            console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
+            // TODO 设置头像
+
+            const user = await userDB.findOne({ mid: comment.uid });
+            console.log(user);
+
+            // 缓存 user 信息
+            if (user) {
+              comment.face = user.face;
+            } else {
+              const { data } = await getUserInfo(comment.uid);
+              data.createdAt = new Date()
+              await userDB.insert(data);
+              comment.face = data.face;
+            }
+
+            const data = await commentDB.insert(comment);
+            await this.sendDanmaku(data);
+          })
+        );
+
+        const interactWords = data
+          .filter((msg) => msg.cmd === "INTERACT_WORD")
+          .map(parseInteractWord);
+        await Promise.all(
+          interactWords.map(async (interactWord) => {
+            console.log(
+              `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
+            );
+            await interactDB.insert(interactWord);
+          })
+        );
+
+        data.forEach((msg) => {
+          if (msg.cmd === "INTERACT_WORD") return;
+          if (msg.cmd === "DANMU_MSG") return;
+          console.log(msg);
+        });
+      } else {
+        if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
+          console.log(data);
+          const { fans, fans_club } = data.data;
+          this.fansNumber = fans;
+          this.fansClubNumber = fans_club;
+        } else {
+          console.log(data);
+        }
+      }
+    });
+
+    emitter.on("ninki", async (data) => {
+      this.ninkiNumber = data.count;
+    });
   },
   computed: {
     menuitemClasses: function () {
@@ -140,8 +195,18 @@ export default {
         const { level, level_color } = data.anchor_info.live_info;
         const { attention } = data.anchor_info.relation_info;
         const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info;
+        this.username = uname;
+        this.avatar = face;
+        this.ninkiNumber = 1;
+        this.fansNumber = attention;
+        this.fansClubNumber = fansclub;
       } else {
         close();
+        this.username = "";
+        this.avatar = null;
+        this.ninkiNumber = 0;
+        this.fansNumber = 0;
+        this.fansClubNumber = 0;
       }
     },
     showDanmakuWindow(status) {
@@ -153,7 +218,8 @@ export default {
             width: 320,
             height: 320,
             // x, y,
-            x: 0, y: 0,
+            x: 0,
+            y: 0,
             frame: false,
             transparent: true,
             webPreferences: {
@@ -180,11 +246,29 @@ export default {
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status);
     },
+    async sendDanmaku(payload) {
+      await this.$store.dispatch("ADD_MESSAGE", {
+        id: payload._id,
+        uid: payload.uid,
+        name: payload.name,
+        comment: payload.comment,
+        role: GUARD_LEVEL_MAP[payload.guard],
+      });
+    },
   },
 };
 </script>
 
 <style scoped>
+.avatar-wrapper {
+  display: inline-block;
+  vertical-align: top;
+}
+.status-wrapper {
+  display: inline-block;
+  line-height: 21px;
+  padding-left: 40px;
+}
 .layout-header {
   background: white;
 }

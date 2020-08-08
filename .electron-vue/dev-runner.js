@@ -68,6 +68,10 @@ function startRenderer() {
           '/xlive': {
             target: "https://api.live.bilibili.com",
             changeOrigin: true
+          },
+          '/x': {
+            target: "https://api.bilibili.com",
+            changeOrigin: true
           }
         },
         before(app, ctx) {

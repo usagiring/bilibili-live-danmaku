@@ -55,11 +55,11 @@ const mutations = {
 }
 
 const actions = {
-  someAsyncTask(comment) {
-  },
-
   async ADD_EXAMPLE_MESSAGE({ commit }, payload) {
     commit('ADD_EXAMPLE_MESSAGE', payload)
+  },
+  async ADD_MESSAGE({ commit }, payload) {
+    commit('ADD_MESSAGE', payload)
   },
 }
 

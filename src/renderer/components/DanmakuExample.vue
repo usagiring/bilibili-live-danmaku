@@ -1,6 +1,6 @@
 <template>
-  <WindowTemplate>
-    <div class="super-chat-content">
+  <div>
+    <div class="super-chat-content-wrapper">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
           class="super-chat-avatar"
@@ -29,7 +29,7 @@
         </p>
       </div>
     </div>
-  </WindowTemplate>
+  </div>
 </template>
 
 <script>
@@ -122,11 +122,14 @@ export default {
   background-color: rgba(0, 0, 0, 0.3);
   -webkit-app-region: drag;
 }
-.super-chat-content {
-  height: 30px;
+.super-chat-content-wrapper {
+  height: 40px;
+  line-height: 32px;
 }
 .message-content-wrapper {
-  width: 100%;
+  height: 310px;
+  overflow: hidden;
+  position: relative;
 }
 .message-content {
   position: absolute;
@@ -141,7 +144,6 @@ export default {
   border-radius: 20px;
   padding: 0px 10px;
   font-size: 18px;
-  line-height: 32px;
 }
 .super-chat-text {
 }

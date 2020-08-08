@@ -1,13 +1,26 @@
 const Datastore = require('nedb')
+const userDB = new Datastore({ filename: './data/user', autoload: true });
 const commentDB = new Datastore({ filename: './data/comment', autoload: true });
 const giftDB = new Datastore({ filename: './data/gift', autoload: true });
 const interactDB = new Datastore({ filename: './data/interact', autoload: true });
 
+userDB.loadDatabase();
 commentDB.loadDatabase();
 giftDB.loadDatabase();
 interactDB.loadDatabase();
 
+userDB.ensureIndex({
+  fieldName: 'mid',
+  unique: true,
+})
+
+userDB.ensureIndex({
+  fieldName: 'createdAt',
+  expireAfterSeconds: 604800 // 用户数据缓存 7天
+})
+
 export default {
+  userDB: wrapper(userDB),
   commentDB: wrapper(commentDB),
   giftDB: wrapper(giftDB),
   interactDB: wrapper(interactDB)

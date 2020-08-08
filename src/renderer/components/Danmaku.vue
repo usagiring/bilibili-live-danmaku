@@ -1,6 +1,6 @@
 <template>
   <WindowTemplate>
-    <div class="super-chat-content">
+    <div class="super-chat-content-wrapper">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
           class="super-chat-avatar"
@@ -56,7 +56,7 @@ export default {
   },
   computed: {
     messages() {
-      return this.$store.state.Message.exampleMessages;
+      return this.$store.state.Message.messages;
     },
 
     normal_message() {
@@ -111,12 +111,14 @@ export default {
 .layout-footer-center {
   text-align: center;
 }
-
-.super-chat-content {
-  height: 30px;
+.super-chat-content-wrapper {
+  height: 40px;
+  line-height: 32px;
 }
 .message-content-wrapper {
-  width: 100%;
+  height: 310px;
+  overflow: hidden;
+  position: relative;
 }
 .message-content {
   position: absolute;

@@ -14,6 +14,10 @@
                 alpha
               />
             </div>
+            <div class="setting-key-text">
+              <span>显示入场消息</span>
+              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+            </div>
           </div>
         </Panel>
         <Panel name="2">
@@ -43,19 +47,19 @@
               <Input v-model="repeatMS" size="small" style="width: 150px" />
             </div>
             <div>
-              <span class="setting-key-text">是否显示SC区域</span>
+              <span class="setting-key-text">显示SC区域</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
             <div>
-              <span class="setting-key-text">是否显示头像</span>
+              <span class="setting-key-text">显示头像</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
             <div>
-              <span class="setting-key-text">是否显示舰队图标</span>
+              <span class="setting-key-text">显示舰队图标</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
             <div>
-              <span class="setting-key-text">是否显示合并弹幕数量</span>
+              <span class="setting-key-text">显示合并弹幕数量</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
             <div>
@@ -72,7 +76,9 @@
           <div @click="sendTestComment">发送测试弹幕</div>
           <div @click="clear">清空Storage</div>
         </div>
-        <div class="setting-right-content" :style="{ background: background }"></div>
+        <div class="setting-right-content" :style="{ background: background }">
+          <DanmakuExample />
+        </div>
       </div>
     </i-col>
   </Row>
@@ -86,11 +92,6 @@ import SettingEditor from "./SettingEditor";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
 
-// emitter.on("message", (data) => {
-//   console.log(data);
-// });
-
-// TODO 配置读写文件
 export default {
   components: {
     DanmakuExample,
@@ -251,9 +252,6 @@ export default {
       repeatMS: 5000,
       collapse: ["1", "2", "3"],
       isShowMemberShipIcon: true,
-      isShowPreview: false,
-      isAlwaysOnTop: false,
-      win: null,
     };
   },
   computed: {
@@ -272,40 +270,6 @@ export default {
     },
     showMemberShipIcon(status) {
       this.isShowMemberShipIcon = status;
-    },
-    showPreview(status) {
-      const { x, y } = screen.getCursorScreenPoint();
-
-      if (status) {
-        if (!this.win) {
-          this.win = new BrowserWindow({
-            width: 320,
-            height: 320,
-            x,
-            y,
-            frame: false,
-            transparent: true,
-            webPreferences: {
-              nodeIntegration: true,
-            },
-          });
-
-          const winURL =
-            process.env.NODE_ENV === "development"
-              ? `http://localhost:9080/#/danmaku-example`
-              : `file://${__dirname}/index.html/#/danmaku-example`;
-          this.win.loadURL(winURL);
-        } else {
-          this.win.showInactive();
-        }
-      } else {
-        this.win.hide();
-      }
-    },
-    alwaysOnTop(status) {
-      this.win.setFocusable(!status);
-      this.win.setAlwaysOnTop(status);
-      this.win.setIgnoreMouseEvents(status);
     },
     async sendTestComment() {
       const lastest = this.$store.state.Message.exampleComments;
@@ -348,16 +312,11 @@ export default {
   height: 50px;
 }
 .setting-right-content {
-  top: 50px;
-  width: 90%;
-  margin: 20px;
-  height: 300px;
-  bottom: 0;
-  left: 0;
-  position: absolute;
+  margin: 10px;
+  padding: 5px;
+  height: 360px;
 
-  border-radius: 24px;
-  border: solid 3px gray;
-  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: solid 1px gray;
 }
 </style>

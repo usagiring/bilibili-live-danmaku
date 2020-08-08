@@ -51,7 +51,6 @@ function init(options) {
 
     ws.onmessage = function (evt) {
       const result = convertToObject(evt.data);
-      console.log(result)
 
       if (result.op === 3) {
         // {
@@ -266,13 +265,15 @@ function getEncoder() {
 
 function parseComment(msg) {
   if (msg.cmd !== "DANMU_MSG") return
-  const [uid, name] = msg.info[2];
+  const [uid, name, isAdmin] = msg.info[2];
   const [medalLevel, medalName] = msg.info[3]
   return {
     roomId: __roomId,
     sendAt: msg.info[0][4],
     uid,
     name,
+    isAdmin,
+    guard: msg.info[7],
     medalLevel,
     medalName,
     comment: msg.info[1]
@@ -286,7 +287,7 @@ function parseInteractWord(msg) {
     identities,
     roomId,
     score,
-    msgType,
+    msgType, // 1 进入直播间 2 关注直播间
     timestamp,
     uid,
     uname,
