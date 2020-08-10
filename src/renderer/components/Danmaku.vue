@@ -18,6 +18,9 @@
           :key="message.id"
           v-for="message in messages"
         >
+          <template v-if="isShowAvatar">
+            <Avatar :src="message.avatar" size="small" />
+          </template>
           <span
             :class="`name-${message.role}`"
             :style="getNameStyleByRole(message)"
@@ -41,6 +44,7 @@ export default {
   },
   data() {
     return {
+      isShowAvatar: true, // TODO vuex
       superChats: [
         {
           uid: "12346",
@@ -133,7 +137,6 @@ export default {
   border-radius: 20px;
   padding: 0px 10px;
   font-size: 18px;
-  line-height: 32px;
 }
 .super-chat-text {
 }

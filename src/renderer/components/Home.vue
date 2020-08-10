@@ -124,6 +124,7 @@ export default {
               comment.face = user.face;
             } else {
               const { data } = await getUserInfo(comment.uid);
+              // TODO 统一格式化用户数据
               data.createdAt = new Date()
               await userDB.insert(data);
               comment.face = data.face;
@@ -252,6 +253,11 @@ export default {
         uid: payload.uid,
         name: payload.name,
         comment: payload.comment,
+        sendAt: payload.sendAt,
+        isAdmin: payload.isAdmin,
+        avatar: `${payload.face}@48w_48h`,
+        medalLevel: payload.medalLevel,
+        medalName: payload.medalName,
         role: GUARD_LEVEL_MAP[payload.guard],
       });
     },

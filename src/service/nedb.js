@@ -9,6 +9,21 @@ commentDB.loadDatabase();
 giftDB.loadDatabase();
 interactDB.loadDatabase();
 
+interactDB.ensureIndex({
+  fieldName: 'uid',
+})
+interactDB.ensureIndex({
+  fieldName: 'roomId',
+})
+
+commentDB.ensureIndex({
+  fieldName: 'uid',
+})
+commentDB.ensureIndex({
+  fieldName: 'roomId',
+})
+
+
 userDB.ensureIndex({
   fieldName: 'mid',
   unique: true,
