@@ -1,5 +1,5 @@
 <template>
-  <WindowTemplate>
+  <div>
     <div class="super-chat-content-wrapper">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
@@ -32,19 +32,14 @@
         </p>
       </div>
     </div>
-  </WindowTemplate>
+  </div>
 </template>
 
 <script>
-import WindowTemplate from "./WindowTemplate.vue";
-
 export default {
-  components: {
-    WindowTemplate,
-  },
+  props: ["isPreview"],
   data() {
     return {
-      isShowAvatar: true, // TODO vuex
       superChats: [
         {
           uid: "12346",
@@ -59,8 +54,20 @@ export default {
     };
   },
   computed: {
+    isShowMemberShipIcon() {
+      return this.$store.state.Config.isShowMemberShipIcon;
+    },
+
+    isShowAvatar() {
+      return this.$store.state.Config.isShowAvatar;
+    },
+
     messages() {
-      return this.$store.state.Message.messages;
+      if (this.isPreview) {
+        return this.$store.state.Message.exampleMessages;
+      } else {
+        return this.$store.state.Message.messages;
+      }
     },
 
     normal_message() {
@@ -84,9 +91,6 @@ export default {
     },
   },
   methods: {
-    showMemberShipIcon(status) {
-      this.isShowMemberShipIcon = status;
-    },
     getMessageStyleByRole(message) {
       return this[`${message.role}_message`];
     },

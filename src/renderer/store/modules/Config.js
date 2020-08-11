@@ -1,8 +1,12 @@
 // {role}_{prop}: { [property: string]: string }
 const state = {
+  isShowAvatar: true,
+  isShowMemberShipIcon: true,
+
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"
   },
+
   normal_message: {
 
   },
@@ -63,6 +67,12 @@ const mutations = {
 
   UPDATE_CONTAINER_STYLE(state, payload) {
     state['container_style'] = { ...state['container_style'], ...payload.style }
+  },
+
+  UPDATE_CONFIG(state, payload) {
+    for (const key in payload) {
+      state[key] = payload[key]
+    }
   }
 }
 
@@ -74,6 +84,10 @@ const actions = {
 
   async UPDATE_CONTAINER_STYLE({ commit }, payload) {
     commit('UPDATE_CONTAINER_STYLE', payload)
+  },
+
+  async UPDATE_CONFIG({ commit }, payload) {
+    commit('UPDATE_CONFIG', payload)
   }
 }
 

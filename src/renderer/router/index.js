@@ -21,14 +21,9 @@ export default new Router({
       ]
     },
     {
-      path: '/danmaku',
-      name: 'Danmaku',
-      component: () => import('@/components/Danmaku.vue')
-    },
-    {
-      path: '/danmaku-example',
-      name: 'DanmakuExample',
-      component: () => import('@/components/DanmakuExample.vue')
+      path: '/danmaku-window',
+      name: 'DanmakuWindow',
+      component: () => import('@/components/DanmakuWindow.vue')
     },
     {
       path: '*',

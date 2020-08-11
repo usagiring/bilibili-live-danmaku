@@ -16,7 +16,7 @@
             </div>
             <div class="setting-key-text">
               <span>显示入场消息</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+              <i-switch :value="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
           </div>
         </Panel>
@@ -46,26 +46,26 @@
               </Poptip>
               <Input v-model="repeatMS" size="small" style="width: 150px" />
             </div>
-            <div>
+            <!-- <div>
               <span class="setting-key-text">显示SC区域</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
+            </div>-->
             <div>
               <span class="setting-key-text">显示头像</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+              <i-switch :value="isShowAvatar" @on-change="showAvatar" />
             </div>
             <div>
               <span class="setting-key-text">显示舰队图标</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+              <i-switch :value="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
-            <div>
+            <!-- <div>
               <span class="setting-key-text">显示合并弹幕数量</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>
             <div>
               <span class="setting-key-text">显示原弹幕颜色</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
+            </div>-->
           </div>
         </Panel>
       </Collapse>
@@ -77,7 +77,7 @@
           <div @click="clear">清空Storage</div>
         </div>
         <div class="setting-right-content" :style="{ background: background }">
-          <DanmakuExample />
+          <Danmaku :isPreview="true" />
         </div>
       </div>
     </i-col>
@@ -87,15 +87,15 @@
 <script>
 import { remote } from "electron";
 const { BrowserWindow, screen } = remote;
-import DanmakuExample from "./DanmakuExample.vue";
 import SettingEditor from "./SettingEditor";
+import Danmaku from "./Danmaku";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
 
 export default {
   components: {
-    DanmakuExample,
     SettingEditor,
+    Danmaku,
   },
   data() {
     return {
@@ -249,14 +249,19 @@ export default {
       ],
       roomId: null,
       isConnected: false,
-      repeatMS: 5000,
+      repeatMS: 3000,
       collapse: ["1", "2", "3"],
-      isShowMemberShipIcon: true,
     };
   },
   computed: {
     background() {
       return this.$store.state.Config["container_style"]["background"];
+    },
+    isShowAvatar() {
+      return this.$store.state.Config.isShowAvatar;
+    },
+    isShowMemberShipIcon() {
+      return this.$store.state.Config.isShowMemberShipIcon;
     },
   },
   methods: {
@@ -268,8 +273,15 @@ export default {
         close();
       }
     },
-    showMemberShipIcon(status) {
-      this.isShowMemberShipIcon = status;
+    async showMemberShipIcon(status) {
+      await this.$store.dispatch("UPDATE_CONFIG", {
+        isShowMemberShipIcon: status,
+      });
+    },
+    async showAvatar(status) {
+      await this.$store.dispatch("UPDATE_CONFIG", {
+        isShowAvatar: status,
+      });
     },
     async sendTestComment() {
       const lastest = this.$store.state.Message.exampleComments;

@@ -296,6 +296,42 @@ function parseInteractWord(msg) {
 }
 
 function parseGift(msg) {
+  // COMBO_END
+  // const data = {
+  //   price: combo_total_coin,
+  //   gift_name,
+  //   uid,
+  //   uname
+  // }
+
+  // // SUPER_CHAT_MESSAGE_JPN
+  // const sc = {
+  //   id,
+  //   message,
+  //   message_jpn,
+  //   price,
+  //   rate,
+  //   start_time,
+  //   time,
+  //   end_time,
+  //   uid,
+  //   avatar: user_info.face,
+  //   name: user_info.face,
+  //   guardLevel: user_info.guard_level,
+  //   medalName: medal_info.medal_name,
+  //   medalLevel: medal_info.medal_level,
+  // }
+
+  // // GUARD_BUY
+  // const guard = {
+  //   uid,
+  //   gift_id,
+  //   gift_name,
+  //   price,
+  //   num,
+  //   guardLevel: guard_level,
+  //   name: username
+  // }
 
 }
 
@@ -303,4 +339,8 @@ function parseRoomInfo(msg) {
   if (msg.cmd !== "ROOM_REAL_TIME_MESSAGE_UPDATE") return
   const { fans, fans_club: fansClub, room_id: roomId } = msg.data
   return { fans, fansClub, roomId }
+}
+
+function parseSuperChat(msg) {
+
 }

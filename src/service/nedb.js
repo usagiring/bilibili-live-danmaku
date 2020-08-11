@@ -3,6 +3,7 @@ const userDB = new Datastore({ filename: './data/user', autoload: true });
 const commentDB = new Datastore({ filename: './data/comment', autoload: true });
 const giftDB = new Datastore({ filename: './data/gift', autoload: true });
 const interactDB = new Datastore({ filename: './data/interact', autoload: true });
+const otherDB = new Datastore({ filename: './data/other', autoload: true });
 
 userDB.loadDatabase();
 commentDB.loadDatabase();
@@ -23,9 +24,8 @@ commentDB.ensureIndex({
   fieldName: 'roomId',
 })
 
-
 userDB.ensureIndex({
-  fieldName: 'mid',
+  fieldName: 'uid',
   unique: true,
 })
 
@@ -38,7 +38,8 @@ export default {
   userDB: wrapper(userDB),
   commentDB: wrapper(commentDB),
   giftDB: wrapper(giftDB),
-  interactDB: wrapper(interactDB)
+  interactDB: wrapper(interactDB),
+  otherDB: wrapper(otherDB),
 }
 
 function wrapper(db) {

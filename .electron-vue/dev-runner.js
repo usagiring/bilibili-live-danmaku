@@ -64,6 +64,9 @@ function startRenderer() {
       {
         contentBase: path.join(__dirname, '../'),
         quiet: true,
+        hot: true, 
+        // liveReload: false,
+        // hotOnly: true,
         proxy: {
           '/xlive': {
             target: "https://api.live.bilibili.com",

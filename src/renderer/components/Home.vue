@@ -80,7 +80,7 @@ import emitter, {
 import { getRoomInfo, getUserInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
-const { commentDB, interactDB, userDB } = db;
+const { commentDB, interactDB, userDB, otherDB } = db;
 
 const GUARD_LEVEL_MAP = {
   "0": "normal",
@@ -114,20 +114,20 @@ export default {
         await Promise.all(
           comments.map(async (comment) => {
             console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-            // TODO 设置头像
 
-            const user = await userDB.findOne({ mid: comment.uid });
-            console.log(user);
 
-            // 缓存 user 信息
-            if (user) {
-              comment.face = user.face;
-            } else {
-              const { data } = await getUserInfo(comment.uid);
-              // TODO 统一格式化用户数据
-              data.createdAt = new Date()
-              await userDB.insert(data);
-              comment.face = data.face;
+            if (this.isShowAvatar) {
+              // 缓存 user 信息
+              let user = await userDB.findOne({ uid: comment.uid }).catch(e=> console.log(e))
+              if (!user) {
+                // TODO 限制获取头像频率 避免412被封
+                const { data } = await getUserInfo(comment.uid);
+                // 统一格式化用户数据
+                user = this.parseUser(data);
+                data.createdAt = new Date();
+                userDB.insert(user);
+              }
+              comment.avatar = user.avatar;
             }
 
             const data = await commentDB.insert(comment);
@@ -151,15 +151,16 @@ export default {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           console.log(msg);
+          otherDB.insert(msg);
         });
       } else {
         if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
-          console.log(data);
           const { fans, fans_club } = data.data;
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
         } else {
           console.log(data);
+          otherDB.insert(data);
         }
       }
     });
@@ -171,6 +172,9 @@ export default {
   computed: {
     menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
+    },
+    isShowAvatar() {
+      return this.$store.state.Config.isShowAvatar;
     },
   },
   methods: {
@@ -230,8 +234,8 @@ export default {
 
           const winURL =
             process.env.NODE_ENV === "development"
-              ? `http://localhost:9080/#/danmaku`
-              : `file://${__dirname}/index.html/#/danmaku`;
+              ? `http://localhost:9080/#/danmaku-window`
+              : `file://${__dirname}/index.html/#/danmaku-window`;
           this.win.loadURL(winURL);
         } else {
           this.win.showInactive();
@@ -255,11 +259,21 @@ export default {
         comment: payload.comment,
         sendAt: payload.sendAt,
         isAdmin: payload.isAdmin,
-        avatar: `${payload.face}@48w_48h`,
+        avatar: `${payload.avatar}@48w_48h`,
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
         role: GUARD_LEVEL_MAP[payload.guard],
       });
+    },
+
+    parseUser(data) {
+      return {
+        uid: data.mid,
+        name: data.name,
+        avatar: data.face,
+        sex: data.sex,
+        level: data.level,
+      };
     },
   },
 };
