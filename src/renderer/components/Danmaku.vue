@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{height: '100%'}">
     <div class="super-chat-content-wrapper">
       <span class="super-chat-in-top" style="background: Gold">
         <Avatar
@@ -12,23 +12,27 @@
     </div>
     <div class="message-content-wrapper">
       <div class="message-content">
-        <p
-          :class="`message message-${message.role}`"
-          :style="getMessageStyleByRole(message)"
-          :key="message.id"
-          v-for="message in messages"
-        >
-          <template v-if="isShowAvatar">
-            <Avatar :src="message.avatar" size="small" />
+        <p :key="message.id" v-for="message in messages">
+          <template v-if="message.type==='comment'">
+            <p :style="getMessageStyleByRole(message)">
+              <Avatar v-if="isShowAvatar" :src="message.avatar" size="small" />
+              <span
+                :class="`name-${message.role}`"
+                :style="getNameStyleByRole(message)"
+              >{{message.name}}:</span>
+              <span
+                :class="`comment-${message.role}`"
+                :style="getCommentStyleByRole(message)"
+              >{{message.comment}}</span>
+            </p>
           </template>
-          <span
-            :class="`name-${message.role}`"
-            :style="getNameStyleByRole(message)"
-          >{{message.name}}:</span>
-          <span
-            :class="`comment-${message.role}`"
-            :style="getCommentStyleByRole(message)"
-          >{{message.comment}}</span>
+          <template v-if="message.type==='interactWord'">
+            <!-- 入场消息设置默认使用普通设置 -->
+            <p :style="normal_comment">
+              <span :style="{color: message.color? message.color:undefined}">{{message.name}}</span>
+              {{`${parseMsgType(message.msgType)}直播间`}}
+            </p>
+          </template>
         </p>
       </div>
     </div>
@@ -89,6 +93,27 @@ export default {
     captain_comment() {
       return this.$store.state.Config.captain_comment;
     },
+
+    // 提督和总督暂时使用舰长配置
+    admiral_message() {
+      return this.$store.state.Config.captain_message;
+    },
+    admiral_name() {
+      return this.$store.state.Config.captain_name;
+    },
+    admiral_comment() {
+      return this.$store.state.Config.captain_comment;
+    },
+
+    governor_message() {
+      return this.$store.state.Config.captain_message;
+    },
+    governor_name() {
+      return this.$store.state.Config.captain_name;
+    },
+    governor_comment() {
+      return this.$store.state.Config.captain_comment;
+    },
   },
   methods: {
     getMessageStyleByRole(message) {
@@ -99,6 +124,18 @@ export default {
     },
     getCommentStyleByRole(message) {
       return this[`${message.role}_comment`];
+    },
+
+    parseMsgType(msgType) {
+      if (msgType === 1) {
+        return "进入了";
+      }
+      if (msgType === 2) {
+        return "关注了";
+      }
+      if (msgType === 3) {
+        return "分享了";
+      }
     },
   },
 };
@@ -124,7 +161,8 @@ export default {
   line-height: 32px;
 }
 .message-content-wrapper {
-  height: 310px;
+  height: calc(100% - 40px);
+  /* height: 100%; */
   overflow: hidden;
   position: relative;
 }
@@ -143,8 +181,5 @@ export default {
   font-size: 18px;
 }
 .super-chat-text {
-}
-
-.message-normal {
 }
 </style>

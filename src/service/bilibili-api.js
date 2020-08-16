@@ -5,13 +5,19 @@ const baseLiveUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:9
 
 
 export {
-  getRoomInfo,
+  getRoomInfoV1,
+  getRoomInfoV2,
   getDamankuInfo,
   getGiftConfig,
   getUserInfo
 }
 
-async function getRoomInfo(roomId) {
+async function getRoomInfoV1() {
+  const res = await axios.get(`${baseLiveUrl}room/v1/Room/get_info?room_id=${roomId}&from=room`)
+  return res.data
+}
+
+async function getRoomInfoV2(roomId) {
   const res = await axios.get(`${baseLiveUrl}/xlive/web-room/v1/index/getInfoByRoom?room_id=${roomId}`)
   return res.data
 }
@@ -27,6 +33,8 @@ async function getGiftConfig(roomId, platform = 'pc') {
 }
 
 async function getUserInfo(userId) {
-  const res = await axios.get(`${baseUrl}/x/space/acc/info?mid=${userId}&jsonp=jsonp`)
+  const res = await axios.get(`${baseUrl}/x/space/acc/info?mid=${userId}&jsonp=jsonp`, {
+    timeout: 1000
+  })
   return res.data
 }

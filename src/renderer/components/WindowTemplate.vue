@@ -5,11 +5,23 @@
 </template>
 
 <script>
+import { remote } from "electron";
+
 export default {
   beforeCreate() {
     document
       .getElementsByTagName("body")[0]
       .setAttribute("style", "background-color:rgba(0,0,0,0);");
+  },
+  mounted() {
+    const self = this;
+    document.addEventListener("keyup", function (e) {
+      console.log(e.keyCode);
+      if (e.keyCode === 27) {
+        const window = remote.getCurrentWindow();
+        window.close();
+      }
+    });
   },
   computed: {
     background() {

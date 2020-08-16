@@ -75,7 +75,7 @@ function startRenderer() {
           '/x': {
             target: "https://api.bilibili.com",
             changeOrigin: true
-          }
+          },
         },
         before(app, ctx) {
           app.use(hotMiddleware)

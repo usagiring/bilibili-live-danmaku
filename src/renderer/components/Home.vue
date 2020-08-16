@@ -22,19 +22,28 @@
               size="large"
             />&nbsp;&nbsp;
             <span>{{ username? username: '未连接'}}</span>
+            &nbsp;
+            <Tag
+              v-if="username"
+              type="border"
+              :color="liveStatus === 1? 'green': 'silver'"
+            >{{liveStatus === 1 ? '直播中': '未开播'}}</Tag>
           </div>
 
           <div class="status-wrapper">
             <div class="bar">
               <Icon type="md-flame" />
+              <span class="header-icon-text">人气值</span>
               {{ninkiNumber}}
             </div>
             <div>
               <Icon type="md-star" />
+              <span class="header-icon-text">关注数</span>
               {{fansNumber}}
             </div>
             <div>
               <Icon type="md-heart" />
+              <span class="header-icon-text">粉丝团</span>
               {{fansClubNumber}}
             </div>
           </div>
@@ -51,7 +60,11 @@
             />
             <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
-            <i-switch v-model="isShowDanmakuWindow" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
+            <i-switch
+              :value="isShowDanmakuWindow"
+              :loading="isShowDanmakuWindowLoading"
+              @on-change="showDanmakuWindow"
+            ></i-switch>&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span @click="alwaysOnTop">窗口置顶</span>
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
@@ -77,10 +90,11 @@ import emitter, {
   parseComment,
   parseInteractWord,
 } from "../../service/bilibili-live-ws";
-import { getRoomInfo, getUserInfo } from "../../service/bilibili-api";
+import { getRoomInfoV2, getUserInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
 const { commentDB, interactDB, userDB, otherDB } = db;
+let isGetUserInfoLocked = false;
 
 const GUARD_LEVEL_MAP = {
   "0": "normal",
@@ -89,6 +103,8 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
+// TODO 热加载需要把socket关闭，小窗口关闭
+// TODO 刷新把小窗口关闭
 export default {
   data() {
     return {
@@ -96,6 +112,7 @@ export default {
       roomId: 14917277,
       isConnected: false,
       isShowDanmakuWindow: false,
+      isShowDanmakuWindowLoading: false,
       isAlwaysOnTop: false,
 
       username: "",
@@ -103,6 +120,7 @@ export default {
       ninkiNumber: 0,
       fansNumber: 0,
       fansClubNumber: 0,
+      liveStatus: 0,
     };
   },
   created() {
@@ -111,29 +129,41 @@ export default {
         const comments = data
           .filter((msg) => msg.cmd === "DANMU_MSG")
           .map(parseComment);
-        await Promise.all(
-          comments.map(async (comment) => {
-            console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
 
+        // comments.map(async comment => {
 
-            if (this.isShowAvatar) {
+        // })
+        for (const comment of comments) {
+          console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
+
+          if (this.isShowAvatar) {
+            let user = {};
+            try {
               // 缓存 user 信息
-              let user = await userDB.findOne({ uid: comment.uid }).catch(e=> console.log(e))
-              if (!user) {
-                // TODO 限制获取头像频率 避免412被封
+              user = await userDB.findOne({ uid: comment.uid });
+              if (!user && !isGetUserInfoLocked) {
+                // 限制获取头像频率 避免412被封
+                isGetUserInfoLocked = true;
+                setTimeout(() => {
+                  isGetUserInfoLocked = false;
+                }, 200);
+
                 const { data } = await getUserInfo(comment.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
                 userDB.insert(user);
+              } else {
+                throw new Error("getUserInfo limit");
               }
-              comment.avatar = user.avatar;
-            }
+            } catch (e) {}
 
-            const data = await commentDB.insert(comment);
-            await this.sendDanmaku(data);
-          })
-        );
+            comment.avatar = (user || {}).avatar;
+          }
+
+          const data = await commentDB.insert(comment);
+          await this.sendComment(data);
+        }
 
         const interactWords = data
           .filter((msg) => msg.cmd === "INTERACT_WORD")
@@ -143,7 +173,10 @@ export default {
             console.log(
               `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
             );
-            await interactDB.insert(interactWord);
+            const data = await interactDB.insert(interactWord);
+            if (this.isShowEnterInfo) {
+              this.sendInteractWord(data)
+            }
           })
         );
 
@@ -176,14 +209,16 @@ export default {
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
     },
+    isShowEnterInfo() {
+      return this.$store.state.Config.isShowEnterInfo;
+    },
   },
   methods: {
     async connect(status) {
       if (status && this.roomId) {
-        await init({ roomId: Number(this.roomId), uid: 0 });
-        this.isConnected = status;
-        const { data } = await getRoomInfo(this.roomId);
+        const { data } = await getRoomInfoV2(this.roomId);
         console.log(data);
+
         const {
           uid,
           room_id: roomId,
@@ -192,19 +227,24 @@ export default {
           tags,
           background,
           description,
-          live_status,
-          live_start_time,
+          live_status: liveStatus,
+          live_start_time, // 直播开始时间 unixtime
           online,
         } = data.room_info;
+
+        await init({ roomId: Number(roomId), uid: 0 });
+        this.isConnected = status;
+
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
         const { attention } = data.anchor_info.relation_info;
         const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info;
         this.username = uname;
         this.avatar = face;
-        this.ninkiNumber = 1;
+        this.ninkiNumber = online;
         this.fansNumber = attention;
         this.fansClubNumber = fansclub;
+        this.liveStatus = liveStatus;
       } else {
         close();
         this.username = "";
@@ -212,57 +252,80 @@ export default {
         this.ninkiNumber = 0;
         this.fansNumber = 0;
         this.fansClubNumber = 0;
+        this.liveStatus = 0;
       }
     },
     showDanmakuWindow(status) {
-      const { x, y } = screen.getCursorScreenPoint();
+      // const { x, y } = screen.getCursorScreenPoint();
+      this.isShowDanmakuWindowLoading = true;
 
       if (status) {
-        if (!this.win) {
-          this.win = new BrowserWindow({
-            width: 320,
-            height: 320,
-            // x, y,
-            x: 0,
-            y: 0,
-            frame: false,
-            transparent: true,
-            webPreferences: {
-              nodeIntegration: true,
-            },
-          });
+        this.win = new BrowserWindow({
+          width: 320,
+          height: 350,
+          // x, y,
+          x: 0,
+          y: 0,
+          frame: false,
+          transparent: true,
+          hasShadow: false,
+          webPreferences: {
+            nodeIntegration: true,
+          },
+        });
 
-          const winURL =
-            process.env.NODE_ENV === "development"
-              ? `http://localhost:9080/#/danmaku-window`
-              : `file://${__dirname}/index.html/#/danmaku-window`;
-          this.win.loadURL(winURL);
-        } else {
-          this.win.showInactive();
-        }
+        const winURL =
+          process.env.NODE_ENV === "development"
+            ? `http://localhost:9080/#/danmaku-window`
+            : `file://${__dirname}/index.html/#/danmaku-window`;
+        this.win.loadURL(winURL);
+        this.win.on("close", (e) => {
+          this.isShowDanmakuWindow = false;
+          this.isShowDanmakuWindowLoading = false;
+        });
+        // 初始化时清空弹幕池
+        this.$store.dispatch("CLEAR_MESSAGE");
+        this.isShowDanmakuWindow = true;
+        this.isShowDanmakuWindowLoading = false;
       } else {
-        // this.win.hide();
+        if (!this.win) return;
         this.win.close();
         this.win = null;
       }
     },
+
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status);
     },
-    async sendDanmaku(payload) {
+    async sendComment(payload) {
       await this.$store.dispatch("ADD_MESSAGE", {
         id: payload._id,
+        type: "comment",
         uid: payload.uid,
         name: payload.name,
         comment: payload.comment,
         sendAt: payload.sendAt,
         isAdmin: payload.isAdmin,
-        avatar: `${payload.avatar}@48w_48h`,
+        avatar: payload.avatar
+          ? `${payload.avatar}@48w_48h`
+          : "https://static.hdslb.com/images/member/noface.gif",
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
         role: GUARD_LEVEL_MAP[payload.guard],
+      });
+    },
+    sendInteractWord(payload) {
+      this.$store.dispatch("ADD_MESSAGE", {
+        id: payload._id,
+        type: "interactWord",
+        uid: payload.uid,
+        identities: payload.identities,
+        name: payload.uname,
+        color: payload.unameColor,
+        sendAt: payload.timestamp,
+        msgType: payload.msgType,
       });
     },
 
@@ -283,6 +346,9 @@ export default {
 .avatar-wrapper {
   display: inline-block;
   vertical-align: top;
+}
+.header-icon-text {
+  font-size: 12px;
 }
 .status-wrapper {
   display: inline-block;

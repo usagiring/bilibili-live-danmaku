@@ -25,6 +25,11 @@ function close() {
 }
 
 function init(options) {
+  console.log(ws && ws.readyState)
+
+  if(ws && (ws.readyState === 1 || ws.readyState === 0)) return
+
+  
   const { uid = 0, roomId } = options
 
   __roomId = roomId

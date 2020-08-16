@@ -16,7 +16,7 @@
             </div>
             <div class="setting-key-text">
               <span>显示入场消息</span>
-              <i-switch :value="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+              <i-switch :value="isShowEnterInfo" @on-change="showEnterInfo" />
             </div>
           </div>
         </Panel>
@@ -263,6 +263,9 @@ export default {
     isShowMemberShipIcon() {
       return this.$store.state.Config.isShowMemberShipIcon;
     },
+    isShowEnterInfo() {
+      return this.$store.state.Config.isShowEnterInfo;
+    },
   },
   methods: {
     async connect(status) {
@@ -281,6 +284,11 @@ export default {
     async showAvatar(status) {
       await this.$store.dispatch("UPDATE_CONFIG", {
         isShowAvatar: status,
+      });
+    },
+    showEnterInfo(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isShowEnterInfo: status,
       });
     },
     async sendTestComment() {

@@ -32,6 +32,16 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  mainWindow.on('close', (e) => {
+    // e.preventDefault()
+    // e.returnValue = false
+    // BrowserWindow.getAllWindows().forEach(window => {
+    //   console.log(window)
+    //   window.close()
+    // })
+  })
+
 }
 
 app.on('ready', createWindow)

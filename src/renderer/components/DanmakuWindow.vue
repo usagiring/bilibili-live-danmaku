@@ -11,11 +11,10 @@ import Danmaku from "./Danmaku.vue";
 export default {
   components: {
     WindowTemplate,
-    Danmaku
+    Danmaku,
   },
 };
 </script>
 
 <style scoped>
-
 </style>
