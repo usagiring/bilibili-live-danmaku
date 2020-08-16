@@ -7,7 +7,7 @@
           src="https://i.loli.net/2017/08/21/599a521472424.jpg"
           size="small"
         />
-        <span class="super-chat-text">$100</span>
+        <span class="super-chat-text">￥100</span>
       </span>
     </div>
     <div class="message-content-wrapper">
@@ -15,7 +15,7 @@
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type==='comment'">
             <p :style="getMessageStyleByRole(message)">
-              <Avatar v-if="isShowAvatar" :src="message.avatar" size="small" />
+              <Avatar v-if="isShowAvatar" :src="message.avatar" :style="avatarSizeStyle" />
               <span
                 :class="`name-${message.role}`"
                 :style="getNameStyleByRole(message)"
@@ -33,6 +33,52 @@
               {{`${parseMsgType(message.msgType)}直播间`}}
             </p>
           </template>
+          <template v-if="message.type==='superChat'">
+            <div
+              :style="{border: `solid 1px ${parsePriceColor(message.price).backgroundBottomColor}`}"
+              class="message-super-chat"
+            >
+              <div
+                :style="{background: `${parsePriceColor(message.price).backgroundColor}`}"
+                class="message-super-chat-content message-super-chat-content-header"
+              >
+                <div :style="{display: 'inline-block', 'vertical-align':'top'}">
+                  <Avatar class="super-chat-avatar" :src="message.avatar" size="large" />
+                </div>
+                <div :style="{display: 'inline-block'}">
+                  <p class="super-chat-text">{{message.name}}</p>
+                  <p class="super-chat-text">{{`￥${message.price}`}}</p>
+                </div>
+              </div>
+              <div
+                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`}"
+                class="message-super-chat-content message-super-chat-content-bottom"
+              >{{message.comment}}</div>
+            </div>
+          </template>
+          <template v-if="message.type==='gift'">
+            <div
+              :style="{border: `solid 1px ${parsePriceColor(message.price).backgroundBottomColor}`}"
+              class="message-super-chat"
+            >
+              <div
+                :style="{background: `${parsePriceColor(message.price).backgroundColor}`}"
+                class="message-super-chat-content message-super-chat-content-header"
+              >
+                <div :style="{display: 'inline-block', 'vertical-align':'top'}">
+                  <Avatar class="super-chat-avatar" :src="message.avatar" size="large" />
+                </div>
+                <div :style="{display: 'inline-block'}">
+                  <p class="super-chat-text">{{message.name}}</p>
+                  <p class="super-chat-text">{{`￥${message.price}`}}</p>
+                </div>
+              </div>
+              <div
+                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`}"
+                class="message-super-chat-content message-super-chat-content-bottom"
+              >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</div>
+            </div>
+          </template>
         </p>
       </div>
     </div>
@@ -40,6 +86,21 @@
 </template>
 
 <script>
+const PRICE_COLOR = {
+  "1": {
+    backgroundColor: "#EDF5FF",
+    backgroundBottomColor: "#2A60B2",
+  },
+  "2": {
+    backgroundColor: "#DBFFFD",
+    backgroundBottomColor: "#427D9E",
+  },
+  "3": {
+    backgroundColor: "#FFF1C5",
+    backgroundBottomColor: "#E2B52B",
+  },
+};
+
 export default {
   props: ["isPreview"],
   data() {
@@ -61,9 +122,16 @@ export default {
     isShowMemberShipIcon() {
       return this.$store.state.Config.isShowMemberShipIcon;
     },
-
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
+    },
+    avatarSizeStyle() {
+      const avatarSize = this.$store.state.Config.avatarSize;
+      return {
+        width: `${avatarSize}px`,
+        height: `${avatarSize}px`,
+        "line-height": `${avatarSize}px`,
+      };
     },
 
     messages() {
@@ -137,6 +205,24 @@ export default {
         return "分享了";
       }
     },
+
+    parsePriceColor(price) {
+      if (price < 50) {
+        return PRICE_COLOR["1"];
+      }
+      if (price >= 50 && price < 100) {
+        return PRICE_COLOR["2"];
+      }
+      if (price >= 100 && price < 500) {
+        return PRICE_COLOR["3"];
+      }
+      if (price >= 500 && price < 1000) {
+      }
+      if (price >= 1000 && price < 2000) {
+      }
+      if (price >= 2000) {
+      }
+    },
   },
 };
 </script>
@@ -167,11 +253,12 @@ export default {
   position: relative;
 }
 .message-content {
+  width: 100%;
   position: absolute;
   bottom: 0px;
 }
 .super-chat-avatar {
-  transform: translate(0%, -5%);
+  /* transform: translate(0%, -5%); */
 }
 .super-chat-in-top {
   display: inline-block;
@@ -180,6 +267,21 @@ export default {
   padding: 0px 10px;
   font-size: 18px;
 }
-.super-chat-text {
+.message-super-chat {
+  border-radius: 10px;
+  border: solid 1px rgba(66, 125, 158, 1);
+  margin: 5px;
+}
+.message-super-chat-content {
+  padding: 10px;
+}
+.message-super-chat-content-header {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.message-super-chat-content-bottom {
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  color: white;
 }
 </style>

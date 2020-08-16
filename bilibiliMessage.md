@@ -154,3 +154,7 @@ sc
 
 ### cmd: ANCHOR_LOT_CHECKSTATUS
 
+
+"background_color":"#EDF5FF","background_icon":"","background_price_color":"#7497CD","background_bottom_color":"#2A60B2"
+"background_color":"#DBFFFD","background_icon":"","background_price_color":"#7DA4BD","background_bottom_color":"#427D9E",
+"background_color":"#FFF1C5","background_icon":"","background_price_color":"#ECCF75","background_bottom_color":"#E2B52B",

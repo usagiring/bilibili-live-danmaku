@@ -89,11 +89,12 @@ import emitter, {
   close,
   parseComment,
   parseInteractWord,
+  parseGift,
 } from "../../service/bilibili-live-ws";
 import { getRoomInfoV2, getUserInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
-const { commentDB, interactDB, userDB, otherDB } = db;
+const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 let isGetUserInfoLocked = false;
 
 const GUARD_LEVEL_MAP = {
@@ -103,13 +104,11 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
-// TODO 热加载需要把socket关闭，小窗口关闭
-// TODO 刷新把小窗口关闭
 export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 14917277,
+      roomId: 21449083,
       isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -130,9 +129,6 @@ export default {
           .filter((msg) => msg.cmd === "DANMU_MSG")
           .map(parseComment);
 
-        // comments.map(async comment => {
-
-        // })
         for (const comment of comments) {
           console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
 
@@ -168,17 +164,51 @@ export default {
         const interactWords = data
           .filter((msg) => msg.cmd === "INTERACT_WORD")
           .map(parseInteractWord);
-        await Promise.all(
-          interactWords.map(async (interactWord) => {
-            console.log(
-              `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
-            );
-            const data = await interactDB.insert(interactWord);
-            if (this.isShowEnterInfo) {
-              this.sendInteractWord(data)
-            }
-          })
-        );
+
+        for (const interactWord of interactWords) {
+          console.log(
+            `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
+          );
+          const data = await interactDB.insert(interactWord);
+          if (this.isShowEnterInfo) {
+            this.sendInteractWord(data);
+          }
+        }
+
+        const gifts = data.map(parseGift).filter(Boolean);
+
+        for (const gift of gifts) {
+          if (!gift.avatar) {
+            let user = {};
+            try {
+              // 缓存 user 信息
+              user = await userDB.findOne({ uid: gift.uid });
+              if (!user && !isGetUserInfoLocked) {
+                // 限制获取头像频率 避免412被封
+                isGetUserInfoLocked = true;
+                setTimeout(() => {
+                  isGetUserInfoLocked = false;
+                }, 200);
+
+                const { data } = await getUserInfo(gift.uid);
+                // 统一格式化用户数据
+                user = this.parseUser(data);
+                data.createdAt = new Date();
+                userDB.insert(user);
+              } else {
+                throw new Error("getUserInfo limit");
+              }
+            } catch (e) {}
+
+            gift.avatar = (user || {}).avatar;
+          }
+          const data = await giftDB.insert(gift);
+          if (gift.type === "superChat") {
+            this.sendSuperChat(data);
+          } else {
+            this.sendGift(data);
+          }
+        }
 
         data.forEach((msg) => {
           if (msg.cmd === "INTERACT_WORD") return;
@@ -326,6 +356,40 @@ export default {
         color: payload.unameColor,
         sendAt: payload.timestamp,
         msgType: payload.msgType,
+      });
+    },
+    sendSuperChat(payload) {
+      this.$store.dispatch("ADD_MESSAGE", {
+        id: payload._id,
+        type: "superChat",
+
+        uid: payload.uid,
+        name: payload.name,
+        avatar: payload.avatar
+          ? `${payload.avatar}@48w_48h`
+          : "https://static.hdslb.com/images/member/noface.gif",
+
+        price: payload.price,
+
+        comment: payload.comment,
+        time: payload.time,
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+      });
+    },
+    sendGift(payload) {
+      this.$store.dispatch("ADD_MESSAGE", {
+        id: payload._id,
+        type: "gift",
+        uid: payload.uid,
+        name: payload.name,
+        avatar: payload.avatar
+          ? `${payload.avatar}@48w_48h`
+          : "https://static.hdslb.com/images/member/noface.gif",
+
+        price: payload.price,
+        giftNumber: payload.giftNumber,
+        giftName: payload.giftName
       });
     },
 

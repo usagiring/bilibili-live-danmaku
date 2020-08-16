@@ -7,49 +7,51 @@ const state = {
       id: 1,
       type: "comment",
       uid: "12345",
-      name: "其妙",
+      name: "oooovknkdnkjedbiowq",
       comment: "草",
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
       role: "captain"
     },
     {
       id: 2,
       uid: "12346",
-      name: "马自立",
+      name: "fojfwqpojpofsc",
       type: "comment",
       comment: "我就是Hololive！！！",
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
       role: "normal"
     },
     {
-      id: 3,
-      type: "comment",
-      uid: "12346",
-      name: "马自立",
-      type: "comment",
-      comment: "我就是Hololive！！！",
-      role: "normal"
-    },
-    {
-      id: 4,
-      uid: "12346",
-      name: "马自立",
-      type: "comment",
-      comment: "我就是Hololive！！！",
-      role: "normal"
-    },
-    {
-      id: 5,
+      id: 6,
       uid: "12345",
-      name: "Res",
-      type: "comment",
-      comment: "草",
-      role: "captain"
+      name: "fjsojjfowqrwsfwq",
+      type: "superChat",
+      comment: "草草草草草草草草草草草",
+      price: 50,
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
+      role: "normal"
+    },
+    {
+      id: 7,
+      type: "gift",
+      uid: 12345,
+      name: 'fjsojjfowqrwsfwq',
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
+
+      price: 442.1,
+      giftNumber: 50,
+      giftName: '小红花'
     }
   ],
 }
 
 const mutations = {
-  ADD_EXAMPLE_MESSAGE({ exampleMessages }, payload) {
-    exampleMessages.push(payload)
+  ADD_EXAMPLE_MESSAGE(state, payload) {
+    if (state.exampleMessages.length > 40) {
+      state.exampleMessages = [...state.exampleMessages.slice(1), payload]
+    } else {
+      state.exampleMessages = [...state.exampleMessages, payload]
+    }
   },
 
   ADD_MESSAGE(state, payload) {
@@ -64,10 +66,6 @@ const mutations = {
   CLEAR_MESSAGE(state) {
     Vue.set(state, 'messages', []);
   },
-
-  POP() {
-    messages.pop()
-  }
 }
 
 const actions = {

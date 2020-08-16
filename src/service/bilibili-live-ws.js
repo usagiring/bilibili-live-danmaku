@@ -27,9 +27,9 @@ function close() {
 function init(options) {
   console.log(ws && ws.readyState)
 
-  if(ws && (ws.readyState === 1 || ws.readyState === 0)) return
+  if (ws && (ws.readyState === 1 || ws.readyState === 0)) return
 
-  
+
   const { uid = 0, roomId } = options
 
   __roomId = roomId
@@ -300,52 +300,135 @@ function parseInteractWord(msg) {
   }
 }
 
+const RATE = 1000
+
 function parseGift(msg) {
-  // COMBO_END
-  // const data = {
-  //   price: combo_total_coin,
-  //   gift_name,
-  //   uid,
-  //   uname
-  // }
+  if (msg.cmd === 'SUPER_CHAT_MESSAGE_JPN') {
+    const {
+      uid,
+      price,
+      message,
+      message_jpn,
+      time,
+      start_time,
+      end_time,
+      gift,
+      user_info,
+    } = msg.data
+    const {
+      uname,
+      face,
+      guard_level
+    } = user_info
+    const {
+      num,
+      gift_id,
+      gift_name
+    } = gift
+    return {
+      // user
+      uid,
+      name: uname,
+      avatar: face,
+      guardLevel: guard_level,
 
-  // // SUPER_CHAT_MESSAGE_JPN
-  // const sc = {
-  //   id,
-  //   message,
-  //   message_jpn,
-  //   price,
-  //   rate,
-  //   start_time,
-  //   time,
-  //   end_time,
-  //   uid,
-  //   avatar: user_info.face,
-  //   name: user_info.face,
-  //   guardLevel: user_info.guard_level,
-  //   medalName: medal_info.medal_name,
-  //   medalLevel: medal_info.medal_level,
-  // }
+      // gift
+      price: price / RATE,
+      giftId: gift_id,
+      giftName: gift_name,
+      giftNumber: num,
 
-  // // GUARD_BUY
-  // const guard = {
-  //   uid,
-  //   gift_id,
-  //   gift_name,
-  //   price,
-  //   num,
-  //   guardLevel: guard_level,
-  //   name: username
-  // }
+      // sc
+      type: 'superChat',
+      comment: message,
+      commentJPN: message_jpn,
+      time,
+      startTime: start_time,
+      endTime: end_time,
+    }
+  }
+  if (msg.cmd === 'COMBO_END') {
+    const {
+      uid,
+      uname,
+      combo_num,
+      gift_id,
+      gift_name,
+      guard_level,
+      combo_total_coin: price
+    } = msg.data
+    return {
+      uid,
+      name: uname,
+      // face,
+      guardLevel: guard_level,
 
+      price: price / RATE,
+      giftId: gift_id,
+      giftName: gift_name,
+      giftNumber: combo_num,
+
+      type: 'gift',
+    }
+  }
+
+  if (msg.cmd === 'GUARD_BUY') {
+    const {
+      uid,
+      username,
+      guard_level,
+      num,
+      price,
+      gift_id,
+      gift_name
+    } = msg.data
+
+    return {
+      uid,
+      name: username,
+      // face,
+      guardLevel: guard_level,
+
+      price: price / RATE,
+      giftId: gift_id,
+      giftName: gift_name,
+      giftNumber: num,
+
+      type: 'gift',
+    }
+  }
+
+  if (msg.cmd === 'SEND_GIFT') {
+    const {
+      uid,
+      num,
+      total_coin: price,
+      guard_level,
+      giftId,
+      coin_type,
+      uname,
+      face,
+      giftName,
+    } = msg.data
+    return {
+      uid,
+      name: uname,
+      avatar: face,
+      guardLevel: guard_level,
+
+      coinType: coin_type,
+      price: price / RATE,
+      giftId: giftId,
+      giftName: giftName,
+      giftNumber: num,
+
+      type: 'gift',
+    }
+  }
 }
 
 function parseRoomInfo(msg) {
   if (msg.cmd !== "ROOM_REAL_TIME_MESSAGE_UPDATE") return
   const { fans, fans_club: fansClub, room_id: roomId } = msg.data
   return { fans, fansClub, roomId }
-}
-
-function parseSuperChat(msg) {
-
 }

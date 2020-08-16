@@ -35,6 +35,7 @@ export default {
   },
   methods: {
     updateStyle(value) {
+      value = value || 0
       this.$store.dispatch("UPDATE_STYLE", {
         role: this.role,
         prop: this.prop,

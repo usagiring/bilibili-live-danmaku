@@ -18,6 +18,16 @@
               <span>显示入场消息</span>
               <i-switch :value="isShowEnterInfo" @on-change="showEnterInfo" />
             </div>
+            <div class="setting-key-text">
+              <span class="avatar-controller">显示头像</span>
+              <Slider
+                class="avatar-controller-slider"
+                :value="avatarSize"
+                @on-change="changeAvatarSize"
+              ></Slider>
+              <!-- <i-switch :value="isShowAvatar" @on-change="showAvatar" /> -->
+            </div>
+            <div></div>
           </div>
         </Panel>
         <Panel name="2">
@@ -50,10 +60,7 @@
               <span class="setting-key-text">显示SC区域</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
             </div>-->
-            <div>
-              <span class="setting-key-text">显示头像</span>
-              <i-switch :value="isShowAvatar" @on-change="showAvatar" />
-            </div>
+
             <div>
               <span class="setting-key-text">显示舰队图标</span>
               <i-switch :value="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
@@ -73,7 +80,9 @@
     <i-col span="16">
       <div class="setting-right">
         <div class="setting-right-header">
-          <div @click="sendTestComment">发送测试弹幕</div>
+          <span @click="sendTestComment">发送测试弹幕</span>
+          <span @click="sendTestSuperChat">发送测试SC</span>
+          <span @click="sendTestGift">发送测试礼物</span>
           <div @click="clear">清空Storage</div>
         </div>
         <div class="setting-right-content" :style="{ background: background }">
@@ -266,6 +275,9 @@ export default {
     isShowEnterInfo() {
       return this.$store.state.Config.isShowEnterInfo;
     },
+    avatarSize() {
+      return this.$store.state.Config.avatarSize;
+    },
   },
   methods: {
     async connect(status) {
@@ -292,12 +304,44 @@ export default {
       });
     },
     async sendTestComment() {
-      const lastest = this.$store.state.Message.exampleComments;
+      const messages = this.$store.state.Message.exampleMessages;
+      const lastest = messages[messages.length - 1];
       await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
-        id: Math.floor(Math.random() * 100),
+        id: lastest.id + 1,
         uid: "12345",
-        name: "其妙",
+        name: `bli_${Math.floor(Math.random() * 100000000)}`,
+        type: "comment",
+        avatar: "https://static.hdslb.com/images/member/noface.gif",
         comment: `草${new Date()}`,
+        role: "captain",
+      });
+    },
+    async sendTestSuperChat() {
+      const messages = this.$store.state.Message.exampleMessages;
+      const lastest = messages[messages.length - 1];
+      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
+        id: lastest.id + 1,
+        uid: "12345",
+        name: `bli_${Math.floor(Math.random() * 100000000)}`,
+        type: "superChat",
+        avatar: "https://static.hdslb.com/images/member/noface.gif",
+        comment: `草${new Date()}`,
+        price: Math.floor(Math.random() * 100),
+        role: "captain",
+      });
+    },
+    async sendTestGift() {
+      const messages = this.$store.state.Message.exampleMessages;
+      const lastest = messages[messages.length - 1];
+      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
+        id: lastest.id + 1,
+        uid: "12345",
+        name: `bli_${Math.floor(Math.random() * 100000000)}`,
+        type: "gift",
+        price: Math.floor(Math.random() * 100),
+        giftNumber: 1,
+        giftName: "随机礼物",
+        avatar: "https://static.hdslb.com/images/member/noface.gif",
         role: "captain",
       });
     },
@@ -313,6 +357,16 @@ export default {
         },
       });
     },
+    changeAvatarSize(size) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        avatarSize: size,
+      });
+      if (size === 0) {
+        this.showAvatar(false);
+      } else {
+        this.showAvatar(true);
+      }
+    },
   },
 };
 </script>
@@ -320,8 +374,19 @@ export default {
 <style scoped>
 .setting-key-text {
   display: inline-block;
-  width: 140px;
-  text-align: right;
+  width: 100%;
+}
+.avatar-controller {
+  height: 36px;
+  line-height: 36px;
+  display: inline-block;
+  vertical-align: top;
+}
+.avatar-controller-slider {
+  height: 36px;
+  display: inline-block;
+  width: 100px;
+  padding-left: 10px;
 }
 /* .setting-right {
   position: relative;
