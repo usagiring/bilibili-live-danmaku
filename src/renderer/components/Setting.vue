@@ -25,9 +25,30 @@
                 :value="avatarSize"
                 @on-change="changeAvatarSize"
               ></Slider>
-              <!-- <i-switch :value="isShowAvatar" @on-change="showAvatar" /> -->
             </div>
-            <div></div>
+            <div>
+              <span>重复弹幕合并</span>
+              <!-- <Poptip trigger="hover" content="多少毫秒内重复的弹幕只显示最早的一条，且后面显示堆叠数字，设置为0表示不堆叠">
+                <Icon type="ios-help-circle-outline" />
+              </Poptip>-->
+              <InputNumber
+                :value="combineSimilarTime"
+                @on-change="changeCombineSimilarTime"
+                :min="0"
+                size="small"
+                style="width: 100px"
+              />
+            </div>
+            <div>
+              <span>礼物栏展示大于</span>
+              <InputNumber
+                :value="showGiftThreshold"
+                @on-change="changeShowGiftThreshold"
+                :min="0"
+                size="small"
+                style="width: 100px"
+              />
+            </div>
           </div>
         </Panel>
         <Panel name="2">
@@ -49,13 +70,6 @@
         <Panel name="4">
           其他
           <div slot="content">
-            <div>
-              <span class="setting-key-text">重复弹幕合并</span>
-              <Poptip trigger="hover" content="多少毫秒内重复的弹幕只显示最早的一条，且后面显示堆叠数字，设置为0表示不堆叠">
-                <Icon type="ios-help-circle-outline" />
-              </Poptip>
-              <Input v-model="repeatMS" size="small" style="width: 150px" />
-            </div>
             <!-- <div>
               <span class="setting-key-text">显示SC区域</span>
               <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
@@ -258,7 +272,6 @@ export default {
       ],
       roomId: null,
       isConnected: false,
-      repeatMS: 3000,
       collapse: ["1", "2", "3"],
     };
   },
@@ -277,6 +290,12 @@ export default {
     },
     avatarSize() {
       return this.$store.state.Config.avatarSize;
+    },
+    combineSimilarTime() {
+      return this.$store.state.Config.combineSimilarTime;
+    },
+    showGiftThreshold() {
+      return this.$store.state.Config.showGiftThreshold;
     },
   },
   methods: {
@@ -366,6 +385,18 @@ export default {
       } else {
         this.showAvatar(true);
       }
+    },
+
+    changeCombineSimilarTime(number) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        combineSimilarTime: number,
+      });
+    },
+
+    changeShowGiftThreshold(number) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        showGiftThreshold: number,
+      });
     },
   },
 };

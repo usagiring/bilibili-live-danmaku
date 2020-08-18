@@ -1,0 +1,1 @@
+export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'

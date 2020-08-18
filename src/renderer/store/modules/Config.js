@@ -3,6 +3,8 @@ const state = {
   isShowAvatar: true,
   isShowMemberShipIcon: true,
   avatarSize: 24,
+  combineSimilarTime: 3000,
+  showGiftThreshold: 30,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"

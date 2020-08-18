@@ -242,6 +242,12 @@ export default {
     isShowEnterInfo() {
       return this.$store.state.Config.isShowEnterInfo;
     },
+    combineSimilarTime() {
+      return this.$store.state.Config.combineSimilarTime;
+    },
+    messages() {
+      return this.$store.state.Message.messages;
+    },
   },
   methods: {
     async connect(status) {
@@ -329,8 +335,32 @@ export default {
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status);
     },
-    async sendComment(payload) {
-      await this.$store.dispatch("ADD_MESSAGE", {
+    sendComment(payload) {
+      if (this.combineSimilarTime) {
+        const messages = [...this.messages].reverse();
+        let update;
+        for (const message of messages) {
+          const timePoint = payload.sendAt - this.combineSimilarTime;
+          // 如果已扫描到超过设定时间点之前的弹幕，直接跳出
+          if (message.sendAt < timePoint) {
+            break;
+          }
+          if (
+            message.sendAt > timePoint &&
+            message.comment === payload.comment
+          ) {
+            update = message;
+            break;
+          }
+        }
+        if (update) {
+          this.$store.dispatch("UPDATE_MESSAGE_SIMILAR", {
+            id: update.id,
+          });
+          return;
+        }
+      }
+      this.$store.dispatch("ADD_MESSAGE", {
         id: payload._id,
         type: "comment",
         uid: payload.uid,
@@ -389,7 +419,7 @@ export default {
 
         price: payload.price,
         giftNumber: payload.giftNumber,
-        giftName: payload.giftName
+        giftName: payload.giftName,
       });
     },
 

@@ -2,6 +2,7 @@ import Vue from 'vue'
 
 const state = {
   messages: [],
+  gifts: [],
   exampleMessages: [
     {
       id: 1,
@@ -10,7 +11,8 @@ const state = {
       name: "oooovknkdnkjedbiowq",
       comment: "草",
       avatar: "https://static.hdslb.com/images/member/noface.gif",
-      role: "captain"
+      role: "captain",
+      similar: 1
     },
     {
       id: 2,
@@ -43,6 +45,29 @@ const state = {
       giftName: '小红花'
     }
   ],
+  exampleGifts: [
+    {
+      id: 6,
+      uid: "12345",
+      name: "fjsojjfowqrwsfwq",
+      type: "superChat",
+      comment: "草草草草草草草草草草草",
+      price: 50,
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
+      role: "normal"
+    },
+    {
+      id: 7,
+      type: "gift",
+      uid: 12345,
+      name: 'fjsojjfowqrwsfwq',
+      avatar: "https://static.hdslb.com/images/member/noface.gif",
+
+      price: 442.1,
+      giftNumber: 50,
+      giftName: '小红花'
+    }
+  ]
 }
 
 const mutations = {
@@ -66,6 +91,15 @@ const mutations = {
   CLEAR_MESSAGE(state) {
     Vue.set(state, 'messages', []);
   },
+
+  UPDATE_MESSAGE_SIMILAR(state, payload) {
+    const message = state.messages.find(message => message._id === payload._id)
+    message.similar = message.similar ? message.similar++ : 1
+  },
+  UPDATE_EXAMPLE_MESSAGE_SIMILAR(state, payload) {
+    const message = state.exampleMessages.find(message => message._id === payload._id)
+    message.similar = message.similar ? message.similar++ : 1
+  }
 }
 
 const actions = {
@@ -77,6 +111,12 @@ const actions = {
   },
   async CLEAR_MESSAGE({ commit }) {
     commit('CLEAR_MESSAGE')
+  },
+  async UPDATE_MESSAGE_SIMILAR({ commit }, payload) {
+    commit('UPDATE_MESSAGE_SIMILAR', payload)
+  },
+  async UPDATE_EXAMPLE_MESSAGE_SIMILAR({ commit }, payload) {
+    commit('UPDATE_EXAMPLE_MESSAGE_SIMILAR', payload)
   }
 }
 
