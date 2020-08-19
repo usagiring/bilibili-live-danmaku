@@ -93,12 +93,18 @@ const mutations = {
   },
 
   UPDATE_MESSAGE_SIMILAR(state, payload) {
-    const message = state.messages.find(message => message._id === payload._id)
-    message.similar = message.similar ? message.similar++ : 1
+    const index = state.messages.findIndex(message => message.id === payload.id)
+    if (!~index) return
+    const message = state.messages[index]
+    message.similar = message.similar ? ++message.similar : 1
+    state.messages.splice(index, 1, message)
   },
   UPDATE_EXAMPLE_MESSAGE_SIMILAR(state, payload) {
-    const message = state.exampleMessages.find(message => message._id === payload._id)
-    message.similar = message.similar ? message.similar++ : 1
+    const index = state.exampleMessages.findIndex(message => message.id === payload.id)
+    if (!~index) return
+    const message = state.exampleMessages[index]
+    message.similar = message.similar ? ++message.similar : 1
+    state.exampleMessages.splice(index, 1, message)
   }
 }
 

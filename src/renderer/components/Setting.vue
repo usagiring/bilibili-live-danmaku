@@ -97,7 +97,7 @@
           <span @click="sendTestComment">发送测试弹幕</span>
           <span @click="sendTestSuperChat">发送测试SC</span>
           <span @click="sendTestGift">发送测试礼物</span>
-          <div @click="clear">清空Storage</div>
+          <Button @click="clear">还原默认</Button>
         </div>
         <div class="setting-right-content" :style="{ background: background }">
           <Danmaku :isPreview="true" />
@@ -297,6 +297,9 @@ export default {
     showGiftThreshold() {
       return this.$store.state.Config.showGiftThreshold;
     },
+    messages() {
+      return this.$store.state.Message.exampleMessages;
+    },
   },
   methods: {
     async connect(status) {
@@ -322,21 +325,50 @@ export default {
         isShowEnterInfo: status,
       });
     },
-    async sendTestComment() {
-      const messages = this.$store.state.Message.exampleMessages;
+    sendTestComment() {
+      const messages = [...this.messages];
       const lastest = messages[messages.length - 1];
-      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
+
+      const payload = {
         id: lastest.id + 1,
         uid: "12345",
         name: `bli_${Math.floor(Math.random() * 100000000)}`,
         type: "comment",
         avatar: "https://static.hdslb.com/images/member/noface.gif",
-        comment: `草${new Date()}`,
+        comment: `草`,
         role: "captain",
-      });
+        sendAt: new Date() - 0,
+      };
+      console.log('payload' + payload.id)
+      if (this.combineSimilarTime) {
+        messages.reverse();
+        let update;
+        for (const message of messages) {
+          const timePoint = (payload.sendAt || 0) - this.combineSimilarTime;
+          // 如果已扫描到超过设定时间点之前的弹幕，直接跳出
+          if (message.sendAt < timePoint) {
+            break;
+          }
+          if (
+            message.sendAt > timePoint &&
+            message.comment === payload.comment
+          ) {
+            update = message;
+            break;
+          }
+        }
+        if (update) {
+          this.$store.dispatch("UPDATE_EXAMPLE_MESSAGE_SIMILAR", {
+            id: update.id,
+          });
+          return;
+        }
+      }
+
+      this.$store.dispatch("ADD_EXAMPLE_MESSAGE", payload);
     },
     async sendTestSuperChat() {
-      const messages = this.$store.state.Message.exampleMessages;
+      const messages = this.messages;
       const lastest = messages[messages.length - 1];
       await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
         id: lastest.id + 1,
@@ -350,7 +382,7 @@ export default {
       });
     },
     async sendTestGift() {
-      const messages = this.$store.state.Message.exampleMessages;
+      const messages = this.messages;
       const lastest = messages[messages.length - 1];
       await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
         id: lastest.id + 1,

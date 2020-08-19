@@ -35,7 +35,7 @@
                 :style="getCommentStyleByRole(message)"
               >{{message.comment}}</span>
               &nbsp;
-              <span class="comment-similar-badge">{{message.similar}}</span>
+              <span class="comment-similar-badge" v-if="message.similar > 0">{{message.similar}}</span>
             </p>
           </template>
           <template v-if="message.type==='interactWord'">
@@ -354,15 +354,16 @@ export default {
   color: white;
 }
 .comment-similar-badge {
-  width: 16px;
-  height: 16px;
-  border-radius: 8px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
   display: inline-block;
   vertical-align: middle;
   text-align: center;
-  line-height: 16px;
+  line-height: 18px;
   font-size: 12px;
   background: orange;
   color: white;
+  padding-right: 1px;
 }
 </style>
