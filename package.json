@@ -53,6 +53,7 @@
     }
   },
   "dependencies": {
+    "animate.css": "^4.1.0",
     "axios": "^0.18.1",
     "nedb": "^1.8.0",
     "pako": "^1.0.11",

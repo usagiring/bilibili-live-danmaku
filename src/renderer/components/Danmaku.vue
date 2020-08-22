@@ -35,7 +35,7 @@
                 :style="getCommentStyleByRole(message)"
               >{{message.comment}}</span>
               &nbsp;
-              <span class="comment-similar-badge" v-if="message.similar > 0">{{message.similar}}</span>
+              <SimilarCommentBadge v-if="message.similar > 0" v-bind:number="message.similar" />
             </p>
           </template>
           <template v-if="message.type==='interactWord'">
@@ -82,11 +82,11 @@
                 </div>
                 <div :style="{display: 'inline-block'}">
                   <p class="super-chat-text">{{message.name}}</p>
-                  <p class="super-chat-text">{{`￥${message.price}`}}</p>
+                  <p class="super-chat-text">{{`￥${Number(message.price * message.giftNumber).toFixed(1)}`}}</p>
                 </div>
               </div>
               <div
-                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`}"
+                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`}"
                 class="message-super-chat-content message-super-chat-content-bottom"
               >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</div>
             </div>
@@ -117,8 +117,12 @@ const PRICE_COLOR = {
 };
 
 import { DEFAULT_AVATAR } from "../../service/const";
+import SimilarCommentBadge from "./SimilarCommentBadge";
 
 export default {
+  components: {
+    SimilarCommentBadge,
+  },
   props: ["isPreview"],
   data() {
     return {
@@ -164,7 +168,7 @@ export default {
 
     gifts() {
       // if (this.isPreview) {
-        return this.$store.state.Message.exampleGifts;
+      return this.$store.state.Message.exampleGifts;
       // } else {
       //   return this.$store.state.Message.gifts;
       // }
@@ -352,18 +356,5 @@ export default {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
   color: white;
-}
-.comment-similar-badge {
-  min-width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  display: inline-block;
-  vertical-align: middle;
-  text-align: center;
-  line-height: 18px;
-  font-size: 12px;
-  background: orange;
-  color: white;
-  padding-right: 1px;
 }
 </style>

@@ -49,6 +49,11 @@
                 style="width: 100px"
               />
             </div>
+            <Checkbox
+              class="setting-checkbox"
+              :value="showSilverGift"
+              @on-change="changeShowSilverGift"
+            >展示银瓜子礼物</Checkbox>
           </div>
         </Panel>
         <Panel name="2">
@@ -300,6 +305,9 @@ export default {
     messages() {
       return this.$store.state.Message.exampleMessages;
     },
+    showSilverGift() {
+      return this.$store.state.Config.showSilverGift;
+    }
   },
   methods: {
     async connect(status) {
@@ -339,7 +347,7 @@ export default {
         role: "captain",
         sendAt: new Date() - 0,
       };
-      console.log('payload' + payload.id)
+      console.log("payload" + payload.id);
       if (this.combineSimilarTime) {
         messages.reverse();
         let update;
@@ -430,6 +438,11 @@ export default {
         showGiftThreshold: number,
       });
     },
+    changeShowSilverGift(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        showSilverGift: status,
+      });
+    },
   },
 };
 </script>
@@ -466,5 +479,8 @@ export default {
 
   border-radius: 12px;
   border: solid 1px gray;
+}
+.setting-checkbox {
+  vertical-align: top;
 }
 </style>

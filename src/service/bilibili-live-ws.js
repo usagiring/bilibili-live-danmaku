@@ -347,28 +347,29 @@ function parseGift(msg) {
       endTime: end_time,
     }
   }
-  if (msg.cmd === 'COMBO_END') {
+  if (msg.cmd === 'COMBO_SEND') {
     const {
       uid,
       uname,
-      combo_num,
+      total_num,
       gift_id,
       gift_name,
-      guard_level,
-      combo_total_coin: price
+      // guard_level,
+      batch_combo_id
     } = msg.data
     return {
       uid,
       name: uname,
       // face,
-      guardLevel: guard_level,
+      // guardLevel: guard_level,
 
-      price: price / RATE,
+      batchComboId: batch_combo_id,
+
       giftId: gift_id,
       giftName: gift_name,
-      giftNumber: combo_num,
+      giftNumber: total_num,
 
-      type: 'gift',
+      type: 'giftCombo',
     }
   }
 
@@ -389,7 +390,7 @@ function parseGift(msg) {
       // face,
       guardLevel: guard_level,
 
-      price: price / RATE,
+      price: price / RATE, // 单价
       giftId: gift_id,
       giftName: gift_name,
       giftNumber: num,
@@ -402,13 +403,14 @@ function parseGift(msg) {
     const {
       uid,
       num,
-      total_coin: price,
+      price,
       guard_level,
       giftId,
       coin_type,
       uname,
       face,
       giftName,
+      batch_combo_id
     } = msg.data
     return {
       uid,
@@ -416,8 +418,9 @@ function parseGift(msg) {
       avatar: face,
       guardLevel: guard_level,
 
+      batchComboId: batch_combo_id,
       coinType: coin_type,
-      price: price / RATE,
+      price: price / RATE, // 单价
       giftId: giftId,
       giftName: giftName,
       giftNumber: num,

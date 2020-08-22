@@ -105,6 +105,14 @@ const mutations = {
     const message = state.exampleMessages[index]
     message.similar = message.similar ? ++message.similar : 1
     state.exampleMessages.splice(index, 1, message)
+  },
+  UPDATE_GIFT_TOTAL_PRICE(state, payload) {
+    const index = state.messages.findIndex(message => message.id === payload.id)
+    if (!~index) return
+    const message = state.messages[index]
+    message.giftNumber = message.giftNumber + payload.giftNumber
+    // TODO 如果此时金额大于设定值，推送到gift栏
+    state.messages.splice(index, 1, message)
   }
 }
 
@@ -123,6 +131,9 @@ const actions = {
   },
   async UPDATE_EXAMPLE_MESSAGE_SIMILAR({ commit }, payload) {
     commit('UPDATE_EXAMPLE_MESSAGE_SIMILAR', payload)
+  },
+  UPDATE_GIFT_TOTAL_PRICE({ commit }, payload) {
+    commit('UPDATE_GIFT_TOTAL_PRICE', payload)
   }
 }
 

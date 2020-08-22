@@ -104,11 +104,15 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
+// 1. 拉一次接口
+// 2. 每次收到信息记录一下
+const allGifts = [];
+
 export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 21449083,
+      roomId: 21908196,
       isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -178,6 +182,14 @@ export default {
         const gifts = data.map(parseGift).filter(Boolean);
 
         for (const gift of gifts) {
+          // 缓存礼物信息
+          if (!allGifts[gift.giftId]) {
+            allGifts[gift.giftId] = {
+              id: gift.giftId,
+              name: gift.giftName,
+              price: gift.price,
+            };
+          }
           if (!gift.avatar) {
             let user = {};
             try {
@@ -206,6 +218,11 @@ export default {
           if (gift.type === "superChat") {
             this.sendSuperChat(data);
           } else {
+            if (!this.showSilverGift && gift.coinType === "silver") continue;
+            // 对于 combo_send 事件补充一下price
+            if (!gift.price && allGifts[gift.giftId]) {
+              gift.price = allGifts[gift.giftId].price;
+            }
             this.sendGift(data);
           }
         }
@@ -247,6 +264,12 @@ export default {
     },
     messages() {
       return this.$store.state.Message.messages;
+    },
+    showGiftThreshold() {
+      return this.$store.state.Config.showGiftThreshold;
+    },
+    showSilverGift() {
+      return this.$store.state.Config.showSilverGift;
     },
   },
   methods: {
@@ -408,11 +431,22 @@ export default {
       });
     },
     sendGift(payload) {
+      const messages = [...this.messages].reverse();
+      const gift = messages.find(message => message.batchComboId === payload.batchComboId)
+
+      if (gift) {
+        this.$store.dispatch("UPDATE_GIFT_TOTAL_PRICE", {
+          id: gift.id,
+          giftNumber: payload.giftNumber,
+        });
+        return;
+      }
       this.$store.dispatch("ADD_MESSAGE", {
         id: payload._id,
         type: "gift",
         uid: payload.uid,
         name: payload.name,
+        batchComboId: payload.batchComboId,
         avatar: payload.avatar
           ? `${payload.avatar}@48w_48h`
           : "https://static.hdslb.com/images/member/noface.gif",
