@@ -1,5 +1,7 @@
 <template>
-  <div :style="{height: '100%'}">
+  <div
+    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px','-webkit-app-region':'drag'}"
+  >
     <div class="gift-show-content-wrapper-wrapper">
       <div class="gift-show-content-wrapper">
         <template v-for="gift in gifts">
@@ -134,49 +136,49 @@ const PRICE_COLOR = {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
     backgroundBottomColor: "#2A60B2",
-    time: 60000,
+    time: 60000
   },
   "2": {
     backgroundColor: "#DBFFFD",
     backgroundPriceColor: "#7DA4BD",
     backgroundBottomColor: "#427D9E",
-    time: 120000,
+    time: 120000
   },
   "3": {
     backgroundColor: "#FFF1C5",
     backgroundPriceColor: "gold",
     backgroundBottomColor: "#E2B52B",
-    time: 300000,
+    time: 300000
   },
   "4": {
     backgroundColor: "rgb(255,234,210)",
     backgroundPriceColor: "rgb(255,234,210)",
     backgroundBottomColor: "rgb(244,148,67)",
-    time: 1800000,
+    time: 1800000
   },
   "5": {
     backgroundColor: "rgb(255,231,228)",
     backgroundPriceColor: "rgb(255,231,228)",
     backgroundBottomColor: "rgb(229,77,77)",
-    time: 3600000,
+    time: 3600000
   },
   "6": {
     backgroundColor: "rgb(255,216,216)",
     backgroundPriceColor: "rgb(255,216,216)",
     backgroundBottomColor: "rgb(171,26,50)",
-    time: 7200000,
-  },
+    time: 7200000
+  }
 };
 
 export default {
   components: {
-    SimilarCommentBadge,
+    SimilarCommentBadge
   },
   props: ["isPreview"],
   data() {
     return {
       giftHover: 0,
-      DEFAULT_AVATAR,
+      DEFAULT_AVATAR
     };
   },
   computed: {
@@ -191,7 +193,7 @@ export default {
       return {
         width: `${avatarSize}px`,
         height: `${avatarSize}px`,
-        "line-height": `${avatarSize}px`,
+        "line-height": `${avatarSize}px`
       };
     },
 
@@ -200,9 +202,9 @@ export default {
         ? this.$store.state.Message.exampleMessages
         : this.$store.state.Message.messages;
       return messages
-        .map((message) => {
+        .map(message => {
           return Object.assign({}, message, {
-            priceProperties: this.parsePriceColor(message.totalPrice) || {},
+            priceProperties: this.parsePriceColor(message.totalPrice) || {}
           });
         })
         .reverse();
@@ -213,12 +215,12 @@ export default {
         ? this.$store.state.Message.exampleGifts
         : this.$store.state.Message.gifts;
       return gifts
-        .map((gift) => {
+        .map(gift => {
           return Object.assign({}, gift, {
-            priceProperties: this.parsePriceColor(gift.totalPrice) || {},
+            priceProperties: this.parsePriceColor(gift.totalPrice) || {}
           });
         })
-        .filter((gift) => {
+        .filter(gift => {
           return gift.sendAt + gift.priceProperties.time > new Date() - 0;
         });
 
@@ -264,7 +266,7 @@ export default {
     },
     governor_comment() {
       return this.$store.state.Config.captain_comment;
-    },
+    }
   },
   mounted() {},
   methods: {
@@ -321,8 +323,8 @@ export default {
       } else {
         return 100;
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -369,10 +371,15 @@ export default {
   position: absolute;
   bottom: 0px;
   height: 100%;
-  overflow: scroll;
+  overflow-y: auto;
   display: flex;
   flex-direction: column-reverse;
 }
+
+.message-content::-webkit-scrollbar {
+  display: none;
+}
+
 .gift-show-wrapper {
   display: inline-block;
   vertical-align: top;

@@ -233,6 +233,7 @@ export default {
         data.forEach((msg) => {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
+          if (msg.cmd === "SEND_GIFT") return;
           console.log(msg);
           otherDB.insert(msg);
         });
@@ -339,6 +340,7 @@ export default {
           webPreferences: {
             nodeIntegration: true,
           },
+          resizable: true,
         });
 
         const winURL =

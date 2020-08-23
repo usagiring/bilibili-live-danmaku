@@ -471,6 +471,7 @@ export default {
 
   border-radius: 12px;
   border: solid 1px gray;
+  position: relative;
 }
 .setting-checkbox {
   vertical-align: top;

@@ -347,31 +347,31 @@ function parseGift(msg) {
       endTime: end_time,
     }
   }
-  if (msg.cmd === 'COMBO_SEND') {
-    const {
-      uid,
-      uname,
-      total_num,
-      gift_id,
-      gift_name,
-      // guard_level,
-      batch_combo_id
-    } = msg.data
-    return {
-      uid,
-      name: uname,
-      // face,
-      // guardLevel: guard_level,
+  // if (msg.cmd === 'COMBO_SEND') {
+  //   const {
+  //     uid,
+  //     uname,
+  //     total_num,
+  //     gift_id,
+  //     gift_name,
+  //     // guard_level,
+  //     batch_combo_id
+  //   } = msg.data
+  //   return {
+  //     uid,
+  //     name: uname,
+  //     // face,
+  //     // guardLevel: guard_level,
 
-      batchComboId: batch_combo_id,
+  //     batchComboId: batch_combo_id,
 
-      giftId: gift_id,
-      giftName: gift_name,
-      giftNumber: total_num,
+  //     giftId: gift_id,
+  //     giftName: gift_name,
+  //     giftNumber: total_num,
 
-      type: 'giftCombo',
-    }
-  }
+  //     type: 'giftCombo',
+  //   }
+  // }
 
   if (msg.cmd === 'GUARD_BUY') {
     const {
