@@ -14,12 +14,12 @@
               class="gift-show-content"
               :style="{background: gift.priceProperties.backgroundColor}"
             >
-              <div class="gift-show-content-time" :style="{width: `${Math.floor((1 - gift.existsTime / gift.priceProperties.time) * 100)}%`}">
-                <div
-                  :style="{position: 'absolute', width: '200px',height: '100%',background: gift.priceProperties.backgroundBottomColor}"
-                ></div>
-              </div>
-              <div :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3}">
+              <div
+                :style="{'z-index': -1, position: 'absolute', width: `${widthCalculator(gift)}%`,height: '100%',background: gift.priceProperties.backgroundBottomColor}"
+              ></div>
+              <div
+                :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.5px','-webkit-text-stroke-color': 'gray'}"
+              >
                 <Avatar class :src="DEFAULT_AVATAR" size="small" />
                 <span>{{`￥${gift.totalPrice}`}}</span>
               </div>
@@ -91,8 +91,8 @@
                 </div>
               </div>
               <div
-                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`}"
-                class="message-super-chat-content message-super-chat-content-bottom"
+                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`, color: 'white'}"
+                class="message-super-chat-content"
               >{{message.comment}}</div>
             </div>
           </template>
@@ -114,8 +114,8 @@
                 </div>
               </div>
               <div
-                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`}"
-                class="message-super-chat-content message-super-chat-content-bottom"
+                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`, color: 'white'}"
+                class="message-super-chat-content"
               >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</div>
             </div>
           </template>
@@ -209,7 +209,9 @@ export default {
     },
 
     gifts() {
-      const gifts = this.$store.state.Message.exampleGifts;
+      const gifts = this.isPreview
+        ? this.$store.state.Message.exampleGifts
+        : this.$store.state.Message.gifts;
       return gifts
         .map((gift) => {
           return Object.assign({}, gift, {
@@ -221,13 +223,6 @@ export default {
         });
 
       // TODO: 清理时间到达消失的GIFT
-
-      // if (this.isPreview) {
-      // const gifts = [...this.$store.state.Message.exampleGifts];
-
-      // } else {
-      //   return this.$store.state.Message.gifts;
-      // }
     },
 
     normal_message() {
@@ -318,6 +313,15 @@ export default {
     unhoverGift() {
       this.giftHover = 0;
     },
+    widthCalculator(gift) {
+      if (Number(gift.existsTime) && Number(gift.priceProperties.time)) {
+        return Math.floor(
+          (1 - gift.existsTime / gift.priceProperties.time) * 100
+        );
+      } else {
+        return 100;
+      }
+    },
   },
 };
 </script>
@@ -382,6 +386,7 @@ export default {
   color: white;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .gift-show-content-extend {
@@ -392,27 +397,11 @@ export default {
   font-size: 12px;
   position: relative;
   z-index: 9999;
-}
-
-.gift-show-content-time {
-  position: absolute;
-  height: 100%;
-  z-index: -1;
   overflow: hidden;
-}
-
-.gift-show-content-time > div {
-  position: relative;
-  height: 100%;
-  border-radius: 20px;
 }
 
 .gift-show-content-header {
   padding: 5px 10px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-
-  /* background-clip: border-box; TODO 替换*/
 }
 
 .gift-show-content-extend-avatar {
@@ -422,8 +411,6 @@ export default {
 
 .gift-show-content-extend-content {
   padding: 10px 10px;
-  border-bottom-left-radius: 9px;
-  border-bottom-right-radius: 9px;
 
   color: white;
   white-space: normal;
@@ -433,18 +420,10 @@ export default {
   border-radius: 10px;
   border: solid 1px rgba(66, 125, 158, 1);
   margin: 5px;
+  overflow: hidden;
 }
 .message-super-chat-content {
   padding: 10px;
-}
-.message-super-chat-content-header {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-.message-super-chat-content-bottom {
-  border-bottom-right-radius: 9px;
-  border-bottom-left-radius: 9px;
-  color: white;
 }
 .divider {
   border-top: 1px solid;

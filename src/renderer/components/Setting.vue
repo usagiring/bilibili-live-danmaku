@@ -414,7 +414,7 @@ export default {
           name: `bli_${randomNumber}`,
           type: "superChat",
           avatar: DEFAULT_AVATAR,
-          comment: `这是一条测试SuperChat | ${new Date()}`,
+          comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
           price: Math.floor(Math.random() * 100),
           role: "captain",
           sendAt: new Date() - 0,
@@ -430,8 +430,7 @@ export default {
           name: `bli_${randomNumber}`,
           type: "comment",
           avatar: DEFAULT_AVATAR,
-          // comment: `一条弹幕哟～ | ${new Date()}`,
-          comment: "草",
+          comment: `一条弹幕哟～`,
           role: "captain",
           sendAt: new Date() - 0,
         };

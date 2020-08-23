@@ -333,7 +333,7 @@ function parseGift(msg) {
       guardLevel: guard_level,
 
       // gift
-      price: price / RATE,
+      price: price,
       giftId: gift_id,
       giftName: gift_name,
       giftNumber: num,
