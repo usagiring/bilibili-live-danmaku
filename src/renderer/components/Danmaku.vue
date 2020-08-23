@@ -1,6 +1,6 @@
 <template>
   <div
-    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px','-webkit-app-region':'drag'}"
+    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px'}"
   >
     <div class="gift-show-content-wrapper-wrapper">
       <div class="gift-show-content-wrapper">
@@ -22,7 +22,7 @@
               <div
                 :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.5px','-webkit-text-stroke-color': 'gray'}"
               >
-                <Avatar class :src="DEFAULT_AVATAR" size="small" />
+                <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
                 <span>{{`￥${gift.totalPrice}`}}</span>
               </div>
             </div>
@@ -35,7 +35,7 @@
                 class="gift-show-content-header"
                 :style="{background: gift.priceProperties.backgroundColor}"
               >
-                <Avatar class="gift-show-content-extend-avatar" :src="DEFAULT_AVATAR" />
+                <Avatar class="gift-show-content-extend-avatar" :src="gift.avatar || DEFAULT_AVATAR" />
                 <div :style="{display: 'inline-block'}">
                   <p>{{gift.name}}</p>
                   <p>{{`￥${gift.totalPrice}`}}</p>
@@ -349,6 +349,7 @@ export default {
   z-index: 999;
   overflow-x: auto;
   width: 100%;
+  /* -webkit-app-region: no-drag; */
 }
 
 .gift-show-content-wrapper::-webkit-scrollbar {
@@ -358,6 +359,7 @@ export default {
 .gift-show-content-wrapper-wrapper {
   position: relative;
   height: 40px;
+  -webkit-app-region: no-drag;
 }
 
 .message-content-wrapper {
@@ -365,6 +367,7 @@ export default {
   /* height: 100%; */
   overflow: hidden;
   position: relative;
+  -webkit-app-region: drag;
 }
 .message-content {
   width: 100%;
@@ -405,6 +408,7 @@ export default {
   position: relative;
   z-index: 9999;
   overflow: hidden;
+  /* -webkit-app-region: no-drag */
 }
 
 .gift-show-content-header {
