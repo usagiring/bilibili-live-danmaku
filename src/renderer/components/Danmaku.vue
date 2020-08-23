@@ -1,24 +1,52 @@
 <template>
   <div :style="{height: '100%'}">
-    <div class="super-chat-content-wrapper">
-      <template v-for="gift in gifts">
-        <div
-          :key="gift.id"
-          @mouseenter="hoverGift(gift.id)"
-          @mouseleave="unhoverGift()"
-          :class="gift.id === giftHover? 'super-chat-in-top-extend' : 'super-chat-in-top'"
-          :style="{background: parsePriceColor(gift.price).backgroundPriceColor}"
-        >
-          <div :style="{margin: '0 10px'}">
-            <Avatar class="super-chat-avatar" :src="DEFAULT_AVATAR" size="small" />
-            <span class="super-chat-text">{{`￥${gift.price}`}}</span>
-          </div>
+    <div class="gift-show-content-wrapper-wrapper">
+      <div class="gift-show-content-wrapper">
+        <template v-for="gift in gifts">
           <div
-            v-if="gift.id === giftHover"
-            class="super-chat-text-extend"
-          >sssssssssssssssssssssssssssssssssss</div>
-        </div>
-      </template>
+            :key="gift.id"
+            @mouseenter="hoverGift(gift.id)"
+            @mouseleave="unhoverGift()"
+            class="gift-show-wrapper"
+          >
+            <div
+              v-if="gift.id !== giftHover"
+              class="gift-show-content"
+              :style="{background: gift.priceProperties.backgroundColor}"
+            >
+              <div class="gift-show-content-time" :style="{width: `${Math.floor((1 - gift.existsTime / gift.priceProperties.time) * 100)}%`}">
+                <div
+                  :style="{position: 'absolute', width: '200px',height: '100%',background: gift.priceProperties.backgroundBottomColor}"
+                ></div>
+              </div>
+              <div :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3}">
+                <Avatar class :src="DEFAULT_AVATAR" size="small" />
+                <span>{{`￥${gift.totalPrice}`}}</span>
+              </div>
+            </div>
+            <div
+              v-else
+              class="gift-show-content-extend"
+              :style="{border: `1px solid ${gift.priceProperties.backgroundBottomColor}`}"
+            >
+              <div
+                class="gift-show-content-header"
+                :style="{background: gift.priceProperties.backgroundColor}"
+              >
+                <Avatar class="gift-show-content-extend-avatar" :src="DEFAULT_AVATAR" />
+                <div :style="{display: 'inline-block'}">
+                  <p>{{gift.name}}</p>
+                  <p>{{`￥${gift.totalPrice}`}}</p>
+                </div>
+              </div>
+              <div
+                class="gift-show-content-extend-content"
+                :style="{background: gift.priceProperties.backgroundBottomColor}"
+              >{{ gift.type === 'superChat' ? gift.comment : `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`}}</div>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
     <div class="message-content-wrapper">
       <div class="message-content">
@@ -55,11 +83,11 @@
                 class="message-super-chat-content message-super-chat-content-header"
               >
                 <div :style="{display: 'inline-block', 'vertical-align':'top'}">
-                  <Avatar class="super-chat-avatar" :src="message.avatar" size="large" />
+                  <Avatar :src="message.avatar" size="large" />
                 </div>
                 <div :style="{display: 'inline-block'}">
-                  <p class="super-chat-text">{{message.name}}</p>
-                  <p class="super-chat-text">{{`￥${message.price}`}}</p>
+                  <p>{{message.name}}</p>
+                  <p>{{`￥${message.price}`}}</p>
                 </div>
               </div>
               <div
@@ -70,19 +98,19 @@
           </template>
           <template v-if="message.type==='gift'">
             <div
-              :style="{border: `solid 1px ${parsePriceColor(message.price).backgroundBottomColor}`}"
+              :style="{border: `solid 1px ${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`}"
               class="message-super-chat"
             >
               <div
-                :style="{background: `${parsePriceColor(message.price).backgroundColor}`}"
+                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundColor}`}"
                 class="message-super-chat-content message-super-chat-content-header"
               >
                 <div :style="{display: 'inline-block', 'vertical-align':'top'}">
-                  <Avatar class="super-chat-avatar" :src="message.avatar" size="large" />
+                  <Avatar :src="message.avatar" size="large" />
                 </div>
                 <div :style="{display: 'inline-block'}">
-                  <p class="super-chat-text">{{message.name}}</p>
-                  <p class="super-chat-text">{{`￥${Number(message.price * message.giftNumber).toFixed(1)}`}}</p>
+                  <p>{{message.name}}</p>
+                  <p>{{`￥${Number(message.price * message.giftNumber).toFixed(1)}`}}</p>
                 </div>
               </div>
               <div
@@ -98,26 +126,47 @@
 </template>
 
 <script>
+import { DEFAULT_AVATAR } from "../../service/const";
+import SimilarCommentBadge from "./SimilarCommentBadge";
+
 const PRICE_COLOR = {
   "1": {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
     backgroundBottomColor: "#2A60B2",
+    time: 60000,
   },
   "2": {
     backgroundColor: "#DBFFFD",
     backgroundPriceColor: "#7DA4BD",
     backgroundBottomColor: "#427D9E",
+    time: 120000,
   },
   "3": {
     backgroundColor: "#FFF1C5",
     backgroundPriceColor: "gold",
     backgroundBottomColor: "#E2B52B",
+    time: 300000,
+  },
+  "4": {
+    backgroundColor: "rgb(255,234,210)",
+    backgroundPriceColor: "rgb(255,234,210)",
+    backgroundBottomColor: "rgb(244,148,67)",
+    time: 1800000,
+  },
+  "5": {
+    backgroundColor: "rgb(255,231,228)",
+    backgroundPriceColor: "rgb(255,231,228)",
+    backgroundBottomColor: "rgb(229,77,77)",
+    time: 3600000,
+  },
+  "6": {
+    backgroundColor: "rgb(255,216,216)",
+    backgroundPriceColor: "rgb(255,216,216)",
+    backgroundBottomColor: "rgb(171,26,50)",
+    time: 7200000,
   },
 };
-
-import { DEFAULT_AVATAR } from "../../service/const";
-import SimilarCommentBadge from "./SimilarCommentBadge";
 
 export default {
   components: {
@@ -126,18 +175,6 @@ export default {
   props: ["isPreview"],
   data() {
     return {
-      superChats: [
-        {
-          uid: "12346",
-          name: "sc",
-          type: "super-chat",
-          number: 100,
-          unit: "RMB",
-          comment: "!!!!!!!!!!!!!!!",
-          role: "normal",
-        },
-      ],
-      // giftHover: 6, // FOR TEST
       giftHover: 0,
       DEFAULT_AVATAR,
     };
@@ -159,16 +196,35 @@ export default {
     },
 
     messages() {
-      if (this.isPreview) {
-        return this.$store.state.Message.exampleMessages;
-      } else {
-        return this.$store.state.Message.messages;
-      }
+      const messages = this.isPreview
+        ? this.$store.state.Message.exampleMessages
+        : this.$store.state.Message.messages;
+      return messages
+        .map((message) => {
+          return Object.assign({}, message, {
+            priceProperties: this.parsePriceColor(message.totalPrice) || {},
+          });
+        })
+        .reverse();
     },
 
     gifts() {
+      const gifts = this.$store.state.Message.exampleGifts;
+      return gifts
+        .map((gift) => {
+          return Object.assign({}, gift, {
+            priceProperties: this.parsePriceColor(gift.totalPrice) || {},
+          });
+        })
+        .filter((gift) => {
+          return gift.sendAt + gift.priceProperties.time > new Date() - 0;
+        });
+
+      // TODO: 清理时间到达消失的GIFT
+
       // if (this.isPreview) {
-      return this.$store.state.Message.exampleGifts;
+      // const gifts = [...this.$store.state.Message.exampleGifts];
+
       // } else {
       //   return this.$store.state.Message.gifts;
       // }
@@ -215,6 +271,7 @@ export default {
       return this.$store.state.Config.captain_comment;
     },
   },
+  mounted() {},
   methods: {
     getMessageStyleByRole(message) {
       return this[`${message.role}_message`];
@@ -255,7 +312,6 @@ export default {
       if (price >= 2000) {
       }
     },
-
     hoverGift(giftId) {
       this.giftHover = giftId;
     },
@@ -281,12 +337,23 @@ export default {
 .layout-footer-center {
   text-align: center;
 }
-.super-chat-content-wrapper {
-  height: 40px;
-  line-height: 32px;
-  position: relative;
+.gift-show-content-wrapper {
+  white-space: nowrap;
+  position: absolute;
   z-index: 999;
+  overflow-x: auto;
+  width: 100%;
 }
+
+.gift-show-content-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.gift-show-content-wrapper-wrapper {
+  position: relative;
+  height: 40px;
+}
+
 .message-content-wrapper {
   height: calc(100% - 40px);
   /* height: 100%; */
@@ -297,47 +364,69 @@ export default {
   width: 100%;
   position: absolute;
   bottom: 0px;
+  height: 100%;
+  overflow: scroll;
+  display: flex;
+  flex-direction: column-reverse;
 }
-.super-chat-avatar {
-  /* transform: translate(0%, -5%); */
-}
-.super-chat-in-top {
+.gift-show-wrapper {
   display: inline-block;
+  vertical-align: top;
+}
+.gift-show-content {
+  display: inline-block;
+  line-height: 32px;
   border-radius: 20px;
   height: 32px;
-  /* padding: 0px 10px; */
-  font-size: 18px;
-  vertical-align: top;
+  margin-right: 3px;
+  color: white;
+  position: relative;
+  z-index: 1;
 }
 
-.super-chat-in-top-extend {
-  display: inline-block;
-  height: 32px;
-  font-size: 18px;
-  vertical-align: top;
+.gift-show-content-extend {
+  border-radius: 10px;
+  margin-right: 3px;
 
   width: 200px;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-/* .super-chat-in-top:hover {
-  display: inline-block;
-  border-radius: 20px;
-  font-size: 18px;
-  padding: 0px 10px;
-
-  width: 150px;
-  height: 100px;
-} */
-.super-chat-text-extend {
-  padding: 0px 10px;
-  width: 100%;
-  background: gold;
-  overflow-wrap: break-word;
+  font-size: 12px;
   position: relative;
-  font-size: 14px;
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
+  z-index: 9999;
+}
+
+.gift-show-content-time {
+  position: absolute;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.gift-show-content-time > div {
+  position: relative;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.gift-show-content-header {
+  padding: 5px 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  /* background-clip: border-box; TODO 替换*/
+}
+
+.gift-show-content-extend-avatar {
+  vertical-align: top;
+  margin-top: 2px;
+}
+
+.gift-show-content-extend-content {
+  padding: 10px 10px;
+  border-bottom-left-radius: 9px;
+  border-bottom-right-radius: 9px;
+
+  color: white;
+  white-space: normal;
 }
 
 .message-super-chat {
@@ -353,8 +442,14 @@ export default {
   border-top-right-radius: 10px;
 }
 .message-super-chat-content-bottom {
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 9px;
+  border-bottom-left-radius: 9px;
   color: white;
+}
+.divider {
+  border-top: 1px solid;
+  width: 100%;
+  padding: 5px 0;
+  position: relative;
 }
 </style>

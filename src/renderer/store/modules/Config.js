@@ -5,6 +5,7 @@ const state = {
   avatarSize: 24,
   combineSimilarTime: 3000,
   showGiftThreshold: 30,
+  isShowInteractInfo: false,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"

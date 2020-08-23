@@ -15,11 +15,14 @@
               />
             </div>
             <div class="setting-key-text">
-              <span>显示入场消息</span>
-              <i-switch :value="isShowEnterInfo" @on-change="showEnterInfo" />
+              <Checkbox
+                class="setting-checkbox"
+                :value="isShowInteractInfo"
+                @on-change="showInteractInfo"
+              >显示入场消息</Checkbox>
             </div>
             <div class="setting-key-text">
-              <span class="avatar-controller">显示头像</span>
+              <span class="avatar-controller">头像大小</span>
               <Slider
                 class="avatar-controller-slider"
                 :value="avatarSize"
@@ -99,9 +102,8 @@
     <i-col span="16">
       <div class="setting-right">
         <div class="setting-right-header">
-          <span @click="sendTestComment">发送测试弹幕</span>
-          <span @click="sendTestSuperChat">发送测试SC</span>
-          <span @click="sendTestGift">发送测试礼物</span>
+          <Button @click="sendTestMessage">发送测试弹幕</Button>
+          <Button @click="clearExampleDanmaku">还原默认弹幕</Button>
           <Button @click="clear">还原默认</Button>
         </div>
         <div class="setting-right-content" :style="{ background: background }">
@@ -119,6 +121,7 @@ import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import Store from "electron-store";
+import { DEFAULT_AVATAR } from "../../service/const";
 
 export default {
   components: {
@@ -290,8 +293,8 @@ export default {
     isShowMemberShipIcon() {
       return this.$store.state.Config.isShowMemberShipIcon;
     },
-    isShowEnterInfo() {
-      return this.$store.state.Config.isShowEnterInfo;
+    isShowInteractInfo() {
+      return this.$store.state.Config.isShowInteractInfo;
     },
     avatarSize() {
       return this.$store.state.Config.avatarSize;
@@ -307,7 +310,7 @@ export default {
     },
     showSilverGift() {
       return this.$store.state.Config.showSilverGift;
-    }
+    },
   },
   methods: {
     async connect(status) {
@@ -328,82 +331,18 @@ export default {
         isShowAvatar: status,
       });
     },
-    showEnterInfo(status) {
+    showInteractInfo(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowEnterInfo: status,
+        isShowInteractInfo: status,
       });
     },
-    sendTestComment() {
-      const messages = [...this.messages];
-      const lastest = messages[messages.length - 1];
+    sendTestMessage() {
+      this.$store.dispatch(
+        "ADD_EXAMPLE_MESSAGE",
+        this.randomMessageGenerator()
+      );
+    },
 
-      const payload = {
-        id: lastest.id + 1,
-        uid: "12345",
-        name: `bli_${Math.floor(Math.random() * 100000000)}`,
-        type: "comment",
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        comment: `草`,
-        role: "captain",
-        sendAt: new Date() - 0,
-      };
-      console.log("payload" + payload.id);
-      if (this.combineSimilarTime) {
-        messages.reverse();
-        let update;
-        for (const message of messages) {
-          const timePoint = (payload.sendAt || 0) - this.combineSimilarTime;
-          // 如果已扫描到超过设定时间点之前的弹幕，直接跳出
-          if (message.sendAt < timePoint) {
-            break;
-          }
-          if (
-            message.sendAt > timePoint &&
-            message.comment === payload.comment
-          ) {
-            update = message;
-            break;
-          }
-        }
-        if (update) {
-          this.$store.dispatch("UPDATE_EXAMPLE_MESSAGE_SIMILAR", {
-            id: update.id,
-          });
-          return;
-        }
-      }
-
-      this.$store.dispatch("ADD_EXAMPLE_MESSAGE", payload);
-    },
-    async sendTestSuperChat() {
-      const messages = this.messages;
-      const lastest = messages[messages.length - 1];
-      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
-        id: lastest.id + 1,
-        uid: "12345",
-        name: `bli_${Math.floor(Math.random() * 100000000)}`,
-        type: "superChat",
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        comment: `草${new Date()}`,
-        price: Math.floor(Math.random() * 100),
-        role: "captain",
-      });
-    },
-    async sendTestGift() {
-      const messages = this.messages;
-      const lastest = messages[messages.length - 1];
-      await this.$store.dispatch("ADD_EXAMPLE_MESSAGE", {
-        id: lastest.id + 1,
-        uid: "12345",
-        name: `bli_${Math.floor(Math.random() * 100000000)}`,
-        type: "gift",
-        price: Math.floor(Math.random() * 100),
-        giftNumber: 1,
-        giftName: "随机礼物",
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        role: "captain",
-      });
-    },
     clear() {
       const store = new Store({ name: "vuex" });
       store.clear();
@@ -443,6 +382,67 @@ export default {
         showSilverGift: status,
       });
     },
+
+    randomMessageGenerator() {
+      const randomNumber = Math.floor(Math.random() * 100000000);
+      const roles = ["normal", "governor", "admiral", "captain"];
+      const randomRole = roles[Math.floor(Math.random() * roles.length)];
+      const types = ["gift", "comment", "superChat"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      if (randomType === "gift") {
+        const gift = {
+          id: randomNumber,
+          uid: randomNumber,
+          name: `bli_${randomNumber}`,
+          type: "gift",
+          price: Math.floor(Math.random() * 100),
+          giftNumber: 1,
+          giftName: "随机礼物",
+          avatar: DEFAULT_AVATAR,
+          role: "captain",
+          sendAt: new Date() - 0,
+          batchComboId: randomNumber,
+          // batchComboId: 1,
+        };
+        gift.role = randomRole;
+        return gift;
+      }
+      if (randomType === "superChat") {
+        const superChat = {
+          id: randomNumber,
+          uid: randomNumber,
+          name: `bli_${randomNumber}`,
+          type: "superChat",
+          avatar: DEFAULT_AVATAR,
+          comment: `这是一条测试SuperChat | ${new Date()}`,
+          price: Math.floor(Math.random() * 100),
+          role: "captain",
+          sendAt: new Date() - 0,
+        };
+        superChat.role = randomRole;
+        return superChat;
+      }
+
+      if (randomType === "comment") {
+        const comment = {
+          id: randomNumber,
+          uid: randomNumber,
+          name: `bli_${randomNumber}`,
+          type: "comment",
+          avatar: DEFAULT_AVATAR,
+          // comment: `一条弹幕哟～ | ${new Date()}`,
+          comment: "草",
+          role: "captain",
+          sendAt: new Date() - 0,
+        };
+        comment.role = randomRole;
+        return comment;
+      }
+    },
+
+    clearExampleDanmaku() {
+      this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
+    },
   },
 };
 </script>
@@ -464,14 +464,7 @@ export default {
   width: 100px;
   padding-left: 10px;
 }
-/* .setting-right {
-  position: relative;
-  height: 100%;
-  width: 100%;
-} */
-.setting-right-header {
-  height: 50px;
-}
+
 .setting-right-content {
   margin: 10px;
   padding: 5px;

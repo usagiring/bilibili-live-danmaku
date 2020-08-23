@@ -104,6 +104,7 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
+
 // 1. 拉一次接口
 // 2. 每次收到信息记录一下
 const allGifts = [];
@@ -112,7 +113,7 @@ export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 21908196,
+      roomId: 947866,
       isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -174,7 +175,7 @@ export default {
             `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
           );
           const data = await interactDB.insert(interactWord);
-          if (this.isShowEnterInfo) {
+          if (this.isShowInteractInfo) {
             this.sendInteractWord(data);
           }
         }
@@ -217,13 +218,15 @@ export default {
           const data = await giftDB.insert(gift);
           if (gift.type === "superChat") {
             this.sendSuperChat(data);
-          } else {
+          } else if (gift.type === "gift") {
             if (!this.showSilverGift && gift.coinType === "silver") continue;
             // 对于 combo_send 事件补充一下price
             if (!gift.price && allGifts[gift.giftId]) {
               gift.price = allGifts[gift.giftId].price;
             }
+            if (gift.coinType === "silver") gift.price = 0;
             this.sendGift(data);
+          } else if (gift.type === "giftCombo") {
           }
         }
 
@@ -256,8 +259,8 @@ export default {
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
     },
-    isShowEnterInfo() {
-      return this.$store.state.Config.isShowEnterInfo;
+    isShowInteractInfo() {
+      return this.$store.state.Config.isShowInteractInfo;
     },
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
@@ -304,6 +307,11 @@ export default {
         this.fansNumber = attention;
         this.fansClubNumber = fansclub;
         this.liveStatus = liveStatus;
+
+        // TODO 记录上一次设置房间号
+        // this.$store.dispatch("UPDATE_CONFIG", {
+        //   previousRoomId: roomId,
+        // });
       } else {
         close();
         this.username = "";
@@ -359,30 +367,6 @@ export default {
       this.win.setIgnoreMouseEvents(status);
     },
     sendComment(payload) {
-      if (this.combineSimilarTime) {
-        const messages = [...this.messages].reverse();
-        let update;
-        for (const message of messages) {
-          const timePoint = payload.sendAt - this.combineSimilarTime;
-          // 如果已扫描到超过设定时间点之前的弹幕，直接跳出
-          if (message.sendAt < timePoint) {
-            break;
-          }
-          if (
-            message.sendAt > timePoint &&
-            message.comment === payload.comment
-          ) {
-            update = message;
-            break;
-          }
-        }
-        if (update) {
-          this.$store.dispatch("UPDATE_MESSAGE_SIMILAR", {
-            id: update.id,
-          });
-          return;
-        }
-      }
       this.$store.dispatch("ADD_MESSAGE", {
         id: payload._id,
         type: "comment",
@@ -425,22 +409,14 @@ export default {
         price: payload.price,
 
         comment: payload.comment,
+        sendAt: new Date() - 0,
+
         time: payload.time,
         startTime: payload.startTime,
         endTime: payload.endTime,
       });
     },
     sendGift(payload) {
-      const messages = [...this.messages].reverse();
-      const gift = messages.find(message => message.batchComboId === payload.batchComboId)
-
-      if (gift) {
-        this.$store.dispatch("UPDATE_GIFT_TOTAL_PRICE", {
-          id: gift.id,
-          giftNumber: payload.giftNumber,
-        });
-        return;
-      }
       this.$store.dispatch("ADD_MESSAGE", {
         id: payload._id,
         type: "gift",
@@ -452,6 +428,7 @@ export default {
           : "https://static.hdslb.com/images/member/noface.gif",
 
         price: payload.price,
+        sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
         giftName: payload.giftName,
       });
@@ -466,6 +443,16 @@ export default {
         level: data.level,
       };
     },
+
+
+  },
+  mounted() {
+    setInterval(() => {
+      console.log("1");
+      this.$store.dispatch("GIFT_TIMER", {
+        now: new Date() - 0,
+      });
+    }, 1000);
   },
 };
 </script>
