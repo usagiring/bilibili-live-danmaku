@@ -104,7 +104,6 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
-
 // 1. 拉一次接口
 // 2. 每次收到信息记录一下
 const allGifts = [];
@@ -118,6 +117,7 @@ export default {
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
       isAlwaysOnTop: false,
+      giftTimer: null,
 
       username: "",
       avatar: null,
@@ -138,28 +138,21 @@ export default {
           console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
 
           if (this.isShowAvatar) {
-            let user = {};
-            try {
-              // 缓存 user 信息
-              user = await userDB.findOne({ uid: comment.uid });
-              if (!user && !isGetUserInfoLocked) {
-                // 限制获取头像频率 避免412被封
-                isGetUserInfoLocked = true;
-                setTimeout(() => {
-                  isGetUserInfoLocked = false;
-                }, 200);
-
-                const { data } = await getUserInfo(comment.uid);
+            // 缓存 user 信息
+            let user = await userDB.findOne({ uid: gift.uid });
+            if (!user) {
+              try {
+                const data = await this.getUserInfoThrottle(gift.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
                 userDB.insert(user);
-              } else {
+              } catch (e) {
                 throw new Error("getUserInfo limit");
               }
-            } catch (e) {}
+            }
 
-            comment.avatar = (user || {}).avatar;
+            gift.avatar = (user || {}).avatar;
           }
 
           const data = await commentDB.insert(comment);
@@ -192,26 +185,19 @@ export default {
             };
           }
           if (!gift.avatar) {
-            let user = {};
-            try {
-              // 缓存 user 信息
-              user = await userDB.findOne({ uid: gift.uid });
-              if (!user && !isGetUserInfoLocked) {
-                // 限制获取头像频率 避免412被封
-                isGetUserInfoLocked = true;
-                setTimeout(() => {
-                  isGetUserInfoLocked = false;
-                }, 200);
-
-                const { data } = await getUserInfo(gift.uid);
+            // 缓存 user 信息
+            let user = await userDB.findOne({ uid: gift.uid });
+            if (!user) {
+              try {
+                const data = await this.getUserInfoThrottle(gift.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
                 userDB.insert(user);
-              } else {
+              } catch (e) {
                 throw new Error("getUserInfo limit");
               }
-            } catch (e) {}
+            }
 
             gift.avatar = (user || {}).avatar;
           }
@@ -446,15 +432,31 @@ export default {
       };
     },
 
+    async getUserInfoThrottle(uid) {
+      if (isGetUserInfoLocked) throw new Error("isGetUserInfoLocked");
+      // 限制获取头像频率 避免412被封
+      // 412 和请求量和速率都有关系，阶段式限流
+      isGetUserInfoLocked = true;
+      setTimeout(() => {
+        isGetUserInfoLocked = false;
+      }, 1000);
 
+      const { data } = await getUserInfo(uid);
+      return data;
+    },
   },
   mounted() {
-    setInterval(() => {
+    this.giftTimer = setInterval(() => {
       console.log("1");
       this.$store.dispatch("GIFT_TIMER", {
         now: new Date() - 0,
       });
     }, 1000);
+  },
+  beforeDestroy() {
+    if (this.giftTimer) {
+      clearInterval(this.giftTimer);
+    }
   },
 };
 </script>

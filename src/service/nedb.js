@@ -29,10 +29,10 @@ userDB.ensureIndex({
   unique: true,
 })
 
-userDB.ensureIndex({
-  fieldName: 'createdAt',
-  expireAfterSeconds: 604800 // 用户数据缓存 7天
-})
+// userDB.ensureIndex({
+//   fieldName: 'createdAt',
+//   expireAfterSeconds: 604800 // 用户数据缓存 7天
+// })
 
 export default {
   userDB: wrapper(userDB),

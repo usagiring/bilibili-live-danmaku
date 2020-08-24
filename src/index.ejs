@@ -20,8 +20,8 @@
   <script>
     if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
     // window.onbeforeunload = (e) => {
-    //   console.log('I do not want to be closed')
-    //   e.returnValue = false // 相当于 `return false` ，但是不推荐使用
+    //   require('../service/bilibili-live-ws').close()
+    //   return true
     // }
   </script>
 

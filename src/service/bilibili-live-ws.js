@@ -21,14 +21,17 @@ export {
 
 function close() {
   if (!ws) return
+  ws.onclose = function (e) {
+    console.log(4001, 'manual close')
+    clearInterval(HEART_BEAT_TIMER);
+  };
   ws.close();
 }
 
 function init(options) {
   console.log(ws && ws.readyState)
 
-  if (ws && (ws.readyState === 1 || ws.readyState === 0)) return
-
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
 
   const { uid = 0, roomId } = options
 
@@ -58,14 +61,6 @@ function init(options) {
       const result = convertToObject(evt.data);
 
       if (result.op === 3) {
-        // {
-        //   body: { count: 1 },
-        //   headerLen: 16,
-        //   op: 3,
-        //   packetLen: 20,
-        //   seq: 1,
-        //   ver: 1
-        // }
         emitter.emit('ninki', result.body)
       }
       if (Array.isArray(result.body)) {
@@ -79,19 +74,26 @@ function init(options) {
       }
     };
 
-    ws.onclose = function () {
+    ws.onclose = function (e) {
       console.log('close')
+      clearInterval(HEART_BEAT_TIMER);
+
+      // 报错重连
+      init(options)
     };
 
     ws.onerror = function (err) {
       console.error('error', err)
+      clearInterval(HEART_BEAT_TIMER);
+
+      // 报错重连
+      init(options)
     };
   })
 
   function heartBeat() {
     clearInterval(HEART_BEAT_TIMER);
     HEART_BEAT_TIMER = setInterval(() => {
-      // TODO 报错重连
       ws.send(convertToArrayBuffer({}, 2));
     }, 30000);
   }

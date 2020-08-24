@@ -19,7 +19,7 @@
                 class="setting-checkbox"
                 :value="isShowInteractInfo"
                 @on-change="showInteractInfo"
-              >显示入场消息</Checkbox>
+              >显示交互消息</Checkbox>
             </div>
             <div class="setting-key-text">
               <span class="avatar-controller">头像大小</span>
@@ -47,6 +47,16 @@
               <InputNumber
                 :value="showGiftThreshold"
                 @on-change="changeShowGiftThreshold"
+                :min="0"
+                size="small"
+                style="width: 100px"
+              />
+            </div>
+            <div>
+              <span>弹幕礼物展示大于</span>
+              <InputNumber
+                :value="showGiftCardThreshold"
+                @on-change="changeShowGiftCardThreshold"
                 :min="0"
                 size="small"
                 style="width: 100px"
@@ -305,6 +315,9 @@ export default {
     showGiftThreshold() {
       return this.$store.state.Config.showGiftThreshold;
     },
+    showGiftCardThreshold() {
+      return this.$store.state.Config.showGiftCardThreshold;
+    },
     messages() {
       return this.$store.state.Message.exampleMessages;
     },
@@ -375,6 +388,11 @@ export default {
     changeShowGiftThreshold(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
         showGiftThreshold: number,
+      });
+    },
+    changeShowGiftCardThreshold(number) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        showGiftCardThreshold: number,
       });
     },
     changeShowSilverGift(status) {
