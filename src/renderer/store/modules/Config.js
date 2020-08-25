@@ -6,6 +6,7 @@ const state = {
   combineSimilarTime: 3000,
   showGiftThreshold: 30,
   isShowInteractInfo: false,
+  showGiftCardThreshold: 0,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"

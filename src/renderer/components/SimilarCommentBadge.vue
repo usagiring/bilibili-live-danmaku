@@ -7,17 +7,17 @@ export default {
   props: ["number"],
   data() {
     return {
-      animateKey: "",
+      animateKey: ""
     };
   },
   watch: {
-    number: function (newValue) {
+    number: function(newValue) {
       this.animateKey = "rubberBand";
       setTimeout(() => {
         this.animateKey = "";
       }, 500);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -27,12 +27,10 @@ export default {
   height: 16px;
   border-radius: 8px;
   display: inline-block;
-  vertical-align: middle;
   text-align: center;
-  line-height: 16px;
   font-size: 12px;
-  font-family: monospace;
-  background: burlywood;
+  font-weight: bold;
+  background: orange;
   color: white;
   padding-right: 1px;
 }

@@ -112,7 +112,7 @@ export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 947866,
+      roomId: 21449083,
       isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -139,10 +139,10 @@ export default {
 
           if (this.isShowAvatar) {
             // 缓存 user 信息
-            let user = await userDB.findOne({ uid: gift.uid });
+            let user = await userDB.findOne({ uid: comment.uid });
             if (!user) {
               try {
-                const data = await this.getUserInfoThrottle(gift.uid);
+                const data = await this.getUserInfoThrottle(comment.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
@@ -152,7 +152,7 @@ export default {
               }
             }
 
-            gift.avatar = (user || {}).avatar;
+            comment.avatar = (user || {}).avatar;
           }
 
           const data = await commentDB.insert(comment);
@@ -195,7 +195,8 @@ export default {
                 data.createdAt = new Date();
                 userDB.insert(user);
               } catch (e) {
-                throw new Error("getUserInfo limit");
+                // TODO 全局 errorHandler
+                // throw new Error("getUserInfo limit");
               }
             }
 
