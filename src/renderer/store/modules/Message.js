@@ -126,6 +126,7 @@ const mutations = {
 
   CLEAR_MESSAGE(state) {
     state.messages = []
+    state.gifts = []
   },
 
   RESTORE_EXAMPLE_MESSAGE(state) {

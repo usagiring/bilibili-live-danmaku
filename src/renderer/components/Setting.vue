@@ -459,6 +459,7 @@ export default {
 
     clearExampleDanmaku() {
       this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
+      this.$store.dispatch("CLEAR_MESSAGE");
     },
   },
 };

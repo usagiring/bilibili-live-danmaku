@@ -148,7 +148,7 @@ export default {
                 data.createdAt = new Date();
                 userDB.insert(user);
               } catch (e) {
-                throw new Error("getUserInfo limit");
+                // throw new Error("getUserInfo limit");
               }
             }
 
