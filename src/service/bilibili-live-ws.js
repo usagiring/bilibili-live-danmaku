@@ -305,7 +305,7 @@ function parseInteractWord(msg) {
 const RATE = 1000
 
 function parseGift(msg) {
-  if (msg.cmd === 'SUPER_CHAT_MESSAGE_JPN') {
+  if (msg.cmd === 'SUPER_CHAT_MESSAGE' || msg.cmd === 'SUPER_CHAT_MESSAGE_JPN') {
     const {
       uid,
       price,
@@ -316,6 +316,7 @@ function parseGift(msg) {
       end_time,
       gift,
       user_info,
+      id,
     } = msg.data
     const {
       uname,
@@ -341,6 +342,7 @@ function parseGift(msg) {
       giftNumber: num,
 
       // sc
+      superChatId: id,
       type: 'superChat',
       comment: message,
       commentJPN: message_jpn,

@@ -104,10 +104,6 @@ const GUARD_LEVEL_MAP = {
   "3": "captain",
 };
 
-// 1. 拉一次接口
-// 2. 每次收到信息记录一下
-const allGifts = [];
-
 export default {
   data() {
     return {
@@ -176,14 +172,6 @@ export default {
         const gifts = data.map(parseGift).filter(Boolean);
 
         for (const gift of gifts) {
-          // 缓存礼物信息
-          if (!allGifts[gift.giftId]) {
-            allGifts[gift.giftId] = {
-              id: gift.giftId,
-              name: gift.giftName,
-              price: gift.price,
-            };
-          }
           if (!gift.avatar) {
             // 缓存 user 信息
             let user = await userDB.findOne({ uid: gift.uid });
@@ -207,10 +195,6 @@ export default {
             this.sendSuperChat(data);
           } else if (gift.type === "gift") {
             if (!this.showSilverGift && gift.coinType === "silver") continue;
-            // 对于 combo_send 事件补充一下price
-            if (!gift.price && allGifts[gift.giftId]) {
-              gift.price = allGifts[gift.giftId].price;
-            }
             if (gift.coinType === "silver") gift.price = 0;
             this.sendGift(data);
           } else if (gift.type === "giftCombo") {
@@ -400,6 +384,7 @@ export default {
         comment: payload.comment,
         sendAt: new Date() - 0,
 
+        superChatId: payload.superChatId,
         time: payload.time,
         startTime: payload.startTime,
         endTime: payload.endTime,
