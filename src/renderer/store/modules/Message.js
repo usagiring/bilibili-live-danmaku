@@ -286,11 +286,11 @@ const actions = {
     // 礼物叠加处理
     if (payload.type === 'gift') {
       const messages = [...state.messages].reverse();
-      const giftIndex = messages.findIndex(message => message.batchComboId === payload.batchComboId)
+      const giftIndex = payload.batchComboId ? messages.findIndex(message => message.batchComboId === payload.batchComboId) : -1
       if (~giftIndex) {
         const gift = messages[giftIndex]
         const giftNumber = gift.giftNumber + payload.giftNumber
-        // TODO 如果此时金额大于设定值，推送到gift栏
+        // 如果此时金额大于设定值，推送到gift栏
         const update = {
           id: gift.id,
           giftNumber,
@@ -299,11 +299,28 @@ const actions = {
         if (gift.price) {
           update.totalPrice = Number((giftNumber || 1) * gift.price).toFixed(1)
           const showGiftThreshold = rootState.Config.showGiftThreshold
+          // TODO FIX 这里也需要叠加处理
           if (update.totalPrice >= showGiftThreshold) {
             commit('ADD_GIFT', update)
           }
         }
         commit('UPDATE_MESSAGE', update)
+        return
+      }
+    }
+
+    // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
+    if (payload.type === 'superChat') {
+      const messages = [...state.messages].reverse();
+      const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
+      if (~scIndex) {
+        if (payload.commentJPN) {
+          const sc = messages[scIndex]
+          commit('UPDATE_MESSAGE', {
+            index: messages.length - 1 - scIndex,
+            commentJPN: payload.commentJPN
+          })
+        }
         return
       }
     }
@@ -315,6 +332,7 @@ const actions = {
         commit('ADD_GIFT', payload)
       }
     }
+
     commit('ADD_MESSAGE', payload)
   },
   CLEAR_MESSAGE({ commit }) {
