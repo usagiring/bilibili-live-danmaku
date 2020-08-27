@@ -192,7 +192,7 @@ const mutations = {
 }
 
 const actions = {
-  async ADD_EXAMPLE_MESSAGE({ commit, rootState }, payload) {
+  async ADD_EXAMPLE_MESSAGE({ state, commit, rootState }, payload) {
     const combineSimilarTime = rootState.Config.combineSimilarTime
     if (combineSimilarTime && payload.type === 'comment') {
       const messages = [...state.exampleMessages].reverse();
@@ -244,6 +244,22 @@ const actions = {
         return
       }
     }
+    // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
+    if (payload.type === 'superChat') {
+      const messages = [...state.exampleMessages].reverse();
+
+      const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
+      if (~scIndex) {
+        if (payload.commentJPN) {
+          commit('UPDATE_EXAMPLE_MESSAGE', {
+            index: messages.length - 1 - scIndex,
+            commentJPN: payload.commentJPN
+          })
+        }
+        return
+      }
+    }
+
     if (payload.price) {
       payload.totalPrice = Number((payload.giftNumber || 1) * payload.price).toFixed(1)
       const showGiftThreshold = rootState.Config.showGiftThreshold
@@ -311,10 +327,10 @@ const actions = {
     // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
     if (payload.type === 'superChat') {
       const messages = [...state.messages].reverse();
+      
       const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
       if (~scIndex) {
         if (payload.commentJPN) {
-          const sc = messages[scIndex]
           commit('UPDATE_MESSAGE', {
             index: messages.length - 1 - scIndex,
             commentJPN: payload.commentJPN
