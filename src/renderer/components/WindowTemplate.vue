@@ -16,7 +16,6 @@ export default {
   mounted() {
     const self = this;
     document.addEventListener("keyup", function (e) {
-      console.log(e.keyCode);
       if (e.keyCode === 27) {
         const window = remote.getCurrentWindow();
         window.close();

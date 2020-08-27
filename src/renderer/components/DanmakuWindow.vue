@@ -1,6 +1,6 @@
 <template>
   <WindowTemplate>
-    <Danmaku />
+    <Danmaku v-bind:isSingleWindow="true"/>
   </WindowTemplate>
 </template>
 
