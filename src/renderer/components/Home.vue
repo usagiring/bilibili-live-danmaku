@@ -384,7 +384,7 @@ export default {
         comment: payload.comment,
         sendAt: new Date() - 0,
 
-        superChatId: payload.superChatId,
+        superChatId: Number(payload.superChatId),
         time: payload.time,
         startTime: payload.startTime,
         endTime: payload.endTime,

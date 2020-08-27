@@ -156,6 +156,7 @@ export default {
           name: "名称描边大小",
           role: "normal",
           prop: "name",
+          numberStep: 0.1,
           styleName: "-webkit-text-stroke-width",
         },
         {
@@ -188,6 +189,7 @@ export default {
           name: "评论描边大小",
           role: "normal",
           prop: "comment",
+          numberStep: 0.1,
           styleName: "-webkit-text-stroke-width",
         },
         {
@@ -229,6 +231,7 @@ export default {
           name: "名称描边大小",
           role: "captain",
           prop: "name",
+          numberStep: 0.1,
           styleName: "-webkit-text-stroke-width",
         },
         {
@@ -261,6 +264,7 @@ export default {
           name: "评论描边大小",
           role: "captain",
           prop: "comment",
+          numberStep: 0.1,
           styleName: "-webkit-text-stroke-width",
         },
         {
@@ -429,6 +433,7 @@ export default {
         const superChat = {
           id: randomNumber,
           uid: randomNumber,
+          superChatId: 1,
           name: `bli_${randomNumber}`,
           type: "superChat",
           avatar: DEFAULT_AVATAR,

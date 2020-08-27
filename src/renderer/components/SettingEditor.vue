@@ -2,7 +2,7 @@
   <div>
     <span>{{name}}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" @on-change="updateStyle" :min="0" size="small" />
+      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" />
     </template>
     <template v-if="type === 'ColorPicker'">
       <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
@@ -12,7 +12,7 @@
 
 <script>
 export default {
-  props: ["type", "name", "role", "prop", "styleName"],
+  props: ["type", "name", "role", "prop", "styleName", "numberStep"],
   data() {
     return {};
   },

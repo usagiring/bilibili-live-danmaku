@@ -18,7 +18,7 @@
                 :style="{'z-index': -1, position: 'absolute', width: `${widthCalculator(gift)}%`,height: '100%',background: gift.priceProperties.backgroundBottomColor}"
               ></div>
               <div
-                :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.5px','-webkit-text-stroke-color': 'gray'}"
+                :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px','-webkit-text-stroke-color': gift.priceProperties.backgroundPriceColor}"
               >
                 <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
                 <span>{{`￥${gift.totalPrice}`}}</span>
@@ -232,7 +232,8 @@ export default {
         })
         .filter((gift) => {
           return gift.sendAt + gift.priceProperties.time > new Date() - 0;
-        });
+        })
+        .reverse();
 
       // TODO: 清理时间到达消失的GIFT
     },
