@@ -47,6 +47,13 @@
               {{fansClubNumber}}
             </div>
           </div>
+          <div class="status-wrapper">
+            <div class="bar">
+              <Icon type="md-flame" />
+              <span class="header-icon-text"></span>
+              {{peopleNumber}}
+            </div>
+          </div>
         </Header>
         <div class="layout-header2">
           <div>
@@ -94,6 +101,7 @@ import emitter, {
 import { getRoomInfoV2, getUserInfo } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
+import { uniq } from "lodash";
 const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 let isGetUserInfoLocked = false;
 
@@ -114,13 +122,16 @@ export default {
       isShowDanmakuWindowLoading: false,
       isAlwaysOnTop: false,
       giftTimer: null,
+      peopleTimer: null,
 
       username: "",
       avatar: null,
       ninkiNumber: 0,
       fansNumber: 0,
       fansClubNumber: 0,
-      liveStatus: 0
+      liveStatus: 0,
+      peopleNumber: 0,
+
     };
   },
   created() {
@@ -161,7 +172,7 @@ export default {
 
         for (const interactWord of interactWords) {
           console.log(
-            `${interactWord.uname}(${interactWord.uid}) 进入了直播间`
+            `${interactWord.name}(${interactWord.uid}) 进入了直播间`
           );
           const data = await interactDB.insert(interactWord);
           if (this.isShowInteractInfo) {
@@ -365,8 +376,8 @@ export default {
         type: "interactWord",
         uid: payload.uid,
         identities: payload.identities,
-        name: payload.uname,
-        color: payload.unameColor,
+        name: payload.name,
+        color: payload.nameColor,
         sendAt: payload.timestamp,
         msgType: payload.msgType
       });
@@ -436,17 +447,40 @@ export default {
   },
   mounted() {
     this.giftTimer = setInterval(() => {
-      console.log("1");
+      console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER", {
         now: new Date() - 0
       });
     }, 1000);
+
+    this.peopleTimer = setInterval(async () => {
+      console.log("peopleTimer");
+      const tenMinutesAgo = new Date() - 1000 * 60 * 10;
+      const [comments, gifts, interacts] = await Promise.all([
+        commentDB.find(
+          { sendAt: { $gte: tenMinutesAgo } },
+          { uid: 1, name: 1 }
+        ),
+        giftDB.find({ sendAt: { $gte: tenMinutesAgo } }, { uid: 1, name: 1 }),
+        interactDB.find(
+          { sendAt: { $gte: tenMinutesAgo } },
+          { uid: 1, name: 1 }
+        ),
+      ]);
+
+      this.peopleNumber = uniq(
+        [...comments, ...gifts, ...interacts].map((i) => i.uid)
+      ).length;
+    }, 10000);
   },
   beforeDestroy() {
     if (this.giftTimer) {
       clearInterval(this.giftTimer);
     }
-  }
+    if (this.peopleTimer) {
+      clearInterval(this.peopleTimer);
+    }
+  },
 };
 </script>
 

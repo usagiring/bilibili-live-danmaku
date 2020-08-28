@@ -294,26 +294,24 @@ function parseInteractWord(msg) {
     identities,
     roomId,
     score,
-    msgType, // 1 进入直播间 2 关注直播间
-    timestamp,
+    msgType, // 1 进入直播间 2 关注直播间 3 分享直播间
+    sendAt: timestamp * 1000, // 
     uid,
-    uname,
-    unameColor
+    name: uname,
+    nameColor: unameColor
   }
 }
 
 const RATE = 1000
 
 function parseGift(msg) {
+  const now = new Date() - 0
   if (msg.cmd === 'SUPER_CHAT_MESSAGE' || msg.cmd === 'SUPER_CHAT_MESSAGE_JPN') {
     const {
       uid,
       price,
       message,
       message_jpn,
-      time,
-      start_time,
-      end_time,
       gift,
       user_info,
       id,
@@ -329,6 +327,8 @@ function parseGift(msg) {
       gift_name
     } = gift
     return {
+      roomId: __roomId,
+      sendAt: now,
       // user
       uid,
       name: uname,
@@ -346,36 +346,8 @@ function parseGift(msg) {
       type: 'superChat',
       comment: message,
       commentJPN: message_jpn,
-      time,
-      startTime: start_time,
-      endTime: end_time,
     }
   }
-  // if (msg.cmd === 'COMBO_SEND') {
-  //   const {
-  //     uid,
-  //     uname,
-  //     total_num,
-  //     gift_id,
-  //     gift_name,
-  //     // guard_level,
-  //     batch_combo_id
-  //   } = msg.data
-  //   return {
-  //     uid,
-  //     name: uname,
-  //     // face,
-  //     // guardLevel: guard_level,
-
-  //     batchComboId: batch_combo_id,
-
-  //     giftId: gift_id,
-  //     giftName: gift_name,
-  //     giftNumber: total_num,
-
-  //     type: 'giftCombo',
-  //   }
-  // }
 
   if (msg.cmd === 'GUARD_BUY') {
     const {
@@ -389,6 +361,8 @@ function parseGift(msg) {
     } = msg.data
 
     return {
+      roomId: __roomId,
+      sendAt: now,
       uid,
       name: username,
       // face,
@@ -417,6 +391,8 @@ function parseGift(msg) {
       batch_combo_id
     } = msg.data
     return {
+      roomId: __roomId,
+      sendAt: now,
       uid,
       name: uname,
       avatar: face,

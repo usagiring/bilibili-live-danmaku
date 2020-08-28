@@ -10,11 +10,18 @@ commentDB.loadDatabase();
 giftDB.loadDatabase();
 interactDB.loadDatabase();
 
+giftDB.ensureIndex({
+  fieldName: 'sendAt',
+})
+
 interactDB.ensureIndex({
   fieldName: 'uid',
 })
 interactDB.ensureIndex({
   fieldName: 'roomId',
+})
+interactDB.ensureIndex({
+  fieldName: 'sendAt',
 })
 
 commentDB.ensureIndex({
@@ -22,6 +29,9 @@ commentDB.ensureIndex({
 })
 commentDB.ensureIndex({
   fieldName: 'roomId',
+})
+commentDB.ensureIndex({
+  fieldName: 'sendAt',
 })
 
 userDB.ensureIndex({
