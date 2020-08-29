@@ -9,7 +9,9 @@ export {
   getRoomInfoV2,
   getDamankuInfo,
   getGiftConfig,
-  getUserInfo
+  getUserInfo,
+  getHistoryMessages,
+  getGuardInfo
 }
 
 async function getRoomInfoV1() {
@@ -35,6 +37,20 @@ async function getGiftConfig(roomId, platform = 'pc') {
 async function getUserInfo(userId) {
   const res = await axios.get(`${baseUrl}/x/space/acc/info?mid=${userId}&jsonp=jsonp`, {
     timeout: 1000
+  })
+  return res.data
+}
+
+async function getHistoryMessages(roomId) {
+  const res = await axios.get(`${baseLiveUrl}/xlive/web-room/v1/dM/gethistory?roomid=${roomId}`, {
+
+  })
+  return res.data
+}
+
+async function getGuardInfo(roomId, ruid) {
+  const res = await axios.get(`${baseLiveUrl}/xlive/app-room/v2/guardTab/topList?roomid=${roomId}&page=1&ruid=${ruid}&page_size=29`, {
+
   })
   return res.data
 }

@@ -124,6 +124,15 @@ const mutations = {
     }
   },
 
+  UPDATE_GIFT(state, payload) {
+    const index = payload.index || state.gifts.findIndex(gift => gift.id === payload.id)
+    if (!~index) return
+    delete payload.index
+    const gift = state.gifts[index]
+    const newGift = Object.assign({}, gift, payload)
+    state.gifts.splice(index, 1, newGift)
+  },
+
   CLEAR_MESSAGE(state) {
     state.messages = []
     state.gifts = []
@@ -228,7 +237,7 @@ const actions = {
       if (~giftIndex) {
         const gift = messages[giftIndex]
         const giftNumber = gift.giftNumber + payload.giftNumber
-        // TODO 如果此时金额大于设定值，推送到gift栏
+
         const update = {
           id: gift.id,
           giftNumber,
@@ -238,7 +247,7 @@ const actions = {
           update.totalPrice = Number((giftNumber || 1) * gift.price).toFixed(1)
           const showGiftThreshold = rootState.Config.showGiftThreshold
           if (update.totalPrice >= showGiftThreshold) {
-            commit('ADD_EXAMPLE_GIFT', update)
+            commit('ADD_EXAMPLE_GIFT',  Object.assign({}, gift, update))
           }
         }
         commit('UPDATE_EXAMPLE_MESSAGE', update)
@@ -317,7 +326,18 @@ const actions = {
           const showGiftThreshold = rootState.Config.showGiftThreshold
           // TODO FIX 这里也需要叠加处理
           if (update.totalPrice >= showGiftThreshold) {
-            commit('ADD_GIFT', update)
+            const gifts = [...state.gifts]
+            const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
+            if(~existsGiftIndex) {
+              commit('UPDATE_GIFT',{
+                id: gift.id,
+                index: existsGiftIndex,
+                totalPrice: update.totalPrice,
+                giftNumber
+              })
+            }else{
+              commit('ADD_GIFT', Object.assign({}, gift, update))
+            }
           }
         }
         commit('UPDATE_MESSAGE', update)

@@ -1,11 +1,12 @@
 <template>
-  <div :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px'}">
+  <div :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none'}">
     <div
+      @wheel.prevent="giftScroll"
       @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent(): undefined"
       @mouseleave="isSingleWindow ? setIgnoreMouseEvent(): undefined"
       class="gift-show-content-wrapper-wrapper"
     >
-      <div class="gift-show-content-wrapper">
+      <div class="gift-show-content-wrapper" id="gift-show-content-wrapper">
         <template v-for="gift in gifts">
           <div
             :key="gift.id"
@@ -56,6 +57,8 @@
       </div>
     </div>
     <div class="message-content-wrapper">
+      <div :style="{position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag'}"></div>
+      <div :style="{position: 'absolute', height: '100%', width: '20%',right:'0'}"></div>
       <div class="message-content">
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type==='comment'">
@@ -353,6 +356,10 @@ export default {
     },
     setUnIgnoreMouseEvent() {
       win.setIgnoreMouseEvents(false);
+    },
+    giftScroll(e) {
+      const el = document.getElementById("gift-show-content-wrapper");
+      el.scrollLeft += e.deltaY;
     }
   }
 };
@@ -389,7 +396,7 @@ export default {
 .gift-show-content-wrapper-wrapper {
   position: relative;
   height: 40px;
-  -webkit-app-region: no-drag;
+  /* -webkit-app-region: no-drag; */
 }
 
 .message-content-wrapper {
@@ -397,7 +404,6 @@ export default {
   /* height: 100%; */
   overflow: hidden;
   position: relative;
-  -webkit-app-region: drag;
 }
 .message-content {
   width: 100%;

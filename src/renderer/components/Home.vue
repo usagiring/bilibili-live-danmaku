@@ -49,7 +49,16 @@
           </div>
           <div class="status-wrapper">
             <div class="bar">
-              <Icon type="md-flame" />
+              <Tooltip content="舰队">
+                <Icon type="md-cog" />
+              </Tooltip>
+              <span class="header-icon-text"></span>
+              {{guardNumber}}
+            </div>
+            <div class="bar">
+              <Tooltip content="十分钟内互动人数">
+                <Icon type="md-person" />
+              </Tooltip>
               <span class="header-icon-text"></span>
               {{peopleNumber}}
             </div>
@@ -98,7 +107,11 @@ import emitter, {
   parseInteractWord,
   parseGift
 } from "../../service/bilibili-live-ws";
-import { getRoomInfoV2, getUserInfo } from "../../service/bilibili-api";
+import {
+  getRoomInfoV2,
+  getUserInfo,
+  getGuardInfo
+} from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
 import { uniq } from "lodash";
@@ -131,7 +144,7 @@ export default {
       fansClubNumber: 0,
       liveStatus: 0,
       peopleNumber: 0,
-
+      guardNumber: 0,
     };
   },
   created() {
@@ -171,9 +184,7 @@ export default {
           .map(parseInteractWord);
 
         for (const interactWord of interactWords) {
-          console.log(
-            `${interactWord.name}(${interactWord.uid}) 进入了直播间`
-          );
+          console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
           const data = await interactDB.insert(interactWord);
           if (this.isShowInteractInfo) {
             this.sendInteractWord(data);
@@ -208,7 +219,6 @@ export default {
             if (!this.showSilverGift && gift.coinType === "silver") continue;
             if (gift.coinType === "silver") gift.price = 0;
             this.sendGift(data);
-          } else if (gift.type === "giftCombo") {
           }
         }
 
@@ -291,6 +301,8 @@ export default {
         this.fansClubNumber = fansclub;
         this.liveStatus = liveStatus;
 
+        const guardInfo = await getGuardInfo(roomId, uid);
+        this.guardNumber = guardInfo.data.info.num;
         // TODO 记录上一次设置房间号
         // this.$store.dispatch("UPDATE_CONFIG", {
         //   previousRoomId: roomId,
@@ -455,21 +467,25 @@ export default {
 
     this.peopleTimer = setInterval(async () => {
       console.log("peopleTimer");
+      if (!this.roomId && !this.isConnected) return;
       const tenMinutesAgo = new Date() - 1000 * 60 * 10;
       const [comments, gifts, interacts] = await Promise.all([
         commentDB.find(
-          { sendAt: { $gte: tenMinutesAgo } },
+          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
         ),
-        giftDB.find({ sendAt: { $gte: tenMinutesAgo } }, { uid: 1, name: 1 }),
+        giftDB.find(
+          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
+          { uid: 1, name: 1 }
+        ),
         interactDB.find(
-          { sendAt: { $gte: tenMinutesAgo } },
+          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
-        ),
+        )
       ]);
 
       this.peopleNumber = uniq(
-        [...comments, ...gifts, ...interacts].map((i) => i.uid)
+        [...comments, ...gifts, ...interacts].map(i => i.uid)
       ).length;
     }, 10000);
   },
@@ -480,7 +496,7 @@ export default {
     if (this.peopleTimer) {
       clearInterval(this.peopleTimer);
     }
-  },
+  }
 };
 </script>
 
