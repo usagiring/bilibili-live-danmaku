@@ -11,11 +11,11 @@
           <div
             :key="gift.id"
             @mouseenter="hoverGift(gift.id)"
-            @mouseleave="unhoverGift()"
+            @mouseleave="unhoverGift(gift.id)"
             class="gift-show-wrapper"
           >
             <div
-              v-if="gift.id !== giftHover"
+              v-if="!giftHover.includes(gift.id)"
               class="gift-show-content"
               :style="{background: gift.priceProperties.backgroundColor}"
             >
@@ -138,6 +138,7 @@
 <script>
 import { DEFAULT_AVATAR } from "../../service/const";
 import SimilarCommentBadge from "./SimilarCommentBadge";
+import { difference } from 'lodash'
 const win = require("electron").remote.getCurrentWindow();
 
 const PRICE_COLOR = {
@@ -186,9 +187,22 @@ export default {
   props: ["isPreview", "isSingleWindow"],
   data() {
     return {
-      giftHover: 0,
+      giftHover: [],
       DEFAULT_AVATAR
     };
+  },
+  watch: {
+    gifts: function (newGifts, oldGifts) {
+      console.log(newGifts.length, oldGifts.length)
+      const newIds = difference(newGifts.map(gift => gift.id), oldGifts.map(gift => gift.id))
+      if(!newIds.length) return
+      this.giftHover = [...this.giftHover, ...newIds]
+      newIds.forEach(newId => {
+        setTimeout(() => {
+          this.giftHover = this.giftHover.filter(id => id !== newId)
+        }, 5000)
+      })
+    }
   },
   computed: {
     isAlwaysOnTop() {
@@ -335,10 +349,10 @@ export default {
       }
     },
     hoverGift(giftId) {
-      this.giftHover = giftId;
+      this.giftHover = [...this.giftHover, giftId];
     },
-    unhoverGift() {
-      this.giftHover = 0;
+    unhoverGift(giftId) {
+      this.giftHover = this.giftHover.filter(id => id !== giftId);
     },
     widthCalculator(gift) {
       if (Number(gift.existsTime) && Number(gift.priceProperties.time)) {
