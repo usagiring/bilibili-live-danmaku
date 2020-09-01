@@ -1,5 +1,7 @@
 <template>
-  <div :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none'}">
+  <div
+    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none'}"
+  >
     <div
       @wheel.prevent="giftScroll"
       @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent(): undefined"
@@ -7,59 +9,67 @@
       class="gift-show-content-wrapper-wrapper"
     >
       <div class="gift-show-content-wrapper" id="gift-show-content-wrapper">
-        <template v-for="gift in gifts">
-          <div
-            :key="gift.id"
-            @mouseenter="hoverGift(gift.id)"
-            @mouseleave="unhoverGift(gift.id)"
-            class="gift-show-wrapper"
-          >
+        <transition-group name="fade">
+          <template v-for="gift in gifts">
             <div
-              v-if="!giftHover.includes(gift.id)"
-              class="gift-show-content"
-              :style="{background: gift.priceProperties.backgroundColor}"
+              :key="gift.id"
+              @mouseenter="hoverGift(gift.id)"
+              @mouseleave="unhoverGift(gift.id)"
+              class="gift-show-wrapper"
             >
+              <!-- <transition name="fade"> -->
               <div
-                :style="{'z-index': -1, position: 'absolute', width: `${widthCalculator(gift)}%`,height: '100%',background: gift.priceProperties.backgroundBottomColor}"
-              ></div>
-              <div
-                :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px','-webkit-text-stroke-color': gift.priceProperties.backgroundPriceColor}"
-              >
-                <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
-                <span>{{`￥${gift.totalPrice}`}}</span>
-              </div>
-            </div>
-            <div
-              v-else
-              class="gift-show-content-extend"
-              :style="{border: `1px solid ${gift.priceProperties.backgroundBottomColor}`}"
-            >
-              <div
-                class="gift-show-content-header"
+                :key="`${gift.id}_normal`"
+                v-if="!giftHover.includes(gift.id)"
+                class="gift-show-content"
                 :style="{background: gift.priceProperties.backgroundColor}"
               >
-                <Avatar
-                  class="gift-show-content-extend-avatar"
-                  :src="gift.avatar || DEFAULT_AVATAR"
-                />
-                <div :style="{display: 'inline-block'}">
-                  <p>{{gift.name}}</p>
-                  <p>{{`￥${gift.totalPrice}`}}</p>
+                <div
+                  :style="{'z-index': -1, position: 'absolute', width: `${widthCalculator(gift)}%`,height: '100%',background: gift.priceProperties.backgroundBottomColor}"
+                ></div>
+                <div
+                  :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px','-webkit-text-stroke-color': gift.priceProperties.backgroundPriceColor}"
+                >
+                  <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
+                  <span>{{`￥${gift.totalPrice}`}}</span>
                 </div>
               </div>
               <div
-                class="gift-show-content-extend-content"
-                :style="{background: gift.priceProperties.backgroundBottomColor}"
-              >{{ gift.type === 'superChat' ? gift.comment : `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`}}</div>
+                :key="`${gift.id}_extend`"
+                v-else
+                class="gift-show-content-extend"
+                :style="{border: `1px solid ${gift.priceProperties.backgroundBottomColor}`}"
+              >
+                <div
+                  class="gift-show-content-header"
+                  :style="{background: gift.priceProperties.backgroundColor}"
+                >
+                  <Avatar
+                    class="gift-show-content-extend-avatar"
+                    :src="gift.avatar || DEFAULT_AVATAR"
+                  />
+                  <div :style="{display: 'inline-block'}">
+                    <p>{{gift.name}}</p>
+                    <p>{{`￥${gift.totalPrice}`}}</p>
+                  </div>
+                </div>
+                <div
+                  class="gift-show-content-extend-content"
+                  :style="{background: gift.priceProperties.backgroundBottomColor}"
+                >{{ gift.type === 'superChat' ? gift.comment : `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`}}</div>
+              </div>
+              <!-- </transition> -->
             </div>
-          </div>
-        </template>
+          </template>
+        </transition-group>
       </div>
     </div>
     <div class="message-content-wrapper">
-      <div :style="{position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag'}"></div>
+      <div
+        :style="{position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag'}"
+      ></div>
       <div :style="{position: 'absolute', height: '100%', width: '20%',right:'0'}"></div>
-      <div class="message-content">
+      <transition-group name="fade" tag="div" class="message-content">
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type==='comment'">
             <p :style="getMessageStyleByRole(message)">
@@ -130,7 +140,7 @@
             </div>
           </template>
         </p>
-      </div>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -138,7 +148,7 @@
 <script>
 import { DEFAULT_AVATAR } from "../../service/const";
 import SimilarCommentBadge from "./SimilarCommentBadge";
-import { difference } from 'lodash'
+import { difference } from "lodash";
 const win = require("electron").remote.getCurrentWindow();
 
 const PRICE_COLOR = {
@@ -146,63 +156,66 @@ const PRICE_COLOR = {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
     backgroundBottomColor: "#2A60B2",
-    time: 60000
+    time: 60000,
   },
   "2": {
     backgroundColor: "#DBFFFD",
     backgroundPriceColor: "#7DA4BD",
     backgroundBottomColor: "#427D9E",
-    time: 120000
+    time: 120000,
   },
   "3": {
     backgroundColor: "#FFF1C5",
     backgroundPriceColor: "gold",
     backgroundBottomColor: "#E2B52B",
-    time: 300000
+    time: 300000,
   },
   "4": {
     backgroundColor: "rgb(255,234,210)",
     backgroundPriceColor: "rgb(255,234,210)",
     backgroundBottomColor: "rgb(244,148,67)",
-    time: 1800000
+    time: 1800000,
   },
   "5": {
     backgroundColor: "rgb(255,231,228)",
     backgroundPriceColor: "rgb(255,231,228)",
     backgroundBottomColor: "rgb(229,77,77)",
-    time: 3600000
+    time: 3600000,
   },
   "6": {
     backgroundColor: "rgb(255,216,216)",
     backgroundPriceColor: "rgb(255,216,216)",
     backgroundBottomColor: "rgb(171,26,50)",
-    time: 7200000
-  }
+    time: 7200000,
+  },
 };
 
 export default {
   components: {
-    SimilarCommentBadge
+    SimilarCommentBadge,
   },
   props: ["isPreview", "isSingleWindow"],
   data() {
     return {
       giftHover: [],
-      DEFAULT_AVATAR
+      DEFAULT_AVATAR,
     };
   },
   watch: {
     gifts: function (newGifts, oldGifts) {
-      console.log(newGifts.length, oldGifts.length)
-      const newIds = difference(newGifts.map(gift => gift.id), oldGifts.map(gift => gift.id))
-      if(!newIds.length) return
-      this.giftHover = [...this.giftHover, ...newIds]
-      newIds.forEach(newId => {
+      console.log(newGifts.length, oldGifts.length);
+      const newIds = difference(
+        newGifts.map((gift) => gift.id),
+        oldGifts.map((gift) => gift.id)
+      );
+      if (!newIds.length) return;
+      this.giftHover = [...this.giftHover, ...newIds];
+      newIds.forEach((newId) => {
         setTimeout(() => {
-          this.giftHover = this.giftHover.filter(id => id !== newId)
-        }, 5000)
-      })
-    }
+          this.giftHover = this.giftHover.filter((id) => id !== newId);
+        }, 5000);
+      });
+    },
   },
   computed: {
     isAlwaysOnTop() {
@@ -222,7 +235,7 @@ export default {
       return {
         width: `${avatarSize}px`,
         height: `${avatarSize}px`,
-        "line-height": `${avatarSize}px`
+        "line-height": `${avatarSize}px`,
       };
     },
 
@@ -231,15 +244,15 @@ export default {
         ? this.$store.state.Message.exampleMessages
         : this.$store.state.Message.messages;
       return messages
-        .filter(message => {
+        .filter((message) => {
           return (
             !message.totalPrice ||
             message.totalPrice > this.showGiftCardThreshold
           );
         })
-        .map(message => {
+        .map((message) => {
           return Object.assign({}, message, {
-            priceProperties: this.parsePriceColor(message.totalPrice) || {}
+            priceProperties: this.parsePriceColor(message.totalPrice) || {},
           });
         })
         .reverse();
@@ -250,12 +263,12 @@ export default {
         ? this.$store.state.Message.exampleGifts
         : this.$store.state.Message.gifts;
       return gifts
-        .map(gift => {
+        .map((gift) => {
           return Object.assign({}, gift, {
-            priceProperties: this.parsePriceColor(gift.totalPrice) || {}
+            priceProperties: this.parsePriceColor(gift.totalPrice) || {},
           });
         })
-        .filter(gift => {
+        .filter((gift) => {
           return gift.sendAt + gift.priceProperties.time > new Date() - 0;
         })
         .reverse();
@@ -302,7 +315,7 @@ export default {
     },
     governor_comment() {
       return this.$store.state.Config.captain_comment;
-    }
+    },
   },
   mounted() {},
   methods: {
@@ -352,7 +365,7 @@ export default {
       this.giftHover = [...this.giftHover, giftId];
     },
     unhoverGift(giftId) {
-      this.giftHover = this.giftHover.filter(id => id !== giftId);
+      this.giftHover = this.giftHover.filter((id) => id !== giftId);
     },
     widthCalculator(gift) {
       if (Number(gift.existsTime) && Number(gift.priceProperties.time)) {
@@ -374,8 +387,8 @@ export default {
     giftScroll(e) {
       const el = document.getElementById("gift-show-content-wrapper");
       el.scrollLeft += e.deltaY;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -491,5 +504,13 @@ export default {
   width: 100%;
   padding: 5px 0;
   position: relative;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

@@ -417,7 +417,7 @@ export default {
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "gift",
-          price: Math.floor(Math.random() * 100),
+          price: Math.floor(Math.random() * 2000),
           giftNumber: 1,
           giftName: "随机礼物",
           avatar: DEFAULT_AVATAR,
@@ -438,7 +438,7 @@ export default {
           type: "superChat",
           avatar: DEFAULT_AVATAR,
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
-          price: Math.floor(Math.random() * 100),
+          price: Math.floor(Math.random() * 2000),
           role: "captain",
           sendAt: new Date() - 0,
         };
