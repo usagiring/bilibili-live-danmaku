@@ -433,7 +433,7 @@ export default {
         const superChat = {
           id: randomNumber,
           uid: randomNumber,
-          superChatId: 1,
+          superChatId: Math.floor(Math.random() * 100000000),
           name: `bli_${randomNumber}`,
           type: "superChat",
           avatar: DEFAULT_AVATAR,

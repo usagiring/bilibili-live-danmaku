@@ -244,10 +244,11 @@ const actions = {
           index: messages.length - 1 - giftIndex
         }
         if (gift.price) {
-          update.totalPrice = Number((giftNumber || 1) * gift.price).toFixed(1)
+          const totalPrice = Number((giftNumber || 1) * gift.price)
+          update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
           const showGiftThreshold = rootState.Config.showGiftThreshold
           if (update.totalPrice >= showGiftThreshold) {
-            commit('ADD_EXAMPLE_GIFT',  Object.assign({}, gift, update))
+            commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
           }
         }
         commit('UPDATE_EXAMPLE_MESSAGE', update)
@@ -271,7 +272,8 @@ const actions = {
     }
 
     if (payload.price) {
-      payload.totalPrice = Number((payload.giftNumber || 1) * payload.price).toFixed(1)
+      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
       const showGiftThreshold = rootState.Config.showGiftThreshold
       if (payload.totalPrice >= showGiftThreshold) {
         commit('ADD_EXAMPLE_GIFT', payload)
@@ -322,20 +324,21 @@ const actions = {
           index: messages.length - 1 - giftIndex
         }
         if (gift.price) {
-          update.totalPrice = Number((giftNumber || 1) * gift.price).toFixed(1)
+          const totalPrice = Number((giftNumber || 1) * gift.price)
+          update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
           const showGiftThreshold = rootState.Config.showGiftThreshold
           // TODO FIX 这里也需要叠加处理
           if (update.totalPrice >= showGiftThreshold) {
             const gifts = [...state.gifts]
             const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
-            if(~existsGiftIndex) {
-              commit('UPDATE_GIFT',{
+            if (~existsGiftIndex) {
+              commit('UPDATE_GIFT', {
                 id: gift.id,
                 index: existsGiftIndex,
                 totalPrice: update.totalPrice,
                 giftNumber
               })
-            }else{
+            } else {
               commit('ADD_GIFT', Object.assign({}, gift, update))
             }
           }
@@ -348,7 +351,7 @@ const actions = {
     // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
     if (payload.type === 'superChat') {
       const messages = [...state.messages].reverse();
-      
+
       const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
       if (~scIndex) {
         if (payload.commentJPN) {
@@ -362,7 +365,8 @@ const actions = {
     }
 
     if (payload.price) {
-      payload.totalPrice = Number((payload.giftNumber || 1) * payload.price).toFixed(1)
+      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
       const showGiftThreshold = rootState.Config.showGiftThreshold
       if (payload.totalPrice >= showGiftThreshold) {
         commit('ADD_GIFT', payload)

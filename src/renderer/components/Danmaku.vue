@@ -94,50 +94,14 @@
             </p>
           </template>
           <template v-if="message.type==='superChat'">
-            <div
-              :style="{border: `solid 1px ${parsePriceColor(message.price).backgroundBottomColor}`}"
-              class="message-super-chat"
-            >
-              <div
-                :style="{background: `${parsePriceColor(message.price).backgroundColor}`}"
-                class="message-super-chat-content message-super-chat-content-header"
-              >
-                <div :style="{display: 'inline-block', 'vertical-align':'top'}">
-                  <Avatar :src="message.avatar" size="large" />
-                </div>
-                <div :style="{display: 'inline-block'}">
-                  <p>{{message.name}}</p>
-                  <p>{{`￥${message.price}`}}</p>
-                </div>
-              </div>
-              <div
-                :style="{background: `${parsePriceColor(message.price).backgroundBottomColor}`, color: 'white'}"
-                class="message-super-chat-content"
-              >{{message.comment}}</div>
-            </div>
+            <GiftCard v-bind="message">
+              {{message.comment}}
+            </GiftCard>
           </template>
           <template v-if="message.type==='gift'">
-            <div
-              :style="{border: `solid 1px ${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`}"
-              class="message-super-chat"
-            >
-              <div
-                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundColor}`}"
-                class="message-super-chat-content message-super-chat-content-header"
-              >
-                <div :style="{display: 'inline-block', 'vertical-align':'top'}">
-                  <Avatar :src="message.avatar" size="large" />
-                </div>
-                <div :style="{display: 'inline-block'}">
-                  <p>{{message.name}}</p>
-                  <p>{{`￥${Number(message.price * message.giftNumber).toFixed(1)}`}}</p>
-                </div>
-              </div>
-              <div
-                :style="{background: `${parsePriceColor(message.price * message.giftNumber).backgroundBottomColor}`, color: 'white'}"
-                class="message-super-chat-content"
-              >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</div>
-            </div>
+            <GiftCard v-bind="message">
+              {{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}
+            </GiftCard>
           </template>
         </p>
       </transition-group>
@@ -149,6 +113,7 @@
 import { DEFAULT_AVATAR } from "../../service/const";
 import SimilarCommentBadge from "./SimilarCommentBadge";
 import { difference } from "lodash";
+import GiftCard from "./GiftCard";
 const win = require("electron").remote.getCurrentWindow();
 
 const PRICE_COLOR = {
@@ -193,6 +158,7 @@ const PRICE_COLOR = {
 export default {
   components: {
     SimilarCommentBadge,
+    GiftCard,
   },
   props: ["isPreview", "isSingleWindow"],
   data() {
@@ -203,7 +169,6 @@ export default {
   },
   watch: {
     gifts: function (newGifts, oldGifts) {
-      console.log(newGifts.length, oldGifts.length);
       const newIds = difference(
         newGifts.map((gift) => gift.id),
         oldGifts.map((gift) => gift.id)
