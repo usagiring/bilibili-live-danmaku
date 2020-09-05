@@ -7,57 +7,58 @@ const state = {
   showGiftThreshold: 30,
   isShowInteractInfo: false,
   showGiftCardThreshold: 0,
+  isShowSilverGift: false,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"
   },
 
-  normal_message: {
+  '0_message': {
 
   },
-  normal_name: {
+  '0_name': {
     'font-size': '12px',
     '-webkit-text-stroke-width': '1px',
     '-webkit-text-stroke-color': 'white',
     color: 'white'
   },
-  normal_comment: {
+  '0_comment': {
     'font-size': '12px',
     color: 'white'
   },
 
-  captain_message: {
+  '3_message': {
 
   },
-  captain_name: {
+  '3_name': {
     'font-size': '12px',
     '-webkit-text-stroke-width': '1px',
     '-webkit-text-stroke-color': 'green',
     color: 'white'
   },
-  captain_comment: {
+  '3_comment': {
     'font-size': '12px',
     color: 'white'
   },
 
-  admiral_name: {
+  '2_name': {
     'font-size': '12px',
     '-webkit-text-stroke-width': '1px',
     '-webkit-text-stroke-color': 'green',
     color: 'white'
   },
-  admiral_comment: {
+  '2_comment': {
     'font-size': '12px',
     color: 'white'
   },
 
-  governor_name: {
+  '1_name': {
     'font-size': '12px',
     '-webkit-text-stroke-width': '1px',
     '-webkit-text-stroke-color': 'green',
     color: 'white'
   },
-  governor_comment: {
+  '1_comment': {
     'font-size': '12px',
     color: 'white'
   },

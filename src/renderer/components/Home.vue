@@ -99,6 +99,7 @@
 
 <script>
 import { remote } from "electron";
+
 const { BrowserWindow, screen } = remote;
 import emitter, {
   init,
@@ -144,7 +145,7 @@ export default {
       fansClubNumber: 0,
       liveStatus: 0,
       peopleNumber: 0,
-      guardNumber: 0,
+      guardNumber: 0
     };
   },
   created() {
@@ -216,7 +217,7 @@ export default {
           if (gift.type === "superChat") {
             this.sendSuperChat(data);
           } else if (gift.type === "gift") {
-            if (!this.showSilverGift && gift.coinType === "silver") continue;
+            if (!this.isShowSilverGift && gift.coinType === "silver") continue;
             if (gift.coinType === "silver") gift.price = 0;
             this.sendGift(data);
           }
@@ -264,8 +265,8 @@ export default {
     showGiftThreshold() {
       return this.$store.state.Config.showGiftThreshold;
     },
-    showSilverGift() {
-      return this.$store.state.Config.showSilverGift;
+    isShowSilverGift() {
+      return this.$store.state.Config.isShowSilverGift;
     }
   },
   methods: {
@@ -379,7 +380,7 @@ export default {
           : "https://static.hdslb.com/images/member/noface.gif",
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
-        role: GUARD_LEVEL_MAP[payload.guard]
+        role: payload.guard
       });
     },
     sendInteractWord(payload) {

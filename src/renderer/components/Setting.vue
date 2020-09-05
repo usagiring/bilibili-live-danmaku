@@ -3,10 +3,10 @@
     <i-col span="8">
       <Collapse simple :value="collapse">
         <Panel name="1">
-          main
+          设置
           <div slot="content">
             <div class="setting-key-text">
-              <span>背景色</span>
+              <span>窗口背景色</span>
               <ColorPicker
                 :value="background"
                 @on-active-change="updateBackground"
@@ -62,49 +62,48 @@
                 style="width: 100px"
               />
             </div>
-            <Checkbox
-              class="setting-checkbox"
-              :value="showSilverGift"
-              @on-change="changeShowSilverGift"
-            >展示银瓜子礼物</Checkbox>
+            <div>
+              <Checkbox
+                class="setting-checkbox"
+                :value="isShowSilverGift"
+                @on-change="showSilverGift"
+              >展示银瓜子礼物</Checkbox>
+            </div>
+            <div>
+              <Checkbox
+                class="setting-checkbox"
+                :value="isShowMemberShipIcon"
+                @on-change="showMemberShipIcon"
+              >显示舰队图标</Checkbox>
+            </div>
           </div>
         </Panel>
         <Panel name="2">
           普通
           <div slot="content">
-            <template v-for="item in editors.filter(editor=> editor.role === 'normal')">
-              <SettingEditor :key="item.id" v-bind="item" />
+            <template v-for="item in editors.filter(editor=> editor.role === 0)">
+              <div :key="item.id">
+                <SettingEditor v-bind="item" />
+              </div>
             </template>
           </div>
         </Panel>
         <Panel name="3">
           舰长
           <div slot="content">
-            <template v-for="item in editors.filter(editor=> editor.role === 'captain')">
-              <SettingEditor :key="item.id" v-bind="item" />
+            <template v-for="item in editors.filter(editor=> editor.role === 3)">
+              <div :key="item.id">
+                <SettingEditor v-bind="item" />
+              </div>
             </template>
           </div>
         </Panel>
         <Panel name="4">
-          其他
+          高级
           <div slot="content">
-            <!-- <div>
-              <span class="setting-key-text">显示SC区域</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>-->
-
             <div>
-              <span class="setting-key-text">显示舰队图标</span>
-              <i-switch :value="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
+              <Button @click="clear">还原默认设置</Button>
             </div>
-            <!-- <div>
-              <span class="setting-key-text">显示合并弹幕数量</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>
-            <div>
-              <span class="setting-key-text">显示原弹幕颜色</span>
-              <i-switch v-model="isShowMemberShipIcon" @on-change="showMemberShipIcon" />
-            </div>-->
           </div>
         </Panel>
       </Collapse>
@@ -113,8 +112,8 @@
       <div class="setting-right">
         <div class="setting-right-header">
           <Button @click="sendTestMessage">发送测试弹幕</Button>
-          <Button @click="clearExampleDanmaku">还原默认弹幕</Button>
-          <Button @click="clear">还原默认</Button>
+          <Button @click="clearExampleDanmaku">还原默认预览弹幕</Button>
+          <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
         <div class="setting-right-content" :style="{ background: background }">
           <Danmaku :isPreview="true" />
@@ -136,165 +135,164 @@ import { DEFAULT_AVATAR } from "../../service/const";
 export default {
   components: {
     SettingEditor,
-    Danmaku,
+    Danmaku
   },
   data() {
     return {
+      collapse: ["1", "2", "3", "4"],
+
       editors: [
         // ***** normal *****
         {
           id: Math.random(),
           type: "InputNumber",
           name: "名称大小",
-          role: "normal",
+          role: 0,
           prop: "name",
-          styleName: "font-size",
+          styleName: "font-size"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
-          role: "normal",
+          role: 0,
           prop: "name",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: "-webkit-text-stroke-width"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "名称描边颜色",
-          role: "normal",
+          role: 0,
           prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          styleName: "-webkit-text-stroke-color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "名称前景色",
-          role: "normal",
+          role: 0,
           prop: "name",
-          styleName: "color",
+          styleName: "color"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "评论大小",
-          role: "normal",
+          role: 0,
           prop: "comment",
-          styleName: "font-size",
+          styleName: "font-size"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "评论描边大小",
-          role: "normal",
+          role: 0,
           prop: "comment",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: "-webkit-text-stroke-width"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "评论描边颜色",
-          role: "normal",
+          role: 0,
           prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          styleName: "-webkit-text-stroke-color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "评论前景色",
-          role: "normal",
+          role: 0,
           prop: "comment",
-          styleName: "color",
+          styleName: "color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "消息背景色",
-          role: "normal",
+          role: 0,
           prop: "message",
-          styleName: "background",
+          styleName: "background"
         },
         // ***** captain *****
         {
           id: Math.random(),
           type: "InputNumber",
           name: "名称大小",
-          role: "captain",
+          role: 3,
           prop: "name",
-          styleName: "font-size",
+          styleName: "font-size"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
-          role: "captain",
+          role: 3,
           prop: "name",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: "-webkit-text-stroke-width"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "名称描边颜色",
-          role: "captain",
+          role: 3,
           prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          styleName: "-webkit-text-stroke-color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "名称前景色",
-          role: "captain",
+          role: 3,
           prop: "name",
-          styleName: "color",
+          styleName: "color"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "评论大小",
-          role: "captain",
+          role: 3,
           prop: "comment",
-          styleName: "font-size",
+          styleName: "font-size"
         },
         {
           id: Math.random(),
           type: "InputNumber",
           name: "评论描边大小",
-          role: "captain",
+          role: 3,
           prop: "comment",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: "-webkit-text-stroke-width"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "评论描边颜色",
-          role: "captain",
+          role: 3,
           prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          styleName: "-webkit-text-stroke-color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "评论前景色",
-          role: "captain",
+          role: 3,
           prop: "comment",
-          styleName: "color",
+          styleName: "color"
         },
         {
           id: Math.random(),
           type: "ColorPicker",
           name: "消息背景色",
-          role: "captain",
+          role: 3,
           prop: "message",
-          styleName: "background",
-        },
-      ],
-      roomId: null,
-      isConnected: false,
-      collapse: ["1", "2", "3"],
+          styleName: "background"
+        }
+      ]
     };
   },
   computed: {
@@ -325,32 +323,24 @@ export default {
     messages() {
       return this.$store.state.Message.exampleMessages;
     },
-    showSilverGift() {
-      return this.$store.state.Config.showSilverGift;
-    },
+    isShowSilverGift() {
+      return this.$store.state.Config.isShowSilverGift;
+    }
   },
   methods: {
-    async connect(status) {
-      if (status && this.roomId) {
-        await init({ roomId: Number(this.roomId) });
-        this.isConnected = status;
-      } else {
-        close();
-      }
-    },
-    async showMemberShipIcon(status) {
-      await this.$store.dispatch("UPDATE_CONFIG", {
-        isShowMemberShipIcon: status,
+    showMemberShipIcon(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isShowMemberShipIcon: status
       });
     },
-    async showAvatar(status) {
-      await this.$store.dispatch("UPDATE_CONFIG", {
-        isShowAvatar: status,
+    showAvatar(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isShowAvatar: status
       });
     },
     showInteractInfo(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowInteractInfo: status,
+        isShowInteractInfo: status
       });
     },
     sendTestMessage() {
@@ -368,13 +358,13 @@ export default {
     updateBackground(color) {
       this.$store.dispatch("UPDATE_CONTAINER_STYLE", {
         style: {
-          background: color,
-        },
+          background: color
+        }
       });
     },
     changeAvatarSize(size) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        avatarSize: size,
+        avatarSize: size
       });
       if (size === 0) {
         this.showAvatar(false);
@@ -385,30 +375,30 @@ export default {
 
     changeCombineSimilarTime(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        combineSimilarTime: number,
+        combineSimilarTime: number
       });
     },
 
     changeShowGiftThreshold(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        showGiftThreshold: number,
+        showGiftThreshold: number
       });
     },
     changeShowGiftCardThreshold(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        showGiftCardThreshold: number,
+        showGiftCardThreshold: number
       });
     },
-    changeShowSilverGift(status) {
+
+    showSilverGift(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        showSilverGift: status,
+        isShowSilverGift: status
       });
     },
 
     randomMessageGenerator() {
       const randomNumber = Math.floor(Math.random() * 100000000);
-      const roles = ["normal", "governor", "admiral", "captain"];
-      const randomRole = roles[Math.floor(Math.random() * roles.length)];
+      const randomRole = Math.floor(Math.random() * 4);
       const types = ["gift", "comment", "superChat"];
       const randomType = types[Math.floor(Math.random() * types.length)];
       if (randomType === "gift") {
@@ -421,9 +411,9 @@ export default {
           giftNumber: 1,
           giftName: "随机礼物",
           avatar: DEFAULT_AVATAR,
-          role: "captain",
+          role: 3,
           sendAt: new Date() - 0,
-          batchComboId: randomNumber,
+          batchComboId: randomNumber
           // batchComboId: 1,
         };
         gift.role = randomRole;
@@ -439,8 +429,8 @@ export default {
           avatar: DEFAULT_AVATAR,
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
           price: Math.floor(Math.random() * 2000),
-          role: "captain",
-          sendAt: new Date() - 0,
+          role: 3,
+          sendAt: new Date() - 0
         };
         superChat.role = randomRole;
         return superChat;
@@ -454,8 +444,8 @@ export default {
           type: "comment",
           avatar: DEFAULT_AVATAR,
           comment: `一条弹幕哟～`,
-          role: "captain",
-          sendAt: new Date() - 0,
+          role: 3,
+          sendAt: new Date() - 0
         };
         comment.role = randomRole;
         return comment;
@@ -464,9 +454,12 @@ export default {
 
     clearExampleDanmaku() {
       this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
-      this.$store.dispatch("CLEAR_MESSAGE");
     },
-  },
+
+    clearDanmaku() {
+      this.$store.dispatch("CLEAR_MESSAGE");
+    }
+  }
 };
 </script>
 
@@ -486,6 +479,10 @@ export default {
   display: inline-block;
   width: 100px;
   padding-left: 10px;
+}
+
+.setting-right-header {
+  margin: 10px;
 }
 
 .setting-right-content {

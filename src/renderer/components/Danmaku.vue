@@ -73,6 +73,11 @@
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type==='comment'">
             <p :style="getMessageStyleByRole(message)">
+              <i
+                v-if="isShowMemberShipIcon && message.role"
+                class="guard-icon"
+                :style="{'background-image': `url(https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard${message.role}.png@44w_44h.webp)`}"
+              ></i>
               <Avatar v-if="isShowAvatar" :src="message.avatar" :style="avatarSizeStyle" />
               <span
                 :class="`name-${message.role}`"
@@ -88,20 +93,18 @@
           </template>
           <template v-if="message.type==='interactWord'">
             <!-- 入场消息设置默认使用普通设置 -->
-            <p :style="normal_comment">
+            <p :style="'0_comment'">
               <span :style="{color: message.color? message.color:undefined}">{{message.name}}</span>
               {{`${parseMsgType(message.msgType)}直播间`}}
             </p>
           </template>
           <template v-if="message.type==='superChat'">
-            <GiftCard v-bind="message">
-              {{message.comment}}
-            </GiftCard>
+            <GiftCard v-bind="message">{{message.comment}}</GiftCard>
           </template>
           <template v-if="message.type==='gift'">
-            <GiftCard v-bind="message">
-              {{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}
-            </GiftCard>
+            <GiftCard
+              v-bind="message"
+            >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</GiftCard>
           </template>
         </p>
       </transition-group>
@@ -121,66 +124,66 @@ const PRICE_COLOR = {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
     backgroundBottomColor: "#2A60B2",
-    time: 60000,
+    time: 60000
   },
   "2": {
     backgroundColor: "#DBFFFD",
     backgroundPriceColor: "#7DA4BD",
     backgroundBottomColor: "#427D9E",
-    time: 120000,
+    time: 120000
   },
   "3": {
     backgroundColor: "#FFF1C5",
     backgroundPriceColor: "gold",
     backgroundBottomColor: "#E2B52B",
-    time: 300000,
+    time: 300000
   },
   "4": {
     backgroundColor: "rgb(255,234,210)",
     backgroundPriceColor: "rgb(255,234,210)",
     backgroundBottomColor: "rgb(244,148,67)",
-    time: 1800000,
+    time: 1800000
   },
   "5": {
     backgroundColor: "rgb(255,231,228)",
     backgroundPriceColor: "rgb(255,231,228)",
     backgroundBottomColor: "rgb(229,77,77)",
-    time: 3600000,
+    time: 3600000
   },
   "6": {
     backgroundColor: "rgb(255,216,216)",
     backgroundPriceColor: "rgb(255,216,216)",
     backgroundBottomColor: "rgb(171,26,50)",
-    time: 7200000,
-  },
+    time: 7200000
+  }
 };
 
 export default {
   components: {
     SimilarCommentBadge,
-    GiftCard,
+    GiftCard
   },
   props: ["isPreview", "isSingleWindow"],
   data() {
     return {
       giftHover: [],
-      DEFAULT_AVATAR,
+      DEFAULT_AVATAR
     };
   },
   watch: {
-    gifts: function (newGifts, oldGifts) {
+    gifts: function(newGifts, oldGifts) {
       const newIds = difference(
-        newGifts.map((gift) => gift.id),
-        oldGifts.map((gift) => gift.id)
+        newGifts.map(gift => gift.id),
+        oldGifts.map(gift => gift.id)
       );
       if (!newIds.length) return;
       this.giftHover = [...this.giftHover, ...newIds];
-      newIds.forEach((newId) => {
+      newIds.forEach(newId => {
         setTimeout(() => {
-          this.giftHover = this.giftHover.filter((id) => id !== newId);
+          this.giftHover = this.giftHover.filter(id => id !== newId);
         }, 5000);
       });
-    },
+    }
   },
   computed: {
     isAlwaysOnTop() {
@@ -200,7 +203,7 @@ export default {
       return {
         width: `${avatarSize}px`,
         height: `${avatarSize}px`,
-        "line-height": `${avatarSize}px`,
+        "line-height": `${avatarSize}px`
       };
     },
 
@@ -209,15 +212,15 @@ export default {
         ? this.$store.state.Message.exampleMessages
         : this.$store.state.Message.messages;
       return messages
-        .filter((message) => {
+        .filter(message => {
           return (
             !message.totalPrice ||
             message.totalPrice > this.showGiftCardThreshold
           );
         })
-        .map((message) => {
+        .map(message => {
           return Object.assign({}, message, {
-            priceProperties: this.parsePriceColor(message.totalPrice) || {},
+            priceProperties: this.parsePriceColor(message.totalPrice) || {}
           });
         })
         .reverse();
@@ -228,12 +231,12 @@ export default {
         ? this.$store.state.Message.exampleGifts
         : this.$store.state.Message.gifts;
       return gifts
-        .map((gift) => {
+        .map(gift => {
           return Object.assign({}, gift, {
-            priceProperties: this.parsePriceColor(gift.totalPrice) || {},
+            priceProperties: this.parsePriceColor(gift.totalPrice) || {}
           });
         })
-        .filter((gift) => {
+        .filter(gift => {
           return gift.sendAt + gift.priceProperties.time > new Date() - 0;
         })
         .reverse();
@@ -241,46 +244,46 @@ export default {
       // TODO: 清理时间到达消失的GIFT
     },
 
-    normal_message() {
-      return this.$store.state.Config.normal_message;
+    "0_message"() {
+      return this.$store.state.Config["0_message"];
     },
-    normal_name() {
-      return this.$store.state.Config.normal_name;
+    "0_name"() {
+      return this.$store.state.Config["0_name"];
     },
-    normal_comment() {
-      return this.$store.state.Config.normal_comment;
+    "0_comment"() {
+      return this.$store.state.Config["0_comment"];
     },
 
-    captain_message() {
-      return this.$store.state.Config.captain_message;
+    "3_message"() {
+      return this.$store.state.Config["3_message"];
     },
-    captain_name() {
-      return this.$store.state.Config.captain_name;
+    "3_name"() {
+      return this.$store.state.Config["3_name"];
     },
-    captain_comment() {
-      return this.$store.state.Config.captain_comment;
+    "3_comment"() {
+      return this.$store.state.Config["3_comment"];
     },
 
     // 提督和总督暂时使用舰长配置
-    admiral_message() {
-      return this.$store.state.Config.captain_message;
+    "2_message"() {
+      return this.$store.state.Config["2_message"];
     },
-    admiral_name() {
-      return this.$store.state.Config.captain_name;
+    "2_name"() {
+      return this.$store.state.Config["2_name"];
     },
-    admiral_comment() {
-      return this.$store.state.Config.captain_comment;
+    "2_comment"() {
+      return this.$store.state.Config["2_comment"];
     },
 
-    governor_message() {
-      return this.$store.state.Config.captain_message;
+    "1_message"() {
+      return this.$store.state.Config["1_message"];
     },
-    governor_name() {
-      return this.$store.state.Config.captain_name;
+    "1_name"() {
+      return this.$store.state.Config["1_name"];
     },
-    governor_comment() {
-      return this.$store.state.Config.captain_comment;
-    },
+    "1_comment"() {
+      return this.$store.state.Config["1_comment"];
+    }
   },
   mounted() {},
   methods: {
@@ -330,7 +333,7 @@ export default {
       this.giftHover = [...this.giftHover, giftId];
     },
     unhoverGift(giftId) {
-      this.giftHover = this.giftHover.filter((id) => id !== giftId);
+      this.giftHover = this.giftHover.filter(id => id !== giftId);
     },
     widthCalculator(gift) {
       if (Number(gift.existsTime) && Number(gift.priceProperties.time)) {
@@ -352,8 +355,8 @@ export default {
     giftScroll(e) {
       const el = document.getElementById("gift-show-content-wrapper");
       el.scrollLeft += e.deltaY;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -469,6 +472,14 @@ export default {
   width: 100%;
   padding: 5px 0;
   position: relative;
+}
+.guard-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: middle;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .fade-enter-active,

@@ -158,3 +158,5 @@ sc
 "background_color":"#EDF5FF","background_icon":"","background_price_color":"#7497CD","background_bottom_color":"#2A60B2"
 "background_color":"#DBFFFD","background_icon":"","background_price_color":"#7DA4BD","background_bottom_color":"#427D9E",
 "background_color":"#FFF1C5","background_icon":"","background_price_color":"#ECCF75","background_bottom_color":"#E2B52B",
+
+background-image: url("https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp");

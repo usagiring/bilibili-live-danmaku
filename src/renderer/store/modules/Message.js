@@ -1,50 +1,51 @@
+const EXAMPLE_MESSAGES = [
+  {
+    id: 1,
+    type: "comment",
+    uid: "12345",
+    name: "bli_22222222222",
+    comment: "草",
+    avatar: "https://static.hdslb.com/images/member/noface.gif",
+    role: 3,
+    similar: 1
+  },
+  {
+    id: 2,
+    uid: "12346",
+    name: "bli_11111111111",
+    type: "comment",
+    comment: "？？？？？？？？",
+    avatar: "https://static.hdslb.com/images/member/noface.gif",
+    role: 0
+  },
+  {
+    id: 6,
+    uid: "12345",
+    name: "bli_22222222222",
+    type: "superChat",
+    comment: "8888888888888888888",
+    price: 50,
+    totalPrice: 50,
+    avatar: "https://static.hdslb.com/images/member/noface.gif",
+    role: 0
+  },
+  {
+    id: 7,
+    type: "gift",
+    uid: 12345,
+    name: 'bli_11111111111',
+    avatar: "https://static.hdslb.com/images/member/noface.gif",
+    price: 6,
+    giftNumber: 50,
+    totalPrice: 300,
+    giftName: '小红花'
+  }
+]
+
 const state = {
   messages: [],
   gifts: [],
-  exampleMessages: [
-    {
-      id: 1,
-      type: "comment",
-      uid: "12345",
-      name: "oooovknkdnkjedbiowq",
-      comment: "草",
-      avatar: "https://static.hdslb.com/images/member/noface.gif",
-      role: "captain",
-      similar: 1
-    },
-    {
-      id: 2,
-      uid: "12346",
-      name: "fojfwqpojpofsc",
-      type: "comment",
-      comment: "我就是Hololive！！！",
-      avatar: "https://static.hdslb.com/images/member/noface.gif",
-      role: "normal"
-    },
-    {
-      id: 6,
-      uid: "12345",
-      name: "fjsojjfowqrwsfwq",
-      type: "superChat",
-      comment: "草草草草草草草草草草草",
-      price: 50,
-      totalPrice: 50,
-      avatar: "https://static.hdslb.com/images/member/noface.gif",
-      role: "normal"
-    },
-    {
-      id: 7,
-      type: "gift",
-      uid: 12345,
-      name: 'fjsojjfowqrwsfwq',
-      avatar: "https://static.hdslb.com/images/member/noface.gif",
-
-      price: 6,
-      giftNumber: 50,
-      totalPrice: 300,
-      giftName: '小红花'
-    }
-  ],
+  exampleMessages: [...EXAMPLE_MESSAGES],
   exampleGifts: [
     // {
     //   id: 6,
@@ -139,50 +140,7 @@ const mutations = {
   },
 
   RESTORE_EXAMPLE_MESSAGE(state) {
-    state.exampleMessages = [
-      {
-        id: 1,
-        type: "comment",
-        uid: "12345",
-        name: "oooovknkdnkjedbiowq",
-        comment: "草",
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        role: "captain",
-        similar: 1
-      },
-      {
-        id: 2,
-        uid: "12346",
-        name: "fojfwqpojpofsc",
-        type: "comment",
-        comment: "我就是Hololive！！！",
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        role: "normal"
-      },
-      {
-        id: 6,
-        uid: "12345",
-        name: "fjsojjfowqrwsfwq",
-        type: "superChat",
-        comment: "草草草草草草草草草草草",
-        price: 50,
-        totalPrice: 50,
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-        role: "normal"
-      },
-      {
-        id: 7,
-        type: "gift",
-        uid: 12345,
-        name: 'fjsojjfowqrwsfwq',
-        avatar: "https://static.hdslb.com/images/member/noface.gif",
-
-        price: 6,
-        giftNumber: 50,
-        totalPrice: 300,
-        giftName: '小红花'
-      }
-    ]
+    state.exampleMessages = [...EXAMPLE_MESSAGES],
     state.exampleGifts = []
   },
 
