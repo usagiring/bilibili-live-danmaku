@@ -141,7 +141,7 @@ const mutations = {
 
   RESTORE_EXAMPLE_MESSAGE(state) {
     state.exampleMessages = [...EXAMPLE_MESSAGES],
-    state.exampleGifts = []
+      state.exampleGifts = []
   },
 
   GIFT_TIMER(state, payload) {
@@ -201,13 +201,12 @@ const actions = {
           giftNumber,
           index: messages.length - 1 - giftIndex
         }
-        if (gift.price) {
-          const totalPrice = Number((giftNumber || 1) * gift.price)
-          update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-          const showGiftThreshold = rootState.Config.showGiftThreshold
-          if (update.totalPrice >= showGiftThreshold) {
-            commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
-          }
+        gift.price = gift.price || 0
+        const totalPrice = Number((giftNumber || 1) * gift.price)
+        update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+        const showGiftThreshold = rootState.Config.showGiftThreshold
+        if (update.totalPrice >= showGiftThreshold) {
+          commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
         }
         commit('UPDATE_EXAMPLE_MESSAGE', update)
         return
@@ -229,14 +228,14 @@ const actions = {
       }
     }
 
-    if (payload.price) {
-      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
-      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-      const showGiftThreshold = rootState.Config.showGiftThreshold
-      if (payload.totalPrice >= showGiftThreshold) {
-        commit('ADD_EXAMPLE_GIFT', payload)
-      }
+    payload.price = payload.price || 0
+    const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+    payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+    const showGiftThreshold = rootState.Config.showGiftThreshold
+    if (payload.totalPrice >= showGiftThreshold) {
+      commit('ADD_EXAMPLE_GIFT', payload)
     }
+
     commit('ADD_EXAMPLE_MESSAGE', payload)
   },
   ADD_MESSAGE({ state, commit, rootState }, payload) {
@@ -281,26 +280,26 @@ const actions = {
           giftNumber,
           index: messages.length - 1 - giftIndex
         }
-        if (gift.price) {
-          const totalPrice = Number((giftNumber || 1) * gift.price)
-          update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-          const showGiftThreshold = rootState.Config.showGiftThreshold
-          // TODO FIX 这里也需要叠加处理
-          if (update.totalPrice >= showGiftThreshold) {
-            const gifts = [...state.gifts]
-            const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
-            if (~existsGiftIndex) {
-              commit('UPDATE_GIFT', {
-                id: gift.id,
-                index: existsGiftIndex,
-                totalPrice: update.totalPrice,
-                giftNumber
-              })
-            } else {
-              commit('ADD_GIFT', Object.assign({}, gift, update))
-            }
+        gift.price = gift.price || 0
+        const totalPrice = Number((giftNumber || 1) * gift.price)
+        update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+        const showGiftThreshold = rootState.Config.showGiftThreshold
+        // 这里也需要叠加处理
+        if (update.totalPrice >= showGiftThreshold) {
+          const gifts = [...state.gifts]
+          const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
+          if (~existsGiftIndex) {
+            commit('UPDATE_GIFT', {
+              id: gift.id,
+              index: existsGiftIndex,
+              totalPrice: update.totalPrice,
+              giftNumber
+            })
+          } else {
+            commit('ADD_GIFT', Object.assign({}, gift, update))
           }
         }
+
         commit('UPDATE_MESSAGE', update)
         return
       }
@@ -322,14 +321,14 @@ const actions = {
       }
     }
 
-    if (payload.price) {
-      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
-      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-      const showGiftThreshold = rootState.Config.showGiftThreshold
-      if (payload.totalPrice >= showGiftThreshold) {
-        commit('ADD_GIFT', payload)
-      }
+    payload.price = payload.price || 0
+    const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+    payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+    const showGiftThreshold = rootState.Config.showGiftThreshold
+    if (payload.totalPrice >= showGiftThreshold) {
+      commit('ADD_GIFT', payload)
     }
+
 
     commit('ADD_MESSAGE', payload)
   },

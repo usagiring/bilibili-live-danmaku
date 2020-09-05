@@ -266,23 +266,23 @@ export default {
 
     // 提督和总督暂时使用舰长配置
     "2_message"() {
-      return this.$store.state.Config["2_message"];
+      return this.$store.state.Config["3_message"];
     },
     "2_name"() {
-      return this.$store.state.Config["2_name"];
+      return this.$store.state.Config["3_name"];
     },
     "2_comment"() {
-      return this.$store.state.Config["2_comment"];
+      return this.$store.state.Config["3_comment"];
     },
 
     "1_message"() {
-      return this.$store.state.Config["1_message"];
+      return this.$store.state.Config["3_message"];
     },
     "1_name"() {
-      return this.$store.state.Config["1_name"];
+      return this.$store.state.Config["3_name"];
     },
     "1_comment"() {
-      return this.$store.state.Config["1_comment"];
+      return this.$store.state.Config["3_comment"];
     }
   },
   mounted() {},
