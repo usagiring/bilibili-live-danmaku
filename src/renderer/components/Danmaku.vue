@@ -73,12 +73,12 @@
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type==='comment'">
             <p :style="getMessageStyleByRole(message)">
+              <Avatar v-if="isShowAvatar" :src="message.avatar" :style="avatarSizeStyle" />
               <i
                 v-if="isShowMemberShipIcon && message.role"
                 class="guard-icon"
                 :style="{'background-image': `url(https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard${message.role}.png@44w_44h.webp)`}"
               ></i>
-              <Avatar v-if="isShowAvatar" :src="message.avatar" :style="avatarSizeStyle" />
               <span
                 :class="`name-${message.role}`"
                 :style="getNameStyleByRole(message)"
