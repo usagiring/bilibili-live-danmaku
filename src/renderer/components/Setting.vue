@@ -104,6 +104,12 @@
             <div>
               <Button @click="clear">还原默认设置</Button>
             </div>
+            <div>
+              <Button>刷新直播间信息</Button>
+            </div>
+            <div>
+              <Button>备份并清理数据库</Button>
+            </div>
           </div>
         </Panel>
       </Collapse>

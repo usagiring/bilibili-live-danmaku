@@ -110,7 +110,7 @@ const mutations = {
   },
 
   ADD_EXAMPLE_GIFT(state, payload) {
-    if (state.exampleGifts.length > 999) {
+    if (state.exampleGifts.length > 99) {
       state.exampleGifts = [...state.exampleGifts.slice(1), payload]
     } else {
       state.exampleGifts = [...state.exampleGifts, payload]
@@ -118,7 +118,7 @@ const mutations = {
   },
 
   ADD_GIFT(state, payload) {
-    if (state.gifts.length > 999) {
+    if (state.gifts.length > 99) {
       state.gifts = [...state.gifts.slice(1), payload]
     } else {
       state.gifts = [...state.gifts, payload]

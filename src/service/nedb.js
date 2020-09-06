@@ -11,6 +11,12 @@ giftDB.loadDatabase();
 interactDB.loadDatabase();
 
 giftDB.ensureIndex({
+  fieldName: 'uid',
+})
+giftDB.ensureIndex({
+  fieldName: 'roomId',
+})
+giftDB.ensureIndex({
   fieldName: 'sendAt',
 })
 
@@ -50,6 +56,16 @@ export default {
   giftDB: wrapper(giftDB),
   interactDB: wrapper(interactDB),
   otherDB: wrapper(otherDB),
+  executor
+}
+
+function executor(cursor) {
+  return new Promise((resolve, reject) => {
+    cursor.exec((err, docs) => {
+      if (err) reject(err)
+      resolve(docs)
+    })
+  })
 }
 
 function wrapper(db) {
@@ -62,9 +78,23 @@ function wrapper(db) {
         })
       })
     },
-    find: (query) => {
+    find: (query, options = {}) => {
+      const { skip, limit, sort, projection } = options
       return new Promise((resolve, reject) => {
-        db.find(query, (err, docs) => {
+        let cursor = db.find(query)
+        if (projection) {
+          cursor = cursor.projection(projection)
+        }
+        if (sort) {
+          cursor = cursor.sort(sort)
+        }
+        if (skip) {
+          cursor = cursor.skip(skip)
+        }
+        if (limit) {
+          cursor = cursor.limit(limit)
+        }
+        cursor.exec((err, docs) => {
           if (err) reject(err)
           resolve(docs)
         })

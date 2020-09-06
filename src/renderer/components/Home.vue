@@ -68,7 +68,8 @@
           <div>
             <span>连接直播间</span>
             <InputNumber
-              v-model="roomId"
+              :value="roomId"
+              @on-change="changeRoomId"
               placeholder="请输入房间号"
               size="small"
               :disabled="isConnected"
@@ -88,9 +89,7 @@
           </div>
         </div>
         <Content class="layout-content">
-          <div>
-            <router-view></router-view>
-          </div>
+          <router-view :style="{height: '100%'}"></router-view>
         </Content>
       </Layout>
     </Layout>
@@ -98,8 +97,8 @@
 </template>
 
 <script>
+import { uniq } from "lodash";
 import { remote } from "electron";
-
 const { BrowserWindow, screen } = remote;
 import emitter, {
   init,
@@ -115,7 +114,6 @@ import {
 } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
-import { uniq } from "lodash";
 const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 let isGetUserInfoLocked = false;
 
@@ -130,7 +128,6 @@ export default {
   data() {
     return {
       isCollapsed: true,
-      roomId: 21449083,
       isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -247,6 +244,9 @@ export default {
     });
   },
   computed: {
+    roomId() {
+      return this.$store.state.Config.roomId;
+    },
     menuitemClasses: function() {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
     },
@@ -304,9 +304,9 @@ export default {
 
         const guardInfo = await getGuardInfo(roomId, uid);
         this.guardNumber = guardInfo.data.info.num;
-        // TODO 记录上一次设置房间号
+
         // this.$store.dispatch("UPDATE_CONFIG", {
-        //   previousRoomId: roomId,
+        //   connectedAt: new Date()
         // });
       } else {
         close();
@@ -443,6 +443,12 @@ export default {
         sex: data.sex,
         level: data.level
       };
+    },
+
+    changeRoomId(roomId) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        roomId: roomId
+      });
     },
 
     async getUserInfoThrottle(uid) {
