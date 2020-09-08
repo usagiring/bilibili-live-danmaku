@@ -9,6 +9,7 @@ const state = {
   isShowInteractInfo: false,
   showGiftCardThreshold: 0,
   isShowSilverGift: false,
+  guardNumber: 0,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"

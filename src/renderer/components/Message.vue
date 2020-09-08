@@ -13,7 +13,7 @@
         @on-clear="clearDateRange"
       ></DatePicker>
       <Input v-model="userId" placeholder="UserId" clearable style="width: 100px" size="small" />
-      <Button type="primary" shape="circle" icon="ios-search" @click="search"></Button>
+      <Button type="primary" shape="circle" icon="ios-search" @click="searchAll"></Button>
       <Checkbox
         class="setting-checkbox"
         :value="isShowUserSpaceLink"
@@ -40,7 +40,8 @@
                     ></i>
                     <span
                       v-if="comment.medalLevel && comment.medalName"
-                    >{{`[${comment.medalName}${comment.medalLevel}]`}}</span>
+                      class="medal-style"
+                    >{{`${comment.medalName}${comment.medalLevel}`}}</span>
                     <span>{{`${comment.name}`}}</span>
                     <span v-if="isShowUserSpaceLink">{{`(${comment.uid})`}}</span>
                     <span>{{`: ${comment.comment}`}}</span>
@@ -48,7 +49,22 @@
                 </template>
               </Scroll>
             </div>
-            <div slot="bottom" class="split-pane"></div>
+            <div slot="bottom" class="split-pane" id="split-left-bottom">
+              <Scroll
+                :on-reach-edge="handleReachEdge2"
+                :height="scrollHeight2"
+                :distance-to-edge="[10,10]"
+              >
+                <template v-for="interact in interacts">
+                  <div :key="interact._id">
+                    <span>{{(new Date(interact.sendAt)).toLocaleString()}}</span>
+                    <span>{{`${interact.name}`}}</span>
+                    <span v-if="isShowUserSpaceLink">{{`(${interact.uid})`}}</span>
+                    <!-- <span>{{`: ${interact.comment}`}}</span> -->
+                  </div>
+                </template>
+              </Scroll>
+            </div>
           </Split>
         </div>
         <div slot="right" class="split-pane"></div>
@@ -71,7 +87,7 @@ export default {
       dateRange: [],
       comments: [],
       isShowUserSpaceLink: true,
-      scrollHeight: 300
+      scrollHeight: 300,
     };
   },
   created() {
@@ -86,12 +102,11 @@ export default {
     changeDateRange([startTime, endTime]) {
       this.dateRange = [new Date(startTime), new Date(endTime)];
     },
-    async search(options) {
-      const comments = await this.__search(options);
-      console.log(comments);
+    async searchAll(options) {
+      const comments = await this.searchComment(options);
       this.comments = comments;
     },
-    async __search(options = {}) {
+    async searchComment(options = {}) {
       const { sort, skip, limit, scrollToken } = options;
       if (scrollToken) {
       }
@@ -102,7 +117,7 @@ export default {
       if (this.dateRange.length) {
         query.sendAt = {
           $gte: this.dateRange[0].getTime(),
-          $lte: this.dateRange[1].getTime()
+          $lte: this.dateRange[1].getTime(),
         };
       }
       if (this.userId) {
@@ -116,7 +131,7 @@ export default {
       console.log(query);
       const comments = await commentDB.find(query, {
         sort: sort || { sendAt: -1 },
-        limit: 20
+        limit: 20,
       });
       return comments;
     },
@@ -125,16 +140,21 @@ export default {
         // 向上
         if (dir > 0) {
           const firstComment = this.comments[0];
-          const comments = await this.__search({
+          const comments = await this.searchComment({
             scrollToken: `$gt:${firstComment.sendAt}`,
-            sort: { sendAt: 1 }
+            sort: { sendAt: 1 },
           });
           comments.reverse();
-          console.log(comments);
           this.comments = [...comments, ...this.comments];
         }
         // 向下
         if (dir < 0) {
+          const lastComment = this.comments[this.comments.length - 1];
+          const comments = await this.searchComment({
+            scrollToken: `$lt:${lastComment.sendAt}`,
+            sort: { sendAt: -1 },
+          });
+          this.comments = [...this.comments, ...comments];
         }
         resolve();
       });
@@ -145,13 +165,26 @@ export default {
     splitLeftMoving(e) {
       const doc = document.getElementById("split-left-top");
       this.scrollHeight = doc.clientHeight;
+      const doc2 = document.getElementById("split-left-bottom");
+      this.scrollHeight2 = doc.clientHeight;
     },
     clearDateRange() {
-      setTimeout(()=> {
-      this.dateRange = []
-      },0)
-    }
-  }
+      setTimeout(() => {
+        this.dateRange = [];
+      }, 0);
+    },
+    handleReachEdge2() {
+      return new Promise(async (resolve, reject) => {
+        // 向上
+        if (dir > 0) {
+        }
+        // 向下
+        if (dir < 0) {
+        }
+        resolve();
+      });
+    },
+  },
 };
 </script>
 
@@ -186,11 +219,15 @@ export default {
 }
 
 .guard-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   vertical-align: middle;
   background-size: contain;
   background-repeat: no-repeat;
+}
+.medal-style {
+  font-size: 12px;
+  align-content: center;
 }
 </style>

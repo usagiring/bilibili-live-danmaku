@@ -102,13 +102,16 @@
           高级
           <div slot="content">
             <div>
-              <Button @click="clear">还原默认设置</Button>
+              <Button @click="clearAllSetting">还原默认设置</Button>
             </div>
             <div>
-              <Button>刷新直播间信息</Button>
+              <Button @click="refreshInfo">刷新直播间信息</Button>
             </div>
             <div>
-              <Button>备份并清理数据库</Button>
+              <Button @click="backupAndClearDB">备份并清理数据库</Button>
+            </div>
+            <div>
+              <Button @click="clearUserDB">清理用户缓存</Button>
             </div>
           </div>
         </Panel>
@@ -141,7 +144,7 @@ import { DEFAULT_AVATAR } from "../../service/const";
 export default {
   components: {
     SettingEditor,
-    Danmaku
+    Danmaku,
   },
   data() {
     return {
@@ -155,7 +158,7 @@ export default {
           name: "名称大小",
           role: 0,
           prop: "name",
-          styleName: "font-size"
+          styleName: "font-size",
         },
         {
           id: Math.random(),
@@ -164,7 +167,7 @@ export default {
           role: 0,
           prop: "name",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width"
+          styleName: "-webkit-text-stroke-width",
         },
         {
           id: Math.random(),
@@ -172,7 +175,7 @@ export default {
           name: "名称描边颜色",
           role: 0,
           prop: "name",
-          styleName: "-webkit-text-stroke-color"
+          styleName: "-webkit-text-stroke-color",
         },
         {
           id: Math.random(),
@@ -180,7 +183,7 @@ export default {
           name: "名称前景色",
           role: 0,
           prop: "name",
-          styleName: "color"
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -188,7 +191,7 @@ export default {
           name: "评论大小",
           role: 0,
           prop: "comment",
-          styleName: "font-size"
+          styleName: "font-size",
         },
         {
           id: Math.random(),
@@ -197,7 +200,7 @@ export default {
           role: 0,
           prop: "comment",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width"
+          styleName: "-webkit-text-stroke-width",
         },
         {
           id: Math.random(),
@@ -205,7 +208,7 @@ export default {
           name: "评论描边颜色",
           role: 0,
           prop: "comment",
-          styleName: "-webkit-text-stroke-color"
+          styleName: "-webkit-text-stroke-color",
         },
         {
           id: Math.random(),
@@ -213,7 +216,7 @@ export default {
           name: "评论前景色",
           role: 0,
           prop: "comment",
-          styleName: "color"
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -221,7 +224,7 @@ export default {
           name: "消息背景色",
           role: 0,
           prop: "message",
-          styleName: "background"
+          styleName: "background",
         },
         // ***** captain *****
         {
@@ -230,7 +233,7 @@ export default {
           name: "名称大小",
           role: 3,
           prop: "name",
-          styleName: "font-size"
+          styleName: "font-size",
         },
         {
           id: Math.random(),
@@ -239,7 +242,7 @@ export default {
           role: 3,
           prop: "name",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width"
+          styleName: "-webkit-text-stroke-width",
         },
         {
           id: Math.random(),
@@ -247,7 +250,7 @@ export default {
           name: "名称描边颜色",
           role: 3,
           prop: "name",
-          styleName: "-webkit-text-stroke-color"
+          styleName: "-webkit-text-stroke-color",
         },
         {
           id: Math.random(),
@@ -255,7 +258,7 @@ export default {
           name: "名称前景色",
           role: 3,
           prop: "name",
-          styleName: "color"
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -263,7 +266,7 @@ export default {
           name: "评论大小",
           role: 3,
           prop: "comment",
-          styleName: "font-size"
+          styleName: "font-size",
         },
         {
           id: Math.random(),
@@ -272,7 +275,7 @@ export default {
           role: 3,
           prop: "comment",
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width"
+          styleName: "-webkit-text-stroke-width",
         },
         {
           id: Math.random(),
@@ -280,7 +283,7 @@ export default {
           name: "评论描边颜色",
           role: 3,
           prop: "comment",
-          styleName: "-webkit-text-stroke-color"
+          styleName: "-webkit-text-stroke-color",
         },
         {
           id: Math.random(),
@@ -288,7 +291,7 @@ export default {
           name: "评论前景色",
           role: 3,
           prop: "comment",
-          styleName: "color"
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -296,9 +299,9 @@ export default {
           name: "消息背景色",
           role: 3,
           prop: "message",
-          styleName: "background"
-        }
-      ]
+          styleName: "background",
+        },
+      ],
     };
   },
   computed: {
@@ -331,22 +334,22 @@ export default {
     },
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
-    }
+    },
   },
   methods: {
     showMemberShipIcon(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowMemberShipIcon: status
+        isShowMemberShipIcon: status,
       });
     },
     showAvatar(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowAvatar: status
+        isShowAvatar: status,
       });
     },
     showInteractInfo(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowInteractInfo: status
+        isShowInteractInfo: status,
       });
     },
     sendTestMessage() {
@@ -356,7 +359,7 @@ export default {
       );
     },
 
-    clear() {
+    clearAllSetting() {
       const store = new Store({ name: "vuex" });
       store.clear();
     },
@@ -364,13 +367,13 @@ export default {
     updateBackground(color) {
       this.$store.dispatch("UPDATE_CONTAINER_STYLE", {
         style: {
-          background: color
-        }
+          background: color,
+        },
       });
     },
     changeAvatarSize(size) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        avatarSize: size
+        avatarSize: size,
       });
       if (size === 0) {
         this.showAvatar(false);
@@ -381,24 +384,24 @@ export default {
 
     changeCombineSimilarTime(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        combineSimilarTime: number
+        combineSimilarTime: number,
       });
     },
 
     changeShowGiftThreshold(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        showGiftThreshold: number
+        showGiftThreshold: number,
       });
     },
     changeShowGiftCardThreshold(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        showGiftCardThreshold: number
+        showGiftCardThreshold: number,
       });
     },
 
     showSilverGift(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        isShowSilverGift: status
+        isShowSilverGift: status,
       });
     },
 
@@ -419,7 +422,7 @@ export default {
           avatar: DEFAULT_AVATAR,
           role: 3,
           sendAt: new Date() - 0,
-          batchComboId: randomNumber
+          batchComboId: randomNumber,
           // batchComboId: 1,
         };
         gift.role = randomRole;
@@ -436,7 +439,7 @@ export default {
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
           price: Math.floor(Math.random() * 2000),
           role: 3,
-          sendAt: new Date() - 0
+          sendAt: new Date() - 0,
         };
         superChat.role = randomRole;
         return superChat;
@@ -451,7 +454,7 @@ export default {
           avatar: DEFAULT_AVATAR,
           comment: `一条弹幕哟～`,
           role: 3,
-          sendAt: new Date() - 0
+          sendAt: new Date() - 0,
         };
         comment.role = randomRole;
         return comment;
@@ -464,8 +467,26 @@ export default {
 
     clearDanmaku() {
       this.$store.dispatch("CLEAR_MESSAGE");
-    }
-  }
+    },
+
+    async refreshInfo() {
+      // 暂时只刷新舰长数
+      const guardInfo = await getGuardInfo(roomId, uid);
+      this.$store.dispatch("UPDATE_CONFIG", {
+        guardNumber: guardInfo.data.info.num,
+      });
+    },
+
+    async backupAndClearDB() {
+      // TODO 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
+      // const result = await commentDB.remove({},{multi: true})
+    },
+
+    async clearUserDB() {
+      // 清空用户数据缓存
+      // TODO user 清空
+    },
+  },
 };
 </script>
 

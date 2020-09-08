@@ -105,12 +105,12 @@ import emitter, {
   close,
   parseComment,
   parseInteractWord,
-  parseGift
+  parseGift,
 } from "../../service/bilibili-live-ws";
 import {
   getRoomInfoV2,
   getUserInfo,
-  getGuardInfo
+  getGuardInfo,
 } from "../../service/bilibili-api";
 import Store from "electron-store";
 import db from "../../service/nedb";
@@ -118,10 +118,10 @@ const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 let isGetUserInfoLocked = false;
 
 const GUARD_LEVEL_MAP = {
-  "0": "normal",
-  "1": "governor",
-  "2": "admiral",
-  "3": "captain"
+  0: "normal",
+  1: "governor",
+  2: "admiral",
+  3: "captain",
 };
 
 export default {
@@ -142,14 +142,14 @@ export default {
       fansClubNumber: 0,
       liveStatus: 0,
       peopleNumber: 0,
-      guardNumber: 0
+      // guardNumber: 0,
     };
   },
   created() {
-    emitter.on("message", async data => {
+    emitter.on("message", async (data) => {
       if (Array.isArray(data)) {
         const comments = data
-          .filter(msg => msg.cmd === "DANMU_MSG")
+          .filter((msg) => msg.cmd === "DANMU_MSG")
           .map(parseComment);
 
         for (const comment of comments) {
@@ -178,7 +178,7 @@ export default {
         }
 
         const interactWords = data
-          .filter(msg => msg.cmd === "INTERACT_WORD")
+          .filter((msg) => msg.cmd === "INTERACT_WORD")
           .map(parseInteractWord);
 
         for (const interactWord of interactWords) {
@@ -220,7 +220,7 @@ export default {
           }
         }
 
-        data.forEach(msg => {
+        data.forEach((msg) => {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
@@ -233,13 +233,13 @@ export default {
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
         } else {
-          console.log(data);
+          // console.log(data);
           otherDB.insert(data);
         }
       }
     });
 
-    emitter.on("ninki", async data => {
+    emitter.on("ninki", async (data) => {
       this.ninkiNumber = data.count;
     });
   },
@@ -247,7 +247,7 @@ export default {
     roomId() {
       return this.$store.state.Config.roomId;
     },
-    menuitemClasses: function() {
+    menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
     },
     isShowAvatar() {
@@ -267,7 +267,10 @@ export default {
     },
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
-    }
+    },
+    guardNumber() {
+      return this.$store.state.Config.guardNumber;
+    },
   },
   methods: {
     async connect(status) {
@@ -285,7 +288,7 @@ export default {
           description,
           live_status: liveStatus,
           live_start_time, // 直播开始时间 unixtime
-          online
+          online,
         } = data.room_info;
 
         await init({ roomId: Number(roomId), uid: 0 });
@@ -303,11 +306,10 @@ export default {
         this.liveStatus = liveStatus;
 
         const guardInfo = await getGuardInfo(roomId, uid);
-        this.guardNumber = guardInfo.data.info.num;
-
-        // this.$store.dispatch("UPDATE_CONFIG", {
-        //   connectedAt: new Date()
-        // });
+        // this.guardNumber = guardInfo.data.info.num;
+        this.$store.dispatch("UPDATE_CONFIG", {
+          guardNumber: guardInfo.data.info.num,
+        });
       } else {
         close();
         this.username = "";
@@ -316,6 +318,11 @@ export default {
         this.fansNumber = 0;
         this.fansClubNumber = 0;
         this.liveStatus = 0;
+        this.peopleNumber = 0;
+
+        this.$store.dispatch("UPDATE_CONFIG", {
+          guardNumber: 0,
+        });
       }
     },
     showDanmakuWindow(status) {
@@ -333,9 +340,9 @@ export default {
           transparent: true,
           hasShadow: false,
           webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
           },
-          resizable: true
+          resizable: true,
         });
 
         const winURL =
@@ -343,7 +350,7 @@ export default {
             ? `http://localhost:9080/#/danmaku-window`
             : `file://${__dirname}/index.html/#/danmaku-window`;
         this.win.loadURL(winURL);
-        this.win.on("close", e => {
+        this.win.on("close", (e) => {
           this.isShowDanmakuWindow = false;
           this.isShowDanmakuWindowLoading = false;
         });
@@ -363,7 +370,7 @@ export default {
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status, { forward: true });
       this.$store.dispatch("UPDATE_CONFIG", {
-        isAlwaysOnTop: status
+        isAlwaysOnTop: status,
       });
     },
     sendComment(payload) {
@@ -380,7 +387,7 @@ export default {
           : "https://static.hdslb.com/images/member/noface.gif",
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
-        role: payload.guard
+        role: payload.guard,
       });
     },
     sendInteractWord(payload) {
@@ -392,7 +399,7 @@ export default {
         name: payload.name,
         color: payload.nameColor,
         sendAt: payload.timestamp,
-        msgType: payload.msgType
+        msgType: payload.msgType,
       });
     },
     sendSuperChat(payload) {
@@ -414,7 +421,7 @@ export default {
         superChatId: Number(payload.superChatId),
         time: payload.time,
         startTime: payload.startTime,
-        endTime: payload.endTime
+        endTime: payload.endTime,
       });
     },
     sendGift(payload) {
@@ -431,7 +438,7 @@ export default {
         price: payload.price,
         sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
-        giftName: payload.giftName
+        giftName: payload.giftName,
       });
     },
 
@@ -441,13 +448,13 @@ export default {
         name: data.name,
         avatar: data.face,
         sex: data.sex,
-        level: data.level
+        level: data.level,
       };
     },
 
     changeRoomId(roomId) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        roomId: roomId
+        roomId: roomId,
       });
     },
 
@@ -462,18 +469,18 @@ export default {
 
       const { data } = await getUserInfo(uid);
       return data;
-    }
+    },
   },
   mounted() {
     this.giftTimer = setInterval(() => {
-      console.log("giftTimer");
+      // console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER", {
-        now: new Date() - 0
+        now: new Date() - 0,
       });
     }, 1000);
 
     this.peopleTimer = setInterval(async () => {
-      console.log("peopleTimer");
+      // console.log("peopleTimer");
       if (!this.roomId && !this.isConnected) return;
       const tenMinutesAgo = new Date() - 1000 * 60 * 10;
       const [comments, gifts, interacts] = await Promise.all([
@@ -488,11 +495,11 @@ export default {
         interactDB.find(
           { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
-        )
+        ),
       ]);
 
       this.peopleNumber = uniq(
-        [...comments, ...gifts, ...interacts].map(i => i.uid)
+        [...comments, ...gifts, ...interacts].map((i) => i.uid)
       ).length;
     }, 10000);
   },
@@ -503,7 +510,7 @@ export default {
     if (this.peopleTimer) {
       clearInterval(this.peopleTimer);
     }
-  }
+  },
 };
 </script>
 
