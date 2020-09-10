@@ -20,10 +20,6 @@ const store = new Store({ name: "vuex" });
 store.clear();
 ```
 
-https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=5050&type=0
-
-https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=5050
-
-https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/giftConfig?platform=pc&room_id=5050
-
 ### 关闭windowshadow避免resize产生重影
+
+### production debug: --remote-debugging-port=8315, http://localhost:8315/

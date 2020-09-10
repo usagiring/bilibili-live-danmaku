@@ -26,7 +26,7 @@
       >显示银瓜子礼物</Checkbox>
     </div>
     <div class="content-wrapper">
-      <Split v-model="split1">
+      <Split v-model="split1" @on-moving="splitMoving">
         <div slot="left" class="split-pane">
           <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
             <div slot="top" class="split-pane" id="split-left-top">
@@ -150,8 +150,7 @@ export default {
   mounted() {
     setTimeout(() => {
       this.splitLeftMoving();
-      const right = document.getElementById("split-right");
-      this.scrollHeightRight = right.clientHeight;
+      this.splitMoving();
     }, 0);
   },
   computed: {},
@@ -296,6 +295,10 @@ export default {
       this.scrollHeightLeftTop = leftTop.clientHeight;
       const leftBottom = document.getElementById("split-left-bottom");
       this.scrollHeightLeftBottom = leftBottom.clientHeight;
+    },
+    splitMoving(e) {
+      const right = document.getElementById("split-right");
+      this.scrollHeightRight = right.clientHeight;
     },
     clearDateRange() {
       setTimeout(() => {

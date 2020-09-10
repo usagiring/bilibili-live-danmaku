@@ -391,7 +391,7 @@ export default {
         const winURL =
           process.env.NODE_ENV === "development"
             ? `http://localhost:9080/#/danmaku-window`
-            : `file://${__dirname}/index.html/#/danmaku-window`;
+            : `file://${__dirname}/index.html#danmaku-window`;
         this.win.loadURL(winURL);
         this.win.on("close", e => {
           this.isShowDanmakuWindow = false;

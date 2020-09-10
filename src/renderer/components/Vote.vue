@@ -145,12 +145,12 @@ export default {
       const regexps = this.keywords.map((keyword) => new RegExp(keyword, "i"));
 
       emitter.on("message", async (data) => {
-        const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
-          .map(parseComment);
+        // const comments = data
+        //   .filter((msg) => msg.cmd === "DANMU_MSG")
+        //   .map(parseComment);
 
         // TEST
-        // const comments = data.filter((msg) => msg.type === "comment");
+        const comments = data.filter((msg) => msg.type === "comment");
 
         for (const comment of comments) {
           // 已经记录过的用户不再重复统计
@@ -163,6 +163,7 @@ export default {
           userMap[
             comment.uid
           ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
+          console.log(`${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`)
           // 输入图表
           this.data[index]++;
           this.makeChart({ data: this.data });
@@ -170,7 +171,7 @@ export default {
       });
 
       // TEST
-      // emitter.emit("message", __EXAMPLE_MESSAGES);
+      emitter.emit("message", __EXAMPLE_MESSAGES);
     },
     stop() {
       const listenerCount = emitter.listenerCount("message");
@@ -182,12 +183,15 @@ export default {
       this.isWatching = false;
     },
 
-    makeChart({ type = "bar", keywords, data }) {
+    makeChart({ type = "bar", data }) {
       this.chart.setOption({
         tooltip: {},
-        xAxis: {},
+        xAxis: {
+          type: 'value'
+        },
         yAxis: {
-          data: keywords,
+          type: 'category',
+          data: this.keywords,
         },
         series: [
           {
@@ -217,7 +221,7 @@ export default {
 }
 
 #chart {
-  width: 400px;
+  width: 600px;
   height: 400px;
 }
 
