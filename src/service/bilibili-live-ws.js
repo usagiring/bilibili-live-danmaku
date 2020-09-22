@@ -334,6 +334,7 @@ function parseGift(msg) {
       name: uname,
       avatar: face,
       guardLevel: guard_level,
+      coinType: 'gold',
 
       // gift
       price: price,
@@ -367,6 +368,7 @@ function parseGift(msg) {
       name: username,
       // face,
       guardLevel: guard_level,
+      coinType: 'gold',
 
       price: price / RATE, // 单价
       giftId: gift_id,
