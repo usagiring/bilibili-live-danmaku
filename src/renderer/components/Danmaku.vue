@@ -1,6 +1,6 @@
 <template>
   <div
-    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none'}"
+    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none', opacity: windowOpacity}"
   >
     <div
       @wheel.prevent="giftScroll"
@@ -120,70 +120,70 @@ import GiftCard from "./GiftCard";
 const win = require("electron").remote.getCurrentWindow();
 
 const PRICE_COLOR = {
-  "1": {
+  1: {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
     backgroundBottomColor: "#2A60B2",
-    time: 60000
+    time: 60000,
   },
-  "2": {
+  2: {
     backgroundColor: "#DBFFFD",
     backgroundPriceColor: "#7DA4BD",
     backgroundBottomColor: "#427D9E",
-    time: 120000
+    time: 120000,
   },
-  "3": {
+  3: {
     backgroundColor: "#FFF1C5",
     backgroundPriceColor: "gold",
     backgroundBottomColor: "#E2B52B",
-    time: 300000
+    time: 300000,
   },
-  "4": {
+  4: {
     backgroundColor: "rgb(255,234,210)",
     backgroundPriceColor: "rgb(255,234,210)",
     backgroundBottomColor: "rgb(244,148,67)",
-    time: 1800000
+    time: 1800000,
   },
-  "5": {
+  5: {
     backgroundColor: "rgb(255,231,228)",
     backgroundPriceColor: "rgb(255,231,228)",
     backgroundBottomColor: "rgb(229,77,77)",
-    time: 3600000
+    time: 3600000,
   },
-  "6": {
+  6: {
     backgroundColor: "rgb(255,216,216)",
     backgroundPriceColor: "rgb(255,216,216)",
     backgroundBottomColor: "rgb(171,26,50)",
-    time: 7200000
-  }
+    time: 7200000,
+  },
 };
 
 export default {
   components: {
     SimilarCommentBadge,
-    GiftCard
+    GiftCard,
   },
   props: ["isPreview", "isSingleWindow"],
   data() {
     return {
       giftHover: [],
-      DEFAULT_AVATAR
+      DEFAULT_AVATAR,
     };
   },
   watch: {
-    gifts: function(newGifts, oldGifts) {
+    gifts: function (newGifts, oldGifts) {
       const newIds = difference(
-        newGifts.map(gift => gift.id),
-        oldGifts.map(gift => gift.id)
+        newGifts.map((gift) => gift.id),
+        oldGifts.map((gift) => gift.id)
       );
       if (!newIds.length) return;
       this.giftHover = [...this.giftHover, ...newIds];
-      newIds.forEach(newId => {
+      newIds.forEach((newId) => {
         setTimeout(() => {
-          this.giftHover = this.giftHover.filter(id => id !== newId);
+          this.giftHover = this.giftHover.filter((id) => id !== newId);
         }, 5000);
       });
-    }
+    },
   },
   computed: {
     isAlwaysOnTop() {
@@ -203,8 +203,11 @@ export default {
       return {
         width: `${avatarSize}px`,
         height: `${avatarSize}px`,
-        "line-height": `${avatarSize}px`
+        "line-height": `${avatarSize}px`,
       };
+    },
+    windowOpacity() {
+      return this.$store.state.Config.windowOpacity;
     },
 
     messages() {
@@ -212,15 +215,15 @@ export default {
         ? this.$store.state.Message.exampleMessages
         : this.$store.state.Message.messages;
       return messages
-        .filter(message => {
+        .filter((message) => {
           return (
             !message.totalPrice ||
             message.totalPrice > this.showGiftCardThreshold
           );
         })
-        .map(message => {
+        .map((message) => {
           return Object.assign({}, message, {
-            priceProperties: this.parsePriceColor(message.totalPrice) || {}
+            priceProperties: this.parsePriceColor(message.totalPrice) || {},
           });
         })
         .reverse();
@@ -231,12 +234,12 @@ export default {
         ? this.$store.state.Message.exampleGifts
         : this.$store.state.Message.gifts;
       return gifts
-        .map(gift => {
+        .map((gift) => {
           return Object.assign({}, gift, {
-            priceProperties: this.parsePriceColor(gift.totalPrice) || {}
+            priceProperties: this.parsePriceColor(gift.totalPrice) || {},
           });
         })
-        .filter(gift => {
+        .filter((gift) => {
           return gift.sendAt + gift.priceProperties.time > new Date() - 0;
         })
         .reverse();
@@ -283,7 +286,7 @@ export default {
     },
     "1_comment"() {
       return this.$store.state.Config["3_comment"];
-    }
+    },
   },
   mounted() {},
   methods: {
@@ -333,7 +336,7 @@ export default {
       this.giftHover = [...this.giftHover, giftId];
     },
     unhoverGift(giftId) {
-      this.giftHover = this.giftHover.filter(id => id !== giftId);
+      this.giftHover = this.giftHover.filter((id) => id !== giftId);
     },
     widthCalculator(gift) {
       if (Number(gift.existsTime) && Number(gift.priceProperties.time)) {
@@ -355,8 +358,8 @@ export default {
     giftScroll(e) {
       const el = document.getElementById("gift-show-content-wrapper");
       el.scrollLeft += e.deltaY;
-    }
-  }
+    },
+  },
 };
 </script>
 

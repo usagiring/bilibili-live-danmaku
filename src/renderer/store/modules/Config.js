@@ -10,6 +10,7 @@ const state = {
   showGiftCardThreshold: 0,
   isShowSilverGift: false,
   guardNumber: 0,
+  windowOpacity: 1,
 
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"

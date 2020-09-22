@@ -15,6 +15,14 @@
               />
             </div>
             <div class="setting-key-text">
+              <span class="avatar-controller">透明度</span>
+              <Slider
+                class="avatar-controller-slider"
+                :value="windowOpacity"
+                @on-change="changeOpacity"
+              ></Slider>
+            </div>
+            <div class="setting-key-text">
               <Checkbox
                 class="setting-checkbox"
                 :value="isShowInteractInfo"
@@ -335,6 +343,9 @@ export default {
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
     },
+    windowOpacity() {
+      return this.$store.state.Config.windowOpacity * 100;
+    },
   },
   methods: {
     showMemberShipIcon(status) {
@@ -380,6 +391,11 @@ export default {
       } else {
         this.showAvatar(true);
       }
+    },
+    changeOpacity(number) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        windowOpacity: Number((number / 100).toFixed(2)),
+      });
     },
 
     changeCombineSimilarTime(number) {
