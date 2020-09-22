@@ -17,7 +17,11 @@ export default new Router({
         {
           path: 'message',
           component: () => import('@/components/Message.vue')
-        }
+        },
+        {
+          path: 'vote',
+          component: () => import('@/components/Vote.vue')
+        },
       ]
     },
     {

@@ -11,6 +11,10 @@
             <Icon type="md-chatboxes" />
             <span v-if="!isCollapsed">消息</span>
           </MenuItem>
+          <MenuItem name="1-3" to="/vote">
+            <Icon type="md-podium" />
+            <span v-if="!isCollapsed">投票</span>
+          </MenuItem>
         </Menu>
       </Sider>
       <Layout>

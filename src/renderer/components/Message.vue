@@ -265,7 +265,7 @@ export default {
     },
 
     async searchGift(options = {}) {
-      const { sort, skip, limit, scrollToken, isShowSilverGift } = options;
+      const { sort, skip, limit, scrollToken } = options;
       if (scrollToken) {
       }
       const query = {};
@@ -286,13 +286,14 @@ export default {
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      if(!isShowSilverGift) {
+      if(!this.isShowSilverGift) {
         query.coinType = 'gold'
       }
       const gifts = await giftDB.find(query, {
         sort: sort || { sendAt: -1 },
         limit: 20,
       });
+      console.log(query)
       console.log(gifts)
       return gifts;
     },
