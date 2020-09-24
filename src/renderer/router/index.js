@@ -22,6 +22,10 @@ export default new Router({
           path: 'vote',
           component: () => import('@/components/Vote.vue')
         },
+        {
+          path: 'lottery',
+          component: () => import('@/components/Lottery.vue')
+        }
       ]
     },
     {

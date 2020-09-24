@@ -55,6 +55,7 @@
   "dependencies": {
     "animate.css": "^4.1.0",
     "axios": "^0.18.1",
+    "echarts": "^4.9.0",
     "lodash": "^4.17.20",
     "moment": "^2.27.0",
     "nedb": "^1.8.0",

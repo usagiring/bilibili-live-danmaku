@@ -15,6 +15,10 @@
             <Icon type="md-podium" />
             <span v-if="!isCollapsed">投票</span>
           </MenuItem>
+          <MenuItem name="1-4" to="/lottery">
+            <Icon type="md-bonfire" />
+            <span v-if="!isCollapsed">祈愿</span>
+          </MenuItem>
         </Menu>
       </Sider>
       <Layout>
