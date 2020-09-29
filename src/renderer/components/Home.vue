@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <Layout :style="{minHeight: '100vh'}">
+    <Layout :style="{ minHeight: '100vh' }">
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
           <MenuItem name="1-1" to="/setting">
@@ -25,34 +25,35 @@
         <Header class="layout-header">
           <div class="avatar-wrapper">
             <Avatar
-              :icon="avatar? undefined : 'ios-person'"
-              :src="avatar? avatar: undefined"
+              :icon="avatar ? undefined : 'ios-person'"
+              :src="avatar ? avatar : undefined"
               size="large"
             />&nbsp;&nbsp;
-            <span>{{ username? username: '未连接'}}</span>
+            <span>{{ username ? username : "未连接" }}</span>
             &nbsp;
             <Tag
               v-if="username"
               type="border"
-              :color="liveStatus === 1? 'green': 'silver'"
-            >{{liveStatus === 1 ? '直播中': '未开播'}}</Tag>
+              :color="liveStatus === 1 ? 'green' : 'silver'"
+              >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag
+            >
           </div>
 
           <div class="status-wrapper">
             <div class="bar">
               <Icon type="md-flame" />
               <span class="header-icon-text">人气值</span>
-              {{ninkiNumber}}
+              {{ ninkiNumber }}
             </div>
             <div>
               <Icon type="md-star" />
               <span class="header-icon-text">关注数</span>
-              {{fansNumber}}
+              {{ fansNumber }}
             </div>
             <div>
               <Icon type="md-heart" />
               <span class="header-icon-text">粉丝团</span>
-              {{fansClubNumber}}
+              {{ fansClubNumber }}
             </div>
           </div>
           <div class="status-wrapper">
@@ -61,14 +62,14 @@
                 <Icon type="md-cog" />
               </Tooltip>
               <span class="header-icon-text"></span>
-              {{guardNumber}}
+              {{ guardNumber }}
             </div>
             <div class="bar">
               <Tooltip content="十分钟内互动人数">
                 <Icon type="md-person" />
               </Tooltip>
               <span class="header-icon-text"></span>
-              {{peopleNumber}}
+              {{ peopleNumber }}
             </div>
           </div>
         </Header>
@@ -83,21 +84,29 @@
               :disabled="isConnected"
               style="width: 120px"
             />
-            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i-switch
+              v-model="isConnected"
+              @on-change="connect"
+              :disabled="!roomId"
+            />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
             <i-switch
               :value="isShowDanmakuWindow"
               :loading="isShowDanmakuWindowLoading"
               @on-change="showDanmakuWindow"
-            ></i-switch>&nbsp;&nbsp;&nbsp;
+            ></i-switch
+            >&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span @click="alwaysOnTop">窗口置顶</span>
-              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+              <i-switch
+                v-model="isAlwaysOnTop"
+                @on-change="alwaysOnTop"
+              ></i-switch>
             </template>
           </div>
         </div>
         <Content class="layout-content">
-          <router-view :style="{height: '100%'}"></router-view>
+          <router-view :style="{ height: '100%' }"></router-view>
         </Content>
       </Layout>
     </Layout>
@@ -107,7 +116,10 @@
 <script>
 import { uniq } from "lodash";
 import { remote } from "electron";
+import Store from "electron-store";
 const { BrowserWindow, screen } = remote;
+
+import { getUserInfoThrottle } from "../../service/util";
 import emitter, {
   init,
   close,
@@ -117,20 +129,10 @@ import emitter, {
 } from "../../service/bilibili-live-ws";
 import {
   getRoomInfoV2,
-  getUserInfo,
   getGuardInfo,
 } from "../../service/bilibili-api";
-import Store from "electron-store";
 import db from "../../service/nedb";
 const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
-let isGetUserInfoLocked = false;
-
-const GUARD_LEVEL_MAP = {
-  0: "normal",
-  1: "governor",
-  2: "admiral",
-  3: "captain",
-};
 
 export default {
   data() {
@@ -168,7 +170,7 @@ export default {
             let user = await userDB.findOne({ uid: comment.uid });
             if (!user) {
               try {
-                const data = await this.getUserInfoThrottle(comment.uid);
+                const data = await getUserInfoThrottle(comment.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
@@ -205,7 +207,7 @@ export default {
             let user = await userDB.findOne({ uid: gift.uid });
             if (!user) {
               try {
-                const data = await this.getUserInfoThrottle(gift.uid);
+                const data = await getUserInfoThrottle(gift.uid);
                 // 统一格式化用户数据
                 user = this.parseUser(data);
                 data.createdAt = new Date();
@@ -464,19 +466,6 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", {
         roomId: roomId,
       });
-    },
-
-    async getUserInfoThrottle(uid) {
-      if (isGetUserInfoLocked) throw new Error("isGetUserInfoLocked");
-      // 限制获取头像频率 避免412被封
-      // 412 和请求量和速率都有关系，阶段式限流
-      isGetUserInfoLocked = true;
-      setTimeout(() => {
-        isGetUserInfoLocked = false;
-      }, 1000);
-
-      const { data } = await getUserInfo(uid);
-      return data;
     },
   },
   mounted() {

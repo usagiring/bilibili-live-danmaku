@@ -108,9 +108,10 @@
 </template>
 
 <script>
-import db from "../../service/nedb";
 import { shell } from "electron";
 import moment from "moment";
+import { getPriceProperties } from '../../service/util'
+import db from "../../service/nedb";
 import GiftCard from "./GiftCard";
 
 const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
@@ -405,30 +406,10 @@ export default {
     dateFormat(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
-    parsePriceColor(price) {
-      if (price < 50) {
-        return PRICE_COLOR["1"];
-      }
-      if (price >= 50 && price < 100) {
-        return PRICE_COLOR["2"];
-      }
-      if (price >= 100 && price < 500) {
-        return PRICE_COLOR["3"];
-      }
-      if (price >= 500 && price < 1000) {
-        return PRICE_COLOR["4"];
-      }
-      if (price >= 1000 && price < 2000) {
-        return PRICE_COLOR["5"];
-      }
-      if (price >= 2000) {
-        return PRICE_COLOR["6"];
-      }
-    },
     formatGift(gift) {
       gift.totalPrice = (gift.giftNumber || 1) * gift.price;
       return Object.assign({}, gift, {
-        priceProperties: this.parsePriceColor(gift.totalPrice) || {},
+        priceProperties: getPriceProperties(gift.totalPrice) || {},
       });
     },
     async showSilverGift(status){

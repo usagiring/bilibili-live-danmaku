@@ -27,7 +27,8 @@
                 class="setting-checkbox"
                 :value="isShowInteractInfo"
                 @on-change="showInteractInfo"
-              >显示交互消息</Checkbox>
+                >显示交互消息</Checkbox
+              >
             </div>
             <div class="setting-key-text">
               <span class="avatar-controller">头像大小</span>
@@ -75,21 +76,25 @@
                 class="setting-checkbox"
                 :value="isShowSilverGift"
                 @on-change="showSilverGift"
-              >展示银瓜子礼物</Checkbox>
+                >展示银瓜子礼物</Checkbox
+              >
             </div>
             <div>
               <Checkbox
                 class="setting-checkbox"
                 :value="isShowMemberShipIcon"
                 @on-change="showMemberShipIcon"
-              >显示舰队图标</Checkbox>
+                >显示舰队图标</Checkbox
+              >
             </div>
           </div>
         </Panel>
         <Panel name="2">
           普通
           <div slot="content">
-            <template v-for="item in editors.filter(editor=> editor.role === 0)">
+            <template
+              v-for="item in editors.filter((editor) => editor.role === 0)"
+            >
               <div :key="item.id">
                 <SettingEditor v-bind="item" />
               </div>
@@ -99,7 +104,9 @@
         <Panel name="3">
           舰长
           <div slot="content">
-            <template v-for="item in editors.filter(editor=> editor.role === 3)">
+            <template
+              v-for="item in editors.filter((editor) => editor.role === 3)"
+            >
               <div :key="item.id">
                 <SettingEditor v-bind="item" />
               </div>
@@ -143,11 +150,12 @@
 <script>
 import { remote } from "electron";
 const { BrowserWindow, screen } = remote;
+import Store from "electron-store";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
-import Store from "electron-store";
 import { DEFAULT_AVATAR } from "../../service/const";
+import { getGuardInfo } from "../../service/bilibili-api";
 
 export default {
   components: {
