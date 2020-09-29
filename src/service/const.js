@@ -49,3 +49,47 @@ export const GUARD_LEVEL_MAP = {
 
 // 限制获取头像频率，单位毫秒，避免 412 限制，1000 为比较安全的值
 export const GET_USER_INFO_FREQUENCY_LIMIT = 1000
+
+export const EXAMPLE_MESSAGES = [
+  {
+    id: 1,
+    type: "comment",
+    uid: "12345",
+    name: "bli_22222222222",
+    comment: "草",
+    avatar: DEFAULT_AVATAR,
+    role: 3,
+    similar: 1
+  },
+  {
+    id: 2,
+    uid: "12346",
+    name: "bli_11111111111",
+    type: "comment",
+    comment: "？？？？？？？？",
+    avatar: DEFAULT_AVATAR,
+    role: 0
+  },
+  {
+    id: 6,
+    uid: "12345",
+    name: "bli_22222222222",
+    type: "superChat",
+    comment: "8888888888888888888",
+    price: 50,
+    totalPrice: 50,
+    avatar: DEFAULT_AVATAR,
+    role: 0
+  },
+  {
+    id: 7,
+    type: "gift",
+    uid: 12345,
+    name: 'bli_11111111111',
+    avatar: DEFAULT_AVATAR,
+    price: 6,
+    giftNumber: 50,
+    totalPrice: 300,
+    giftName: '小红花'
+  }
+]

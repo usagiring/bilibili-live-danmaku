@@ -169,7 +169,7 @@ export default {
       comments: [],
       interacts: [],
       gifts: [],
-      isShowUserSpaceLink: true,
+      isShowUserSpaceLink: false,
       scrollHeightLeftTop: 300,
       scrollHeightLeftBottom: 100,
       scrollHeightRight: 1000,
@@ -437,6 +437,10 @@ export default {
 .split-pane {
   height: 100%;
   overflow: auto;
+}
+
+#split-left-top,#split-left-bottom {
+  padding: 5px 10px;
 }
 
 .split-pane::-webkit-scrollbar {
