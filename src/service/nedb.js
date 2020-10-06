@@ -110,9 +110,9 @@ function wrapper(db) {
     },
     update: (query, data, options = {}) => {
       return new Promise((resolve, reject) => {
-        db.update(query, data, options, (err, doc) => {
+        db.update(query, data, options, (err, numAffected, affectedDocuments, upsert) => {
           if (err) reject(err)
-          resolve(doc)
+          resolve(affectedDocuments)
         })
       })
     },

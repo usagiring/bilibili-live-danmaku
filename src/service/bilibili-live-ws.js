@@ -6,7 +6,7 @@ const emitter = new Emitter()
 const URI = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 let ws
 let HEART_BEAT_TIMER = null;
-let __roomId
+let realRoomId
 
 export default emitter
 export {
@@ -35,7 +35,7 @@ function init(options) {
 
   const { uid = 0, roomId } = options
 
-  __roomId = roomId
+  realRoomId = roomId
   if (!roomId) throw new Error('roomId is null')
 
   const authParams = {
@@ -275,7 +275,7 @@ function parseComment(msg) {
   const [uid, name, isAdmin] = msg.info[2];
   const [medalLevel, medalName] = msg.info[3]
   return {
-    roomId: __roomId,
+    roomId: realRoomId,
     sendAt: msg.info[0][4],
     uid,
     name,
@@ -327,7 +327,7 @@ function parseGift(msg) {
       gift_name
     } = gift
     return {
-      roomId: __roomId,
+      roomId: realRoomId,
       sendAt: now,
       // user
       uid,
@@ -340,7 +340,7 @@ function parseGift(msg) {
       price: price,
       giftId: gift_id,
       giftName: gift_name,
-      giftNumber: num,
+      giftNumber: num || 1,
 
       // sc
       superChatId: id,
@@ -362,7 +362,7 @@ function parseGift(msg) {
     } = msg.data
 
     return {
-      roomId: __roomId,
+      roomId: realRoomId,
       sendAt: now,
       uid,
       name: username,
@@ -393,7 +393,7 @@ function parseGift(msg) {
       batch_combo_id
     } = msg.data
     return {
-      roomId: __roomId,
+      roomId: realRoomId,
       sendAt: now,
       uid,
       name: uname,

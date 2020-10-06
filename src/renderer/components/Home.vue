@@ -35,8 +35,7 @@
               v-if="username"
               type="border"
               :color="liveStatus === 1 ? 'green' : 'silver'"
-              >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag
-            >
+            >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
           </div>
 
           <div class="status-wrapper">
@@ -84,24 +83,16 @@
               :disabled="isConnected"
               style="width: 120px"
             />
-            <i-switch
-              v-model="isConnected"
-              @on-change="connect"
-              :disabled="!roomId"
-            />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
             <i-switch
               :value="isShowDanmakuWindow"
               :loading="isShowDanmakuWindowLoading"
               @on-change="showDanmakuWindow"
-            ></i-switch
-            >&nbsp;&nbsp;&nbsp;
+            ></i-switch>&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span @click="alwaysOnTop">窗口置顶</span>
-              <i-switch
-                v-model="isAlwaysOnTop"
-                @on-change="alwaysOnTop"
-              ></i-switch>
+              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
           </div>
         </div>
@@ -125,13 +116,11 @@ import emitter, {
   close,
   parseComment,
   parseInteractWord,
-  parseGift,
+  parseGift
 } from "../../service/bilibili-live-ws";
-import {
-  getRoomInfoV2,
-  getGuardInfo,
-} from "../../service/bilibili-api";
+import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import db from "../../service/nedb";
+import { DEFAULT_AVATAR } from "../../service/const";
 const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 
 export default {
@@ -151,15 +140,15 @@ export default {
       fansNumber: 0,
       fansClubNumber: 0,
       liveStatus: 0,
-      peopleNumber: 0,
+      peopleNumber: 0
       // guardNumber: 0,
     };
   },
   created() {
-    emitter.on("message", async (data) => {
+    emitter.on("message", async data => {
       if (Array.isArray(data)) {
         const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
+          .filter(msg => msg.cmd === "DANMU_MSG")
           .map(parseComment);
 
         for (const comment of comments) {
@@ -188,7 +177,7 @@ export default {
         }
 
         const interactWords = data
-          .filter((msg) => msg.cmd === "INTERACT_WORD")
+          .filter(msg => msg.cmd === "INTERACT_WORD")
           .map(parseInteractWord);
 
         for (const interactWord of interactWords) {
@@ -220,17 +209,60 @@ export default {
 
             gift.avatar = (user || {}).avatar;
           }
-          const data = await giftDB.insert(gift);
+
           if (gift.type === "superChat") {
+            let data;
+
+            if (gift.commentJPN) {
+              let sc = await giftDB.findOne({
+                roomId: this.roomId,
+                superChatId
+              });
+              if (sc) {
+                data = await giftDB.update(
+                  { _id: sc._id },
+                  {
+                    $set: { commentJPN: gift.commentJPN }
+                  },
+                  { returnUpdatedDocs: true }
+                );
+              }
+            }
+
+            if (!data) {
+              data = await giftDB.insert(gift);
+            }
             this.sendSuperChat(data);
           } else if (gift.type === "gift") {
+            let data;
+            if (gift.batchComboId) {
+              const comboGift = await giftDB.findOne({
+                roomId: this.roomId,
+                batchComboId: gift.batchComboId
+              });
+              console.log( `roomId: ` + this.roomId, `batchComboId:` + gift.batchComboId)
+              console.log(comboGift, gift)
+              if (comboGift) {
+                data = await giftDB.update(
+                  { _id: comboGift._id },
+                  {
+                    $set: { giftNumber: comboGift.giftNumber + gift.giftNumber }
+                  },
+                  { returnUpdatedDocs: true }
+                );
+              }
+            }
+            if (!data) {
+              data = await giftDB.insert(gift);
+            }
             if (!this.isShowSilverGift && gift.coinType === "silver") continue;
             if (gift.coinType === "silver") gift.price = 0;
+            console.log(data)
             this.sendGift(data);
           }
         }
 
-        data.forEach((msg) => {
+        data.forEach(msg => {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
@@ -249,7 +281,7 @@ export default {
       }
     });
 
-    emitter.on("ninki", async (data) => {
+    emitter.on("ninki", async data => {
       this.ninkiNumber = data.count;
     });
   },
@@ -257,7 +289,7 @@ export default {
     roomId() {
       return this.$store.state.Config.roomId;
     },
-    menuitemClasses: function () {
+    menuitemClasses: function() {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
     },
     isShowAvatar() {
@@ -280,7 +312,7 @@ export default {
     },
     guardNumber() {
       return this.$store.state.Config.guardNumber;
-    },
+    }
   },
   methods: {
     async connect(status) {
@@ -298,7 +330,7 @@ export default {
           description,
           live_status: liveStatus,
           live_start_time, // 直播开始时间 unixtime
-          online,
+          online
         } = data.room_info;
 
         await init({ roomId: Number(roomId), uid: 0 });
@@ -319,6 +351,7 @@ export default {
         // this.guardNumber = guardInfo.data.info.num;
         this.$store.dispatch("UPDATE_CONFIG", {
           guardNumber: guardInfo.data.info.num,
+          realRoomId: roomId
         });
       } else {
         close();
@@ -331,7 +364,7 @@ export default {
         this.peopleNumber = 0;
 
         this.$store.dispatch("UPDATE_CONFIG", {
-          guardNumber: 0,
+          guardNumber: 0
         });
       }
     },
@@ -350,9 +383,9 @@ export default {
           transparent: true,
           hasShadow: false,
           webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: true
           },
-          resizable: true,
+          resizable: true
         });
 
         const winURL =
@@ -360,7 +393,7 @@ export default {
             ? `http://localhost:9080/#/danmaku-window`
             : `file://${__dirname}/index.html/#/danmaku-window`;
         this.win.loadURL(winURL);
-        this.win.on("close", (e) => {
+        this.win.on("close", e => {
           this.isShowDanmakuWindow = false;
           this.isShowDanmakuWindowLoading = false;
         });
@@ -380,7 +413,7 @@ export default {
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status, { forward: true });
       this.$store.dispatch("UPDATE_CONFIG", {
-        isAlwaysOnTop: status,
+        isAlwaysOnTop: status
       });
     },
     sendComment(payload) {
@@ -392,12 +425,10 @@ export default {
         comment: payload.comment,
         sendAt: payload.sendAt,
         isAdmin: payload.isAdmin,
-        avatar: payload.avatar
-          ? `${payload.avatar}@48w_48h`
-          : "https://static.hdslb.com/images/member/noface.gif",
+        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
-        role: payload.guard,
+        role: payload.guard
       });
     },
     sendInteractWord(payload) {
@@ -409,7 +440,7 @@ export default {
         name: payload.name,
         color: payload.nameColor,
         sendAt: payload.timestamp,
-        msgType: payload.msgType,
+        msgType: payload.msgType
       });
     },
     sendSuperChat(payload) {
@@ -419,9 +450,7 @@ export default {
 
         uid: payload.uid,
         name: payload.name,
-        avatar: payload.avatar
-          ? `${payload.avatar}@48w_48h`
-          : "https://static.hdslb.com/images/member/noface.gif",
+        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
 
         price: payload.price,
 
@@ -431,7 +460,7 @@ export default {
         superChatId: Number(payload.superChatId),
         time: payload.time,
         startTime: payload.startTime,
-        endTime: payload.endTime,
+        endTime: payload.endTime
       });
     },
     sendGift(payload) {
@@ -441,14 +470,12 @@ export default {
         uid: payload.uid,
         name: payload.name,
         batchComboId: payload.batchComboId,
-        avatar: payload.avatar
-          ? `${payload.avatar}@48w_48h`
-          : "https://static.hdslb.com/images/member/noface.gif",
+        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
 
         price: payload.price,
         sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
-        giftName: payload.giftName,
+        giftName: payload.giftName
       });
     },
 
@@ -458,21 +485,21 @@ export default {
         name: data.name,
         avatar: data.face,
         sex: data.sex,
-        level: data.level,
+        level: data.level
       };
     },
 
     changeRoomId(roomId) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        roomId: roomId,
+        roomId: roomId
       });
-    },
+    }
   },
   mounted() {
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER", {
-        now: new Date() - 0,
+        now: new Date() - 0
       });
     }, 1000);
 
@@ -492,11 +519,11 @@ export default {
         interactDB.find(
           { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
-        ),
+        )
       ]);
 
       this.peopleNumber = uniq(
-        [...comments, ...gifts, ...interacts].map((i) => i.uid)
+        [...comments, ...gifts, ...interacts].map(i => i.uid)
       ).length;
     }, 10000);
   },
@@ -507,7 +534,7 @@ export default {
     if (this.peopleTimer) {
       clearInterval(this.peopleTimer);
     }
-  },
+  }
 };
 </script>
 

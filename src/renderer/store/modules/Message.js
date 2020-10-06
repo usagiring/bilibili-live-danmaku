@@ -204,10 +204,10 @@ const actions = {
     // 礼物叠加处理
     if (payload.type === 'gift') {
       const messages = [...state.messages].reverse();
-      const giftIndex = payload.batchComboId ? messages.findIndex(message => message.batchComboId === payload.batchComboId) : -1
+      const giftIndex = messages.findIndex(message => message.id === payload.id)
       if (~giftIndex) {
         const gift = messages[giftIndex]
-        const giftNumber = gift.giftNumber + payload.giftNumber
+        const giftNumber = payload.giftNumber
         // 如果此时金额大于设定值，推送到gift栏
         const update = {
           id: gift.id,
@@ -243,7 +243,7 @@ const actions = {
     if (payload.type === 'superChat') {
       const messages = [...state.messages].reverse();
 
-      const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
+      const scIndex = messages.findIndex(message => message.id === payload.id)
       if (~scIndex) {
         if (payload.commentJPN) {
           commit('UPDATE_MESSAGE', {
