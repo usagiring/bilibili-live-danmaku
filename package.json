@@ -20,7 +20,7 @@
   },
   "build": {
     "productName": "bilibili-danmaku",
-    "appId": "com.example.yourapp",
+    "appId": "com.electron.bilibili-danmaku",
     "directories": {
       "output": "build"
     },
@@ -46,16 +46,38 @@
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
     },
     "linux": {
       "icon": "build/icons"
-    }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
   },
   "dependencies": {
     "animate.css": "^4.1.0",
     "axios": "^0.18.1",
     "echarts": "^4.9.0",
+    "electron-updater": "^4.3.5",
     "lodash": "^4.17.20",
     "moment": "^2.27.0",
     "nedb": "^1.8.0",
