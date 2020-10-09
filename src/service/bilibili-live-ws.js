@@ -289,7 +289,7 @@ function parseComment(msg) {
 
 function parseInteractWord(msg) {
   if (msg.cmd !== "INTERACT_WORD") return
-  const { identities, msg_type: msgType, roomid: roomId, score, timestamp, uid, uname, uname_color: unameColor } = msg.data
+  const { identities, msg_type: msgType, roomid: roomId, score, timestamp, uid, uname: name, uname_color: nameColor } = msg.data
   return {
     identities,
     roomId,
@@ -297,8 +297,8 @@ function parseInteractWord(msg) {
     msgType, // 1 进入直播间 2 关注直播间 3 分享直播间
     sendAt: timestamp * 1000, // 
     uid,
-    name: uname,
-    nameColor: unameColor
+    name,
+    nameColor
   }
 }
 

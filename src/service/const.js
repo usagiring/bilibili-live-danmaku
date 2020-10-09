@@ -47,6 +47,12 @@ export const GUARD_LEVEL_MAP = {
   3: "captain",
 };
 
+export const INTERACT_TYPE = {
+  1: '进入',
+  2: '关注',
+  3: '分享'
+}
+
 // 限制获取头像频率，单位毫秒，避免 412 限制，1000 为比较安全的值
 export const GET_USER_INFO_FREQUENCY_LIMIT = 1000
 
