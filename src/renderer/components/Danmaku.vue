@@ -93,7 +93,7 @@
           </template>
           <template v-if="message.type==='interactWord'">
             <!-- 入场消息设置默认使用普通设置 -->
-            <p :style="'0_comment'">
+            <p :style="`0_comment`">
               <span :style="{color: message.color? message.color:undefined}">{{message.name}}</span>
               {{`${parseMsgType(message.msgType)}直播间`}}
             </p>

@@ -145,12 +145,12 @@ export default {
       const regexps = this.keywords.map((keyword) => new RegExp(keyword, "i"));
 
       emitter.on("message", async (data) => {
-        // const comments = data
-        //   .filter((msg) => msg.cmd === "DANMU_MSG")
-        //   .map(parseComment);
+        const comments = data
+          .filter((msg) => msg.cmd === "DANMU_MSG")
+          .map(parseComment);
 
         // TEST
-        const comments = data.filter((msg) => msg.type === "comment");
+        // const comments = data.filter((msg) => msg.type === "comment");
 
         for (const comment of comments) {
           // 已经记录过的用户不再重复统计
@@ -171,7 +171,7 @@ export default {
       });
 
       // TEST
-      emitter.emit("message", __EXAMPLE_MESSAGES);
+      // emitter.emit("message", __EXAMPLE_MESSAGES);
     },
     stop() {
       const listenerCount = emitter.listenerCount("message");

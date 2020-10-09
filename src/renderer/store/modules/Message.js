@@ -255,14 +255,16 @@ const actions = {
       }
     }
 
-    payload.price = payload.price || 0
-    const totalPrice = Number((payload.giftNumber || 1) * payload.price)
-    payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-    const showGiftThreshold = rootState.Config.showGiftThreshold
-    if (payload.totalPrice >= showGiftThreshold) {
-      commit('ADD_GIFT', payload)
+    // TODO: refactor
+    if (payload.type === 'gift' || payload.type === 'superChat') {
+      payload.price = payload.price || 0
+      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+      const showGiftThreshold = rootState.Config.showGiftThreshold
+      if (payload.totalPrice >= showGiftThreshold) {
+        commit('ADD_GIFT', payload)
+      }
     }
-
 
     commit('ADD_MESSAGE', payload)
   },
