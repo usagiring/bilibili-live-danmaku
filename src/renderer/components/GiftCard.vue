@@ -6,7 +6,7 @@
       </div>
       <div :style="{display: 'inline-block'}">
         <p>{{name}}</p>
-        <p>{{`￥${totalPrice}`}}</p>
+        <p v-if="totalPrice">{{`￥${totalPrice}`}}</p>
       </div>
     </div>
     <div

@@ -240,8 +240,6 @@ export default {
                 roomId: this.roomId,
                 batchComboId: gift.batchComboId
               });
-              console.log( `roomId: ` + this.roomId, `batchComboId:` + gift.batchComboId)
-              console.log(comboGift, gift)
               if (comboGift) {
                 data = await giftDB.update(
                   { _id: comboGift._id },

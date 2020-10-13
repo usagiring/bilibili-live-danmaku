@@ -402,7 +402,7 @@ function parseGift(msg) {
 
       batchComboId: batch_combo_id,
       coinType: coin_type,
-      price: price / RATE, // 单价
+      price: coin_type === 'gold' ? price / RATE : 0, // 单价
       giftId: giftId,
       giftName: giftName,
       giftNumber: num,

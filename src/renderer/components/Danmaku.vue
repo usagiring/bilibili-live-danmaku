@@ -31,7 +31,7 @@
                   :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px','-webkit-text-stroke-color': gift.priceProperties.backgroundPriceColor}"
                 >
                   <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
-                  <span>{{`￥${gift.totalPrice}`}}</span>
+                  <span v-if="gift.totalPrice">{{`￥${gift.totalPrice}`}}</span>
                 </div>
               </div>
               <div
@@ -50,7 +50,7 @@
                   />
                   <div :style="{display: 'inline-block'}">
                     <p>{{gift.name}}</p>
-                    <p>{{`￥${gift.totalPrice}`}}</p>
+                    <p v-if="gift.totalPrice">{{`￥${gift.totalPrice}`}}</p>
                   </div>
                 </div>
                 <div
@@ -93,7 +93,7 @@
           </template>
           <template v-if="message.type==='interactWord'">
             <!-- 入场消息设置默认使用普通设置 -->
-            <p :style="`0_comment`">
+            <p :style="getCommentStyleByRole({role: 0})">
               <span :style="{color: message.color? message.color:undefined}">{{message.name}}</span>
               {{`${parseMsgType(message.msgType)}了直播间`}}
             </p>
