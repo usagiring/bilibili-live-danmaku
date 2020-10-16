@@ -34,6 +34,7 @@
         <Button class="vote-button" @click="stop" :disabled="!isWatching"
           >停止</Button
         >
+        <Button class="vote-button" @click="showVoteRecord">记录</Button>
       </i-col>
       <i-col span="15">
         <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
@@ -52,6 +53,7 @@
 
 <script>
 import * as echarts from "echarts";
+import { shuffle } from 'lodash'
 import emitter, {
   init,
   close,
@@ -59,8 +61,9 @@ import emitter, {
   parseInteractWord,
   parseGift,
 } from "../../service/bilibili-live-ws";
-import { EXAMPLE_MESSAGES, DEFAULT_AVATAR } from "../../service/const";
+import { EXAMPLE_MESSAGES, DEFAULT_AVATAR, COLORS } from "../../service/const";
 let userMap = {};
+let colorPool = shuffle(COLORS);
 
 // TEST
 const __EXAMPLE_MESSAGES = [...EXAMPLE_MESSAGES].concat([
@@ -163,7 +166,9 @@ export default {
           userMap[
             comment.uid
           ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
-          console.log(`${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`)
+          console.log(
+            `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
+          );
           // 输入图表
           this.data[index]++;
           this.makeChart({ data: this.data });
@@ -186,18 +191,54 @@ export default {
     makeChart({ type = "bar", data }) {
       this.chart.setOption({
         tooltip: {},
+
         xAxis: {
-          type: 'value'
+          type: "value",
+          axisTick: {
+            show: false,
+          },
         },
         yAxis: {
-          type: 'category',
+          type: "category",
           data: this.keywords,
+          axisTick: {
+            show: false,
+          },
         },
         series: [
           {
             name: "计数",
             type,
-            data,
+            barWidth: 30,
+            itemStyle: {
+              borderType: "solid",
+              // borderColor: "silver",
+              // borderWidth: 1,
+              barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
+            },
+            data: [
+              {
+                // name: "xx",
+                value: 2,
+                itemStyle: {
+                  color: this.randomPickColor(),
+                },
+              },
+              {
+                // name: "xx",
+                value: 1,
+                itemStyle: {
+                  color: this.randomPickColor(),
+                },
+              },
+              {
+                // name: "xx",
+                value: 3,
+                itemStyle: {
+                  color: this.randomPickColor(),
+                },
+              },
+            ],
           },
         ],
       });
@@ -208,6 +249,13 @@ export default {
     },
     pieChart() {
       this.makeChart({ type: "pie" });
+    },
+
+    showVoteRecord() {},
+    randomPickColor() {
+      const color = colorPool.shift();
+      colorPool.push(color);
+      return color;
     },
   },
 };
@@ -222,7 +270,7 @@ export default {
 
 #chart {
   width: 600px;
-  height: 400px;
+  min-height: 300px;
 }
 
 .vote-button {

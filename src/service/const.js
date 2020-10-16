@@ -99,3 +99,5 @@ export const EXAMPLE_MESSAGES = [
     giftName: '小红花'
   }
 ]
+
+export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
