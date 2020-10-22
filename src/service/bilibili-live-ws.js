@@ -343,7 +343,7 @@ function parseGift(msg) {
       giftNumber: num || 1,
 
       // sc
-      superChatId: id,
+      superChatId: `${id}`,
       type: 'superChat',
       comment: message,
       commentJPN: message_jpn,

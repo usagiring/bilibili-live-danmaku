@@ -152,7 +152,7 @@ export default {
           .map(parseComment);
 
         for (const comment of comments) {
-          console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
+          // console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
 
           if (this.isShowAvatar) {
             // 缓存 user 信息
@@ -181,7 +181,7 @@ export default {
           .map(parseInteractWord);
 
         for (const interactWord of interactWords) {
-          console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
+          // console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
           const data = await interactDB.insert(interactWord);
           if (this.isShowInteractInfo) {
             this.sendInteractWord(data);
@@ -211,27 +211,31 @@ export default {
           }
 
           if (gift.type === "superChat") {
-            let data;
+            let data = await giftDB.findOne({
+              roomId: this.roomId,
+              superChatId: gift.superChatId
+            });
 
-            if (gift.commentJPN) {
-              let sc = await giftDB.findOne({
-                roomId: this.roomId,
-                superChatId
-              });
-              if (sc) {
+            // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
+            if (data && gift.commentJPN) {
+              if (gift.commentJPN) {
                 data = await giftDB.update(
-                  { _id: sc._id },
+                  { _id: data._id },
                   {
                     $set: { commentJPN: gift.commentJPN }
                   },
                   { returnUpdatedDocs: true }
                 );
+              } else {
+                // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
+                continue;
               }
             }
 
             if (!data) {
               data = await giftDB.insert(gift);
             }
+
             this.sendSuperChat(data);
           } else if (gift.type === "gift") {
             let data;
@@ -255,7 +259,6 @@ export default {
             }
             if (!this.isShowSilverGift && gift.coinType === "silver") continue;
             if (gift.coinType === "silver") gift.price = 0;
-            console.log(data)
             this.sendGift(data);
           }
         }
@@ -264,7 +267,6 @@ export default {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
-          console.log(msg);
           otherDB.insert(msg);
         });
       } else {

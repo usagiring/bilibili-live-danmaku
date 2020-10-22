@@ -24,8 +24,15 @@ export function getPriceProperties(price) {
 }
 
 let isGetUserInfoLocked = false;
+let isGetUserInfoLocked20min = false
 export async function getUserInfoThrottle(uid) {
   if (isGetUserInfoLocked) throw new Error("isGetUserInfoLocked");
+  if (isGetUserInfoLocked20min) {
+    setTimeout(() => {
+      isGetUserInfoLocked20min = false
+    }, 1000 * 60 * 20)
+    throw new Error('isGetUserInfoLocked 20min')
+  }
   // 限制获取头像频率 避免412被封
   // 412 和请求量和速率都有关系，阶段式限流
   isGetUserInfoLocked = true;
@@ -33,6 +40,13 @@ export async function getUserInfoThrottle(uid) {
     isGetUserInfoLocked = false;
   }, GET_USER_INFO_FREQUENCY_LIMIT);
 
-  const { data } = await getUserInfo(uid);
-  return data;
+  try {
+    const { data } = await getUserInfo(uid);
+    return data;
+  } catch (e) {
+    if (e.message === 'Request failed with status code 412') {
+      isGetUserInfoLocked20min = true
+    }
+    throw e
+  }
 }

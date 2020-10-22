@@ -28,12 +28,8 @@
         </Tooltip>
       </i-col>
       <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching"
-          >开始</Button
-        >
-        <Button class="vote-button" @click="stop" :disabled="!isWatching"
-          >停止</Button
-        >
+        <Button class="vote-button" @click="start" :disabled="isWatching">开始</Button>
+        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
         <Button class="vote-button" @click="showVoteRecord">记录</Button>
       </i-col>
       <i-col span="15">
@@ -53,13 +49,13 @@
 
 <script>
 import * as echarts from "echarts";
-import { shuffle } from 'lodash'
+import { shuffle } from "lodash";
 import emitter, {
   init,
   close,
   parseComment,
   parseInteractWord,
-  parseGift,
+  parseGift
 } from "../../service/bilibili-live-ws";
 import { EXAMPLE_MESSAGES, DEFAULT_AVATAR, COLORS } from "../../service/const";
 let userMap = {};
@@ -75,7 +71,7 @@ const __EXAMPLE_MESSAGES = [...EXAMPLE_MESSAGES].concat([
     comment: "AAAAA",
     avatar: DEFAULT_AVATAR,
     role: 3,
-    similar: 0,
+    similar: 0
   },
   {
     id: 204,
@@ -85,7 +81,7 @@ const __EXAMPLE_MESSAGES = [...EXAMPLE_MESSAGES].concat([
     comment: "BBB",
     avatar: DEFAULT_AVATAR,
     role: 3,
-    similar: 0,
+    similar: 0
   },
   {
     id: 205,
@@ -95,8 +91,8 @@ const __EXAMPLE_MESSAGES = [...EXAMPLE_MESSAGES].concat([
     comment: "cc",
     avatar: DEFAULT_AVATAR,
     role: 3,
-    similar: 0,
-  },
+    similar: 0
+  }
 ]);
 
 // example: {} 内会被匹配，其他作为文字展示
@@ -109,71 +105,69 @@ export default {
     return {
       optionstring: "{A}\n{B}\n{C}: 221sfxx",
       chart: null,
-      isWatching: false,
+      isWatching: false
     };
   },
   computed: {
     options() {
-      return this.optionstring.split(/\n/g);
+      const optionArray = this.optionstring.split(/\n/g);
+      return optionArray.reduce((map, optionString) => {
+        const left = optionString.indexOf("{");
+        const right = optionString.lastIndexOf("}");
+        // 如果没找到直接返回map
+        if (!~left || !~right) return map;
+        if (right < left) return map;
+        const keyword = optionString.substring(left + 1, right);
+        map[keyword] = optionString.substring(right + 1);
+        return map;
+      }, {});
     },
+
     keywords() {
-      return this.options
-        .map((option) => {
-          const left = option.indexOf("{");
-          const right = option.lastIndexOf("}");
-          // 如果没找到直接返回
-          if (!~left || !~right) return;
-          if (right < left) return;
-          const keyword = option.substring(left + 1, right);
-          return keyword;
-        })
-        .filter(Boolean);
+      return Object.keys(this.options);
     },
+    descriptions() {
+      return Object.values(this.options);
+    },
+    regexps() {
+      return this.keywords.map(keyword => new RegExp(keyword, "i"));
+    }
   },
   methods: {
     init() {
       userMap = {};
+      // this.chart = null
+      const chartDOM = document.getElementById("chart");
+      // const style = window.getComputedStyle(chartDOM)
+      // const top = style.getPropertyValue('height');
+      // chartDOM.style.height = `${160 + this.keywords.length * 30}px`;
       if (!this.chart) {
-        this.chart = echarts.init(document.getElementById("chart"));
+        this.chart = echarts.init(chartDOM);
       }
-      const data = this.keywords.map(() => 0);
+      this.chart.resize({
+        height: 160 + this.keywords.length * 30
+      });
+      const data = this.descriptions.map((description, index) => {
+        return {
+          name: this.keywords[index],
+          value: 0,
+          itemStyle: {
+            color: this.randomPickColor()
+          },
+          label: {
+            formatter: description
+          }
+        };
+      });
       this.data = data;
-      this.makeChart({ keywords: this.keywords, data, type: "bar" });
+      this.makeChart({ data: data, type: "bar" });
     },
     start() {
       this.init();
 
       this.isWatching = true;
 
-      const regexps = this.keywords.map((keyword) => new RegExp(keyword, "i"));
-
-      emitter.on("message", async (data) => {
-        const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
-          .map(parseComment);
-
-        // TEST
-        // const comments = data.filter((msg) => msg.type === "comment");
-
-        for (const comment of comments) {
-          // 已经记录过的用户不再重复统计
-          if (userMap[comment.uid]) continue;
-          const index = regexps.findIndex((regexp) => {
-            return regexp.test(comment.comment);
-          });
-          if (!~index) continue;
-          // 记录统计
-          userMap[
-            comment.uid
-          ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
-          console.log(
-            `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
-          );
-          // 输入图表
-          this.data[index]++;
-          this.makeChart({ data: this.data });
-        }
-      });
+      emitter.on("message", this.onVoteMessage);
 
       // TEST
       // emitter.emit("message", __EXAMPLE_MESSAGES);
@@ -182,9 +176,7 @@ export default {
       const listenerCount = emitter.listenerCount("message");
       // 如果只有1个监听者，即主监听器，不处理
       if (listenerCount <= 1) return;
-      emitter.off("message", () =>
-        console.log("eventName: message, remove one listener")
-      );
+      emitter.removeListener("message", this.onVoteMessage);
       this.isWatching = false;
     },
 
@@ -194,53 +186,40 @@ export default {
 
         xAxis: {
           type: "value",
-          axisTick: {
-            show: false,
+          splitLine: {
+            show: false
           },
+          axisTick: {
+            show: false
+          }
         },
         yAxis: {
           type: "category",
           data: this.keywords,
           axisTick: {
-            show: false,
-          },
+            show: false
+          }
         },
         series: [
           {
             name: "计数",
             type,
             barWidth: 30,
+            label: {
+              show: true,
+              align: "right"
+
+              // verticalAlign: 'top'
+            },
             itemStyle: {
               borderType: "solid",
               // borderColor: "silver",
               // borderWidth: 1,
-              barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
+              barBorderRadius: [0, 20, 20, 0] //（顺时针左上，右上，右下，左下）
             },
-            data: [
-              {
-                // name: "xx",
-                value: 2,
-                itemStyle: {
-                  color: this.randomPickColor(),
-                },
-              },
-              {
-                // name: "xx",
-                value: 1,
-                itemStyle: {
-                  color: this.randomPickColor(),
-                },
-              },
-              {
-                // name: "xx",
-                value: 3,
-                itemStyle: {
-                  color: this.randomPickColor(),
-                },
-              },
-            ],
-          },
-        ],
+            data: data
+          }
+        ]
       });
     },
 
@@ -251,13 +230,43 @@ export default {
       this.makeChart({ type: "pie" });
     },
 
-    showVoteRecord() {},
+    showVoteRecord() {
+      console.log(userMap);
+    },
     randomPickColor() {
       const color = colorPool.shift();
       colorPool.push(color);
       return color;
     },
-  },
+    onVoteMessage: async function(data) {
+      if (!Array.isArray(data)) return;
+      const comments = data
+        .filter(msg => msg.cmd === "DANMU_MSG")
+        .map(parseComment);
+
+      // TEST
+      // const comments = data.filter((msg) => msg.type === "comment");
+
+      for (const comment of comments) {
+        // 已经记录过的用户不再重复统计
+        if (userMap[comment.uid]) continue;
+        const index = this.regexps.findIndex(regexp => {
+          return regexp.test(comment.comment);
+        });
+        if (!~index) continue;
+        // 记录统计
+        userMap[
+          comment.uid
+        ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
+        console.log(
+          `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
+        );
+        // 输入图表
+        this.data[index].value++;
+        this.makeChart({ data: this.data });
+      }
+    }
+  }
 };
 </script>
 
@@ -270,7 +279,7 @@ export default {
 
 #chart {
   width: 600px;
-  min-height: 300px;
+  /* height: 250px; */
 }
 
 .vote-button {
