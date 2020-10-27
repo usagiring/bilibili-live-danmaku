@@ -1,6 +1,5 @@
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
 
-// TODO 可配置文字颜色，避免显示不清
 export const PRICE_PROPERTIES = {
   1: {
     backgroundColor: "#EDF5FF",
@@ -40,6 +39,16 @@ export const PRICE_PROPERTIES = {
   },
 };
 
+export const GUARD_ICON_1 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png@44w_44h.webp"
+export const GUARD_ICON_2 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png@44w_44h.webp"
+export const GUARD_ICON_3 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp"
+
+export const GUARD_ICON_MAP = {
+  1: GUARD_ICON_1,
+  2: GUARD_ICON_2,
+  3: GUARD_ICON_3,
+}
+
 export const GUARD_LEVEL_MAP = {
   0: "normal",
   1: "governor",
@@ -53,7 +62,11 @@ export const INTERACT_TYPE = {
   3: '分享'
 }
 
-// 限制获取头像频率，单位毫秒，避免 412 限制，1000 为比较安全的值
+export const ENTER_ROOM_TYPE = {
+  1: '进入',
+  2: '光临'
+}
+
 export const GET_USER_INFO_FREQUENCY_LIMIT = 1000
 
 export const EXAMPLE_MESSAGES = [

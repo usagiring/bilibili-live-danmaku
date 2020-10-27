@@ -1,7 +1,13 @@
 <template>
   <div class="query-component">
     <div class="searcher-wrapper">
-      <Input v-model="roomId" placeholder="房间号" clearable style="width: 150px" size="small" />
+      <Input
+        v-model="roomId"
+        placeholder="房间号"
+        clearable
+        style="width: 150px"
+        size="small"
+      />
       <DatePicker
         type="datetimerange"
         format="yyyy-MM-dd HH:mm"
@@ -12,18 +18,31 @@
         @on-change="changeDateRange"
         @on-clear="clearDateRange"
       ></DatePicker>
-      <Input v-model="userId" placeholder="UserId" clearable style="width: 100px" size="small" />
-      <Button type="primary" shape="circle" icon="ios-search" @click="searchAll"></Button>
+      <Input
+        v-model="userId"
+        placeholder="用户ID"
+        clearable
+        style="width: 100px"
+        size="small"
+      />
+      <Button
+        type="primary"
+        shape="circle"
+        icon="ios-search"
+        @click="searchAll"
+      ></Button>
       <Checkbox
         class="setting-checkbox"
         :value="isShowUserSpaceLink"
         @on-change="showUserSpaceLink"
-      >查成分</Checkbox>
+        >查成分</Checkbox
+      >
       <Checkbox
         class="setting-checkbox"
         :value="isShowSilverGift"
         @on-change="showSilverGift"
-      >显示银瓜子礼物</Checkbox>
+        >显示银瓜子礼物</Checkbox
+      >
     </div>
     <div class="content-wrapper">
       <Split v-model="split1" @on-moving="splitMoving">
@@ -33,27 +52,31 @@
               <Scroll
                 :on-reach-edge="handleReachEdgeComment"
                 :height="scrollHeightLeftTop"
-                :distance-to-edge="[10,10]"
+                :distance-to-edge="[10, 10]"
               >
                 <template v-for="comment in comments">
                   <div :key="comment._id" class="comment-content">
-                    <span>{{(dateFormat(comment.sendAt))}}</span>
+                    <span>{{ dateFormat(comment.sendAt) }}</span>
                     <i
                       v-if="comment.guard"
                       class="guard-icon"
-                      :style="{'background-image': `url(https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard${comment.guard}.png@44w_44h.webp)`}"
+                      :style="{
+                        'background-image': `url(${getGuardIcon(comment.guard)})`,
+                      }"
                     ></i>
                     <span
                       v-if="comment.medalLevel && comment.medalName"
                       class="medal-style"
-                    >{{`${comment.medalName}${comment.medalLevel}`}}</span>
-                    <span>{{`${comment.name}`}}</span>
+                      >{{ `${comment.medalName}${comment.medalLevel}` }}</span
+                    >
+                    <span>{{ `${comment.name}` }}</span>
                     <span
                       v-if="isShowUserSpaceLink"
                       class="user-link"
                       @click="openBiliUserSpace(comment.uid)"
-                    >{{`(${comment.uid})`}}</span>
-                    <span>{{`: ${comment.comment}`}}</span>
+                      >{{ `(${comment.uid})` }}</span
+                    >
+                    <span>{{ `: ${comment.comment}` }}</span>
                   </div>
                 </template>
               </Scroll>
@@ -62,17 +85,18 @@
               <Scroll
                 :on-reach-edge="handleReachEdgeInteract"
                 :height="scrollHeightLeftBottom"
-                :distance-to-edge="[10,10]"
+                :distance-to-edge="[10, 10]"
               >
                 <template v-for="interact in interacts">
                   <div :key="interact._id">
-                    <span>{{(dateFormat(interact.sendAt))}}</span>
-                    <span>{{`${interact.name}`}}</span>
+                    <span>{{ dateFormat(interact.sendAt) }}</span>
+                    <span>{{ `${interact.name}` }}</span>
                     <span
                       v-if="isShowUserSpaceLink"
                       class="user-link"
                       @click="openBiliUserSpace(interact.uid)"
-                    >{{`(${interact.uid})`}}</span>
+                      >{{ `(${interact.uid})` }}</span
+                    >
                     <span>进入了直播间</span>
                     <!-- <span>{{`: ${interact.comment}`}}</span> -->
                   </div>
@@ -85,17 +109,17 @@
           <Scroll
             :on-reach-edge="handleReachEdgeGift"
             :height="scrollHeightRight"
-            :distance-to-edge="[10,10]"
+            :distance-to-edge="[10, 10]"
           >
             <template v-for="gift in gifts">
-              <div :key="gift._id" :style="{padding: '0 10px'}">
-                <template v-if="gift.type==='superChat'">
-                  <GiftCard v-bind="gift">{{gift.comment}}</GiftCard>
+              <div :key="gift._id" :style="{ padding: '0 10px' }">
+                <template v-if="gift.type === 'superChat'">
+                  <GiftCard v-bind="gift">{{ gift.comment }}</GiftCard>
                 </template>
-                <template v-if="gift.type==='gift'">
-                  <GiftCard
-                    v-bind="gift"
-                  >{{`${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`}}</GiftCard>
+                <template v-if="gift.type === 'gift'">
+                  <GiftCard v-bind="gift">{{
+                    `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`
+                  }}</GiftCard>
                 </template>
                 <!-- <span>{{`: ${interact.comment}`}}</span> -->
               </div>
@@ -110,7 +134,8 @@
 <script>
 import { shell } from "electron";
 import moment from "moment";
-import { getPriceProperties } from '../../service/util'
+import { GUARD_ICON_MAP } from '../../service/const'
+import { getPriceProperties } from "../../service/util";
 import db from "../../service/nedb";
 import GiftCard from "./GiftCard";
 
@@ -134,7 +159,7 @@ export default {
       scrollHeightLeftTop: 300,
       scrollHeightLeftBottom: 100,
       scrollHeightRight: 1000,
-      isShowSilverGift: false
+      isShowSilverGift: false,
     };
   },
   created() {
@@ -144,7 +169,7 @@ export default {
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
     this.searchAll({
-      isShowSilverGift: this.isShowSilverGift
+      isShowSilverGift: this.isShowSilverGift,
     });
   },
   mounted() {
@@ -183,7 +208,7 @@ export default {
         };
       }
       if (this.userId) {
-        query.uid = this.userId;
+        query.uid = parseInt(this.userId);
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -211,7 +236,7 @@ export default {
         };
       }
       if (this.userId) {
-        query.uid = this.userId;
+        query.uid = parseInt(this.userId);
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -240,22 +265,20 @@ export default {
         };
       }
       if (this.userId) {
-        query.uid = this.userId;
+        query.uid = parseInt(this.userId);
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      if(!this.isShowSilverGift) {
-        query.coinType = 'gold'
+      if (!this.isShowSilverGift) {
+        query.coinType = "gold";
       }
       const gifts = await giftDB.find(query, {
         sort: sort || { sendAt: -1 },
         limit: 20,
       });
-      console.log(query)
-      console.log(gifts)
       return gifts;
     },
 
@@ -344,7 +367,7 @@ export default {
             sort: { sendAt: 1 },
           });
           gifts.reverse();
-          gifts = gifts.map(this.formatGift)
+          gifts = gifts.map(this.formatGift);
           setTimeout(() => {
             this.gifts = [...gifts, ...this.gifts];
           }, 700);
@@ -356,7 +379,7 @@ export default {
             scrollToken: `$lt:${lastGift.sendAt}`,
             sort: { sendAt: -1 },
           });
-          gifts = gifts.map(this.formatGift)
+          gifts = gifts.map(this.formatGift);
           setTimeout(() => {
             this.gifts = [...this.gifts, ...gifts];
           }, 700);
@@ -372,19 +395,24 @@ export default {
     },
     formatGift(gift) {
       gift.totalPrice = (gift.giftNumber || 1) * gift.price;
-      gift.totalPrice = Number.isInteger(gift.totalPrice) ? gift.totalPrice : gift.totalPrice.toFixed(1)
+      gift.totalPrice = Number.isInteger(gift.totalPrice)
+        ? gift.totalPrice
+        : gift.totalPrice.toFixed(1);
       return Object.assign({}, gift, {
         priceProperties: getPriceProperties(gift.totalPrice) || {},
       });
     },
-    async showSilverGift(status){
+    async showSilverGift(status) {
       this.isShowSilverGift = status;
       let gifts = await this.searchGift({
-        isShowSilverGift: status
-      })
+        isShowSilverGift: status,
+      });
       gifts = gifts.map(this.formatGift);
       this.gifts = gifts;
-    }
+    },
+    getGuardIcon(level) {
+      return GUARD_ICON_MAP[level];
+    },
   },
 };
 </script>
@@ -404,7 +432,8 @@ export default {
   overflow: auto;
 }
 
-#split-left-top,#split-left-bottom {
+#split-left-top,
+#split-left-bottom {
   padding: 5px 10px;
 }
 
@@ -442,7 +471,7 @@ export default {
 }
 .user-link {
   cursor: pointer;
-  color: blue;
+  color: lightsalmon;
   text-decoration: underline;
 }
 </style>

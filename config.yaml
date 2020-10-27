@@ -1,0 +1,36 @@
+# 限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000以上 为比较安全的值, 
+GET_USER_INFO_FREQUENCY_LIMIT: 1000
+# 图表色彩
+COLORS: ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+# 礼物色彩区分, 1～6 分别对应B站 6档SC价格
+PRICE_PROPERTIES:
+  1:
+    backgroundColor: "#EDF5FF"
+    backgroundPriceColor: "#7497CD"
+    backgroundBottomColor: "#2A60B2"
+    time: 60000
+  2:
+    backgroundColor: "#DBFFFD"
+    backgroundPriceColor: "#7DA4BD"
+    backgroundBottomColor: "#427D9E"
+    time: 120000
+  3:
+    backgroundColor: "#FFF1C5"
+    backgroundPriceColor: "gold"
+    backgroundBottomColor: "#E2B52B"
+    time: 300000
+  4
+    backgroundColor: "rgb(255,234,210)"
+    backgroundPriceColor: "rgb(255,234,210)"
+    backgroundBottomColor: "rgb(244,148,67)"
+    time: 1800000
+  5
+    backgroundColor: "rgb(255,231,228)"
+    backgroundPriceColor: "rgb(255,231,228)"
+    backgroundBottomColor: "rgb(229,77,77)"
+    time: 3600000
+  6
+    backgroundColor: "rgb(255,216,216)"
+    backgroundPriceColor: "rgb(255,216,216)"
+    backgroundBottomColor: "rgb(171,26,50)"
+    time: 7200000
