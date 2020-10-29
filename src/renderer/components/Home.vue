@@ -35,7 +35,8 @@
               v-if="username"
               type="border"
               :color="liveStatus === 1 ? 'green' : 'silver'"
-            >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
+              >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag
+            >
           </div>
 
           <div class="status-wrapper">
@@ -83,16 +84,24 @@
               :disabled="isConnected"
               style="width: 120px"
             />
-            <i-switch v-model="isConnected" @on-change="connect" :disabled="!roomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i-switch
+              v-model="isConnected"
+              @on-change="connect"
+              :disabled="!roomId"
+            />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
             <i-switch
               :value="isShowDanmakuWindow"
               :loading="isShowDanmakuWindowLoading"
               @on-change="showDanmakuWindow"
-            ></i-switch>&nbsp;&nbsp;&nbsp;
+            ></i-switch
+            >&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span @click="alwaysOnTop">窗口置顶</span>
-              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+              <i-switch
+                v-model="isAlwaysOnTop"
+                @on-change="alwaysOnTop"
+              ></i-switch>
             </template>
           </div>
         </div>
@@ -116,7 +125,7 @@ import emitter, {
   close,
   parseComment,
   parseInteractWord,
-  parseGift
+  parseGift,
 } from "../../service/bilibili-live-ws";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import db from "../../service/nedb";
@@ -140,15 +149,15 @@ export default {
       fansNumber: 0,
       fansClubNumber: 0,
       liveStatus: 0,
-      peopleNumber: 0
+      peopleNumber: 0,
       // guardNumber: 0,
     };
   },
   created() {
-    emitter.on("message", async data => {
+    emitter.on("message", async (data) => {
       if (Array.isArray(data)) {
         const comments = data
-          .filter(msg => msg.cmd === "DANMU_MSG")
+          .filter((msg) => msg.cmd === "DANMU_MSG")
           .map(parseComment);
 
         for (const comment of comments) {
@@ -177,7 +186,7 @@ export default {
         }
 
         const interactWords = data
-          .filter(msg => msg.cmd === "INTERACT_WORD")
+          .filter((msg) => msg.cmd === "INTERACT_WORD")
           .map(parseInteractWord);
 
         for (const interactWord of interactWords) {
@@ -213,7 +222,7 @@ export default {
           if (gift.type === "superChat") {
             let data = await giftDB.findOne({
               roomId: this.roomId,
-              superChatId: gift.superChatId
+              superChatId: gift.superChatId,
             });
 
             // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
@@ -222,7 +231,7 @@ export default {
                 data = await giftDB.update(
                   { _id: data._id },
                   {
-                    $set: { commentJPN: gift.commentJPN }
+                    $set: { commentJPN: gift.commentJPN },
                   },
                   { returnUpdatedDocs: true }
                 );
@@ -242,13 +251,15 @@ export default {
             if (gift.batchComboId) {
               const comboGift = await giftDB.findOne({
                 roomId: this.roomId,
-                batchComboId: gift.batchComboId
+                batchComboId: gift.batchComboId,
               });
               if (comboGift) {
                 data = await giftDB.update(
                   { _id: comboGift._id },
                   {
-                    $set: { giftNumber: comboGift.giftNumber + gift.giftNumber }
+                    $set: {
+                      giftNumber: comboGift.giftNumber + gift.giftNumber,
+                    },
                   },
                   { returnUpdatedDocs: true }
                 );
@@ -263,7 +274,7 @@ export default {
           }
         }
 
-        data.forEach(msg => {
+        data.forEach((msg) => {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
@@ -281,7 +292,7 @@ export default {
       }
     });
 
-    emitter.on("ninki", async data => {
+    emitter.on("ninki", async (data) => {
       this.ninkiNumber = data.count;
     });
   },
@@ -289,8 +300,11 @@ export default {
     roomId() {
       return this.$store.state.Config.roomId;
     },
-    menuitemClasses: function() {
+    menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
+    },
+    messages() {
+      return this.$store.state.Message.messages;
     },
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
@@ -301,9 +315,6 @@ export default {
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
     },
-    messages() {
-      return this.$store.state.Message.messages;
-    },
     showGiftThreshold() {
       return this.$store.state.Config.showGiftThreshold;
     },
@@ -312,7 +323,19 @@ export default {
     },
     guardNumber() {
       return this.$store.state.Config.guardNumber;
-    }
+    },
+    windowWidth() {
+      return this.$store.state.Config.windowWidth;
+    },
+    windowHeight() {
+      return this.$store.state.Config.windowHeight;
+    },
+    windowX() {
+      return this.$store.state.Config.windowX;
+    },
+    windowY() {
+      return this.$store.state.Config.windowY;
+    },
   },
   methods: {
     async connect(status) {
@@ -330,7 +353,7 @@ export default {
           description,
           live_status: liveStatus,
           live_start_time, // 直播开始时间 unixtime
-          online
+          online,
         } = data.room_info;
 
         await init({ roomId: Number(roomId), uid: 0 });
@@ -351,7 +374,7 @@ export default {
         // this.guardNumber = guardInfo.data.info.num;
         this.$store.dispatch("UPDATE_CONFIG", {
           guardNumber: guardInfo.data.info.num,
-          realRoomId: roomId
+          realRoomId: roomId,
         });
       } else {
         close();
@@ -364,7 +387,7 @@ export default {
         this.peopleNumber = 0;
 
         this.$store.dispatch("UPDATE_CONFIG", {
-          guardNumber: 0
+          guardNumber: 0,
         });
       }
     },
@@ -374,18 +397,18 @@ export default {
 
       if (status) {
         this.win = new BrowserWindow({
-          width: 320,
-          height: 350,
+          width: this.windowWidth || 320,
+          height: this.windowHeight || 350,
           // x, y,
-          x: 0,
-          y: 0,
+          x: this.windowX || 0,
+          y: this.windowY || 0,
           frame: false,
           transparent: true,
           hasShadow: false,
           webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
           },
-          resizable: true
+          resizable: true,
         });
 
         const winURL =
@@ -393,10 +416,27 @@ export default {
             ? `http://localhost:9080/#/danmaku-window`
             : `file://${__dirname}/index.html#danmaku-window`;
         this.win.loadURL(winURL);
-        this.win.on("close", e => {
+        this.win.on("close", (e) => {
           this.isShowDanmakuWindow = false;
           this.isShowDanmakuWindowLoading = false;
         });
+        this.win.on("resize", () => {
+          const [width, height] = this.win.getSize();
+          this.$store.dispatch("UPDATE_CONFIG", {
+            windowWidth: width,
+            windowHeight: height,
+          });
+        });
+        this.win.on("move", () => {
+          const [x, y] = this.win.getPosition();
+          this.$store.dispatch("UPDATE_CONFIG", {
+            windowX: x,
+            windowY: y,
+          });
+        });
+        // this.win.on('always-on-top-changed', (e, isAlwaysOnTop) => {
+
+        // })
         // 初始化时清空弹幕池
         this.$store.dispatch("CLEAR_MESSAGE");
         this.isShowDanmakuWindow = true;
@@ -413,7 +453,7 @@ export default {
       this.win.setAlwaysOnTop(status);
       this.win.setIgnoreMouseEvents(status, { forward: true });
       this.$store.dispatch("UPDATE_CONFIG", {
-        isAlwaysOnTop: status
+        isAlwaysOnTop: status,
       });
     },
     sendComment(payload) {
@@ -428,7 +468,7 @@ export default {
         avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
-        role: payload.guard
+        role: payload.guard,
       });
     },
     sendInteractWord(payload) {
@@ -440,7 +480,7 @@ export default {
         name: payload.name,
         color: payload.nameColor,
         sendAt: payload.timestamp,
-        msgType: payload.msgType
+        msgType: payload.msgType,
       });
     },
     sendSuperChat(payload) {
@@ -460,7 +500,7 @@ export default {
         superChatId: Number(payload.superChatId),
         time: payload.time,
         startTime: payload.startTime,
-        endTime: payload.endTime
+        endTime: payload.endTime,
       });
     },
     sendGift(payload) {
@@ -475,7 +515,7 @@ export default {
         price: payload.price,
         sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
-        giftName: payload.giftName
+        giftName: payload.giftName,
       });
     },
 
@@ -485,21 +525,21 @@ export default {
         name: data.name,
         avatar: data.face,
         sex: data.sex,
-        level: data.level
+        level: data.level,
       };
     },
 
     changeRoomId(roomId) {
       this.$store.dispatch("UPDATE_CONFIG", {
-        roomId: roomId
+        roomId: roomId,
       });
-    }
+    },
   },
   mounted() {
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER", {
-        now: new Date() - 0
+        now: new Date() - 0,
       });
     }, 1000);
 
@@ -519,11 +559,11 @@ export default {
         interactDB.find(
           { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
-        )
+        ),
       ]);
 
       this.peopleNumber = uniq(
-        [...comments, ...gifts, ...interacts].map(i => i.uid)
+        [...comments, ...gifts, ...interacts].map((i) => i.uid)
       ).length;
     }, 10000);
   },
@@ -534,7 +574,7 @@ export default {
     if (this.peopleTimer) {
       clearInterval(this.peopleTimer);
     }
-  }
+  },
 };
 </script>
 
