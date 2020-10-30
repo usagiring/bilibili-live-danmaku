@@ -159,6 +159,8 @@ export default {
     };
   },
   created() {
+    this.initial();
+
     emitter.on("message", async (data) => {
       if (Array.isArray(data)) {
         const comments = data
@@ -383,17 +385,7 @@ export default {
         });
       } else {
         close();
-        this.username = "";
-        this.avatar = null;
-        this.ninkiNumber = 0;
-        this.fansNumber = 0;
-        this.fansClubNumber = 0;
-        this.liveStatus = 0;
-        this.peopleNumber = 0;
-
-        this.$store.dispatch("UPDATE_CONFIG", {
-          guardNumber: 0,
-        });
+        this.initial();
       }
     },
     showDanmakuWindow(status) {
@@ -453,6 +445,19 @@ export default {
       }
     },
 
+    initial() {
+      this.username = "";
+      this.avatar = null;
+      this.ninkiNumber = 0;
+      this.fansNumber = 0;
+      this.fansClubNumber = 0;
+      this.liveStatus = 0;
+      this.peopleNumber = 0;
+
+      this.$store.dispatch("UPDATE_CONFIG", {
+        guardNumber: 0,
+      });
+    },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
       this.win.setAlwaysOnTop(status);
