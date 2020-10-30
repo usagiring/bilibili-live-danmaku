@@ -149,13 +149,21 @@
 
 <script>
 import { remote } from "electron";
-const { BrowserWindow, screen } = remote;
+const window = remote.getCurrentWindow();
 import Store from "electron-store";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
 import { DEFAULT_AVATAR } from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
+import {
+  commentDB,
+  interactDB,
+  userDB,
+  otherDB,
+  giftDB,
+  backup,
+} from "../../service/nedb";
 
 export default {
   components: {
@@ -502,13 +510,19 @@ export default {
     },
 
     async backupAndClearDB() {
-      // TODO 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
-      // const result = await commentDB.remove({},{multi: true})
+      // 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
+      backup();
+      await commentDB.remove({}, { multi: true });
+      await giftDB.remove({}, { multi: true });
+      await interactDB.remove({}, { multi: true });
+      await otherDB.remove({}, { multi: true });
+      window.reload();
     },
 
     async clearUserDB() {
       // 清空用户数据缓存
-      // TODO user 清空
+      await userDB.remove({}, { multi: true });
+      window.reload();
     },
   },
 };

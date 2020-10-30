@@ -61,7 +61,9 @@
                       v-if="comment.guard"
                       class="guard-icon"
                       :style="{
-                        'background-image': `url(${getGuardIcon(comment.guard)})`,
+                        'background-image': `url(${getGuardIcon(
+                          comment.guard
+                        )})`,
                       }"
                     ></i>
                     <span
@@ -132,14 +134,21 @@
 </template>
 
 <script>
-import { shell } from "electron";
+import { shell, remote } from "electron";
+const window = remote.getCurrentWindow();
 import moment from "moment";
-import { GUARD_ICON_MAP } from '../../service/const'
+import { GUARD_ICON_MAP } from "../../service/const";
 import { getPriceProperties } from "../../service/util";
-import db from "../../service/nedb";
+import {
+  commentDB,
+  interactDB,
+  userDB,
+  otherDB,
+  giftDB,
+} from "../../service/nedb";
 import GiftCard from "./GiftCard";
 
-const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
+// const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 
 export default {
   components: {
@@ -168,8 +177,10 @@ export default {
     // new Date(this.$store.state.Config.connectedAt) ||
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
-    this.searchAll({
-      isShowSilverGift: this.isShowSilverGift,
+    this.searchAll();
+    window.on("resize", () => {
+      this.splitLeftMoving();
+      this.splitMoving();
     });
   },
   mounted() {
@@ -199,7 +210,7 @@ export default {
       }
       const query = {};
       if (this.roomId) {
-        query.roomId = this.roomId;
+        query.roomId = parseInt(this.roomId);
       }
       if (this.dateRange.length) {
         query.sendAt = {
@@ -227,7 +238,7 @@ export default {
       }
       const query = {};
       if (this.roomId) {
-        query.roomId = this.roomId;
+        query.roomId = parseInt(this.roomId);
       }
       if (this.dateRange.length) {
         query.sendAt = {
@@ -256,7 +267,7 @@ export default {
       }
       const query = {};
       if (this.roomId) {
-        query.roomId = this.roomId;
+        query.roomId = parseInt(this.roomId);
       }
       if (this.dateRange.length) {
         query.sendAt = {

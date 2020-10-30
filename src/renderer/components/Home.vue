@@ -128,9 +128,14 @@ import emitter, {
   parseGift,
 } from "../../service/bilibili-live-ws";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
-import db from "../../service/nedb";
+import {
+  commentDB,
+  interactDB,
+  userDB,
+  otherDB,
+  giftDB,
+} from "../../service/nedb";
 import { DEFAULT_AVATAR } from "../../service/const";
-const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
 
 export default {
   data() {
