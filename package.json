@@ -27,6 +27,9 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "extraFiles": [
+      "config.yaml"
+    ],
     "dmg": {
       "contents": [
         {

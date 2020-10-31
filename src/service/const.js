@@ -1,6 +1,6 @@
 const YAML = require('yaml')
 const fs = require('fs')
-const file = fs.readFileSync(`${__dirname}/../../config.yaml`, 'utf8')
+const file = fs.readFileSync(`config.yaml`, 'utf8')
 const OPTION_CONFIG = YAML.parse(file)
 
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
