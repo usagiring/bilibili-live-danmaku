@@ -5,8 +5,8 @@
         <Panel name="1">
           设置
           <div slot="content">
-            <div class="setting-key-text">
-              <span>窗口背景色</span>
+            <div>
+              <span class="setting-key-text">窗口背景色</span>
               <ColorPicker
                 :value="background"
                 @on-active-change="updateBackground"
@@ -14,32 +14,26 @@
                 alpha
               />
             </div>
-            <div class="setting-key-text">
-              <span class="avatar-controller">透明度</span>
-              <Slider
-                class="avatar-controller-slider"
-                :value="windowOpacity"
-                @on-change="changeOpacity"
-              ></Slider>
-            </div>
-            <div class="setting-key-text">
-              <Checkbox
-                class="setting-checkbox"
-                :value="isShowInteractInfo"
-                @on-change="showInteractInfo"
-                >显示交互消息</Checkbox
-              >
-            </div>
-            <div class="setting-key-text">
-              <span class="avatar-controller">头像大小</span>
-              <Slider
-                class="avatar-controller-slider"
-                :value="avatarSize"
-                @on-change="changeAvatarSize"
-              ></Slider>
+            <div>
+              <span class="setting-key-text">透明度</span>
+              <div class="avatar-controller-slider">
+                <Slider
+                  :value="windowOpacity"
+                  @on-change="changeOpacity"
+                ></Slider>
+              </div>
             </div>
             <div>
-              <span>重复弹幕合并</span>
+              <span class="setting-key-text">头像大小</span>
+              <div class="avatar-controller-slider">
+                <Slider
+                  :value="avatarSize"
+                  @on-change="changeAvatarSize"
+                ></Slider>
+              </div>
+            </div>
+            <div class="setting-key">
+              <span class="setting-key-text">重复弹幕合并</span>
               <!-- <Poptip trigger="hover" content="多少毫秒内重复的弹幕只显示最早的一条，且后面显示堆叠数字，设置为0表示不堆叠">
                 <Icon type="ios-help-circle-outline" />
               </Poptip>-->
@@ -48,40 +42,40 @@
                 @on-change="changeCombineSimilarTime"
                 :min="0"
                 size="small"
-                style="width: 100px"
               />
             </div>
-            <div>
-              <span>礼物栏展示大于</span>
+            <div class="setting-key">
+              <span class="setting-key-text">礼物栏展示大于</span>
               <InputNumber
                 :value="showGiftThreshold"
                 @on-change="changeShowGiftThreshold"
                 :min="0"
                 size="small"
-                style="width: 100px"
               />
             </div>
-            <div>
-              <span>弹幕礼物展示大于</span>
+            <div class="setting-key">
+              <span class="setting-key-text">弹幕礼物展示大于</span>
               <InputNumber
                 :value="showGiftCardThreshold"
                 @on-change="changeShowGiftCardThreshold"
                 :min="0"
                 size="small"
-                style="width: 100px"
               />
             </div>
             <div>
               <Checkbox
-                class="setting-checkbox"
-                :value="isShowSilverGift"
-                @on-change="showSilverGift"
+                :value="isShowInteractInfo"
+                @on-change="showInteractInfo"
+                >显示交互消息</Checkbox
+              >
+            </div>
+            <div>
+              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift"
                 >展示银瓜子礼物</Checkbox
               >
             </div>
             <div>
               <Checkbox
-                class="setting-checkbox"
                 :value="isShowMemberShipIcon"
                 @on-change="showMemberShipIcon"
                 >显示舰队图标</Checkbox
@@ -95,7 +89,7 @@
             <template
               v-for="item in editors.filter((editor) => editor.role === 0)"
             >
-              <div :key="item.id">
+              <div :key="item.id" class="setting-key">
                 <SettingEditor v-bind="item" />
               </div>
             </template>
@@ -107,7 +101,7 @@
             <template
               v-for="item in editors.filter((editor) => editor.role === 3)"
             >
-              <div :key="item.id">
+              <div :key="item.id" class="setting-key">
                 <SettingEditor v-bind="item" />
               </div>
             </template>
@@ -116,16 +110,16 @@
         <Panel name="4">
           高级
           <div slot="content">
-            <div>
+            <div class="setting-key">
               <Button @click="clearAllSetting">还原默认设置</Button>
             </div>
-            <div>
+            <div class="setting-key">
               <Button @click="refreshInfo">刷新直播间信息</Button>
             </div>
-            <div>
+            <div class="setting-key">
               <Button @click="backupAndClearDB">备份并清理数据库</Button>
             </div>
-            <div>
+            <div class="setting-key">
               <Button @click="clearUserDB">清理用户缓存</Button>
             </div>
           </div>
@@ -329,6 +323,12 @@ export default {
     };
   },
   computed: {
+    realRoomId() {
+      return this.$store.state.Config.realRoomId;
+    },
+    ruid() {
+      return this.$store.state.Config.ruid;
+    },
     background() {
       return this.$store.state.Config["container_style"]["background"];
     },
@@ -503,7 +503,7 @@ export default {
 
     async refreshInfo() {
       // 暂时只刷新舰长数
-      const guardInfo = await getGuardInfo(roomId, uid);
+      const guardInfo = await getGuardInfo(this.realRoomId, this.ruid);
       this.$store.dispatch("UPDATE_CONFIG", {
         guardNumber: guardInfo.data.info.num,
       });
@@ -529,21 +529,18 @@ export default {
 </script>
 
 <style scoped>
+.setting-key {
+  padding-top: 5px;
+}
 .setting-key-text {
   display: inline-block;
-  width: 100%;
-}
-.avatar-controller {
-  height: 36px;
-  line-height: 36px;
-  display: inline-block;
-  vertical-align: top;
+  width: 120px;
 }
 .avatar-controller-slider {
-  height: 36px;
+  height: 30px;
   display: inline-block;
+  vertical-align: bottom;
   width: 100px;
-  padding-left: 10px;
 }
 
 .setting-right-header {

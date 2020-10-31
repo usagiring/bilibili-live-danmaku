@@ -4,7 +4,8 @@
       <i-col span="7">
         <Input
           class="option-input"
-          v-model="optionstring"
+          :value="optionstring"
+          @on-change="changeInput"
           type="textarea"
           :rows="7"
           placeholder="输入备选项，使用换行分隔"
@@ -38,10 +39,10 @@
       </i-col>
       <i-col span="15">
         <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-          <Button @click="barChart">
+          <Button @click="barChart" :disabled="!isWatching">
             <Icon type="md-podium" />
           </Button>
-          <Button @click="pieChart">
+          <Button @click="pieChart" :disabled="!isWatching">
             <Icon type="md-pie" />
           </Button>
         </ButtonGroup>
@@ -78,40 +79,6 @@ import emitter, {
 import { EXAMPLE_MESSAGES, DEFAULT_AVATAR, COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 
-// TEST
-const __EXAMPLE_MESSAGES = [...EXAMPLE_MESSAGES].concat([
-  {
-    id: 203,
-    type: "comment",
-    uid: "12345",
-    name: "bli_22222222222",
-    comment: "AAAAA",
-    avatar: DEFAULT_AVATAR,
-    role: 3,
-    similar: 0,
-  },
-  {
-    id: 204,
-    type: "comment",
-    uid: "12345",
-    name: "bli_22222222222",
-    comment: "BBB",
-    avatar: DEFAULT_AVATAR,
-    role: 3,
-    similar: 0,
-  },
-  {
-    id: 205,
-    type: "comment",
-    uid: "333333",
-    name: "bli_333333",
-    comment: "cc",
-    avatar: DEFAULT_AVATAR,
-    role: 3,
-    similar: 0,
-  },
-]);
-
 // example: {} 内会被匹配，其他作为文字展示
 // {A}: 选项A
 // {B}: 选项B
@@ -124,41 +91,7 @@ export default {
       isWatching: false,
       type: "bar",
       modal1: false,
-      userMap: {
-        1231321: "222313-> fwfdfsdf",
-        1231322: "222313-> fwfdfsdf",
-        1231323: "222313-> fwfdfsdf",
-        1231324: "222313-> fwfdfsdf",
-        1231325: "222313-> fwfdfsdf",
-        1231326: "222313-> fwfdfsdf",
-        1231327: "222313-> fwfdfsdf",
-        1231328: "222313-> fwfdfsdf",
-        1231329: "222313-> fwfdfsdf",
-        12313: "222313-> fwfdfsdf",
-        12314: "222313-> fwfdfsdf",
-        1231334: "222313-> fwfdfsdf",
-        1231344: "222313-> fwfdfsdf",
-        1231354: "222313-> fwfdfsdf",
-        1231364: "222313-> fwfdfsdf",
-        1231374: "222313-> fwfdfsdf",
-        1231384: "222313-> fwfdfsdf",
-        1231394: "222313-> fwfdfsdf",
-        1231304: "222313-> fwfdfsdf",
-        123234: "222313-> fwfdfsdf",
-        1233304: "222313-> fwfdfsdf",
-        1234304: "222313-> fwfdfsdf",
-        1235304: "222313-> fwfdfsdf",
-        1236304: "222313-> fwfdfsdf",
-        1237304: "222313-> fwfdfsdf",
-        1238304: "222313-> fwfdfsdf",
-        1239304: "222313-> fwfdfsdf",
-        1230304: "222313-> fwfdfsdf",
-        1241304: "222313-> fwfdfsdf",
-        1251304: "222313-> fwfdfsdf",
-        1261304: "222313-> fwfdfsdf",
-        1271304: "222313-> fwfdfsdf",
-        1281304: "222313-> fwfdfsdf",
-      },
+      userMap: {},
     };
   },
   computed: {
@@ -189,6 +122,9 @@ export default {
       return this.keywords.map((keyword) => new RegExp(keyword, "i"));
     },
   },
+  beforeDestroy() {
+    this.stop()
+  },
   methods: {
     init() {
       this.userMap = {};
@@ -203,9 +139,6 @@ export default {
           itemStyle: {
             color: this.randomPickColor(),
           },
-          label: {
-            formatter: description,
-          },
         };
       });
       this.data = data;
@@ -218,9 +151,6 @@ export default {
       this.isWatching = true;
 
       emitter.on("message", this.onVoteMessage);
-
-      // TEST
-      // emitter.emit("message", __EXAMPLE_MESSAGES);
     },
     stop() {
       const listenerCount = emitter.listenerCount("message");
@@ -230,33 +160,24 @@ export default {
       this.isWatching = false;
     },
 
-    makeChart({ type = "bar" }) {
-      const series = [
-        {
-          name: "计数",
-          type,
-          barWidth: 30,
-          label: {
-            show: true,
-            align: "right",
-            // verticalAlign: 'top'
-          },
-          itemStyle: {
-            borderType: "solid",
-            // borderColor: "silver",
-            // borderWidth: 1,
-            barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
-          },
-          data: this.data,
-        },
-      ];
-      
-      const options = {
-        series: series,
-      };
+    makeChart(options = {}) {
+      const chartOptions = {};
 
-      if (type === "pie") {
-        Object.assign(options, {
+      if (this.type === "pie") {
+        Object.assign(chartOptions, {
+          series: [
+            {
+              name: "计数",
+              type: "pie",
+              minShowLabelAngle: 1,
+              label: {
+                show: true,
+                position: "outside",
+                formatter: "{b}: {d}%",
+              },
+              data: this.data,
+            },
+          ],
           legend: {
             orient: "vertical",
             left: "left",
@@ -264,8 +185,26 @@ export default {
         });
       }
 
-      if (type === "bar") {
-        Object.assign(options, {
+      if (this.type === "bar") {
+        Object.assign(chartOptions, {
+          tooltip: {
+            show: true,
+            // formatter: '{b}: {c}'
+          },
+          series: [
+            {
+              name: "计数",
+              type: "bar",
+              barWidth: 30,
+              itemStyle: {
+                borderType: "solid",
+                // borderColor: "silver",
+                // borderWidth: 1,
+                barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
+              },
+              data: this.data,
+            },
+          ],
           xAxis: {
             type: "value",
             splitLine: {
@@ -285,19 +224,21 @@ export default {
         });
       }
 
-      this.chart.setOption(options);
+      this.chart.setOption(chartOptions);
     },
 
     barChart() {
+      this.type = "bar";
       this.chart.clear();
       this.chart.resize({
         height: 160 + this.keywords.length * 30,
       });
-      this.makeChart({ type: "bar" });
+      this.makeChart();
     },
     pieChart() {
+      this.type = "pie";
       this.chart.clear();
-      this.makeChart({ type: "pie" });
+      this.makeChart();
     },
 
     showVoteRecord() {
@@ -313,9 +254,6 @@ export default {
       const comments = data
         .filter((msg) => msg.cmd === "DANMU_MSG")
         .map(parseComment);
-
-      // TEST
-      // const comments = data.filter((msg) => msg.type === "comment");
 
       for (const comment of comments) {
         // 已经记录过的用户不再重复统计
@@ -335,6 +273,12 @@ export default {
         this.data[index].value++;
         this.makeChart();
       }
+    },
+
+    changeInput(e) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        optionstring: e.target.value,
+      });
     },
   },
 };

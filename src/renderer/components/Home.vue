@@ -161,147 +161,14 @@ export default {
   created() {
     this.initial();
 
-    emitter.on("message", async (data) => {
-      if (Array.isArray(data)) {
-        const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
-          .map(parseComment);
-
-        for (const comment of comments) {
-          // console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-
-          if (this.isShowAvatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: comment.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(comment.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            comment.avatar = (user || {}).avatar;
-          }
-
-          const data = await commentDB.insert(comment);
-          await this.sendComment(data);
-        }
-
-        const interactWords = data
-          .filter((msg) => msg.cmd === "INTERACT_WORD")
-          .map(parseInteractWord);
-
-        for (const interactWord of interactWords) {
-          // console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
-          const data = await interactDB.insert(interactWord);
-          if (this.isShowInteractInfo) {
-            this.sendInteractWord(data);
-          }
-        }
-
-        const gifts = data.map(parseGift).filter(Boolean);
-
-        for (const gift of gifts) {
-          if (!gift.avatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: gift.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(gift.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // TODO 全局 errorHandler
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            gift.avatar = (user || {}).avatar;
-          }
-
-          if (gift.type === "superChat") {
-            let data = await giftDB.findOne({
-              roomId: this.roomId,
-              superChatId: gift.superChatId,
-            });
-
-            // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
-            if (data && gift.commentJPN) {
-              if (gift.commentJPN) {
-                data = await giftDB.update(
-                  { _id: data._id },
-                  {
-                    $set: { commentJPN: gift.commentJPN },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              } else {
-                // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
-                continue;
-              }
-            }
-
-            if (!data) {
-              data = await giftDB.insert(gift);
-            }
-
-            this.sendSuperChat(data);
-          } else if (gift.type === "gift") {
-            let data;
-            if (gift.batchComboId) {
-              const comboGift = await giftDB.findOne({
-                roomId: this.roomId,
-                batchComboId: gift.batchComboId,
-              });
-              if (comboGift) {
-                data = await giftDB.update(
-                  { _id: comboGift._id },
-                  {
-                    $set: {
-                      giftNumber: comboGift.giftNumber + gift.giftNumber,
-                    },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              }
-            }
-            if (!data) {
-              data = await giftDB.insert(gift);
-            }
-            if (!this.isShowSilverGift && gift.coinType === "silver") continue;
-            if (gift.coinType === "silver") gift.price = 0;
-            this.sendGift(data);
-          }
-        }
-
-        data.forEach((msg) => {
-          if (msg.cmd === "INTERACT_WORD") return;
-          if (msg.cmd === "DANMU_MSG") return;
-          if (msg.cmd === "SEND_GIFT") return;
-          otherDB.insert(msg);
-        });
-      } else {
-        if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
-          const { fans, fans_club } = data.data;
-          this.fansNumber = fans;
-          this.fansClubNumber = fans_club;
-        } else {
-          // console.log(data);
-          otherDB.insert(data);
-        }
-      }
-    });
+    emitter.on("message", this.onMessage);
 
     emitter.on("ninki", async (data) => {
       this.ninkiNumber = data.count;
     });
+
+    const listenerCount = emitter.listenerCount("message");
+    console.log(`listenerCount: ${listenerCount}`);
   },
   computed: {
     roomId() {
@@ -385,6 +252,7 @@ export default {
         this.$store.dispatch("UPDATE_CONFIG", {
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
+          ruid: uid
         });
       } else {
         close();
@@ -547,6 +415,144 @@ export default {
         roomId: roomId,
       });
     },
+
+    onMessage: async function (data) {
+      if (Array.isArray(data)) {
+        const comments = data
+          .filter((msg) => msg.cmd === "DANMU_MSG")
+          .map(parseComment);
+
+        for (const comment of comments) {
+          // console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
+
+          if (this.isShowAvatar) {
+            // 缓存 user 信息
+            let user = await userDB.findOne({ uid: comment.uid });
+            if (!user) {
+              try {
+                const data = await getUserInfoThrottle(comment.uid);
+                // 统一格式化用户数据
+                user = this.parseUser(data);
+                data.createdAt = new Date();
+                userDB.insert(user);
+              } catch (e) {
+                // throw new Error("getUserInfo limit");
+              }
+            }
+
+            comment.avatar = (user || {}).avatar;
+          }
+
+          const data = await commentDB.insert(comment);
+          await this.sendComment(data);
+        }
+
+        const interactWords = data
+          .filter((msg) => msg.cmd === "INTERACT_WORD")
+          .map(parseInteractWord);
+
+        for (const interactWord of interactWords) {
+          // console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
+          const data = await interactDB.insert(interactWord);
+          if (this.isShowInteractInfo) {
+            this.sendInteractWord(data);
+          }
+        }
+
+        const gifts = data.map(parseGift).filter(Boolean);
+
+        for (const gift of gifts) {
+          if (!gift.avatar) {
+            // 缓存 user 信息
+            let user = await userDB.findOne({ uid: gift.uid });
+            if (!user) {
+              try {
+                const data = await getUserInfoThrottle(gift.uid);
+                // 统一格式化用户数据
+                user = this.parseUser(data);
+                data.createdAt = new Date();
+                userDB.insert(user);
+              } catch (e) {
+                // TODO 全局 errorHandler
+                // throw new Error("getUserInfo limit");
+              }
+            }
+
+            gift.avatar = (user || {}).avatar;
+          }
+
+          if (gift.type === "superChat") {
+            let data = await giftDB.findOne({
+              roomId: this.roomId,
+              superChatId: gift.superChatId,
+            });
+
+            // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
+            if (data && gift.commentJPN) {
+              if (gift.commentJPN) {
+                data = await giftDB.update(
+                  { _id: data._id },
+                  {
+                    $set: { commentJPN: gift.commentJPN },
+                  },
+                  { returnUpdatedDocs: true }
+                );
+              } else {
+                // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
+                continue;
+              }
+            }
+
+            if (!data) {
+              data = await giftDB.insert(gift);
+            }
+
+            this.sendSuperChat(data);
+          } else if (gift.type === "gift") {
+            let data;
+            if (gift.batchComboId) {
+              const comboGift = await giftDB.findOne({
+                roomId: this.roomId,
+                batchComboId: gift.batchComboId,
+              });
+              if (comboGift) {
+                data = await giftDB.update(
+                  { _id: comboGift._id },
+                  {
+                    $set: {
+                      giftNumber: comboGift.giftNumber + gift.giftNumber,
+                    },
+                  },
+                  { returnUpdatedDocs: true }
+                );
+              }
+            }
+            if (!data) {
+              data = await giftDB.insert(gift);
+            }
+            if (!this.isShowSilverGift && gift.coinType === "silver") continue;
+            if (gift.coinType === "silver") gift.price = 0;
+            this.sendGift(data);
+          }
+        }
+
+        data.forEach((msg) => {
+          if (msg.cmd === "INTERACT_WORD") return;
+          if (msg.cmd === "DANMU_MSG") return;
+          if (msg.cmd === "SEND_GIFT") return;
+          otherDB.insert(msg);
+        });
+      } else {
+        if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
+          const { fans, fans_club } = data.data;
+          this.fansNumber = fans;
+          this.fansClubNumber = fans_club;
+        } else {
+          // console.log(data);
+          otherDB.insert(data);
+        }
+      }
+    },
   },
   mounted() {
     this.giftTimer = setInterval(() => {
@@ -581,6 +587,8 @@ export default {
     }, 10000);
   },
   beforeDestroy() {
+    emitter.removeListener("message", this.onMessage);
+    
     if (this.giftTimer) {
       clearInterval(this.giftTimer);
     }

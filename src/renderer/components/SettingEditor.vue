@@ -1,11 +1,23 @@
 <template>
   <div>
-    <span>{{name}}</span>
+    <span class="setting-key-text">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" />
+      <InputNumber
+        :value="value"
+        @on-change="updateStyle"
+        :min="0"
+        :step="numberStep || 1"
+        size="small"
+        :style="{ width: '55px' }"
+      />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
+      <ColorPicker
+        :value="value"
+        @on-active-change="updateStyle"
+        size="small"
+        alpha
+      />
     </template>
   </div>
 </template>
@@ -35,7 +47,7 @@ export default {
   },
   methods: {
     updateStyle(value) {
-      value = value || 0
+      value = value || 0;
       this.$store.dispatch("UPDATE_STYLE", {
         role: this.role,
         prop: this.prop,
@@ -52,5 +64,9 @@ export default {
 </script>
 
 <style scoped>
+.setting-key-text {
+  width: 90px;
+  display: inline-block;
+}
 </style>
 

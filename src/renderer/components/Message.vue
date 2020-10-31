@@ -99,8 +99,7 @@
                       @click="openBiliUserSpace(interact.uid)"
                       >{{ `(${interact.uid})` }}</span
                     >
-                    <span>进入了直播间</span>
-                    <!-- <span>{{`: ${interact.comment}`}}</span> -->
+                    <span>{{ getInteractType(interact.msgType) }}了直播间</span>
                   </div>
                 </template>
               </Scroll>
@@ -115,6 +114,9 @@
           >
             <template v-for="gift in gifts">
               <div :key="gift._id" :style="{ padding: '0 10px' }">
+                <p :style="{ padding: '0 8px' }">
+                  {{ dateFormat(gift.sendAt) }}
+                </p>
                 <template v-if="gift.type === 'superChat'">
                   <GiftCard v-bind="gift">{{ gift.comment }}</GiftCard>
                 </template>
@@ -123,7 +125,7 @@
                     `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`
                   }}</GiftCard>
                 </template>
-                <!-- <span>{{`: ${interact.comment}`}}</span> -->
+                <!-- <div class='devider'></div> -->
               </div>
             </template>
           </Scroll>
@@ -137,7 +139,7 @@
 import { shell, remote } from "electron";
 const window = remote.getCurrentWindow();
 import moment from "moment";
-import { GUARD_ICON_MAP } from "../../service/const";
+import { GUARD_ICON_MAP, INTERACT_TYPE } from "../../service/const";
 import { getPriceProperties } from "../../service/util";
 import {
   commentDB,
@@ -178,15 +180,14 @@ export default {
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
     this.searchAll();
-    window.on("resize", () => {
-      this.splitLeftMoving();
-      this.splitMoving();
-    });
+    window.on("resize", this.onResize);
+  },
+  beforeDestroy() {
+    window.removeListener("resize", this.onResize);
   },
   mounted() {
     setTimeout(() => {
-      this.splitLeftMoving();
-      this.splitMoving();
+      this.onResize();
     }, 0);
   },
   computed: {},
@@ -424,6 +425,13 @@ export default {
     getGuardIcon(level) {
       return GUARD_ICON_MAP[level];
     },
+    getInteractType(type) {
+      return INTERACT_TYPE[type];
+    },
+    onResize: function () {
+      this.splitLeftMoving();
+      this.splitMoving();
+    },
   },
 };
 </script>
@@ -484,5 +492,10 @@ export default {
   cursor: pointer;
   color: lightsalmon;
   text-decoration: underline;
+}
+.devider {
+  width: 90%;
+  height: 1px;
+  background: silver;
 }
 </style>
