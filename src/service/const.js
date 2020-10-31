@@ -1,7 +1,11 @@
+const YAML = require('yaml')
+const fs = require('fs')
+const file = fs.readFileSync(`${__dirname}/../../config.yaml`, 'utf8')
+const OPTION_CONFIG = YAML.parse(file)
+
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
 
-// TODO 可配置文字颜色，避免显示不清
-export const PRICE_PROPERTIES = {
+export const PRICE_PROPERTIES = OPTION_CONFIG.PRICE_PROPERTIES || {
   1: {
     backgroundColor: "#EDF5FF",
     backgroundPriceColor: "#7497CD",
@@ -40,6 +44,16 @@ export const PRICE_PROPERTIES = {
   },
 };
 
+export const GUARD_ICON_1 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png@44w_44h.webp"
+export const GUARD_ICON_2 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png@44w_44h.webp"
+export const GUARD_ICON_3 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp"
+
+export const GUARD_ICON_MAP = {
+  1: GUARD_ICON_1,
+  2: GUARD_ICON_2,
+  3: GUARD_ICON_3,
+}
+
 export const GUARD_LEVEL_MAP = {
   0: "normal",
   1: "governor",
@@ -53,26 +67,30 @@ export const INTERACT_TYPE = {
   3: '分享'
 }
 
-// 限制获取头像频率，单位毫秒，避免 412 限制，1000 为比较安全的值
-export const GET_USER_INFO_FREQUENCY_LIMIT = 1000
+export const ENTER_ROOM_TYPE = {
+  1: '进入',
+  2: '光临'
+}
+
+export const GET_USER_INFO_FREQUENCY_LIMIT = OPTION_CONFIG.GET_USER_INFO_FREQUENCY_LIMIT || 1000
 
 export const EXAMPLE_MESSAGES = [
   {
     id: 1,
     type: "comment",
-    uid: "12345",
-    name: "bli_22222222222",
-    comment: "草",
+    uid: "123456",
+    name: "bli_123456",
+    comment: "这是一条测试弹幕哟～",
     avatar: DEFAULT_AVATAR,
     role: 3,
     similar: 1
   },
   {
     id: 2,
-    uid: "12346",
-    name: "bli_11111111111",
+    uid: "654321",
+    name: "bli_654321",
     type: "comment",
-    comment: "？？？？？？？？",
+    comment: "～哟幕弹试测条一是这",
     avatar: DEFAULT_AVATAR,
     role: 0
   },
@@ -91,13 +109,13 @@ export const EXAMPLE_MESSAGES = [
     id: 7,
     type: "gift",
     uid: 12345,
-    name: 'bli_11111111111',
+    name: 'bli_12345',
     avatar: DEFAULT_AVATAR,
-    price: 6,
+    price: 2,
     giftNumber: 50,
-    totalPrice: 300,
-    giftName: '小红花'
+    totalPrice: 100,
+    giftName: '测试礼物'
   }
 ]
 
-export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+export const COLORS = OPTION_CONFIG.COLORS || ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']

@@ -1,3 +1,5 @@
+const fs = require('fs')
+const moment = require('moment')
 const Datastore = require('nedb')
 const userDB = new Datastore({ filename: './data/user', autoload: true });
 const commentDB = new Datastore({ filename: './data/comment', autoload: true });
@@ -50,16 +52,7 @@ userDB.ensureIndex({
 //   expireAfterSeconds: 604800 // 用户数据缓存 7天
 // })
 
-export default {
-  userDB: wrapper(userDB),
-  commentDB: wrapper(commentDB),
-  giftDB: wrapper(giftDB),
-  interactDB: wrapper(interactDB),
-  otherDB: wrapper(otherDB),
-  executor
-}
-
-function executor(cursor) {
+export function executor(cursor) {
   return new Promise((resolve, reject) => {
     cursor.exec((err, docs) => {
       if (err) reject(err)
@@ -125,4 +118,28 @@ function wrapper(db) {
       })
     }
   }
+}
+
+export function backup() {
+  const now = moment(new Date()).format("YYYY-MM-DD-HH:mm:ss");
+  const DATADIR = `${__dirname}/../../data`
+  // 是否先压缩一次？
+  // commentDB.persistence.compactDatafile()
+  fs.copyFileSync(`${DATADIR}/comment`, `${DATADIR}/comment-${now}`)
+  fs.copyFileSync(`${DATADIR}/gift`, `${DATADIR}/gift-${now}`)
+  fs.copyFileSync(`${DATADIR}/interact`, `${DATADIR}/interact-${now}`)
+}
+
+const userDBWrapper = wrapper(userDB)
+const commentDBWrapper = wrapper(commentDB)
+const giftDBWrapper = wrapper(giftDB)
+const interactDBWrapper = wrapper(interactDB)
+const otherDBWrapper = wrapper(otherDB)
+
+export {
+  userDBWrapper as userDB,
+  commentDBWrapper as commentDB,
+  giftDBWrapper as giftDB,
+  interactDBWrapper as interactDB,
+  otherDBWrapper as otherDB,
 }

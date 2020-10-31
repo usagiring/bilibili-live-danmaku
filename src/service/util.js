@@ -1,4 +1,4 @@
-import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT } from './const'
+import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT, GUARD_ICON_MAP } from './const'
 import { getUserInfo } from './bilibili-api'
 
 // TODO 设置一些更小的粒度？ < 1
@@ -49,4 +49,8 @@ export async function getUserInfoThrottle(uid) {
     }
     throw e
   }
+}
+
+export function getGuardIcon(level) {
+  return GUARD_ICON_MAP[level]
 }

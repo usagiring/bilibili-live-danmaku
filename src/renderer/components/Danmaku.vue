@@ -77,7 +77,7 @@
               <i
                 v-if="isShowMemberShipIcon && message.role"
                 class="guard-icon"
-                :style="{'background-image': `url(https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard${message.role}.png@44w_44h.webp)`}"
+                :style="{'background-image': `url(${getGuardIcon(message.role)})`}"
               ></i>
               <span
                 :class="`name-${message.role}`"
@@ -116,7 +116,7 @@
 import { difference } from "lodash";
 const win = require("electron").remote.getCurrentWindow();
 
-import { DEFAULT_AVATAR, INTERACT_TYPE } from "../../service/const";
+import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP } from "../../service/const";
 import { getPriceProperties } from '../../service/util'
 import SimilarCommentBadge from "./SimilarCommentBadge";
 import GiftCard from "./GiftCard";
@@ -294,6 +294,9 @@ export default {
       const el = document.getElementById("gift-show-content-wrapper");
       el.scrollLeft += e.deltaY;
     },
+    getGuardIcon(level){
+      return GUARD_ICON_MAP[level]
+    }
   },
 };
 </script>

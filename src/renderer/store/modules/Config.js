@@ -12,6 +12,7 @@ const state = {
   guardNumber: 0,
   windowOpacity: 1,
 
+  optionstring: "{A}\n{B}\n{C}",
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"
   },
