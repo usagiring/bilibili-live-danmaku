@@ -343,6 +343,9 @@ export default {
     windowY() {
       return this.$store.state.Config.windowY;
     },
+    realRoomId() {
+      return this.$store.state.Config.realRoomId;
+    },
   },
   methods: {
     async connect(status) {
@@ -555,19 +558,19 @@ export default {
 
     this.peopleTimer = setInterval(async () => {
       // console.log("peopleTimer");
-      if (!this.roomId && !this.isConnected) return;
+      if (!this.realRoomId && !this.isConnected) return;
       const tenMinutesAgo = new Date() - 1000 * 60 * 10;
       const [comments, gifts, interacts] = await Promise.all([
         commentDB.find(
-          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
+          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
         ),
         giftDB.find(
-          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
+          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
         ),
         interactDB.find(
-          { roomId: this.roomId, sendAt: { $gte: tenMinutesAgo } },
+          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
           { uid: 1, name: 1 }
         ),
       ]);

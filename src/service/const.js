@@ -97,7 +97,7 @@ export const EXAMPLE_MESSAGES = [
   {
     id: 6,
     uid: "12345",
-    name: "bli_22222222222",
+    name: "bli_12345",
     type: "superChat",
     comment: "8888888888888888888",
     price: 50,

@@ -96,6 +96,7 @@ const mutations = {
 const actions = {
   async ADD_EXAMPLE_MESSAGE({ state, commit, rootState }, payload) {
     const combineSimilarTime = rootState.Config.combineSimilarTime
+
     if (combineSimilarTime && payload.type === 'comment') {
       const messages = [...state.exampleMessages].reverse();
       let update;
@@ -125,11 +126,11 @@ const actions = {
     // 礼物叠加处理
     if (payload.type === 'gift') {
       const messages = [...state.exampleMessages].reverse();
-      const giftIndex = messages.findIndex(message => message.batchComboId === payload.batchComboId)
+      const giftIndex = messages.findIndex(message => message.id === payload.id)
       if (~giftIndex) {
         const gift = messages[giftIndex]
-        const giftNumber = gift.giftNumber + payload.giftNumber
-
+        const giftNumber = payload.giftNumber
+        // 如果此时金额大于设定值，推送到gift栏
         const update = {
           id: gift.id,
           giftNumber,
@@ -139,18 +140,32 @@ const actions = {
         const totalPrice = Number((giftNumber || 1) * gift.price)
         update.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
         const showGiftThreshold = rootState.Config.showGiftThreshold
+        // 这里也需要叠加处理
         if (update.totalPrice >= showGiftThreshold) {
-          commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
+          const gifts = [...state.exampleGifts]
+          const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
+          if (~existsGiftIndex) {
+            // commit('UPDATE_GIFT', {
+            //   id: gift.id,
+            //   index: existsGiftIndex,
+            //   totalPrice: update.totalPrice,
+            //   giftNumber
+            // })
+          } else {
+            commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
+          }
         }
+
         commit('UPDATE_EXAMPLE_MESSAGE', update)
         return
       }
     }
+
     // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
     if (payload.type === 'superChat') {
       const messages = [...state.exampleMessages].reverse();
 
-      const scIndex = messages.findIndex(message => message.superChatId === payload.superChatId)
+      const scIndex = messages.findIndex(message => message.id === payload.id)
       if (~scIndex) {
         if (payload.commentJPN) {
           commit('UPDATE_EXAMPLE_MESSAGE', {
@@ -162,12 +177,15 @@ const actions = {
       }
     }
 
-    payload.price = payload.price || 0
-    const totalPrice = Number((payload.giftNumber || 1) * payload.price)
-    payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
-    const showGiftThreshold = rootState.Config.showGiftThreshold
-    if (payload.totalPrice >= showGiftThreshold) {
-      commit('ADD_EXAMPLE_GIFT', payload)
+    // TODO: refactor
+    if (payload.type === 'gift' || payload.type === 'superChat') {
+      payload.price = payload.price || 0
+      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+      payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
+      const showGiftThreshold = rootState.Config.showGiftThreshold
+      if (payload.totalPrice >= showGiftThreshold) {
+        commit('ADD_EXAMPLE_GIFT', payload)
+      }
     }
 
     commit('ADD_EXAMPLE_MESSAGE', payload)

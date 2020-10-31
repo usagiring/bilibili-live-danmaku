@@ -21,13 +21,13 @@ const state = {
 
   },
   '0_name': {
-    'font-size': '12px',
-    '-webkit-text-stroke-width': '1px',
+    'font-size': '16px',
+    '-webkit-text-stroke-width': '0px',
     '-webkit-text-stroke-color': 'white',
     color: 'white'
   },
   '0_comment': {
-    'font-size': '12px',
+    'font-size': '16px',
     color: 'white'
   },
 
@@ -35,35 +35,35 @@ const state = {
 
   },
   '3_name': {
-    'font-size': '12px',
-    '-webkit-text-stroke-width': '1px',
-    '-webkit-text-stroke-color': 'green',
+    'font-size': '16px',
+    '-webkit-text-stroke-width': '0px',
+    '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
   '3_comment': {
-    'font-size': '12px',
+    'font-size': '16px',
     color: 'white'
   },
 
   '2_name': {
-    'font-size': '12px',
-    '-webkit-text-stroke-width': '1px',
-    '-webkit-text-stroke-color': 'green',
+    'font-size': '16px',
+    '-webkit-text-stroke-width': '0.2px',
+    '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
   '2_comment': {
-    'font-size': '12px',
+    'font-size': '16px',
     color: 'white'
   },
 
   '1_name': {
-    'font-size': '12px',
-    '-webkit-text-stroke-width': '1px',
-    '-webkit-text-stroke-color': 'green',
+    'font-size': '16px',
+    '-webkit-text-stroke-width': '0.2px',
+    '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
   '1_comment': {
-    'font-size': '12px',
+    'font-size': '16px',
     color: 'white'
   },
 
