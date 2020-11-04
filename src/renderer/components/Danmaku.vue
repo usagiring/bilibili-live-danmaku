@@ -1,11 +1,19 @@
 <template>
   <div
-    :style="{position:'absolute',top:'4px',bottom:'4px',left:'4px', right:'4px', '-webkit-user-select': 'none', opacity: windowOpacity}"
+    :style="{
+      position: 'absolute',
+      top: '4px',
+      bottom: '4px',
+      left: '4px',
+      right: '4px',
+      '-webkit-user-select': 'none',
+      opacity: windowOpacity,
+    }"
   >
     <div
       @wheel.prevent="giftScroll"
-      @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent(): undefined"
-      @mouseleave="isSingleWindow ? setIgnoreMouseEvent(): undefined"
+      @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined"
+      @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined"
       class="gift-show-content-wrapper-wrapper"
     >
       <div class="gift-show-content-wrapper" id="gift-show-content-wrapper">
@@ -22,41 +30,77 @@
                 :key="`${gift.id}_normal`"
                 v-if="!giftHover.includes(gift.id)"
                 class="gift-show-content"
-                :style="{background: gift.priceProperties.backgroundColor}"
+                :style="{ background: gift.priceProperties.backgroundColor }"
               >
                 <div
-                  :style="{'z-index': -1, position: 'absolute', width: `${widthCalculator(gift)}%`,height: '100%',background: gift.priceProperties.backgroundBottomColor}"
+                  :style="{
+                    'z-index': -1,
+                    position: 'absolute',
+                    width: `${widthCalculator(gift)}%`,
+                    height: '100%',
+                    background: gift.priceProperties.backgroundBottomColor,
+                  }"
                 ></div>
                 <div
-                  :style="{margin: '0 10px','font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px','-webkit-text-stroke-color': gift.priceProperties.backgroundPriceColor}"
+                  :style="{
+                    margin: '0 10px',
+                    'font-weight': 'bold',
+                    'z-index': 3,
+                    '-webkit-text-stroke-width': '0.3px',
+                    '-webkit-text-stroke-color':
+                      gift.priceProperties.backgroundPriceColor,
+                  }"
                 >
-                  <Avatar class :src="gift.avatar || DEFAULT_AVATAR" size="small" />
-                  <span v-if="gift.totalPrice">{{`￥${gift.totalPrice}`}}</span>
+                  <Avatar
+                    class
+                    :src="gift.avatar || DEFAULT_AVATAR"
+                    size="small"
+                  />
+                  <span v-if="gift.totalPrice">{{
+                    `￥${gift.totalPrice}`
+                  }}</span>
                 </div>
               </div>
               <div
                 :key="`${gift.id}_extend`"
                 v-else
                 class="gift-show-content-extend"
-                :style="{border: `1px solid ${gift.priceProperties.backgroundBottomColor}`}"
+                :style="{
+                  border: `1px solid ${gift.priceProperties.backgroundBottomColor}`,
+                }"
               >
                 <div
                   class="gift-show-content-header"
-                  :style="{background: gift.priceProperties.backgroundColor}"
+                  :style="{ background: gift.priceProperties.backgroundColor }"
                 >
                   <Avatar
                     class="gift-show-content-extend-avatar"
                     :src="gift.avatar || DEFAULT_AVATAR"
                   />
-                  <div :style="{display: 'inline-block'}">
-                    <p>{{gift.name}}</p>
-                    <p v-if="gift.totalPrice">{{`￥${gift.totalPrice}`}}</p>
+                  <div :style="{ display: 'inline-block' }">
+                    <p>{{ gift.name }}</p>
+                    <p v-if="gift.totalPrice">{{ `￥${gift.totalPrice}` }}</p>
                   </div>
                 </div>
                 <div
                   class="gift-show-content-extend-content"
-                  :style="{background: gift.priceProperties.backgroundBottomColor}"
-                >{{ gift.type === 'superChat' ? gift.comment : `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`}}</div>
+                  :style="{
+                    background: gift.priceProperties.backgroundBottomColor,
+                  }"
+                >
+                  <template v-if="gift.type === 'superChat'">
+                    {{ gift.comment }}
+                    <template v-if="gift.commentJPN">
+                      <div class="divider"></div>
+                      {{ gift.commentJPN }}
+                    </template>
+                  </template>
+                  <template v-else>
+                    {{
+                      `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`
+                    }}
+                  </template>
+                </div>
               </div>
               <!-- </transition> -->
             </div>
@@ -66,45 +110,79 @@
     </div>
     <div class="message-content-wrapper">
       <div
-        :style="{position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag'}"
+        :style="{
+          position: 'absolute',
+          height: '100%',
+          width: '80%',
+          '-webkit-app-region': 'drag',
+        }"
       ></div>
-      <div :style="{position: 'absolute', height: '100%', width: '20%',right:'0'}"></div>
+      <div
+        :style="{
+          position: 'absolute',
+          height: '100%',
+          width: '20%',
+          right: '0',
+        }"
+      ></div>
       <transition-group name="fade" tag="div" class="message-content">
         <p :key="message.id" v-for="message in messages">
-          <template v-if="message.type==='comment'">
+          <template v-if="message.type === 'comment'">
             <p :style="getMessageStyleByRole(message)">
-              <Avatar v-if="isShowAvatar" :src="message.avatar" :style="avatarSizeStyle" />
+              <Avatar
+                v-if="isShowAvatar"
+                :src="message.avatar"
+                :style="avatarSizeStyle"
+              />
               <i
                 v-if="isShowMemberShipIcon && message.role"
                 class="guard-icon"
-                :style="{'background-image': `url(${getGuardIcon(message.role)})`}"
+                :style="{
+                  'background-image': `url(${getGuardIcon(message.role)})`,
+                }"
               ></i>
               <span
                 :class="`name-${message.role}`"
                 :style="getNameStyleByRole(message)"
-              >{{message.name}}:</span>
+                >{{ message.name }}:</span
+              >
               <span
                 :class="`comment-${message.role}`"
                 :style="getCommentStyleByRole(message)"
-              >{{message.comment}}</span>
+                >{{ message.comment }}</span
+              >
               &nbsp;
-              <SimilarCommentBadge v-if="message.similar > 0" v-bind:number="message.similar" />
+              <SimilarCommentBadge
+                v-if="message.similar > 0"
+                v-bind:number="message.similar"
+              />
             </p>
           </template>
-          <template v-if="message.type==='interactWord'">
+          <template v-if="message.type === 'interactWord'">
             <!-- 入场消息设置默认使用普通设置 -->
-            <p :style="getCommentStyleByRole({role: 0})">
-              <span :style="{color: message.color? message.color:undefined}">{{message.name}}</span>
-              {{`${parseMsgType(message.msgType)}了直播间`}}
+            <p :style="getCommentStyleByRole({ role: 0 })">
+              <span
+                :style="{ color: message.color ? message.color : undefined }"
+                >{{ message.name }}</span
+              >
+              {{ `${parseMsgType(message.msgType)}了直播间` }}
             </p>
           </template>
-          <template v-if="message.type==='superChat'">
-            <GiftCard v-bind="message">{{message.comment}}</GiftCard>
+          <template v-if="message.type === 'superChat'">
+            <GiftCard v-bind="message">
+              <div>
+                {{ message.comment }}
+                <template v-if="message.commentJPN">
+                  <div class="divider"></div>
+                  {{ message.commentJPN }}
+                </template>
+              </div>
+            </GiftCard>
           </template>
-          <template v-if="message.type==='gift'">
-            <GiftCard
-              v-bind="message"
-            >{{`${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`}}</GiftCard>
+          <template v-if="message.type === 'gift'">
+            <GiftCard v-bind="message">{{
+              `${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`
+            }}</GiftCard>
           </template>
         </p>
       </transition-group>
@@ -116,8 +194,12 @@
 import { difference } from "lodash";
 const win = require("electron").remote.getCurrentWindow();
 
-import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP } from "../../service/const";
-import { getPriceProperties } from '../../service/util'
+import {
+  DEFAULT_AVATAR,
+  INTERACT_TYPE,
+  GUARD_ICON_MAP,
+} from "../../service/const";
+import { getPriceProperties } from "../../service/util";
 import SimilarCommentBadge from "./SimilarCommentBadge";
 import GiftCard from "./GiftCard";
 
@@ -264,7 +346,7 @@ export default {
     },
 
     parseMsgType(msgType) {
-      return INTERACT_TYPE[msgType]
+      return INTERACT_TYPE[msgType];
     },
 
     hoverGift(giftId) {
@@ -294,9 +376,9 @@ export default {
       const el = document.getElementById("gift-show-content-wrapper");
       el.scrollLeft += e.deltaY;
     },
-    getGuardIcon(level){
-      return GUARD_ICON_MAP[level]
-    }
+    getGuardIcon(level) {
+      return GUARD_ICON_MAP[level];
+    },
   },
 };
 </script>
@@ -411,7 +493,7 @@ export default {
 .divider {
   border-top: 1px solid;
   width: 100%;
-  padding: 5px 0;
+  margin: 10px 0;
   position: relative;
 }
 .guard-icon {

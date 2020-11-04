@@ -473,6 +473,9 @@ export default {
           role: 3,
           sendAt: new Date() - 0,
         };
+        if (Math.random() * 2 < 1) {
+          superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
+        }
         superChat.role = randomRole;
         return superChat;
       }

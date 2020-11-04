@@ -12,13 +12,17 @@
             <span v-if="!isCollapsed">消息</span>
           </MenuItem>
           <MenuItem name="1-3" to="/vote">
-            <Icon type="md-podium" />
+            <Icon type="md-pie" />
             <span v-if="!isCollapsed">投票</span>
           </MenuItem>
           <MenuItem name="1-4" to="/lottery">
+            <Icon type="md-stats" />
+            <span v-if="!isCollapsed">统计</span>
+          </MenuItem>
+          <!-- <MenuItem name="1-4" to="/lottery">
             <Icon type="md-bonfire" />
             <span v-if="!isCollapsed">祈愿</span>
-          </MenuItem>
+          </MenuItem> -->
         </Menu>
       </Sider>
       <Layout>
