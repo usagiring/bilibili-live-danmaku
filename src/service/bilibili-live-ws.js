@@ -376,6 +376,7 @@ function parseGift(msg) {
       giftNumber: num,
 
       type: 'gift',
+      isGuardGift: true,
     }
   }
 

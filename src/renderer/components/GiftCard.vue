@@ -1,16 +1,35 @@
 <template>
-  <div :style="{border: `solid 1px ${priceProperties.backgroundBottomColor}`}" class="message-super-chat">
-    <div :style="{background: `${priceProperties.backgroundColor}`, padding: '10px'}">
-      <div :style="{display: 'inline-block', 'vertical-align':'top'}">
+  <div
+    :style="{ border: `solid 1px ${priceProperties.backgroundBottomColor}` }"
+    class="message-super-chat"
+  >
+    <div
+      :style="{
+        background: `${priceProperties.backgroundColor}`,
+        padding: '10px',
+      }"
+    >
+      <div :style="{ display: 'inline-block', 'vertical-align': 'top' }">
         <Avatar :src="avatar" size="large" />
       </div>
-      <div :style="{display: 'inline-block'}">
-        <p>{{name}}</p>
-        <p v-if="totalPrice">{{`￥${totalPrice}`}}</p>
+      <div :style="{ display: 'inline-block' }">
+        <p>{{ name }}</p>
+        <template v-if="isGuardGift">
+          <p>
+            {{ giftNumber === 1 ? `${giftName}` : `${giftName}×${giftNumber}` }}
+          </p>
+        </template>
+        <template v-else-if="totalPrice">
+          <p>{{ `￥${totalPrice}` }}</p>
+        </template>
       </div>
     </div>
     <div
-      :style="{background: `${priceProperties.backgroundBottomColor}`, color: 'white', padding: '10px'}"
+      :style="{
+        background: `${priceProperties.backgroundBottomColor}`,
+        color: 'white',
+        padding: '10px',
+      }"
     >
       <slot></slot>
     </div>
@@ -19,7 +38,15 @@
 
 <script>
 export default {
-  props: ["priceProperties", "avatar", "name", "totalPrice"]
+  props: [
+    "priceProperties",
+    "avatar",
+    "name",
+    "giftName",
+    "totalPrice",
+    "giftNumber",
+    "isGuardGift",
+  ],
 };
 </script>
 

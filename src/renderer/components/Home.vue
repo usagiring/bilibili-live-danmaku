@@ -15,7 +15,7 @@
             <Icon type="md-pie" />
             <span v-if="!isCollapsed">投票</span>
           </MenuItem>
-          <MenuItem name="1-4" to="/lottery">
+          <MenuItem name="1-4" to="/statistic">
             <Icon type="md-stats" />
             <span v-if="!isCollapsed">统计</span>
           </MenuItem>
@@ -256,7 +256,7 @@ export default {
         this.$store.dispatch("UPDATE_CONFIG", {
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
-          ruid: uid
+          ruid: uid,
         });
       } else {
         close();
@@ -379,6 +379,7 @@ export default {
 
         price: payload.price,
 
+        commentJPN: payload.commentJPN,
         comment: payload.comment,
         sendAt: new Date() - 0,
 
@@ -401,6 +402,7 @@ export default {
         sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
         giftName: payload.giftName,
+        isGuardGift: payload.isGuardGift,
       });
     },
 
@@ -492,7 +494,7 @@ export default {
             });
 
             // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
-            if (data && gift.commentJPN) {
+            if (data) {
               if (gift.commentJPN) {
                 data = await giftDB.update(
                   { _id: data._id },
@@ -505,9 +507,7 @@ export default {
                 // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
                 continue;
               }
-            }
-
-            if (!data) {
+            } else {
               data = await giftDB.insert(gift);
             }
 
@@ -592,7 +592,7 @@ export default {
   },
   beforeDestroy() {
     emitter.removeListener("message", this.onMessage);
-    
+
     if (this.giftTimer) {
       clearInterval(this.giftTimer);
     }

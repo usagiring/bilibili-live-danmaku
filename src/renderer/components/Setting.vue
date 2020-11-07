@@ -458,13 +458,20 @@ export default {
           // batchComboId: 1,
         };
         gift.role = randomRole;
+        if (Math.random() * 2 < 1) {
+          gift.giftName = "舰长";
+          gift.isGuardGift = true;
+          gift.price = 198
+        }
         return gift;
       }
       if (randomType === "superChat") {
         const superChat = {
           id: randomNumber,
+          // id: 3333333,
           uid: randomNumber,
           superChatId: Math.floor(Math.random() * 100000000),
+          // superChatId: 3333333,
           name: `bli_${randomNumber}`,
           type: "superChat",
           avatar: DEFAULT_AVATAR,

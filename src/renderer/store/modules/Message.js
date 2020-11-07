@@ -51,6 +51,15 @@ const mutations = {
     }
   },
 
+  UPDATE_EXAMPLE_GIFT(state, payload) {
+    const index = payload.index || state.exampleGifts.findIndex(gift => gift.id === payload.id)
+    if (!~index) return
+    delete payload.index
+    const gift = state.exampleGifts[index]
+    const newGift = Object.assign({}, gift, payload)
+    state.exampleGifts.splice(index, 1, newGift)
+  },
+
   ADD_GIFT(state, payload) {
     if (state.gifts.length > 99) {
       state.gifts = [...state.gifts.slice(1), payload]
@@ -145,12 +154,12 @@ const actions = {
           const gifts = [...state.exampleGifts]
           const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
           if (~existsGiftIndex) {
-            // commit('UPDATE_GIFT', {
-            //   id: gift.id,
-            //   index: existsGiftIndex,
-            //   totalPrice: update.totalPrice,
-            //   giftNumber
-            // })
+            commit('UPDATE_EXAMPLE_GIFT', {
+              id: gift.id,
+              index: existsGiftIndex,
+              totalPrice: update.totalPrice,
+              giftNumber
+            })
           } else {
             commit('ADD_EXAMPLE_GIFT', Object.assign({}, gift, update))
           }
@@ -164,15 +173,30 @@ const actions = {
     // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
     if (payload.type === 'superChat') {
       const messages = [...state.exampleMessages].reverse();
-
       const scIndex = messages.findIndex(message => message.id === payload.id)
+
+      // 查询是否已存在，已存在则return
       if (~scIndex) {
+        // 如果新数据带commentJPN则更新message
         if (payload.commentJPN) {
           commit('UPDATE_EXAMPLE_MESSAGE', {
-            index: messages.length - 1 - scIndex,
+            id: payload.id,
+            index:  messages.length - 1 - scIndex,
             commentJPN: payload.commentJPN
           })
+
+          // 如果存在于礼物栏，则更新礼物
+          const gifts = [...state.exampleGifts]
+          const scGiftIndex = gifts.findIndex(gift => gift.id === payload.id)
+          if (~scGiftIndex) {
+            commit('UPDATE_EXAMPLE_GIFT', {
+              id: payload.id,
+              index: scGiftIndex,
+              commentJPN: payload.commentJPN
+            })
+          }
         }
+
         return
       }
     }
@@ -260,14 +284,27 @@ const actions = {
     // FIX: 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
     if (payload.type === 'superChat') {
       const messages = [...state.messages].reverse();
-
       const scIndex = messages.findIndex(message => message.id === payload.id)
+      // 查询是否已存在，已存在则return
       if (~scIndex) {
+        // 如果新数据带commentJPN则更新message
         if (payload.commentJPN) {
           commit('UPDATE_MESSAGE', {
+            id: payload.id,
             index: messages.length - 1 - scIndex,
             commentJPN: payload.commentJPN
           })
+
+          // 如果存在于礼物栏，则更新礼物
+          const gifts = [...state.gifts]
+          const scGiftIndex = gifts.findIndex(gift => gift.id === payload.id)
+          if (~scGiftIndex) {
+            commit('UPDATE_GIFT', {
+              id: payload.id,
+              index: scGiftIndex,
+              commentJPN: payload.commentJPN
+            })
+          }
         }
         return
       }

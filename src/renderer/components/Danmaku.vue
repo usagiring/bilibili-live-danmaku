@@ -47,8 +47,7 @@
                     'font-weight': 'bold',
                     'z-index': 3,
                     '-webkit-text-stroke-width': '0.3px',
-                    '-webkit-text-stroke-color':
-                      gift.priceProperties.backgroundPriceColor,
+                    '-webkit-text-stroke-color': 'gray',
                   }"
                 >
                   <Avatar
@@ -56,9 +55,18 @@
                     :src="gift.avatar || DEFAULT_AVATAR"
                     size="small"
                   />
-                  <span v-if="gift.totalPrice">{{
-                    `￥${gift.totalPrice}`
-                  }}</span>
+                  <template v-if="gift.isGuardGift">
+                    <span>
+                      {{
+                        gift.giftNumber === 1
+                          ? `${gift.giftName}`
+                          : `${gift.giftName}×${gift.giftNumber}`
+                      }}
+                    </span>
+                  </template>
+                  <template v-else-if="gift.totalPrice">
+                    <span>{{ `￥${gift.totalPrice}` }}</span>
+                  </template>
                 </div>
               </div>
               <div
@@ -79,7 +87,18 @@
                   />
                   <div :style="{ display: 'inline-block' }">
                     <p>{{ gift.name }}</p>
-                    <p v-if="gift.totalPrice">{{ `￥${gift.totalPrice}` }}</p>
+                    <template v-if="gift.isGuardGift">
+                      <p>
+                        {{
+                          gift.giftNumber === 1
+                            ? `${gift.giftName}`
+                            : `${gift.giftName}×${gift.giftNumber}`
+                        }}
+                      </p>
+                    </template>
+                    <template v-else-if="gift.totalPrice">
+                      <p>{{ `￥${gift.totalPrice}` }}</p>
+                    </template>
                   </div>
                 </div>
                 <div

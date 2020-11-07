@@ -116,6 +116,18 @@ export const EXAMPLE_MESSAGES = [
     giftNumber: 50,
     totalPrice: 100,
     giftName: '测试礼物'
+  },
+  {
+    id: 8,
+    type: "gift",
+    uid: 777777,
+    name: 'bli_777777',
+    avatar: DEFAULT_AVATAR,
+    isGuardGift: true,
+    price: 198,
+    giftNumber: 1,
+    totalPrice: 198,
+    giftName: '舰长'
   }
 ]
 
