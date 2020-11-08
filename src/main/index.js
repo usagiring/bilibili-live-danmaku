@@ -31,16 +31,12 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    app.quit()
   })
 
-  mainWindow.on('close', (e) => {
-    // e.preventDefault()
-    // e.returnValue = false
-    // BrowserWindow.getAllWindows().forEach(window => {
-    //   console.log(window)
-    //   window.close()
-    // })
-  })
+  // mainWindow.on('close', (e) => {
+  //   app.quit()
+  // })
 
 }
 

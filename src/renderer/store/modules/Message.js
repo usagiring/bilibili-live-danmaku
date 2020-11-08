@@ -181,7 +181,7 @@ const actions = {
         if (payload.commentJPN) {
           commit('UPDATE_EXAMPLE_MESSAGE', {
             id: payload.id,
-            index:  messages.length - 1 - scIndex,
+            index: messages.length - 1 - scIndex,
             commentJPN: payload.commentJPN
           })
 
@@ -246,15 +246,17 @@ const actions = {
     // 礼物叠加处理
     if (payload.type === 'gift') {
       const messages = [...state.messages].reverse();
-      const giftIndex = messages.findIndex(message => message.id === payload.id)
-      if (~giftIndex) {
-        const gift = messages[giftIndex]
+      const gifts = [...state.gifts]
+
+      const messageIndex = messages.findIndex(message => message.id === payload.id)
+      if (~messageIndex) {
+        const gift = messages[messageIndex]
         const giftNumber = payload.giftNumber
         // 如果此时金额大于设定值，推送到gift栏
         const update = {
           id: gift.id,
           giftNumber,
-          index: messages.length - 1 - giftIndex
+          index: messages.length - 1 - messageIndex
         }
         gift.price = gift.price || 0
         const totalPrice = Number((giftNumber || 1) * gift.price)
@@ -262,11 +264,10 @@ const actions = {
         const showGiftThreshold = rootState.Config.showGiftThreshold
         // 这里也需要叠加处理
         if (update.totalPrice >= showGiftThreshold) {
-          const gifts = [...state.gifts]
-          const existsGiftIndex = gifts.findIndex(_ => _.id === gift.id)
+          const existsGiftIndex = gifts.findIndex(gift => gift.id === payload.id)
           if (~existsGiftIndex) {
             commit('UPDATE_GIFT', {
-              id: gift.id,
+              id: payload.id,
               index: existsGiftIndex,
               totalPrice: update.totalPrice,
               giftNumber
@@ -277,6 +278,20 @@ const actions = {
         }
 
         commit('UPDATE_MESSAGE', update)
+        return
+      }
+
+      const giftIndex = gifts.findIndex(gift => gift.id === payload.id)
+      if (~giftIndex) {
+        const gift = gifts[giftIndex]
+        const giftNumber = payload.giftNumber
+        const totalPrice = Number((giftNumber || 1) * (gift.price || 0))
+        commit('UPDATE_GIFT', {
+          id: payload.id,
+          index: giftIndex,
+          totalPrice: Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1),
+          giftNumber
+        })
         return
       }
     }
@@ -312,8 +327,7 @@ const actions = {
 
     // TODO: refactor
     if (payload.type === 'gift' || payload.type === 'superChat') {
-      payload.price = payload.price || 0
-      const totalPrice = Number((payload.giftNumber || 1) * payload.price)
+      const totalPrice = Number((payload.giftNumber || 1) * (payload.price || 0))
       payload.totalPrice = Number.isInteger(totalPrice) ? totalPrice : totalPrice.toFixed(1)
       const showGiftThreshold = rootState.Config.showGiftThreshold
       if (payload.totalPrice >= showGiftThreshold) {
