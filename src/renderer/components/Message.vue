@@ -5,7 +5,7 @@
         v-model="roomId"
         placeholder="房间号"
         clearable
-        style="width: 150px"
+        style="width: 120px"
         size="small"
       />
       <DatePicker
@@ -21,6 +21,13 @@
       <Input
         v-model="userId"
         placeholder="用户ID"
+        clearable
+        style="width: 100px"
+        size="small"
+      />
+      <Input
+        v-model="userName"
+        placeholder="用户名"
         clearable
         style="width: 100px"
         size="small"
@@ -162,6 +169,7 @@ export default {
       split2: 0.7,
       roomId: null,
       userId: null,
+      userName: "",
       dateRange: [],
       comments: [],
       interacts: [],
@@ -222,6 +230,9 @@ export default {
       if (this.userId) {
         query.uid = parseInt(this.userId);
       }
+      if (this.userName) {
+        query.name = { '$regex': new RegExp(this.userName) }
+      }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
@@ -249,6 +260,9 @@ export default {
       }
       if (this.userId) {
         query.uid = parseInt(this.userId);
+      }
+      if (this.userName) {
+        query.name = { '$regex': new RegExp(this.userName) }
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -278,6 +292,9 @@ export default {
       }
       if (this.userId) {
         query.uid = parseInt(this.userId);
+      }
+      if (this.userName) {
+        query.name = { '$regex': new RegExp(this.userName) }
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -467,6 +484,7 @@ export default {
 .searcher-wrapper {
   height: 35px;
   position: relative;
+  min-width: 1000px;
   padding: 1px 30px;
   border-bottom: 1px solid silver;
 }

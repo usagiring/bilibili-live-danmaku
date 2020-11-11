@@ -1,15 +1,12 @@
-const electron = require('electron')
-const userDataPath = (electron.app || electron.remote.app).getPath('userData')
-console.log(userDataPath)
-
 const fs = require('fs')
 const moment = require('moment')
 const Datastore = require('nedb')
-const userDB = new Datastore({ filename: `${userDataPath}/data/user`, autoload: true });
-const commentDB = new Datastore({ filename: `${userDataPath}/data/comment`, autoload: true });
-const giftDB = new Datastore({ filename: `${userDataPath}/data/gift`, autoload: true });
-const interactDB = new Datastore({ filename: `${userDataPath}/data/interact`, autoload: true });
-const otherDB = new Datastore({ filename: `${userDataPath}/data/other`, autoload: true });
+const { USER_DATA_PATH } = require('./const')
+const userDB = new Datastore({ filename: `${USER_DATA_PATH}/data/user`, autoload: true });
+const commentDB = new Datastore({ filename: `${USER_DATA_PATH}/data/comment`, autoload: true });
+const giftDB = new Datastore({ filename: `${USER_DATA_PATH}/data/gift`, autoload: true });
+const interactDB = new Datastore({ filename: `${USER_DATA_PATH}/data/interact`, autoload: true });
+const otherDB = new Datastore({ filename: `${USER_DATA_PATH}/data/other`, autoload: true });
 
 userDB.loadDatabase();
 commentDB.loadDatabase();
@@ -126,7 +123,7 @@ function wrapper(db) {
 
 export function backup() {
   const now = moment(new Date()).format("YYYY-MM-DD-HH:mm:ss");
-  const DATADIR = `${userDataPath}/data`
+  const DATADIR = `${USER_DATA_PATH}/data`
   // 是否先压缩一次？
   // commentDB.persistence.compactDatafile()
   fs.copyFileSync(`${DATADIR}/comment`, `${DATADIR}/comment-${now}`)

@@ -3,6 +3,10 @@ const fs = require('fs')
 const file = fs.readFileSync(`config.yaml`, 'utf8')
 const OPTION_CONFIG = YAML.parse(file)
 
+const electron = require('electron')
+export const USER_DATA_PATH = (electron.app || electron.remote.app).getPath('userData')
+console.log(USER_DATA_PATH)
+
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
 
 export const PRICE_PROPERTIES = OPTION_CONFIG.PRICE_PROPERTIES || {

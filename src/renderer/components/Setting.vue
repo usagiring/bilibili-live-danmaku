@@ -111,16 +111,37 @@
           高级
           <div slot="content">
             <div class="setting-key">
-              <Button @click="clearAllSetting">还原默认设置</Button>
-            </div>
-            <div class="setting-key">
               <Button @click="refreshInfo">刷新直播间信息</Button>
             </div>
             <div class="setting-key">
-              <Button @click="backupAndClearDB">备份并清理数据库</Button>
+              <Poptip
+                confirm
+                title="确认还原默认设置？"
+                placement="right"
+                @on-ok="clearAllSetting"
+              >
+                <Button>还原默认设置</Button>
+              </Poptip>
             </div>
             <div class="setting-key">
-              <Button @click="clearUserDB">清理用户缓存</Button>
+              <Poptip
+                confirm
+                :title="`确认备份并清理数据库？建议仅在启动明显变慢时操作。备份文件夹: ${USER_DATA_PATH}`"
+                placement="right"
+                @on-ok="backupAndClearDB"
+              >
+                <Button>备份并清理数据库</Button>
+              </Poptip>
+            </div>
+            <div class="setting-key">
+              <Poptip
+                confirm
+                title="确认清理用户缓存？用于刷新用户头像，不建议经常清理"
+                placement="right"
+                @on-ok="clearUserDB"
+              >
+                <Button>清理用户缓存</Button>
+              </Poptip>
             </div>
           </div>
         </Panel>
@@ -148,7 +169,7 @@ import Store from "electron-store";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import emitter, { init, close } from "../../service/bilibili-live-ws";
-import { DEFAULT_AVATAR } from "../../service/const";
+import { DEFAULT_AVATAR, USER_DATA_PATH } from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
 import {
   commentDB,
@@ -167,6 +188,7 @@ export default {
   data() {
     return {
       collapse: ["1", "2", "3", "4"],
+      USER_DATA_PATH: USER_DATA_PATH,
 
       editors: [
         // ***** normal *****
@@ -389,6 +411,7 @@ export default {
     clearAllSetting() {
       const store = new Store({ name: "vuex" });
       store.clear();
+      window.reload();
     },
 
     updateBackground(color) {
@@ -461,7 +484,7 @@ export default {
         if (Math.random() * 2 < 1) {
           gift.giftName = "舰长";
           gift.isGuardGift = true;
-          gift.price = 198
+          gift.price = 198;
         }
         return gift;
       }
