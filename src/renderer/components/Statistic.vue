@@ -65,7 +65,7 @@ export default {
     async statistic() {
       const [start, end] = this.dateRange;
       const query = {
-        roomId: this.roomId,
+        roomId: Number(this.roomId),
       };
       if (start) {
         query.sendAt = query.sendAt || {};
@@ -90,7 +90,12 @@ export default {
         return gift;
       });
       const giftUserMap = gifts.reduce((map, gift) => {
-        return Object.assign(map, { [gift.uid]: gift.totalPrice });
+        if (map[gift.uid]) {
+          map[gift.uid] = map[gift.uid] + gift.totalPrice;
+        } else {
+          map[gift.uid] = gift.totalPrice;
+        }
+        return map;
       }, {});
       let goldTotal = 0;
       let maxGold = 0;
@@ -143,7 +148,7 @@ export default {
       this.dateRange = [new Date(startTime), new Date(endTime)];
     },
     clearDateRange() {
-      this.dateRange = []
+      this.dateRange = [];
     },
   },
 };
