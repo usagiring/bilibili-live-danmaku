@@ -94,6 +94,14 @@ function wrapper(db) {
         })
       })
     },
+    count: (query) => {
+      return new Promise((resolve, reject) => {
+        db.count(query, (err, count) => {
+          if (err) reject(err)
+          resolve(count)
+        })
+      })
+    },
     findOne: (query) => {
       return new Promise((resolve, reject) => {
         db.findOne(query, (err, doc) => {
