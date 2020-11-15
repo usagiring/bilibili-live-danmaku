@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import { uniq } from "lodash";
+import { uniq, debounce } from "lodash";
 import { remote } from "electron";
 import Store from "electron-store";
 const { BrowserWindow, screen } = remote;
@@ -292,20 +292,20 @@ export default {
           this.isShowDanmakuWindow = false;
           this.isShowDanmakuWindowLoading = false;
         });
-        this.win.on("resize", () => {
+        this.win.on("resize", debounce(() => {
           const [width, height] = this.win.getSize();
           this.$store.dispatch("UPDATE_CONFIG", {
             windowWidth: width,
             windowHeight: height,
           });
-        });
-        this.win.on("move", () => {
+        }, 200));
+        this.win.on("move", debounce(() => {
           const [x, y] = this.win.getPosition();
           this.$store.dispatch("UPDATE_CONFIG", {
             windowX: x,
             windowY: y,
           });
-        });
+        }, 200));
         // this.win.on('always-on-top-changed', (e, isAlwaysOnTop) => {
 
         // })
