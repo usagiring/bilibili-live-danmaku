@@ -178,6 +178,7 @@ import {
   otherDB,
   giftDB,
   backup,
+  deleteData
 } from "../../service/nedb";
 
 export default {
@@ -545,10 +546,11 @@ export default {
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
       backup();
-      await commentDB.remove({}, { multi: true });
-      await giftDB.remove({}, { multi: true });
-      await interactDB.remove({}, { multi: true });
-      await otherDB.remove({}, { multi: true });
+      deleteData()
+      // await commentDB.remove({}, { multi: true });
+      // await giftDB.remove({}, { multi: true });
+      // await interactDB.remove({}, { multi: true });
+      // await otherDB.remove({}, { multi: true });
       window.reload();
     },
 

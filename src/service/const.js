@@ -2,9 +2,10 @@ const YAML = require('yaml')
 const fs = require('fs')
 const file = fs.readFileSync(`config.yaml`, 'utf8')
 const OPTION_CONFIG = YAML.parse(file)
+const path = require('path')
 
 const electron = require('electron')
-export const USER_DATA_PATH = (electron.app || electron.remote.app).getPath('userData')
+export const USER_DATA_PATH = path.join((electron.app || electron.remote.app).getPath('userData'), '/data')
 console.log(USER_DATA_PATH)
 
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'

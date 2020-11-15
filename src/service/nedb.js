@@ -1,12 +1,13 @@
 const fs = require('fs')
+const path = require('path')
 const moment = require('moment')
 const Datastore = require('nedb')
 const { USER_DATA_PATH } = require('./const')
-const userDB = new Datastore({ filename: `${USER_DATA_PATH}/data/user`, autoload: true });
-const commentDB = new Datastore({ filename: `${USER_DATA_PATH}/data/comment`, autoload: true });
-const giftDB = new Datastore({ filename: `${USER_DATA_PATH}/data/gift`, autoload: true });
-const interactDB = new Datastore({ filename: `${USER_DATA_PATH}/data/interact`, autoload: true });
-const otherDB = new Datastore({ filename: `${USER_DATA_PATH}/data/other`, autoload: true });
+const userDB = new Datastore({ filename: `${USER_DATA_PATH}/user`, autoload: true });
+const commentDB = new Datastore({ filename: `${USER_DATA_PATH}/comment`, autoload: true });
+const giftDB = new Datastore({ filename: `${USER_DATA_PATH}/gift`, autoload: true });
+const interactDB = new Datastore({ filename: `${USER_DATA_PATH}/interact`, autoload: true });
+const otherDB = new Datastore({ filename: `${USER_DATA_PATH}/other`, autoload: true });
 
 userDB.loadDatabase();
 commentDB.loadDatabase();
@@ -130,13 +131,23 @@ function wrapper(db) {
 }
 
 export function backup() {
-  const now = moment(new Date()).format("YYYY-MM-DD-HH:mm:ss");
-  const DATADIR = `${USER_DATA_PATH}/data`
+  const now = moment(new Date()).format("YYYYMMDD-HHmmss");
+
   // 是否先压缩一次？
   // commentDB.persistence.compactDatafile()
-  fs.copyFileSync(`${DATADIR}/comment`, `${DATADIR}/comment-${now}`)
-  fs.copyFileSync(`${DATADIR}/gift`, `${DATADIR}/gift-${now}`)
-  fs.copyFileSync(`${DATADIR}/interact`, `${DATADIR}/interact-${now}`)
+  const BACKUP_DIR = path.join(USER_DATA_PATH, `backup-${now}`)
+  console.log(BACKUP_DIR)
+  fs.mkdirSync(BACKUP_DIR)
+  fs.copyFileSync(`${USER_DATA_PATH}/comment`, `${BACKUP_DIR}/comment`)
+  fs.copyFileSync(`${USER_DATA_PATH}/gift`, `${BACKUP_DIR}/gift`)
+  fs.copyFileSync(`${USER_DATA_PATH}/interact`, `${BACKUP_DIR}/interact`)
+}
+
+export function deleteData() {
+  fs.unlinkSync(`${USER_DATA_PATH}/comment`)
+  fs.unlinkSync(`${USER_DATA_PATH}/gift`)
+  fs.unlinkSync(`${USER_DATA_PATH}/interact`)
+  fs.unlinkSync(`${USER_DATA_PATH}/other`)
 }
 
 const userDBWrapper = wrapper(userDB)
