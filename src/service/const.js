@@ -111,17 +111,17 @@ export const EXAMPLE_MESSAGES = [
     avatar: DEFAULT_AVATAR,
     role: 0
   },
-  {
-    id: 7,
-    type: "gift",
-    uid: 12345,
-    name: 'bli_12345',
-    avatar: DEFAULT_AVATAR,
-    price: 2,
-    giftNumber: 50,
-    totalPrice: 100,
-    giftName: '测试礼物'
-  },
+  // {
+  //   id: 7,
+  //   type: "gift",
+  //   uid: 12345,
+  //   name: 'bli_12345',
+  //   avatar: DEFAULT_AVATAR,
+  //   price: 2,
+  //   giftNumber: 50,
+  //   totalPrice: 100,
+  //   giftName: '测试礼物'
+  // },
   {
     id: 8,
     type: "gift",

@@ -22,10 +22,11 @@
         type="primary"
         shape="circle"
         icon="ios-search"
+        :disabled="!roomId"
         @click="statistic"
       ></Button>
     </div>
-    <div>
+    <div class="statistic-content">
       <p>获得金瓜子: {{ goldTotal }}</p>
       <p>弹幕数: {{ commentCount }}</p>
       <p>互动人数: {{ interactUserCount }}</p>
@@ -44,6 +45,7 @@ import { uniq, countBy } from "lodash";
 export default {
   data() {
     return {
+      roomId: 0,
       dateRange: [],
       commentCount: 0, // 弹幕总数
       goldTotal: 0,
@@ -81,62 +83,67 @@ export default {
         ...query,
         coinType: "gold",
       };
-      console.log(query, giftQuery);
 
       // --- gift ---
       let gifts = await giftDB.find(giftQuery);
-      gifts = gifts.map((gift) => {
-        gift.totalPrice = gift.giftNumber * gift.price;
-        return gift;
-      });
-      const giftUserMap = gifts.reduce((map, gift) => {
-        if (map[gift.uid]) {
-          map[gift.uid] = map[gift.uid] + gift.totalPrice;
-        } else {
-          map[gift.uid] = gift.totalPrice;
-        }
-        return map;
-      }, {});
-      let goldTotal = 0;
-      let maxGold = 0;
-      let maxGiftUid;
-      for (const key in giftUserMap) {
-        if (giftUserMap[key] > maxGold) {
-          maxGold = giftUserMap[key];
-          maxGiftUid = key;
-        }
-        goldTotal = goldTotal + giftUserMap[key];
-      }
-      this.goldTotal = goldTotal.toFixed(1) * 1000;
-      const maxGiftUser = gifts.find((gift) => gift.uid === Number(maxGiftUid));
-      this.maxGiftUser = maxGiftUser.name;
       const giftUids = gifts.map((gift) => gift.uid);
-      this.giftUserCount = Object.keys(giftUserMap).length;
+      if (gifts.length) {
+        gifts = gifts.map((gift) => {
+          gift.totalPrice = gift.giftNumber * gift.price;
+          return gift;
+        });
+        const giftUserMap = gifts.reduce((map, gift) => {
+          if (map[gift.uid]) {
+            map[gift.uid] = map[gift.uid] + gift.totalPrice;
+          } else {
+            map[gift.uid] = gift.totalPrice;
+          }
+          return map;
+        }, {});
+        let goldTotal = 0;
+        let maxGold = 0;
+        let maxGiftUid;
+        for (const key in giftUserMap) {
+          if (giftUserMap[key] > maxGold) {
+            maxGold = giftUserMap[key];
+            maxGiftUid = key;
+          }
+          goldTotal = goldTotal + giftUserMap[key];
+        }
+        this.goldTotal = goldTotal.toFixed(1) * 1000;
+        const maxGiftUser = gifts.find(
+          (gift) => gift.uid === Number(maxGiftUid)
+        );
+        this.maxGiftUser = maxGiftUser.name;
+        this.giftUserCount = Object.keys(giftUserMap).length;
+      }
 
       // --- comment ---
       const comments = await commentDB.find(query, {
         projection: { uid: 1, name: 1 },
       });
       const commentUids = comments.map((c) => c.uid);
-      const commentCountMap = countBy(commentUids);
-      let maxCommentCount = 0;
-      let maxCommentUid;
-      for (const uid in commentCountMap) {
-        if (commentCountMap[uid] > maxCommentCount) {
-          maxCommentCount = commentCountMap[uid];
-          maxCommentUid = uid;
+      if (comments.length) {
+        const commentCountMap = countBy(commentUids);
+        let maxCommentCount = 0;
+        let maxCommentUid;
+        for (const uid in commentCountMap) {
+          if (commentCountMap[uid] > maxCommentCount) {
+            maxCommentCount = commentCountMap[uid];
+            maxCommentUid = uid;
+          }
         }
+        const maxCommentUser = comments.find(
+          (c) => c.uid === Number(maxCommentUid)
+        );
+        this.maxCommentUser = maxCommentUser.name;
       }
-      const maxCommentUser = comments.find(
-        (c) => c.uid === Number(maxCommentUid)
-      );
-      this.maxCommentUser = maxCommentUser.name;
 
       // --- interact ---
       const interacts = await interactDB.find(query, {
         projection: { uid: 1 },
       });
-      const interactUids = interacts.map((interact) => interacts.uid);
+      const interactUids = interacts.map((interact) => interact.uid);
       this.interactUserCount = uniq([
         ...giftUids,
         ...commentUids,
@@ -148,7 +155,9 @@ export default {
       this.dateRange = [new Date(startTime), new Date(endTime)];
     },
     clearDateRange() {
-      this.dateRange = [];
+      setTimeout(() => {
+        this.dateRange = [];
+      }, 0);
     },
   },
 };
@@ -160,5 +169,11 @@ export default {
   position: relative;
   padding: 1px 30px;
   border-bottom: 1px solid silver;
+}
+.statistic-content {
+  padding: 20px 40px;
+}
+.statistic-content > p {
+  padding: 5px;
 }
 </style>

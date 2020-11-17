@@ -1,4 +1,5 @@
 import { EXAMPLE_MESSAGES } from '../../../service/const'
+import { getPriceProperties } from '../../../service/util'
 
 const state = {
   messages: [],
@@ -91,13 +92,21 @@ const mutations = {
     state.gifts = state.gifts
       .map(gift => {
         gift.existsTime = payload.now - gift.sendAt;
+        gift.priceProperties = getPriceProperties(gift.totalPrice) || {}
         return gift;
+      })
+      .filter((gift) => {
+        return gift.sendAt + gift.priceProperties.time > new Date() - 0;
       })
 
     state.exampleGifts = state.exampleGifts
       .map(gift => {
         gift.existsTime = payload.now - gift.sendAt;
+        gift.priceProperties = getPriceProperties(gift.totalPrice) || {}
         return gift;
+      })
+      .filter((gift) => {
+        return gift.sendAt + gift.priceProperties.time > new Date() - 0;
       })
   }
 }
@@ -345,8 +354,10 @@ const actions = {
     commit('RESTORE_EXAMPLE_MESSAGE')
   },
 
-  GIFT_TIMER({ commit }, payload) {
-    commit('GIFT_TIMER', payload)
+  GIFT_TIMER({ commit }) {
+    commit('GIFT_TIMER', {
+      now: Date.now() - 0
+    })
   }
 }
 

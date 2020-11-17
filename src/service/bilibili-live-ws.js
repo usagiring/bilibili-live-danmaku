@@ -12,6 +12,7 @@ export default emitter
 export {
   init,
   close,
+  getIsWsConnected,
 
   parseComment,
   parseGift,
@@ -26,6 +27,13 @@ function close() {
     clearInterval(HEART_BEAT_TIMER);
   };
   ws.close();
+}
+
+function getIsWsConnected() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    return true
+  }
+  return false
 }
 
 function init(options) {
@@ -273,24 +281,32 @@ function getEncoder() {
 function parseComment(msg) {
   if (msg.cmd !== "DANMU_MSG") return
   const [uid, name, isAdmin] = msg.info[2];
-  const [medalLevel, medalName] = msg.info[3]
-  return {
+  const [medalLevel, medalName, medalAnchorName, medalRoomId, medalColor, , , medalColorBorder, medalColorStart, medalColorEnd] = msg.info[3]
+  const comment = {
     roomId: realRoomId,
     sendAt: msg.info[0][4],
     uid,
     name,
     isAdmin,
     guard: msg.info[7],
-    medalLevel,
-    medalName,
-    comment: msg.info[1]
+    comment: msg.info[1],
   }
+  if (medalLevel && medalName) {
+    Object.assign(comment, {
+      medalLevel,
+      medalName,
+      medalColorBorder: `#${medalColorBorder.toString(16).padStart(6, '0')}`,
+      medalColorStart: `#${medalColorStart.toString(16).padStart(6, '0')}`,
+      medalColorEnd: `#${medalColorEnd.toString(16).padStart(6, '0')}`,
+    })
+  }
+  return comment
 }
 
 function parseInteractWord(msg) {
   if (msg.cmd !== "INTERACT_WORD") return
-  const { identities, msg_type: msgType, roomid: roomId, score, timestamp, uid, uname: name, uname_color: nameColor } = msg.data
-  return {
+  const { identities, msg_type: msgType, roomid: roomId, score, timestamp, uid, uname: name, uname_color: nameColor, fans_medal } = msg.data
+  const interact = {
     identities,
     roomId,
     score,
@@ -298,8 +314,20 @@ function parseInteractWord(msg) {
     sendAt: timestamp * 1000, // 
     uid,
     name,
-    nameColor
+    nameColor,
   }
+  if (fans_medal && fans_medal.medal_name) {
+    const { guard_level, medal_color_border, medal_color_end, medal_color_start, medal_level, medal_name } = fans_medal
+    Object.assign(interact, {
+      // medalGuardLevel: guard_level,
+      medalLevel: medal_level,
+      medalName: medal_name,
+      medalColorBorder: `#${medal_color_border.toString(16).padStart(6, '0')}`,
+      medalColorStart: `#${medal_color_start.toString(16).padStart(6, '0')}`,
+      medalColorEnd: `#${medal_color_end.toString(16).padStart(6, '0')}`,
+    })
+  }
+  return interact
 }
 
 const RATE = 1000

@@ -36,6 +36,7 @@
         type="primary"
         shape="circle"
         icon="ios-search"
+        :disabled="!roomId"
         @click="searchAll"
       ></Button>
       <Checkbox
@@ -73,11 +74,10 @@
                         )})`,
                       }"
                     ></i>
-                    <span
+                    <FanMedal
                       v-if="comment.medalLevel && comment.medalName"
-                      class="medal-style"
-                      >{{ `${comment.medalName}${comment.medalLevel}` }}</span
-                    >
+                      v-bind="comment"
+                    ></FanMedal>
                     <span>{{ `${comment.name}` }}</span>
                     <span
                       v-if="isShowUserSpaceLink"
@@ -99,7 +99,18 @@
                 <template v-for="interact in interacts">
                   <div :key="interact._id">
                     <span>{{ dateFormat(interact.sendAt) }}</span>
-                    <span>{{ `${interact.name}` }}</span>
+                    <FanMedal
+                      v-if="interact.medalLevel && interact.medalName"
+                      v-bind="interact"
+                    ></FanMedal>
+                    <span
+                      :style="{
+                        color: interact.nameColor
+                          ? interact.nameColor
+                          : undefined,
+                      }"
+                      >{{ `${interact.name}` }}</span
+                    >
                     <span
                       v-if="isShowUserSpaceLink"
                       class="user-link"
@@ -156,18 +167,18 @@ import {
   giftDB,
 } from "../../service/nedb";
 import GiftCard from "./GiftCard";
-
-// const { commentDB, interactDB, userDB, otherDB, giftDB } = db;
+import FanMedal from "./FanMedal";
 
 export default {
   components: {
     GiftCard,
+    FanMedal,
   },
   data() {
     return {
       split1: 0.7,
       split2: 0.7,
-      roomId: null,
+      roomId: 0,
       userId: null,
       userName: "",
       dateRange: [],
@@ -205,6 +216,7 @@ export default {
     },
     async searchAll(options) {
       const comments = await this.searchComment(options);
+      console.log(comments);
       this.comments = comments;
       const interacts = await this.searchInteract(options);
       this.interacts = interacts;
@@ -231,7 +243,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { '$regex': new RegExp(this.userName) }
+        query.name = { $regex: new RegExp(this.userName) };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -262,7 +274,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { '$regex': new RegExp(this.userName) }
+        query.name = { $regex: new RegExp(this.userName) };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -294,7 +306,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { '$regex': new RegExp(this.userName) }
+        query.name = { $regex: new RegExp(this.userName) };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");

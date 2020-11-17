@@ -1,8 +1,10 @@
 // {role}_{prop}: { [property: string]: string }
 const state = {
   roomId: 1,
+  isConnected: false,
   isShowAvatar: true,
   isShowMemberShipIcon: true,
+  isShowFanMedal: true,
   avatarSize: 24,
   combineSimilarTime: 3000,
   showGiftThreshold: 30,
@@ -18,7 +20,7 @@ const state = {
   },
 
   '0_message': {
-
+    background: 'rgba(0,0,0,0)'
   },
   '0_name': {
     'font-size': '16px',
@@ -28,11 +30,12 @@ const state = {
   },
   '0_comment': {
     'font-size': '16px',
-    color: 'white'
+    color: 'white',
+    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
   '3_message': {
-
+    background: 'rgba(0,0,0,0)'
   },
   '3_name': {
     'font-size': '16px',
@@ -42,9 +45,13 @@ const state = {
   },
   '3_comment': {
     'font-size': '16px',
-    color: 'white'
+    color: 'white',
+    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
+  '2_message': {
+    background: 'rgba(0,0,0,0)'
+  },
   '2_name': {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0.2px',
@@ -53,9 +60,13 @@ const state = {
   },
   '2_comment': {
     'font-size': '16px',
-    color: 'white'
+    color: 'white',
+    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
+  '1_message': {
+    background: 'rgba(0,0,0,0)'
+  },
   '1_name': {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0.2px',
@@ -64,7 +75,8 @@ const state = {
   },
   '1_comment': {
     'font-size': '16px',
-    color: 'white'
+    color: 'white',
+    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
 }

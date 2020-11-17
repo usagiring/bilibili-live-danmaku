@@ -89,7 +89,8 @@
               style="width: 120px"
             />
             <i-switch
-              v-model="isConnected"
+              :value="isConnected"
+              :loading="isConnecting"
               @on-change="connect"
               :disabled="!roomId"
             />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -127,6 +128,7 @@ import { getUserInfoThrottle } from "../../service/util";
 import emitter, {
   init,
   close,
+  getIsWsConnected,
   parseComment,
   parseInteractWord,
   parseGift,
@@ -145,12 +147,12 @@ export default {
   data() {
     return {
       isCollapsed: true,
-      isConnected: false,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
       isAlwaysOnTop: false,
       giftTimer: null,
       peopleTimer: null,
+      isConnecting: false,
 
       username: "",
       avatar: null,
@@ -183,6 +185,9 @@ export default {
     },
     messages() {
       return this.$store.state.Message.messages;
+    },
+    isConnected() {
+      return this.$store.state.Config.isConnected;
     },
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
@@ -220,6 +225,7 @@ export default {
   },
   methods: {
     async connect(status) {
+      this.isConnecting = true;
       if (status && this.roomId) {
         const { data } = await getRoomInfoV2(this.roomId);
         console.log(data);
@@ -238,7 +244,6 @@ export default {
         } = data.room_info;
 
         await init({ roomId: Number(roomId), uid: 0 });
-        this.isConnected = status;
 
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
@@ -254,6 +259,7 @@ export default {
         const guardInfo = await getGuardInfo(roomId, uid);
         // this.guardNumber = guardInfo.data.info.num;
         this.$store.dispatch("UPDATE_CONFIG", {
+          isConnected: status,
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
           ruid: uid,
@@ -262,6 +268,7 @@ export default {
         close();
         this.initial();
       }
+      this.isConnecting = false;
     },
     showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
@@ -292,20 +299,26 @@ export default {
           this.isShowDanmakuWindow = false;
           this.isShowDanmakuWindowLoading = false;
         });
-        this.win.on("resize", debounce(() => {
-          const [width, height] = this.win.getSize();
-          this.$store.dispatch("UPDATE_CONFIG", {
-            windowWidth: width,
-            windowHeight: height,
-          });
-        }, 200));
-        this.win.on("move", debounce(() => {
-          const [x, y] = this.win.getPosition();
-          this.$store.dispatch("UPDATE_CONFIG", {
-            windowX: x,
-            windowY: y,
-          });
-        }, 200));
+        this.win.on(
+          "resize",
+          debounce(() => {
+            const [width, height] = this.win.getSize();
+            this.$store.dispatch("UPDATE_CONFIG", {
+              windowWidth: width,
+              windowHeight: height,
+            });
+          }, 200)
+        );
+        this.win.on(
+          "move",
+          debounce(() => {
+            const [x, y] = this.win.getPosition();
+            this.$store.dispatch("UPDATE_CONFIG", {
+              windowX: x,
+              windowY: y,
+            });
+          }, 200)
+        );
         // this.win.on('always-on-top-changed', (e, isAlwaysOnTop) => {
 
         // })
@@ -329,9 +342,13 @@ export default {
       this.liveStatus = 0;
       this.peopleNumber = 0;
 
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const payload = {
         guardNumber: 0,
+      };
+      Object.assign(payload, {
+        isConnected: getIsWsConnected(),
       });
+      this.$store.dispatch("UPDATE_CONFIG", payload);
     },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
@@ -351,9 +368,13 @@ export default {
         sendAt: payload.sendAt,
         isAdmin: payload.isAdmin,
         avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
+        role: payload.guard,
+
         medalLevel: payload.medalLevel,
         medalName: payload.medalName,
-        role: payload.guard,
+        medalColorBorder: payload.medalColorBorder,
+        medalColorStart: payload.medalColorStart,
+        medalColorEnd: payload.medalColorEnd,
       });
     },
     sendInteractWord(payload) {
@@ -366,6 +387,12 @@ export default {
         color: payload.nameColor,
         sendAt: payload.timestamp,
         msgType: payload.msgType,
+
+        medalLevel: payload.medalLevel,
+        medalName: payload.medalName,
+        medalColorBorder: payload.medalColorBorder,
+        medalColorStart: payload.medalColorStart,
+        medalColorEnd: payload.medalColorEnd,
       });
     },
     sendSuperChat(payload) {
@@ -424,6 +451,7 @@ export default {
 
     onMessage: async function (data) {
       if (Array.isArray(data)) {
+        // console.log(data);
         const comments = data
           .filter((msg) => msg.cmd === "DANMU_MSG")
           .map(parseComment);
@@ -561,9 +589,7 @@ export default {
   mounted() {
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
-      this.$store.dispatch("GIFT_TIMER", {
-        now: new Date() - 0,
-      });
+      this.$store.dispatch("GIFT_TIMER");
     }, 1000);
 
     this.peopleTimer = setInterval(async () => {
@@ -573,18 +599,17 @@ export default {
       const [comments, gifts, interacts] = await Promise.all([
         commentDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { uid: 1, name: 1 }
+          { projection: {uid: 1} }
         ),
         giftDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { uid: 1, name: 1 }
+          { projection: {uid: 1} }
         ),
         interactDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { uid: 1, name: 1 }
+          { projection: {uid: 1} }
         ),
       ]);
-
       this.peopleNumber = uniq(
         [...comments, ...gifts, ...interacts].map((i) => i.uid)
       ).length;

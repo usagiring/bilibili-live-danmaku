@@ -29,7 +29,7 @@
         </Tooltip>
       </i-col>
       <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching"
+        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected"
           >开始</Button
         >
         <Button class="vote-button" @click="stop" :disabled="!isWatching"
@@ -95,6 +95,9 @@ export default {
     };
   },
   computed: {
+    isConnected() {
+      return this.$store.state.Config.isConnected;
+    },
     optionstring() {
       return this.$store.state.Config.optionstring;
     },

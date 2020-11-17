@@ -160,6 +160,10 @@
                   'background-image': `url(${getGuardIcon(message.role)})`,
                 }"
               ></i>
+              <FanMedal
+                v-if="isShowFanMedal && message.medalLevel && message.medalName"
+                v-bind="message"
+              ></FanMedal>
               <span
                 :class="`name-${message.role}`"
                 :style="getNameStyleByRole(message)"
@@ -180,6 +184,10 @@
           <template v-if="message.type === 'interactWord'">
             <!-- 入场消息设置默认使用普通设置 -->
             <p :style="getCommentStyleByRole({ role: 0 })">
+              <FanMedal
+                v-if="isShowFanMedal && message.medalLevel && message.medalName"
+                v-bind="message"
+              ></FanMedal>
               <span
                 :style="{ color: message.color ? message.color : undefined }"
                 >{{ message.name }}</span
@@ -221,11 +229,13 @@ import {
 import { getPriceProperties } from "../../service/util";
 import SimilarCommentBadge from "./SimilarCommentBadge";
 import GiftCard from "./GiftCard";
+import FanMedal from "./FanMedal";
 
 export default {
   components: {
     SimilarCommentBadge,
     GiftCard,
+    FanMedal,
   },
   props: ["isPreview", "isSingleWindow"],
   data() {
@@ -258,6 +268,9 @@ export default {
     },
     isShowMemberShipIcon() {
       return this.$store.state.Config.isShowMemberShipIcon;
+    },
+    isShowFanMedal() {
+      return this.$store.state.Config.isShowFanMedal;
     },
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
@@ -302,9 +315,6 @@ export default {
           return Object.assign({}, gift, {
             priceProperties: getPriceProperties(gift.totalPrice) || {},
           });
-        })
-        .filter((gift) => {
-          return gift.sendAt + gift.priceProperties.time > new Date() - 0;
         })
         .reverse();
 

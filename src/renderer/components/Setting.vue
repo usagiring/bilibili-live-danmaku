@@ -33,10 +33,17 @@
               </div>
             </div>
             <div class="setting-key">
-              <span class="setting-key-text">重复弹幕合并</span>
-              <!-- <Poptip trigger="hover" content="多少毫秒内重复的弹幕只显示最早的一条，且后面显示堆叠数字，设置为0表示不堆叠">
-                <Icon type="ios-help-circle-outline" />
-              </Poptip>-->
+              <span class="setting-key-text">
+                重复弹幕合并
+                <Tooltip placement="top">
+                  <Icon type="md-alert" class="info-icon" />
+                  <div slot="content">
+                    <div class="description-text">
+                      <p>多少毫秒内重复的弹幕将被合并</p>
+                    </div>
+                  </div>
+                </Tooltip>
+              </span>
               <InputNumber
                 :value="combineSimilarTime"
                 @on-change="changeCombineSimilarTime"
@@ -79,6 +86,11 @@
                 :value="isShowMemberShipIcon"
                 @on-change="showMemberShipIcon"
                 >显示舰队图标</Checkbox
+              >
+            </div>
+            <div>
+              <Checkbox :value="isShowFanMedal" @on-change="showFanMedal"
+                >显示粉丝牌</Checkbox
               >
             </div>
           </div>
@@ -178,7 +190,7 @@ import {
   otherDB,
   giftDB,
   backup,
-  deleteData
+  deleteData,
 } from "../../service/nedb";
 
 export default {
@@ -364,6 +376,9 @@ export default {
     isShowInteractInfo() {
       return this.$store.state.Config.isShowInteractInfo;
     },
+    isShowFanMedal() {
+      return this.$store.state.Config.isShowFanMedal;
+    },
     avatarSize() {
       return this.$store.state.Config.avatarSize;
     },
@@ -390,6 +405,11 @@ export default {
     showMemberShipIcon(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
         isShowMemberShipIcon: status,
+      });
+    },
+    showFanMedal(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isShowFanMedal: status,
       });
     },
     showAvatar(status) {
@@ -472,7 +492,7 @@ export default {
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "gift",
-          price: Math.floor(Math.random() * 2000),
+          price: Math.floor(Math.random() * 10),
           giftNumber: 1,
           giftName: "随机礼物",
           avatar: DEFAULT_AVATAR,
@@ -500,7 +520,7 @@ export default {
           type: "superChat",
           avatar: DEFAULT_AVATAR,
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
-          price: Math.floor(Math.random() * 2000),
+          price: Math.floor(Math.random() * 10),
           role: 3,
           sendAt: new Date() - 0,
         };
@@ -546,7 +566,7 @@ export default {
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
       backup();
-      deleteData()
+      deleteData();
       // await commentDB.remove({}, { multi: true });
       // await giftDB.remove({}, { multi: true });
       // await interactDB.remove({}, { multi: true });
