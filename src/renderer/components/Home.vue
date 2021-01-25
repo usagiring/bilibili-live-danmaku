@@ -248,12 +248,12 @@ export default {
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
         const { attention } = data.anchor_info.relation_info;
-        const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info;
+        const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info || {};
         this.username = uname;
         this.avatar = face;
         this.ninkiNumber = online;
         this.fansNumber = attention;
-        this.fansClubNumber = fansclub;
+        this.fansClubNumber = fansclub || 0;
         this.liveStatus = liveStatus;
 
         const guardInfo = await getGuardInfo(roomId, uid);
