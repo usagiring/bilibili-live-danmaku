@@ -76,6 +76,10 @@ function startRenderer() {
             target: "https://api.bilibili.com",
             changeOrigin: true
           },
+          '/room': {
+            target: "https://api.live.bilibili.com",
+            changeOrigin: true
+          }
         },
         before(app, ctx) {
           app.use(hotMiddleware)

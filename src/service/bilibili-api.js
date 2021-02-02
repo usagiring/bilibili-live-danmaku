@@ -11,11 +11,12 @@ export {
   getGiftConfig,
   getUserInfo,
   getHistoryMessages,
-  getGuardInfo
+  getGuardInfo,
+  getPlayUrl,
 }
 
 async function getRoomInfoV1() {
-  const res = await axios.get(`${baseLiveUrl}room/v1/Room/get_info?room_id=${roomId}&from=room`)
+  const res = await axios.get(`${baseLiveUrl}/room/v1/Room/get_info?room_id=${roomId}&from=room`)
   return res.data
 }
 
@@ -52,5 +53,10 @@ async function getGuardInfo(roomId, ruid) {
   const res = await axios.get(`${baseLiveUrl}/xlive/app-room/v2/guardTab/topList?roomid=${roomId}&page=1&ruid=${ruid}&page_size=29`, {
 
   })
+  return res.data
+}
+
+async function getPlayUrl(roomId) {
+  const res = await axios.get(`${baseLiveUrl}/room/v1/Room/playUrl?cid=${roomId}&qn=0&platform=web`)
   return res.data
 }
