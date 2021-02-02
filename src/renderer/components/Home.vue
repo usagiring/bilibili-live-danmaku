@@ -108,6 +108,8 @@
                 @on-change="alwaysOnTop"
               ></i-switch>
             </template>
+
+            <Button @click="test">test</Button>
           </div>
         </div>
         <Content class="layout-content">
@@ -133,7 +135,13 @@ import emitter, {
   parseInteractWord,
   parseGift,
 } from "../../service/bilibili-live-ws";
-import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
+import {
+  getRoomInfoV2,
+  getGuardInfo,
+  getPlayUrl,
+} from "../../service/bilibili-api";
+import download from '../../service/download'
+// const download = require('../../service/download')
 import {
   commentDB,
   interactDB,
@@ -248,7 +256,8 @@ export default {
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
         const { attention } = data.anchor_info.relation_info;
-        const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info || {};
+        const { medal_name, medal_id, fansclub } =
+          data.anchor_info.medal_info || {};
         this.username = uname;
         this.avatar = face;
         this.ninkiNumber = online;
@@ -585,6 +594,12 @@ export default {
         }
       }
     },
+
+    async test() {
+
+      // const result = await getsPlayUrl(this.realRoomId);
+      download(this.realRoomId)
+    },
   },
   mounted() {
     this.giftTimer = setInterval(() => {
@@ -599,15 +614,15 @@ export default {
       const [comments, gifts, interacts] = await Promise.all([
         commentDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: {uid: 1} }
+          { projection: { uid: 1 } }
         ),
         giftDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: {uid: 1} }
+          { projection: { uid: 1 } }
         ),
         interactDB.find(
           { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: {uid: 1} }
+          { projection: { uid: 1 } }
         ),
       ]);
       this.peopleNumber = uniq(
