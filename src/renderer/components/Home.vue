@@ -19,7 +19,11 @@
             <Icon type="md-stats" />
             <span v-if="!isCollapsed">统计</span>
           </MenuItem>
-          <!-- <MenuItem name="1-4" to="/lottery">
+          <MenuItem name="1-5" to="/live">
+            <Icon type="md-bonfire" />
+            <span v-if="!isCollapsed">直播</span>
+          </MenuItem>
+          <!-- <MenuItem name="1-5" to="/lottery">
             <Icon type="md-bonfire" />
             <span v-if="!isCollapsed">祈愿</span>
           </MenuItem> -->
@@ -108,8 +112,6 @@
                 @on-change="alwaysOnTop"
               ></i-switch>
             </template>
-
-            <Button @click="test">test</Button>
           </div>
         </div>
         <Content class="layout-content">
@@ -138,10 +140,7 @@ import emitter, {
 import {
   getRoomInfoV2,
   getGuardInfo,
-  getPlayUrl,
 } from "../../service/bilibili-api";
-import download from '../../service/download'
-// const download = require('../../service/download')
 import {
   commentDB,
   interactDB,
@@ -593,12 +592,6 @@ export default {
           otherDB.insert(data);
         }
       }
-    },
-
-    async test() {
-
-      // const result = await getsPlayUrl(this.realRoomId);
-      download(this.realRoomId)
     },
   },
   mounted() {

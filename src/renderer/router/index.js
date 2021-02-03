@@ -29,6 +29,10 @@ export default new Router({
         {
           path: 'statistic',
           component: () => import('@/components/Statistic.vue')
+        },
+        {
+          path: 'live',
+          component: () => import('@/components/Live.vue')
         }
       ]
     },

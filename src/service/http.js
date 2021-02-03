@@ -14,7 +14,7 @@ var createError = require('axios/lib/core/createError');
 var enhanceError = require('axios/lib/core/enhanceError');
 
 /*eslint consistent-return:0*/
-export function httpAdapter(config) {
+export default function httpAdapter(config) {
   return new Promise(function dispatchHttpRequest(resolve, reject) {
     var data = config.data;
     var headers = config.headers;
