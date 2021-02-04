@@ -16,7 +16,12 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "",
     "ui": "vue ui",
+    "release": "build -p always",
     "cnpmi": "npm --registry https://registry.npm.taobao.org install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/usagiring/bilibili-live-danmaku.git"
   },
   "build": {
     "productName": "bilibili-danmaku",
