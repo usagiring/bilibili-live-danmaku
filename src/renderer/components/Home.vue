@@ -20,7 +20,7 @@
             <span v-if="!isCollapsed">统计</span>
           </MenuItem>
           <MenuItem name="1-5" to="/live">
-            <Icon type="md-bonfire" />
+            <Icon type="md-play" />
             <span v-if="!isCollapsed">直播</span>
           </MenuItem>
           <!-- <MenuItem name="1-5" to="/lottery">

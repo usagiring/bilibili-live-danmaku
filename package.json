@@ -81,7 +81,7 @@
     ]
   },
   "dependencies": {
-    "@tokine/bilibili-recorder": "0.0.1",
+    "@tokine/bilibili-recorder": "^0.0.2",
     "animate.css": "^4.1.0",
     "axios": "^0.18.1",
     "echarts": "^4.9.0",

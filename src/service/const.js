@@ -7,6 +7,8 @@ const path = require('path')
 const electron = require('electron')
 export const USER_DATA_PATH = path.join((electron.app || electron.remote.app).getPath('userData'), '/data')
 console.log(USER_DATA_PATH)
+export const DEFAULT_RECORD_DIR = path.join((electron.app || electron.remote.app).getPath('exe'), '../record')
+console.log(DEFAULT_RECORD_DIR)
 
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
 
