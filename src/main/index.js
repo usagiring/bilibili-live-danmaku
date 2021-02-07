@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 import '../renderer/store'
 
 /**
@@ -70,19 +70,78 @@ autoUpdater.on('update-downloaded', () => {
 })
 
 app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdatesAndNotify()
+  // dialog.showMessageBox({
+  //   type: 'info',
+  //   title: 'Found Updates',
+  //   message: 'Found updates, do you want update now?',
+  //   buttons: ['Sure', 'No']
+  // }, (buttonIndex) => {
+  //   if (buttonIndex === 0) {
+  //     // autoUpdater.downloadUpdate()
+  //   }
+  // })
+  // const win = new BrowserWindow({
+  //   width:  320,
+  //   height:  350,
+  //   // x, y,
+  //   x:  0,
+  //   y:  0,
+  //   frame: false,
+  //   transparent: true,
+  //   hasShadow: false,
+  //   webPreferences: {
+  //     nodeIntegration: true,
+  //   },
+  //   resizable: true,
+  // });
+
+  // const winURL =
+  //   process.env.NODE_ENV === "development"
+  //     ? `http://localhost:9080/#/danmaku-window`
+  //     : `file://${__dirname}/index.html#danmaku-window`;
+  // win.loadURL(winURL);
+
+
+  if (process.env.NODE_ENV === 'production') {
+    autoUpdater.autoDownload = false
+    autoUpdater.autoInstallOnAppQuit = false
+
+    // autoUpdater.checkForUpdatesAndNotify()
+
+    autoUpdater.on('update-available', () => {
+      dialog.showMessageBox({
+        type: 'info',
+        title: '版本更新',
+        message: '发现新版本，立即更新？',
+        buttons: ['是', '否']
+      }, (buttonIndex) => {
+        if (buttonIndex === 0) {
+          autoUpdater.downloadUpdate()
+        }
+      })
+    })
+
+    autoUpdater.on('error', (error) => {
+      console.error(`AutoUpdate: ${error === null ? "unknown" : (error.stack || error).toString()}`)
+    })
+
+    autoUpdater.on('update-not-available', () => {
+      console.log('AutoUpdate: update-not-available')
+    })
+
+    autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
+      mainWindow.webContents.send('ping', 'whoooooooh!')
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      autoUpdater.quitAndInstall()
+    })
+  }
 })
 
 
-// const { dialog } = require('electron')
-// const { autoUpdater } = require('electron-updater')
-
 // let updater
-// autoUpdater.autoDownload = false
-
-// autoUpdater.on('error', (error) => {
-//   dialog.showErrorBox('Error: ', error === null ? "unknown" : (error.stack || error).toString())
-// })
+// 
 
 // autoUpdater.on('update-available', () => {
 //   dialog.showMessageBox({

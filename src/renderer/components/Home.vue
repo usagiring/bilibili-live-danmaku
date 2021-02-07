@@ -125,8 +125,7 @@
 <script>
 import { uniq, debounce } from "lodash";
 import { remote } from "electron";
-import Store from "electron-store";
-const { BrowserWindow, screen } = remote;
+const { BrowserWindow } = remote;
 
 import { getUserInfoThrottle } from "../../service/util";
 import emitter, {
