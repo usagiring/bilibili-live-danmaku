@@ -67,12 +67,13 @@ app.on('activate', () => {
 import { autoUpdater } from 'electron-updater'
 
 app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') {
+  // if (process.env.NODE_ENV === 'production') {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
     // autoUpdater.checkForUpdatesAndNotify()
 
-    ipcMain.on(IPC_CHECK_FOR_UPDATE, () => {
+    ipcMain.on(IPC_CHECK_FOR_UPDATE, (event) => {
+      event.sender.send(IPC_UPDATE_AVAILABLE)
       autoUpdater.checkForUpdates()
     })
 
@@ -81,11 +82,11 @@ app.on('ready', () => {
     })
 
     autoUpdater.on('update-available', () => {
-      ipcMain.send(IPC_UPDATE_AVAILABLE)
+      mainWindow.webContents.send.send(IPC_UPDATE_AVAILABLE)
     })
 
     autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
-      ipcMain.send(IPC_DOWNLOAD_PROGRESS, {
+      mainWindow.webContents.send.send(IPC_DOWNLOAD_PROGRESS, {
         progress,
         bytesPerSecond,
         percent,
@@ -109,7 +110,7 @@ app.on('ready', () => {
     autoUpdater.on('update-not-available', () => {
       console.log('AutoUpdate: update-not-available')
     })
-  }
+  // }
 })
 
 

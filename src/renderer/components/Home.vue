@@ -162,7 +162,14 @@ import {
   otherDB,
   giftDB,
 } from "../../service/nedb";
-import { DEFAULT_AVATAR, IPC_CHECK_FOR_UPDATE } from "../../service/const";
+import {
+  DEFAULT_AVATAR,
+  IPC_CHECK_FOR_UPDATE,
+  IPC_UPDATE_AVAILABLE,
+  IPC_DOWNLOAD_UPDATE,
+  IPC_DOWNLOAD_PROGRESS,
+  IPC_UPDATE_DOWNLOADED,
+} from "../../service/const";
 
 export default {
   data() {
@@ -621,7 +628,7 @@ export default {
       this.appUpdating = true;
       ipcRenderer.on(IPC_DOWNLOAD_PROGRESS, (event, args) => {
         const { progress, bytesPerSecond, percent, total } = args;
-        console.log(args)
+        console.log(args);
       });
 
       // 更新会退出应用，不监听也可以
@@ -636,7 +643,6 @@ export default {
       this.hasNewVersion = true;
     });
     ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
-
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER");
