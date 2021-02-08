@@ -30,7 +30,7 @@
         </Menu>
       </Sider>
       <Layout>
-        <Header class="layout-header">
+        <div class="layout-header">
           <div class="avatar-wrapper">
             <Avatar
               :icon="avatar ? undefined : 'ios-person'"
@@ -80,17 +80,27 @@
               {{ peopleNumber }}
             </div>
           </div>
-          <div class="status-wrapper">
-            <Circle :percent="80">
-              <span class="demo-Circle-inner" style="font-size: 24px">80%</span>
-            </Circle>
+          <!-- <div> -->
+
+          <!-- </div> -->
+          <div class="updater-wrapper" v-if="hasNewVersion">
+            <template v-if="appUpdating">
+              <Button shape="circle" type="dashed" @click="updateApp">
+                <Icon type="md-arrow-round-up" color="green" />
+                <span :style="{ color: 'green' }">更新</span>
+              </Button>
+            </template>
+            <template v-else>
+              <i-circle :percent="80" :size="60" :style="{ top: '2px' }">
+                <span class="demo-Circle-inner" style="font-size: 12px"
+                  >80%</span
+                >
+              </i-circle>
+            </template>
           </div>
-        </Header>
+        </div>
         <div class="layout-header2">
           <div>
-             <i-circle :percent="80">
-              <span class="demo-Circle-inner" style="font-size: 24px">80%</span>
-            </i-circle>
             <span>连接直播间</span>
             <InputNumber
               :value="roomId"
@@ -122,9 +132,9 @@
             </template>
           </div>
         </div>
-        <Content class="layout-content">
+        <div class="layout-content">
           <router-view :style="{ height: '100%' }"></router-view>
-        </Content>
+        </div>
       </Layout>
     </Layout>
   </div>
@@ -152,7 +162,7 @@ import {
   otherDB,
   giftDB,
 } from "../../service/nedb";
-import { DEFAULT_AVATAR } from "../../service/const";
+import { DEFAULT_AVATAR, IPC_CHECK_FOR_UPDATE } from "../../service/const";
 
 export default {
   data() {
@@ -164,6 +174,8 @@ export default {
       giftTimer: null,
       peopleTimer: null,
       isConnecting: false,
+      hasNewVersion: false,
+      appUpdating: false,
 
       username: "",
       avatar: null,
@@ -603,12 +615,27 @@ export default {
         }
       }
     },
+
+    async updateApp() {
+      ipcRenderer.send(IPC_DOWNLOAD_UPDATE);
+      this.appUpdating = true;
+      ipcRenderer.on(IPC_DOWNLOAD_PROGRESS, (event, args) => {
+        const { progress, bytesPerSecond, percent, total } = args;
+        console.log(args)
+      });
+
+      // 更新会退出应用，不监听也可以
+      ipcRenderer.once(IPC_UPDATE_DOWNLOADED, () => {
+        ipcRenderer.removeAllListeners(IPC_DOWNLOAD_PROGRESS);
+        this.appUpdating = false;
+      });
+    },
   },
   async mounted() {
-    // autoUpdater.checkForUpdates()
-    // .then(updateCheckResult => {
-    //   console.log(updateCheckResult)
-    // })
+    ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
+      this.hasNewVersion = true;
+    });
+    ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
 
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
@@ -655,17 +682,29 @@ export default {
 .avatar-wrapper {
   display: inline-block;
   vertical-align: top;
+  padding-left: 50px;
 }
 .header-icon-text {
   font-size: 12px;
 }
 .status-wrapper {
+  vertical-align: top;
   display: inline-block;
   line-height: 21px;
   padding-left: 40px;
+  height: 64px;
+}
+.updater-wrapper {
+  height: 64px;
+  position: absolute;
+  top: 0px;
+  right: 10px;
 }
 .layout-header {
+  height: 64px;
+  line-height: 64px;
   background: white;
+  position: relative;
 }
 .layout-header2 {
   height: 48px;
@@ -677,6 +716,9 @@ export default {
   width: 100%;
   background: white;
 }
+/* .ivu-btn-dashed {
+  border-color: green;
+} */
 .menu-item span {
   display: inline-block;
   overflow: hidden;

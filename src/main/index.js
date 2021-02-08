@@ -1,4 +1,5 @@
-import { app, BrowserWindow, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
 import '../renderer/store'
 
 /**
@@ -66,58 +67,39 @@ app.on('activate', () => {
 import { autoUpdater } from 'electron-updater'
 
 app.on('ready', () => {
-  // dialog.showMessageBox({
-  //   type: 'info',
-  //   title: 'Found Updates',
-  //   message: 'Found updates, do you want update now?',
-  //   buttons: ['Sure', 'No']
-  // }, (buttonIndex) => {
-  //   if (buttonIndex === 0) {
-  //     // autoUpdater.downloadUpdate()
-  //   }
-  // })
-  // const win = new BrowserWindow({
-  //   width:  320,
-  //   height:  350,
-  //   // x, y,
-  //   x:  0,
-  //   y:  0,
-  //   frame: false,
-  //   transparent: true,
-  //   hasShadow: false,
-  //   webPreferences: {
-  //     nodeIntegration: true,
-  //   },
-  //   resizable: true,
-  // });
-
-  // const winURL =
-  //   process.env.NODE_ENV === "development"
-  //     ? `http://localhost:9080/#/danmaku-window`
-  //     : `file://${__dirname}/index.html#danmaku-window`;
-  // win.loadURL(winURL);
-
-
-  setInterval(() => {
-    mainWindow.webContents.send('ping', 'whoooooooh!')
-  }, 2000)
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
-
     // autoUpdater.checkForUpdatesAndNotify()
 
+    ipcMain.on(IPC_CHECK_FOR_UPDATE, () => {
+      autoUpdater.checkForUpdates()
+    })
+
+    ipcMain.on(IPC_DOWNLOAD_UPDATE, () => {
+      autoUpdater.downloadUpdate()
+    })
+
     autoUpdater.on('update-available', () => {
-      dialog.showMessageBox({
-        type: 'info',
-        title: '版本更新',
-        message: '发现新版本，立即更新？',
-        buttons: ['是', '否']
-      }, (buttonIndex) => {
-        if (buttonIndex === 0) {
-          autoUpdater.downloadUpdate()
-        }
+      ipcMain.send(IPC_UPDATE_AVAILABLE)
+    })
+
+    autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
+      ipcMain.send(IPC_DOWNLOAD_PROGRESS, {
+        progress,
+        bytesPerSecond,
+        percent,
+        total
       })
+
+      // NOTE: 完成load之后再
+      //   mainWindow.webContents.on('did-finish-load', function () {
+      //     mainWindow.webContents.send('channelCanBeAnything', 'message');
+      // });
+    })
+
+    autoUpdater.on('update-downloaded', () => {
+      autoUpdater.quitAndInstall()
     })
 
     autoUpdater.on('error', (error) => {
@@ -126,14 +108,6 @@ app.on('ready', () => {
 
     autoUpdater.on('update-not-available', () => {
       console.log('AutoUpdate: update-not-available')
-    })
-
-    autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
-      mainWindow.webContents.send('ping', 'whoooooooh!')
-    })
-
-    autoUpdater.on('update-downloaded', () => {
-      autoUpdater.quitAndInstall()
     })
   }
 })
