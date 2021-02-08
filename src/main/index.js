@@ -65,10 +65,6 @@ app.on('activate', () => {
 
 import { autoUpdater } from 'electron-updater'
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
-
 app.on('ready', () => {
   // dialog.showMessageBox({
   //   type: 'info',
@@ -102,6 +98,9 @@ app.on('ready', () => {
   // win.loadURL(winURL);
 
 
+  setInterval(() => {
+    mainWindow.webContents.send('ping', 'whoooooooh!')
+  }, 2000)
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false

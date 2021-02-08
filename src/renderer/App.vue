@@ -14,12 +14,29 @@ import { remote, ipcRenderer } from "electron";
 
 export default {
   name: "bilibili-danmaku",
-  created() {
-    ipcRenderer.on("ping", (event, message) => {
-      console.log(message)
+  created() {},
+  mounted() {
+    console.log(process.env.NODE_ENV)
+    if (process.env.NODE_ENV === "production") {
+      autoUpdater.on("update-available", () => {
+        this.$Message.info('发现新版本，立即更新？');
+        dialog.showMessageBox(
+          {
+            type: "info",
+            title: "版本更新",
+            message: "发现新版本，立即更新？",
+            buttons: ["是", "否"],
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) {
+              autoUpdater.downloadUpdate();
+            }
+          }
+        );
+      });
 
-      this.$Message.info('This is a info tip');
-    });
+      autoUpdater.checkForUpdates();
+    }
   },
 };
 </script>

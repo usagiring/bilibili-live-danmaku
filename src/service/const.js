@@ -139,3 +139,6 @@ export const EXAMPLE_MESSAGES = [
 ]
 
 export const COLORS = OPTION_CONFIG.COLORS || ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+
+export const IPC_CHECK_FOR_UPDATE = 'IPC_CHECK_FOR_UPDATE'
+export const IPC_DOWNLOAD_UPDATE = 'IPC_DOWNLOAD_UPDATE'

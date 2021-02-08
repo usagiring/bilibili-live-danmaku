@@ -80,9 +80,17 @@
               {{ peopleNumber }}
             </div>
           </div>
+          <div class="status-wrapper">
+            <Circle :percent="80">
+              <span class="demo-Circle-inner" style="font-size: 24px">80%</span>
+            </Circle>
+          </div>
         </Header>
         <div class="layout-header2">
           <div>
+             <i-circle :percent="80">
+              <span class="demo-Circle-inner" style="font-size: 24px">80%</span>
+            </i-circle>
             <span>连接直播间</span>
             <InputNumber
               :value="roomId"
@@ -124,7 +132,7 @@
 
 <script>
 import { uniq, debounce } from "lodash";
-import { remote } from "electron";
+import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
 import { getUserInfoThrottle } from "../../service/util";
@@ -136,10 +144,7 @@ import emitter, {
   parseInteractWord,
   parseGift,
 } from "../../service/bilibili-live-ws";
-import {
-  getRoomInfoV2,
-  getGuardInfo,
-} from "../../service/bilibili-api";
+import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
   commentDB,
   interactDB,
@@ -181,6 +186,12 @@ export default {
 
     const listenerCount = emitter.listenerCount("message");
     console.log(`listenerCount: ${listenerCount}`);
+
+    ipcRenderer.on("ping", (event, message) => {
+      console.log(message);
+
+      this.$Message.info("This is a info tip");
+    });
   },
   computed: {
     roomId() {
@@ -593,7 +604,12 @@ export default {
       }
     },
   },
-  mounted() {
+  async mounted() {
+    // autoUpdater.checkForUpdates()
+    // .then(updateCheckResult => {
+    //   console.log(updateCheckResult)
+    // })
+
     this.giftTimer = setInterval(() => {
       // console.log("giftTimer");
       this.$store.dispatch("GIFT_TIMER");
