@@ -621,8 +621,18 @@ export default {
       ipcRenderer.send(IPC_DOWNLOAD_UPDATE);
       this.appUpdating = true;
       ipcRenderer.on(IPC_DOWNLOAD_PROGRESS, (event, args) => {
-        const { progress, bytesPerSecond, percent, total } = args;
-        console.log(args);
+        // bytesPerSecond: 63694
+        // delta: 82001
+        // percent: 17.95023024398921
+        // total: 59005232
+        // transferred: 10591575
+        const {
+          bytesPerSecond,
+          delta,
+          percent,
+          total,
+          transferred,
+        } = args.progress;
       });
 
       // 更新会退出应用，不监听也可以
