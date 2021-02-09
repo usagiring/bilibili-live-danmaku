@@ -34,14 +34,15 @@ class Recorder {
 
     const output = path.join(recordDir, `./${roomId}_${Date.now()}.flv`)
     console.log(`record: OUTPUT: ${output}`)
-    this.recorder.record({ roomId, output, qn })
+    return this.recorder.record({ roomId, output, qn })
   }
 
-  async getPlayUrl(roomId, qn) {
-    return this.recorder.getPlayUrl(roomId, qn)
+  async getRandomPlayUrl(roomId, quality) {
+    const qn = quality ? qualityMap[quality] : 400
+    return this.recorder.getRandomPlayUrl({ roomId, qn })
   }
 
-  async cancelRecord(){
+  async cancelRecord() {
     this.recorder.cancelRecord()
   }
 }

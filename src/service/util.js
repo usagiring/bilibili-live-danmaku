@@ -58,3 +58,10 @@ export function getGuardIcon(level) {
 export function getInteractType(type) {
   return INTERACT_TYPE[type]
 }
+
+const units = ['B/s', 'KB/s', 'MB/s']
+export function parseDownloadRate(value, unitIndex = 0) {
+  if (value < 1024) return `${value} ${units[unitIndex]}`
+  value = (value / 1024).toFixed(1)
+  return parseDownloadRate(value, ++unitIndex)
+}

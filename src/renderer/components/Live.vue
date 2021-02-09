@@ -3,11 +3,7 @@
     <div class="searcher-wrapper">
       <div :style="{ display: 'inline-block' }">
         <template v-if="!onRecord">
-          <Button
-            @click="startRecord"
-            shape="circle"
-            :style="{ width: '100px' }"
-          >
+          <Button @click="startRecord" shape="circle">
             <Icon type="md-radio-button-on" color="red" />
             录制
           </Button>
@@ -18,8 +14,10 @@
             停止
           </Button>
         </template>
-        00:00:00
-        <div :style="{ display: 'inline-block', width: '70px' }">1024 kb/s</div>
+        {{ recordDuringFormat }}
+        <div :style="{ display: 'inline-block', width: '70px' }">
+          {{ downloadRate }}
+        </div>
         <Select
           :value="recordQuality"
           style="width: 70px"
@@ -37,9 +35,9 @@
         </Button>
         {{ recordDir }}
       </div>
-      <div>
+      <div :style="{ 'padding-top': '3px' }">
         <Button @click="play" shape="circle">
-          <Icon type="md-play" />
+          <Icon type="md-play" color="green" />
           播放
         </Button>
         <Select
@@ -58,7 +56,7 @@
     </div>
 
     <!-- <script src="flv.min.js"></script> -->
-    <video id="livePlayer"></video>
+    <video id="livePlayer" controls></video>
   </div>
 </template>
 
@@ -68,10 +66,17 @@ import { remote } from "electron";
 const dialog = remote.dialog;
 import recorder from "../../service/bilibili-recorder";
 import { DEFAULT_RECORD_DIR } from "../../service/const";
+import { parseDownloadRate } from "../../service/util";
 export default {
   data() {
     return {
+      flvPlayer: null,
       onRecord: false,
+      recordId: "",
+      recordStartTime: 0,
+      recordDuring: 0,
+      recordTimer: null,
+      downloadRate: "0 KB/s",
       recordQuality: "原画",
       playQuality: "超清",
       qualities: [
@@ -105,31 +110,67 @@ export default {
     recordDir() {
       return this.$store.state.Config.recordDir || DEFAULT_RECORD_DIR;
     },
+    recordDuringFormat() {
+      return new Date(this.recordDuring).toISOString().substr(11, 8);
+    },
   },
   mounted() {},
   methods: {
     async startRecord() {
-      recorder.record(this.realRoomId, this.recordDir, this.recordQuality);
+      const { id } = await recorder.record(
+        this.realRoomId,
+        this.recordDir,
+        this.recordQuality
+      );
+
+      this.recordId = id;
+      recorder.recorder.emitter.on(
+        `${id}-download-rate`,
+        ({ bps, totalSize }) => {
+          this.downloadRate = parseDownloadRate(bps);
+        }
+      );
+
       this.onRecord = true;
+      this.recordStartTime = Date.now();
+      this.recordTimer = setInterval(() => {
+        this.recordDuring = Date.now() - this.recordStartTime;
+      }, 1000);
     },
     async cancelRecord() {
       recorder.cancelRecord();
       this.onRecord = false;
+      this.recordId = "";
+      this.recordStartTime = 0;
+      recorder.recorder.emitter.removeAllListeners(
+        `${this.recordId}-download-rate`
+      );
+      clearInterval(this.recordTimer);
     },
     async play() {
-      const result = await recorder.getPlayUrl(this.realRoomId);
-      const playUrl = result.data.durl[0].url;
+      const playUrl = await recorder.getRandomPlayUrl(
+        this.realRoomId,
+        this.playQuality
+      );
       console.log(playUrl);
 
       if (flvjs.isSupported()) {
-        var livePlayer = document.getElementById("livePlayer");
-        var flvPlayer = flvjs.createPlayer({
+        const livePlayer = document.getElementById("livePlayer");
+
+        if (this.flvPlayer) {
+          this.flvPlayer.destroy();
+          this.flvPlayer = null;
+        }
+        this.flvPlayer = flvjs.createPlayer({
           type: "flv",
           url: playUrl,
         });
-        flvPlayer.attachMediaElement(livePlayer);
-        flvPlayer.load();
-        flvPlayer.play();
+        // {
+        //   headers
+        // }
+        this.flvPlayer.attachMediaElement(livePlayer);
+        this.flvPlayer.load();
+        await this.flvPlayer.play();
       } else {
         console.error("flvjs not support");
       }
