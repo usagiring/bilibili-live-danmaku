@@ -84,7 +84,7 @@
 
           <!-- </div> -->
           <div class="updater-wrapper" v-if="hasNewVersion">
-            <template v-if="appUpdating">
+            <template v-if="!appUpdating">
               <Button shape="circle" type="dashed" @click="updateApp">
                 <Icon type="md-arrow-round-up" color="green" />
                 <span :style="{ color: 'green' }">更新</span>
@@ -205,12 +205,6 @@ export default {
 
     const listenerCount = emitter.listenerCount("message");
     console.log(`listenerCount: ${listenerCount}`);
-
-    ipcRenderer.on("ping", (event, message) => {
-      console.log(message);
-
-      this.$Message.info("This is a info tip");
-    });
   },
   computed: {
     roomId() {

@@ -82,11 +82,11 @@ app.on('ready', () => {
     })
 
     autoUpdater.on('update-available', () => {
-      mainWindow.webContents.send.send(IPC_UPDATE_AVAILABLE)
+      mainWindow.webContents.send(IPC_UPDATE_AVAILABLE)
     })
 
     autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
-      mainWindow.webContents.send.send(IPC_DOWNLOAD_PROGRESS, {
+      mainWindow.webContents.send(IPC_DOWNLOAD_PROGRESS, {
         progress,
         bytesPerSecond,
         percent,
