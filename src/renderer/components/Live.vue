@@ -138,7 +138,7 @@ export default {
       }, 1000);
     },
     async cancelRecord() {
-      recorder.cancelRecord();
+      recorder.cancelRecord(this.recordId);
       this.onRecord = false;
       this.recordId = "";
       this.recordStartTime = 0;

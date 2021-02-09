@@ -42,8 +42,8 @@ class Recorder {
     return this.recorder.getRandomPlayUrl({ roomId, qn })
   }
 
-  async cancelRecord() {
-    this.recorder.cancelRecord()
+  async cancelRecord(id) {
+    return this.recorder.cancelRecord(id)
   }
 }
 
