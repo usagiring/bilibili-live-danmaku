@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="searcher-wrapper">
+  <div id="live-wrapper">
+    <div id="live-config-wrapper">
       <div :style="{ display: 'inline-block' }">
         <template v-if="!onRecord">
           <Button @click="startRecord" shape="circle">
@@ -56,7 +56,11 @@
     </div>
 
     <!-- <script src="flv.min.js"></script> -->
-    <video id="livePlayer" controls></video>
+    <video
+      id="livePlayer"
+      controls
+      :style="{ height: `${this.videoHeight}px` }"
+    ></video>
   </div>
 </template>
 
@@ -64,6 +68,7 @@
 import * as flvjs from "flv.js";
 import { remote } from "electron";
 const dialog = remote.dialog;
+// const window = remote.getCurrentWindow();
 import recorder from "../../service/bilibili-recorder";
 import { DEFAULT_RECORD_DIR } from "../../service/const";
 import { parseDownloadRate } from "../../service/util";
@@ -72,6 +77,7 @@ export default {
     return {
       flvPlayer: null,
       onRecord: false,
+      videoHeight: 480,
       recordId: "",
       recordStartTime: 0,
       recordDuring: 0,
@@ -114,7 +120,13 @@ export default {
       return new Date(this.recordDuring).toISOString().substr(11, 8);
     },
   },
-  mounted() {},
+  mounted() {
+    // this.onResize()
+    // window.on("resize", this.onResize);
+  },
+  // beforeDestroy() {
+    // window.removeListener("resize", this.onResize);
+  // },
   methods: {
     async startRecord() {
       const { id } = await recorder.record(
@@ -197,9 +209,18 @@ export default {
         await this.$nextTick();
       }
     },
+
+    // onResize: function () {
+    //   const liveWrapper = document.getElementById("live-wrapper");
+    //   console.log( liveWrapper.clientHeight)
+    //   this.videoHeight = liveWrapper.clientHeight - 70
+    // },
   },
 };
 </script>
 
 <style scoped>
+#live-config-wrapper {
+  height: 70px;
+}
 </style>

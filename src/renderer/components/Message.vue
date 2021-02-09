@@ -216,7 +216,6 @@ export default {
     },
     async searchAll(options) {
       const comments = await this.searchComment(options);
-      console.log(comments);
       this.comments = comments;
       const interacts = await this.searchInteract(options);
       this.interacts = interacts;
