@@ -91,9 +91,9 @@
               </Button>
             </template>
             <template v-else>
-              <i-circle :percent="80" :size="60" :style="{ top: '2px' }">
+              <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
                 <span class="demo-Circle-inner" style="font-size: 12px"
-                  >80%</span
+                  >{{ downloadRate }}</span
                 >
               </i-circle>
             </template>
@@ -145,7 +145,7 @@ import { uniq, debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
-import { getUserInfoThrottle } from "../../service/util";
+import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
 import emitter, {
   init,
   close,
@@ -183,6 +183,8 @@ export default {
       isConnecting: false,
       hasNewVersion: false,
       appUpdating: false,
+      downloadRate: '0 KB/s',
+      percent: 0,
 
       username: "",
       avatar: null,
@@ -633,6 +635,8 @@ export default {
           total,
           transferred,
         } = args.progress;
+        this.downloadRate = parseDownloadRate(bytesPerSecond);
+        this.percent = Number(percent).toFixed(0)
       });
 
       // 更新会退出应用，不监听也可以
