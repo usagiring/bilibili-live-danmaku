@@ -72,9 +72,9 @@ app.on('ready', () => {
     autoUpdater.autoInstallOnAppQuit = false
     // autoUpdater.checkForUpdatesAndNotify()
 
-    ipcMain.on(IPC_CHECK_FOR_UPDATE, (event) => {
-      event.sender.send(IPC_UPDATE_AVAILABLE)
+    ipcMain.on(IPC_CHECK_FOR_UPDATE, async (event) => {
       autoUpdater.checkForUpdates()
+      // event.sender.send(IPC_UPDATE_AVAILABLE)
     })
 
     ipcMain.on(IPC_DOWNLOAD_UPDATE, () => {

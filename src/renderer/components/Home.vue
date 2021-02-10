@@ -84,17 +84,22 @@
 
           <!-- </div> -->
           <div class="updater-wrapper" v-if="hasNewVersion">
-            <template v-if="!appUpdating">
-              <Button shape="circle" type="dashed" @click="updateApp">
+            <template v-if="!isAppUpdating">
+              <Button
+                shape="circle"
+                type="dashed"
+                @click="updateApp"
+                :loading="isAppUpdateStarting"
+              >
                 <Icon type="md-arrow-round-up" color="green" />
                 <span :style="{ color: 'green' }">更新</span>
               </Button>
             </template>
             <template v-else>
               <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
-                <span class="demo-Circle-inner" style="font-size: 12px"
-                  >{{ downloadRate }}</span
-                >
+                <span class="demo-Circle-inner" style="font-size: 12px">{{
+                  downloadRate
+                }}</span>
               </i-circle>
             </template>
           </div>
@@ -182,8 +187,9 @@ export default {
       peopleTimer: null,
       isConnecting: false,
       hasNewVersion: false,
-      appUpdating: false,
-      downloadRate: '0 KB/s',
+      isAppUpdating: false,
+      isAppUpdateStarting: false,
+      downloadRate: "0 KB/s",
       percent: 0,
 
       username: "",
@@ -621,8 +627,11 @@ export default {
 
     async updateApp() {
       ipcRenderer.send(IPC_DOWNLOAD_UPDATE);
-      this.appUpdating = true;
+      this.isAppUpdateStarting = true;
+
       ipcRenderer.on(IPC_DOWNLOAD_PROGRESS, (event, args) => {
+        this.isAppUpdating = true;
+
         // bytesPerSecond: 63694
         // delta: 82001
         // percent: 17.95023024398921
@@ -636,13 +645,14 @@ export default {
           transferred,
         } = args.progress;
         this.downloadRate = parseDownloadRate(bytesPerSecond);
-        this.percent = Number(percent).toFixed(0)
+        this.percent = Number(percent).toFixed(0);
       });
 
       // 更新会退出应用，不监听也可以
       ipcRenderer.once(IPC_UPDATE_DOWNLOADED, () => {
         ipcRenderer.removeAllListeners(IPC_DOWNLOAD_PROGRESS);
-        this.appUpdating = false;
+        this.isAppUpdating = false;
+        this.isAppUpdateStarting = false;
       });
     },
   },
