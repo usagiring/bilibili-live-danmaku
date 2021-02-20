@@ -1,14 +1,11 @@
-const EventEmitter = require('events');
 import { inflate } from 'pako';
-class Emitter extends EventEmitter { }
-const emitter = new Emitter()
+import emitter from './event'
 
 const URI = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 let ws
 let HEART_BEAT_TIMER = null;
 let realRoomId
 
-export default emitter
 export {
   init,
   close,

@@ -65,3 +65,7 @@ export function parseDownloadRate(value, unitIndex = 0) {
   value = (value / 1024).toFixed(1)
   return parseDownloadRate(value, ++unitIndex)
 }
+
+export function parseHexColor(colorNumber) {
+  return `#${colorNumber.toString(16).padStart(6, '0')}`
+}

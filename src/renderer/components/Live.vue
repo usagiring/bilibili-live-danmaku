@@ -91,22 +91,23 @@
       controls
       :style="{ height: `${this.resolution}px` }"
     ></video>
-    <div :style="{ padding: '0 20px 5px 20px' }">
+    <div :style="{ padding: '0 20px 5px 10px' }">
+      <FanMedal v-if="medalData" v-bind="medalData"></FanMedal>
       <Input
         v-model="message"
         placeholder="弹幕..."
-        @on-enter="sendMessage"
+        @keyup.ctrl.enter="sendMessage"
         clearable
         :style="{ width: '360px' }"
       />
-      <Button
-        @click="sendMessage"
-        :disabled="!this.message || !this.userCookie"
-        :loading="isSending"
-        >发送</Button
-      >
+
       <Tooltip placement="top">
-        <Icon type="md-alert" :style="{ 'font-size': '20px' }" />
+        <Button
+          @click="sendMessage"
+          :disabled="!this.message || !this.userCookie || !this.realRoomId"
+          :loading="isSending"
+          >发送</Button
+        >
         <div slot="content" :style="{ 'white-space': 'normal' }">
           <div :style="{ color: 'red' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
@@ -114,31 +115,47 @@
           </div>
         </div>
       </Tooltip>
+      <Button
+        @click="wearCurrentMedal"
+        :disabled="!this.userCookie || !this.medalId"
+        :loading="isWearing"
+        >佩戴当前直播间牌子</Button
+      >
     </div>
   </div>
 </template>
 
 <script>
 import * as flvjs from "flv.js";
-import cookie from "cookie";
-import querystring from "querystring";
 import { remote } from "electron";
 const dialog = remote.dialog;
 import recorder from "../../service/bilibili-recorder";
+import emitter from "../../service/event";
 import { DEFAULT_RECORD_DIR } from "../../service/const";
-import { parseDownloadRate } from "../../service/util";
-import { sendMessage } from "../../service/bilibili-api";
+import { parseDownloadRate, parseHexColor } from "../../service/util";
+import {
+  sendMessage,
+  getInfoByUser,
+  wearMedal,
+} from "../../service/bilibili-api";
+import FanMedal from "./FanMedal";
+
 export default {
+  components: {
+    FanMedal,
+  },
   data() {
     return {
       flvPlayer: null,
       message: "",
       onRecord: false,
       isSending: false,
+      isWearing: false,
       recordId: "",
       recordStartTime: 0,
       recordDuring: 0,
       recordTimer: null,
+      medalData: null,
       downloadRate: "0 KB/s",
       recordQuality: "原画",
       playQuality: "超清",
@@ -193,6 +210,9 @@ export default {
     realRoomId() {
       return this.$store.state.Config.realRoomId;
     },
+    medalId() {
+      return this.$store.state.Config.medalId;
+    },
     recordDir() {
       return this.$store.state.Config.recordDir || DEFAULT_RECORD_DIR;
     },
@@ -204,11 +224,9 @@ export default {
     },
   },
   mounted() {
-    // this.onResize()
-    // window.on("resize", this.onResize);
+    this.getMedalData();
   },
   // beforeDestroy() {
-  // window.removeListener("resize", this.onResize);
   // },
   methods: {
     async startRecord() {
@@ -302,24 +320,20 @@ export default {
     },
 
     async sendMessage() {
+      if (!this.userCookie || !this.realRoomId || !this.message) return;
       this.isSending = true;
-      const cookies = cookie.parse(this.userCookie);
-      const csrf = cookies.bili_jct;
-      const rnd = Math.floor(Date.now() / 1000 - 10000);
-      const params = querystring.stringify({
-        color: 16777215,
-        fontsize: 25,
-        mode: 1,
-        msg: this.message,
-        rnd,
-        roomid: this.realRoomId,
-        bubble: 0,
-        csrf_token: csrf,
-        csrf: csrf,
-      });
-
       try {
-        const result = await sendMessage(params, this.userCookie);
+        const result = await sendMessage(
+          {
+            message: this.message,
+            roomId: this.realRoomId,
+            color: 16777215,
+            fontsize: 25,
+            mode: 1,
+            bubble: 0,
+          },
+          this.userCookie
+        );
         if (result.data.message) {
           this.$Message.warning(`发送未成功: ${result.data.message}`);
         }
@@ -338,6 +352,50 @@ export default {
 
     changeResolutions(value) {
       this.resolution = value;
+    },
+
+    async getMedalData() {
+      if (!this.userCookie) return;
+      const { data } = await getInfoByUser(this.realRoomId, this.userCookie);
+      const { medal } = data || {};
+      const { curr_weared, is_weared } = medal || {};
+      if (!is_weared) return;
+      const {
+        medal_color_start,
+        medal_color_end,
+        medal_color_border,
+        medal_name,
+        level,
+      } = curr_weared;
+      this.medalData = {
+        medalColorStart: parseHexColor(medal_color_start),
+        medalColorEnd: parseHexColor(medal_color_end),
+        medalColorBorder: parseHexColor(medal_color_border),
+        medalName: medal_name,
+        medalLevel: level,
+      };
+    },
+
+    async wearCurrentMedal() {
+      if (!this.userCookie || !this.medalId) return;
+      this.isWearing = true;
+      try {
+        const result = await wearMedal(this.medalId, this.userCookie);
+        this.medalData = null;
+        setTimeout(async () => {
+          await this.getMedalData();
+        }, 3000);
+        if (result.data.code === 0) {
+          this.$Message.success("佩戴成功");
+        }
+        if (result.data.code === -1) {
+          this.$Message.error("佩戴失败");
+        }
+      } catch (e) {
+        this.$Message.error(`${e.message}`);
+      } finally {
+        this.isWearing = false;
+      }
     },
 
     // onResize: function () {

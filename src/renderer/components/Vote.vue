@@ -69,13 +69,10 @@
 <script>
 import * as echarts from "echarts";
 import { shuffle } from "lodash";
-import emitter, {
-  init,
-  close,
+import {
   parseComment,
-  parseInteractWord,
-  parseGift,
 } from "../../service/bilibili-live-ws";
+import emitter from '../../service/event'
 import { EXAMPLE_MESSAGES, DEFAULT_AVATAR, COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 

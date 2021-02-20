@@ -180,7 +180,6 @@ const window = remote.getCurrentWindow();
 import Store from "electron-store";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
-import emitter, { init, close } from "../../service/bilibili-live-ws";
 import { DEFAULT_AVATAR, USER_DATA_PATH } from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
 import {

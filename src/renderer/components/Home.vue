@@ -151,7 +151,7 @@ import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
 import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
-import emitter, {
+import {
   init,
   close,
   getIsWsConnected,
@@ -159,6 +159,7 @@ import emitter, {
   parseInteractWord,
   parseGift,
 } from "../../service/bilibili-live-ws";
+import emitter from "../../service/event";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
   commentDB,
@@ -302,6 +303,8 @@ export default {
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
           ruid: uid,
+          medalId: medal_id,
+          medalName: medal_name,
         });
       } else {
         close();
