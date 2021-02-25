@@ -4,6 +4,8 @@ import BilibiliRecorder from '@tokine/bilibili-recorder'
 import httpAdapter from './http'
 import { strict as assert } from 'assert'
 import { DEFAULT_RECORD_DIR } from './const'
+import emitter from './event'
+
 const qualityMap = {
   "原画": 10000,
   '蓝光': 400,
@@ -15,7 +17,9 @@ const qualityMap = {
 class Recorder {
   constructor() {
     this.recorder = new BilibiliRecorder(
-      {},
+      {
+        emitter: emitter
+      },
       { adapter: httpAdapter, }
     )
   }

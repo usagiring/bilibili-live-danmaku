@@ -96,7 +96,7 @@
       <Input
         v-model="message"
         placeholder="弹幕..."
-        @keyup.ctrl.enter="sendMessage"
+        @on-keyup.ctrl.enter="sendMessage"
         clearable
         :style="{ width: '360px' }"
       />
@@ -320,6 +320,7 @@ export default {
     },
 
     async sendMessage() {
+      console.log(12312)
       if (!this.userCookie || !this.realRoomId || !this.message) return;
       this.isSending = true;
       try {
