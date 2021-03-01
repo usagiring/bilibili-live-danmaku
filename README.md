@@ -5,7 +5,7 @@
 目前支持直播间数据统计、弹幕展示、弹幕投票等功能
 
 ### 下载
-https://github.com/hling51325/bilibili-live-danmaku/releases
+https://github.com/usagiring/bilibili-live-danmaku/releases
 
 ### 示例
 弹幕窗及设置页面：
