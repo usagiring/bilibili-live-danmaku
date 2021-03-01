@@ -17,6 +17,9 @@ https://github.com/hling51325/bilibili-live-danmaku/releases
 数据统计：
 ![introC](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introC.png)
 
+观看直播：
+![introC](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introD.png)
+
 ### 说明
 - 本应用数据基于本地收集到的数据，未被应用统计到的数据不进行统计。
 - 十分内互动人数，由进入直播间、发送弹幕、送礼组成。
