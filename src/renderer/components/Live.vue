@@ -2,7 +2,7 @@
   <div id="live-wrapper">
     <div id="live-config-wrapper">
       <div :style="{ display: 'inline-block' }">
-        <template v-if="!onRecord">
+        <template v-if="!isRecording">
           <Button @click="startRecord" shape="circle">
             <Icon type="md-radio-button-on" color="red" />
             录制
@@ -148,11 +148,10 @@ export default {
     return {
       flvPlayer: null,
       message: "",
-      onRecord: false,
       isSending: false,
       isWearing: false,
-      recordId: "",
-      recordStartTime: 0,
+      // recordId: "",
+      // recordStartTime: 0,
       recordDuring: 0,
       recordTimer: null,
       medalData: null,
@@ -222,12 +221,33 @@ export default {
     userCookie() {
       return this.$store.state.Config.userCookie;
     },
+    isRecording() {
+      return this.$store.state.Config.isRecording;
+    },
+    recordStartTime() {
+      return this.$store.state.Config.recordStartTime;
+    },
+    recordId() {
+      return this.$store.state.Config.recordId;
+    },
   },
   mounted() {
     this.getMedalData();
+
+    if (this.isRecording) {
+      this.recordDuring = Date.now() - this.recordStartTime;
+      this.recordTimer = setInterval(() => {
+        this.recordDuring = Date.now() - this.recordStartTime;
+      }, 1000);
+
+      emitter.on(`${this.recordId}-download-rate`, ({ bps, totalSize }) => {
+        this.downloadRate = parseDownloadRate(bps);
+      });
+    }
   },
-  // beforeDestroy() {
-  // },
+  beforeDestroy() {
+    emitter.removeAllListeners(`${this.recordId}-download-rate`);
+  },
   methods: {
     async startRecord() {
       try {
@@ -237,16 +257,18 @@ export default {
           this.recordQuality
         );
 
-        this.recordId = id;
-        recorder.recorder.emitter.on(
-          `${id}-download-rate`,
-          ({ bps, totalSize }) => {
-            this.downloadRate = parseDownloadRate(bps);
-          }
-        );
+        emitter.on(`${id}-download-rate`, ({ bps, totalSize }) => {
+          this.downloadRate = parseDownloadRate(bps);
+        });
 
-        this.onRecord = true;
-        this.recordStartTime = Date.now();
+        this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+          recordId: id,
+          recordStartTime: Date.now(),
+          isRecording: true,
+        });
+
+        await this.$nextTick();
+
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - this.recordStartTime;
         }, 1000);
@@ -256,12 +278,14 @@ export default {
     },
     async cancelRecord() {
       recorder.cancelRecord(this.recordId);
-      this.onRecord = false;
-      this.recordId = "";
-      this.recordStartTime = 0;
-      recorder.recorder.emitter.removeAllListeners(
-        `${this.recordId}-download-rate`
-      );
+      this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+        recordStartTime: 0,
+        isRecording: false,
+        recordId: "",
+      });
+      await this.$nextTick();
+      
+      emitter.removeAllListeners(`${this.recordId}-download-rate`);
       clearInterval(this.recordTimer);
     },
     async play() {
@@ -320,7 +344,6 @@ export default {
     },
 
     async sendMessage() {
-      console.log(12312)
       if (!this.userCookie || !this.realRoomId || !this.message) return;
       this.isSending = true;
       try {
