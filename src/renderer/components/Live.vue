@@ -2,7 +2,7 @@
   <div id="live-wrapper">
     <div id="live-config-wrapper">
       <div :style="{ display: 'inline-block' }">
-        <template v-if="!isRecording">
+        <template v-if="!this.isRecording">
           <Button @click="startRecord" shape="circle">
             <Icon type="md-radio-button-on" color="red" />
             录制
@@ -150,8 +150,6 @@ export default {
       message: "",
       isSending: false,
       isWearing: false,
-      // recordId: "",
-      // recordStartTime: 0,
       recordDuring: 0,
       recordTimer: null,
       medalData: null,
@@ -267,8 +265,6 @@ export default {
           isRecording: true,
         });
 
-        await this.$nextTick();
-
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - this.recordStartTime;
         }, 1000);
@@ -283,7 +279,6 @@ export default {
         isRecording: false,
         recordId: "",
       });
-      await this.$nextTick();
       
       emitter.removeAllListeners(`${this.recordId}-download-rate`);
       clearInterval(this.recordTimer);

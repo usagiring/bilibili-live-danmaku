@@ -23,3 +23,6 @@ store.clear();
 ### 关闭windowshadow避免resize产生重影
 
 ### production debug: --remote-debugging-port=8315, http://localhost:8315/
+
+### vuex
+计算属性需要在storage里初始化才能reactive

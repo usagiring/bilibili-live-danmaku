@@ -64,7 +64,9 @@
               >
                 <template v-for="comment in comments">
                   <div :key="comment._id" class="comment-content">
-                    <span>{{ dateFormat(comment.sendAt) }}</span>
+                    <span class="date-style">{{
+                      dateFormat(comment.sendAt)
+                    }}</span>
                     <i
                       v-if="comment.guard"
                       class="guard-icon"
@@ -98,7 +100,7 @@
               >
                 <template v-for="interact in interacts">
                   <div :key="interact._id">
-                    <span>{{ dateFormat(interact.sendAt) }}</span>
+                    <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
                     <FanMedal
                       v-if="interact.medalLevel && interact.medalName"
                       v-bind="interact"
@@ -132,7 +134,7 @@
           >
             <template v-for="gift in gifts">
               <div :key="gift._id" :style="{ padding: '0 10px' }">
-                <p :style="{ padding: '0 8px' }">
+                <p class="date-style" :style="{ padding: '0 8px' }">
                   {{ dateFormat(gift.sendAt) }}
                 </p>
                 <template v-if="gift.type === 'superChat'">
@@ -526,5 +528,10 @@ export default {
   width: 90%;
   height: 1px;
   background: silver;
+}
+.date-style {
+  font-size: 12px;
+  font-family: unset;
+  font-weight: bold;
 }
 </style>

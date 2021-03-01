@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-      position: 'absolute',
+      position: 'relation',
       top: '4px',
       bottom: '4px',
       left: '4px',
@@ -14,7 +14,7 @@
       @wheel.prevent="giftScroll"
       @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined"
       @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined"
-      class="gift-show-content-wrapper-wrapper"
+      :style="{ position: 'absolute', top: '0px', width: '100%', height: `${gifts.length ? '36px': '0px' }` }"
     >
       <div class="gift-show-content-wrapper" id="gift-show-content-wrapper">
         <transition-group name="fade">
@@ -127,7 +127,7 @@
         </transition-group>
       </div>
     </div>
-    <div class="message-content-wrapper">
+    <div class="message-content-wrapper" :style="{top: `${gifts.length ? '36px': '0px' }`}">
       <div
         :style="{
           position: 'absolute',
@@ -440,17 +440,12 @@ export default {
   display: none;
 }
 
-.gift-show-content-wrapper-wrapper {
-  position: relative;
-  height: 40px;
-  /* -webkit-app-region: no-drag; */
-}
-
 .message-content-wrapper {
-  height: calc(100% - 40px);
-  /* height: 100%; */
+  /* height: calc(100% - 40px); */
+  bottom: 0px;
+  width: 100%;
   overflow: hidden;
-  position: relative;
+  position: absolute;
 }
 .message-content {
   width: 100%;

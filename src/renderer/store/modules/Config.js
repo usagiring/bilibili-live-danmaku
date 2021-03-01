@@ -13,6 +13,10 @@ const state = {
   isShowSilverGift: false,
   guardNumber: 0,
   windowOpacity: 1,
+  recordId: "",
+  recordStartTime: 0,
+  isRecording: false,
+  recordDir: "",
 
   optionstring: "{A}\n{B}\n{C}",
   container_style: {
@@ -96,7 +100,7 @@ const mutations = {
       state[key] = payload[key]
     }
   },
-  
+
   UPDATE_CONFIG_TEMP(state, payload) {
     for (const key in payload) {
       state[key] = payload[key]
