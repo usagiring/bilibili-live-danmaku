@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-      position: 'relation',
+      position: 'absolute',
       top: '4px',
       bottom: '4px',
       left: '4px',
