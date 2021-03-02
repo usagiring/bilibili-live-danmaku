@@ -33,8 +33,8 @@
       <p>送礼人数: {{ giftUserCount }}</p>
       <p>发送弹幕最多的人: {{ maxCommentUser }}</p>
       <p>赠送礼物最多的人: {{ maxGiftUser }}</p>
+      <div id="chart"></div>
     </div>
-    <div id="chart"></div>
   </div>
 </template>
 
@@ -49,12 +49,16 @@ import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
+  ToolboxComponent,
+  DataZoomComponent,
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 echarts.use([
   TitleComponent,
   TooltipComponent,
   GridComponent,
+  ToolboxComponent,
+  DataZoomComponent,
   LineChart,
   CanvasRenderer,
 ]);
@@ -80,9 +84,7 @@ export default {
     this.dateRange = [start, end];
     this.statistic();
   },
-  mounted() {
-    this.generateChart();
-  },
+  mounted() {},
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;
@@ -140,7 +142,7 @@ export default {
 
       // --- comment ---
       const comments = await commentDB.find(query, {
-        projection: { uid: 1, name: 1 },
+        projection: { uid: 1, name: 1, sendAt: 1 },
       });
       const commentUids = comments.map((c) => c.uid);
       if (comments.length) {
@@ -157,6 +159,7 @@ export default {
           (c) => c.uid === Number(maxCommentUid)
         );
         this.maxCommentUser = maxCommentUser.name;
+        this.generateChart(comments);
       }
 
       // --- interact ---
@@ -180,30 +183,119 @@ export default {
       }, 0);
     },
 
-    generateChart() {
-      const chartDOM = document.getElementById("chart");
+    generateChart(comments) {
       if (!this.chart) {
+        const chartDOM = document.getElementById("chart");
         this.chart = echarts.init(chartDOM);
       }
+      const [start, end] = this.dateRange;
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const dateDelta = endDate - startDate;
+      console.log(dateDelta);
+
+      // 每分钟
+      const tick = Math.ceil(dateDelta / (60 * 1000));
+      console.log(tick);
+
+      // 横轴时间 00:00
+      const times = [];
+      for (let i = 0; i < tick; i++) {
+        const date = new Date(startDate - 0 + i * 60 * 1000);
+        times.push(
+          `${date
+            .getHours()
+            .toString()
+            .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
+        );
+      }
+      console.log(times);
+      const data = new Array(tick).fill(0);
+      for (const comment of comments) {
+        // 计算出与开始时间差，除以间隔时间，即index
+        const delta = comment.sendAt - (startDate - 0);
+        const index = Math.ceil(delta / (60 * 1000));
+        data[index]++;
+      }
+
+      console.log(data);
 
       const option = {
+        tooltip: {
+          trigger: "axis",
+          position: function (pt) {
+            return [pt[0], "10%"];
+          },
+        },
+        title: {
+          left: "center",
+          text: "大数据量面积图",
+        },
+        toolbox: {
+          feature: {
+            dataZoom: {
+              yAxisIndex: "none",
+            },
+            restore: {},
+            saveAsImage: {},
+          },
+        },
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          data: times,
         },
         yAxis: {
           type: "value",
+          boundaryGap: [0, "100%"],
         },
+        dataZoom: [
+          {
+            type: "inside",
+            start: 0,
+            end: 10,
+          },
+          {
+            start: 0,
+            end: 10,
+          },
+        ],
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            name: "模拟数据",
             type: "line",
-            areaStyle: {},
+            symbol: "none",
+            sampling: "lttb",
+            itemStyle: {
+              color: "rgb(255, 70, 131)",
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  color: "rgb(255, 158, 68)",
+                },
+                {
+                  offset: 1,
+                  color: "rgb(255, 70, 131)",
+                },
+              ]),
+            },
+            data: data,
           },
         ],
       };
+
       this.chart.setOption(option);
+    },
+
+    // TODO 抽离x轴逻辑
+    // 时间变化x轴变化
+    initChart() {
+      if (!this.chart) {
+        const chartDOM = document.getElementById("chart");
+        this.chart = echarts.init(chartDOM);
+      }
     },
   },
 };
@@ -223,7 +315,7 @@ export default {
   padding: 5px;
 }
 #chart {
-  width: 300px;
+  width: 100%;
   height: 300px;
 }
 </style>

@@ -130,6 +130,7 @@
                 confirm
                 title="确认还原默认设置？"
                 placement="right"
+                width="300"
                 @on-ok="clearAllSetting"
               >
                 <Button>还原默认设置</Button>
@@ -140,6 +141,8 @@
                 confirm
                 :title="`确认备份并清理数据库？建议仅在启动明显变慢时操作。备份文件夹: ${USER_DATA_PATH}`"
                 placement="right"
+                width="400"
+                word-wrap
                 @on-ok="backupAndClearDB"
               >
                 <Button>备份并清理数据库</Button>
@@ -150,6 +153,7 @@
                 confirm
                 title="确认清理用户缓存？用于刷新用户头像，不建议经常清理"
                 placement="right"
+                width="400"
                 @on-ok="clearUserDB"
               >
                 <Button>清理用户缓存</Button>
@@ -183,11 +187,7 @@ import Danmaku from "./Danmaku";
 import { DEFAULT_AVATAR, USER_DATA_PATH } from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
 import {
-  commentDB,
-  interactDB,
   userDB,
-  otherDB,
-  giftDB,
   backup,
   deleteData,
 } from "../../service/nedb";
