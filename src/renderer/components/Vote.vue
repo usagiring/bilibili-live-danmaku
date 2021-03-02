@@ -29,7 +29,10 @@
         </Tooltip>
       </i-col>
       <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected"
+        <Button
+          class="vote-button"
+          @click="start"
+          :disabled="isWatching || !isConnected"
           >开始</Button
         >
         <Button class="vote-button" @click="stop" :disabled="!isWatching"
@@ -58,7 +61,7 @@
       :styles="{ height: '70%', overflow: 'auto' }"
     >
       <template v-for="(value, uid) in userMap">
-        <p :key="uid" class="">
+        <p :key="uid">
           {{ value }}
         </p>
       </template>
@@ -68,29 +71,26 @@
 
 <script>
 // import * as echarts from "echarts";
-import * as echarts from 'echarts/core';
+import * as echarts from "echarts/core";
+import { BarChart, PieChart } from "echarts/charts";
 import {
-    BarChart,
-    PieChart
-} from 'echarts/charts';
-import {
-    TitleComponent,
-    TooltipComponent,
-    GridComponent,
-    
-} from 'echarts/components';
-import {
-    CanvasRenderer
-} from 'echarts/renderers';
-echarts.use(
-    [TitleComponent, TooltipComponent, GridComponent, BarChart, PieChart, CanvasRenderer]
-);
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  BarChart,
+  PieChart,
+  CanvasRenderer,
+]);
 
 import { shuffle } from "lodash";
-import {
-  parseComment,
-} from "../../service/bilibili-live-ws";
-import emitter from '../../service/event'
+import { parseComment } from "../../service/bilibili-live-ws";
+import emitter from "../../service/event";
 import { COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 
@@ -141,7 +141,7 @@ export default {
     },
   },
   beforeDestroy() {
-    this.stop()
+    this.stop();
   },
   methods: {
     init() {
@@ -203,8 +203,8 @@ export default {
           grid: {
             top: 0,
             left: 0,
-            rigth: 0
-          }
+            rigth: 0,
+          },
         });
       }
 
@@ -247,8 +247,8 @@ export default {
           grid: {
             top: 20,
             left: 5,
-            rigth: 20
-          }
+            rigth: 20,
+          },
         });
       }
 

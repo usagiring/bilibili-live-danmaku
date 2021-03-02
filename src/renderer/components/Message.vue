@@ -172,8 +172,6 @@ import { getPriceProperties } from "../../service/util";
 import {
   commentDB,
   interactDB,
-  userDB,
-  otherDB,
   giftDB,
 } from "../../service/nedb";
 import GiftCard from "./GiftCard";

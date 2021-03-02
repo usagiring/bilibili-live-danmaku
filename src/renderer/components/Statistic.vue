@@ -34,6 +34,7 @@
       <p>发送弹幕最多的人: {{ maxCommentUser }}</p>
       <p>赠送礼物最多的人: {{ maxGiftUser }}</p>
     </div>
+    <div id="chart"></div>
   </div>
 </template>
 
@@ -41,6 +42,22 @@
 import moment from "moment";
 import { commentDB, interactDB, giftDB, userDB } from "../../service/nedb";
 import { uniq, countBy } from "lodash";
+
+import * as echarts from "echarts/core";
+import { LineChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LineChart,
+  CanvasRenderer,
+]);
 
 export default {
   data() {
@@ -62,6 +79,9 @@ export default {
     console.log(start, end);
     this.dateRange = [start, end];
     this.statistic();
+  },
+  mounted() {
+    this.generateChart();
   },
   methods: {
     async statistic() {
@@ -159,6 +179,32 @@ export default {
         this.dateRange = [];
       }, 0);
     },
+
+    generateChart() {
+      const chartDOM = document.getElementById("chart");
+      if (!this.chart) {
+        this.chart = echarts.init(chartDOM);
+      }
+
+      const option = {
+        xAxis: {
+          type: "category",
+          boundaryGap: false,
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+        yAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            data: [820, 932, 901, 934, 1290, 1330, 1320],
+            type: "line",
+            areaStyle: {},
+          },
+        ],
+      };
+      this.chart.setOption(option);
+    },
   },
 };
 </script>
@@ -175,5 +221,9 @@ export default {
 }
 .statistic-content > p {
   padding: 5px;
+}
+#chart {
+  width: 300px;
+  height: 300px;
 }
 </style>
