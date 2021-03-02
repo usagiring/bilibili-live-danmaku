@@ -160,22 +160,26 @@
                   'background-image': `url(${getGuardIcon(message.role)})`,
                 }"
               ></i>
+              <!-- v-bind="message" -->
               <FanMedal
                 v-if="isShowFanMedal && message.medalLevel && message.medalName"
-                v-bind="message"
+                :medalLevel="message.medalLevel"
+                :medalName="message.medalName"
+                :medalColorStart="message.medalColorStart"
+                :medalColorEnd="message.medalColorEnd"
+                :medalColorBorder="message.medalColorBorder"
               ></FanMedal>
-              <span
-                :class="`name-${message.role}`"
-                :style="getNameStyleByRole(message)"
+              <span class="message-text" :style="getNameStyleByRole(message)"
                 >{{ message.name }}:</span
               >
               <span
-                :class="`comment-${message.role}`"
+                class="message-text"
                 :style="getCommentStyleByRole(message)"
                 >{{ message.comment }}</span
               >
-              &nbsp;
               <SimilarCommentBadge
+                class="message-text"
+                :style="{ 'margin-left': '5px' }"
                 v-if="message.similar > 0"
                 v-bind:number="message.similar"
               />
@@ -186,7 +190,11 @@
             <p :style="getCommentStyleByRole({ role: 0 })">
               <FanMedal
                 v-if="isShowFanMedal && message.medalLevel && message.medalName"
-                v-bind="message"
+                :medalLevel="message.medalLevel"
+                :medalName="message.medalName"
+                :medalColorStart="message.medalColorStart"
+                :medalColorEnd="message.medalColorEnd"
+                :medalColorBorder="message.medalColorBorder"
               ></FanMedal>
               <span
                 :style="{ color: message.color ? message.color : undefined }"
@@ -527,6 +535,9 @@ export default {
   vertical-align: middle;
   background-size: contain;
   background-repeat: no-repeat;
+}
+.message-text {
+  vertical-align: middle;
 }
 
 .fade-enter-active,

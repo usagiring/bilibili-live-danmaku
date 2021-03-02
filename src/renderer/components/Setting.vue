@@ -483,8 +483,31 @@ export default {
     randomMessageGenerator() {
       const randomNumber = Math.floor(Math.random() * 100000000);
       const randomRole = Math.floor(Math.random() * 4);
-      const types = ["gift", "comment", "superChat"];
-      const randomType = types[Math.floor(Math.random() * types.length)];
+      const types = [
+        {
+          name: "gift",
+          probability: 10,
+        },
+        {
+          name: "comment",
+          probability: 80,
+        },
+        {
+          name: "superChat",
+          probability: 10,
+        },
+      ];
+      // const randomType = types[Math.floor(Math.random() * types.length)];
+      const totalProbability = 100;
+      let randomNumber2 = Math.floor(Math.random() * totalProbability);
+      let randomType = "";
+      for (let i = 0; i < types.length; i++) {
+        if (randomNumber2 - types[i].probability < 0) {
+          randomType = types[i].name;
+          break;
+        }
+        randomNumber2 = randomNumber2 - types[i].probability;
+      }
       if (randomType === "gift") {
         const gift = {
           id: randomNumber,

@@ -90,7 +90,12 @@ export const EXAMPLE_MESSAGES = [
     comment: "这是一条测试弹幕哟～",
     avatar: DEFAULT_AVATAR,
     role: 3,
-    similar: 1
+    similar: 1,
+    medalName: '测试者',
+    "medalLevel": 6,
+    "medalColorBorder": "#5d7b9e",
+    "medalColorStart": "#5d7b9e",
+    "medalColorEnd": "#5d7b9e"
   },
   {
     id: 2,

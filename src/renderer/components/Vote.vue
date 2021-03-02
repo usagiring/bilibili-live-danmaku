@@ -67,13 +67,31 @@
 </template>
 
 <script>
-import * as echarts from "echarts";
+// import * as echarts from "echarts";
+import * as echarts from 'echarts/core';
+import {
+    BarChart,
+    PieChart
+} from 'echarts/charts';
+import {
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    
+} from 'echarts/components';
+import {
+    CanvasRenderer
+} from 'echarts/renderers';
+echarts.use(
+    [TitleComponent, TooltipComponent, GridComponent, BarChart, PieChart, CanvasRenderer]
+);
+
 import { shuffle } from "lodash";
 import {
   parseComment,
 } from "../../service/bilibili-live-ws";
 import emitter from '../../service/event'
-import { EXAMPLE_MESSAGES, DEFAULT_AVATAR, COLORS } from "../../service/const";
+import { COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 
 // example: {} 内会被匹配，其他作为文字展示
@@ -182,6 +200,11 @@ export default {
             orient: "vertical",
             left: "left",
           },
+          grid: {
+            top: 0,
+            left: 0,
+            rigth: 0
+          }
         });
       }
 
@@ -208,7 +231,7 @@ export default {
           xAxis: {
             type: "value",
             splitLine: {
-              show: false,
+              // show: false,
             },
             axisTick: {
               show: false,
@@ -221,6 +244,11 @@ export default {
               show: false,
             },
           },
+          grid: {
+            top: 20,
+            left: 5,
+            rigth: 20
+          }
         });
       }
 

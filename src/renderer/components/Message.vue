@@ -78,7 +78,11 @@
                     ></i>
                     <FanMedal
                       v-if="comment.medalLevel && comment.medalName"
-                      v-bind="comment"
+                      :medalLevel="comment.medalLevel"
+                      :medalName="comment.medalName"
+                      :medalColorStart="comment.medalColorStart"
+                      :medalColorEnd="comment.medalColorEnd"
+                      :medalColorBorder="comment.medalColorBorder"
                     ></FanMedal>
                     <span>{{ `${comment.name}` }}</span>
                     <span
@@ -103,7 +107,11 @@
                     <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
                     <FanMedal
                       v-if="interact.medalLevel && interact.medalName"
-                      v-bind="interact"
+                      :medalLevel="interact.medalLevel"
+                      :medalName="interact.medalName"
+                      :medalColorStart="interact.medalColorStart"
+                      :medalColorEnd="interact.medalColorEnd"
+                      :medalColorBorder="interact.medalColorBorder"
                     ></FanMedal>
                     <span
                       :style="{
