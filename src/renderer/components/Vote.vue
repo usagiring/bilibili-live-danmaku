@@ -70,23 +70,27 @@
 </template>
 
 <script>
-// import * as echarts from "echarts";
-import * as echarts from "echarts/core";
-import { BarChart, PieChart } from "echarts/charts";
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
-echarts.use([
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  BarChart,
-  PieChart,
-  CanvasRenderer,
-]);
+import * as echarts from "echarts";
+
+// ISSUE: echart 5.0.2 按需引入 electron 打包报错
+// https://github.com/apache/echarts/issues/14321
+
+// import * as echarts from "echarts/core";
+// import { BarChart, PieChart } from "echarts/charts";
+// import {
+//   TitleComponent,
+//   TooltipComponent,
+//   GridComponent,
+// } from "echarts/components";
+// import { CanvasRenderer } from "echarts/renderers";
+// echarts.use([
+//   TitleComponent,
+//   TooltipComponent,
+//   GridComponent,
+//   BarChart,
+//   PieChart,
+//   CanvasRenderer,
+// ]);
 
 import { shuffle } from "lodash";
 import { parseComment } from "../../service/bilibili-live-ws";

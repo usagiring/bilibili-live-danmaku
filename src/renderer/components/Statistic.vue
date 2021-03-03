@@ -42,26 +42,26 @@
 import moment from "moment";
 import { commentDB, interactDB, giftDB, userDB } from "../../service/nedb";
 import { uniq, countBy } from "lodash";
-
-import * as echarts from "echarts/core";
-import { LineChart } from "echarts/charts";
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  ToolboxComponent,
-  DataZoomComponent,
-} from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
-echarts.use([
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  ToolboxComponent,
-  DataZoomComponent,
-  LineChart,
-  CanvasRenderer,
-]);
+import * as echarts from 'echarts';
+// import * as echarts from "echarts/core";
+// import { LineChart } from "echarts/charts";
+// import {
+//   TitleComponent,
+//   TooltipComponent,
+//   GridComponent,
+//   ToolboxComponent,
+//   DataZoomComponent,
+// } from "echarts/components";
+// import { CanvasRenderer } from "echarts/renderers";
+// echarts.use([
+//   TitleComponent,
+//   TooltipComponent,
+//   GridComponent,
+//   ToolboxComponent,
+//   DataZoomComponent,
+//   LineChart,
+//   CanvasRenderer,
+// ]);
 
 export default {
   data() {
