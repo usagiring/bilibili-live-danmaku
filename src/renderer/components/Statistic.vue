@@ -68,6 +68,7 @@ export default {
     return {
       roomId: 0,
       dateRange: [],
+      isDateRangeChanged: true,
       commentCount: 0, // 弹幕总数
       goldTotal: 0,
       giftUserCount: 0, // 送礼人数
@@ -88,6 +89,7 @@ export default {
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;
+      console.log(start, end)
       const query = {
         roomId: Number(this.roomId),
       };
@@ -176,6 +178,7 @@ export default {
 
     changeDateRange([startTime, endTime]) {
       this.dateRange = [new Date(startTime), new Date(endTime)];
+      this.isDateRangeChanged = true
     },
     clearDateRange() {
       setTimeout(() => {
@@ -184,41 +187,18 @@ export default {
     },
 
     generateChart(comments) {
-      if (!this.chart) {
-        const chartDOM = document.getElementById("chart");
-        this.chart = echarts.init(chartDOM);
-      }
-      const [start, end] = this.dateRange;
+      this.initChartAndXAxis();
+
+      const [start] = this.dateRange;
       const startDate = new Date(start);
-      const endDate = new Date(end);
-      const dateDelta = endDate - startDate;
-      console.log(dateDelta);
 
-      // 每分钟
-      const tick = Math.ceil(dateDelta / (60 * 1000));
-      console.log(tick);
-
-      // 横轴时间 00:00
-      const times = [];
-      for (let i = 0; i < tick; i++) {
-        const date = new Date(startDate - 0 + i * 60 * 1000);
-        times.push(
-          `${date
-            .getHours()
-            .toString()
-            .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
-        );
-      }
-      console.log(times);
-      const data = new Array(tick).fill(0);
+      const data = new Array(this.times.length).fill(0);
       for (const comment of comments) {
         // 计算出与开始时间差，除以间隔时间，即index
-        const delta = comment.sendAt - (startDate - 0);
+        const delta = comment.sendAt - startDate.getTime();
         const index = Math.ceil(delta / (60 * 1000));
         data[index]++;
       }
-
-      console.log(data);
 
       const option = {
         tooltip: {
@@ -229,13 +209,10 @@ export default {
         },
         title: {
           left: "center",
-          text: "大数据量面积图",
+          text: "弹幕密度图",
         },
         toolbox: {
           feature: {
-            dataZoom: {
-              yAxisIndex: "none",
-            },
             restore: {},
             saveAsImage: {},
           },
@@ -243,7 +220,7 @@ export default {
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: times,
+          data: this.times,
         },
         yAxis: {
           type: "value",
@@ -262,12 +239,15 @@ export default {
         ],
         series: [
           {
-            name: "模拟数据",
+            name: "弹幕数量",
             type: "line",
             symbol: "none",
             sampling: "lttb",
             itemStyle: {
               color: "rgb(255, 70, 131)",
+            },
+            lineStyle: {
+              width: 1,
             },
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -289,13 +269,32 @@ export default {
       this.chart.setOption(option);
     },
 
-    // TODO 抽离x轴逻辑
-    // 时间变化x轴变化
-    initChart() {
+    // 抽离x轴逻辑
+    // 选择时间范围变化触发x轴变化
+    initChartAndXAxis() {
       if (!this.chart) {
         const chartDOM = document.getElementById("chart");
         this.chart = echarts.init(chartDOM);
       }
+
+      if (!this.isDateRangeChanged && this.times && this.times.length) return;
+
+      const [start, end] = this.dateRange;
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const dateDelta = endDate - startDate;
+
+      const tick = Math.ceil(dateDelta / (60 * 1000));
+
+      const times = [];
+      for (let i = 0; i < tick; i++) {
+        const date = new Date(startDate.getTime() + i * 60 * 1000);
+        const MM = date.getHours().toString().padStart(2, "0");
+        const SS = date.getMinutes().toString().padStart(2, "0");
+        times.push(`${MM}:${SS}`);
+      }
+      this.times = times;
+      this.isDateRangeChanged = false
     },
   },
 };
