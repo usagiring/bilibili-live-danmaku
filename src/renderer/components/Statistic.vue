@@ -89,7 +89,6 @@ export default {
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;
-      console.log(start, end)
       const query = {
         roomId: Number(this.roomId),
       };
@@ -111,58 +110,52 @@ export default {
       // --- gift ---
       let gifts = await giftDB.find(giftQuery);
       const giftUids = gifts.map((gift) => gift.uid);
-      if (gifts.length) {
-        gifts = gifts.map((gift) => {
-          gift.totalPrice = gift.giftNumber * gift.price;
-          return gift;
-        });
-        const giftUserMap = gifts.reduce((map, gift) => {
-          if (map[gift.uid]) {
-            map[gift.uid] = map[gift.uid] + gift.totalPrice;
-          } else {
-            map[gift.uid] = gift.totalPrice;
-          }
-          return map;
-        }, {});
-        let goldTotal = 0;
-        let maxGold = 0;
-        let maxGiftUid;
-        for (const key in giftUserMap) {
-          if (giftUserMap[key] > maxGold) {
-            maxGold = giftUserMap[key];
-            maxGiftUid = key;
-          }
-          goldTotal = goldTotal + giftUserMap[key];
+      gifts = gifts.map((gift) => {
+        gift.totalPrice = gift.giftNumber * gift.price;
+        return gift;
+      });
+      const giftUserMap = gifts.reduce((map, gift) => {
+        if (map[gift.uid]) {
+          map[gift.uid] = map[gift.uid] + gift.totalPrice;
+        } else {
+          map[gift.uid] = gift.totalPrice;
         }
-        this.goldTotal = goldTotal.toFixed(1) * 1000;
-        const maxGiftUser = gifts.find(
-          (gift) => gift.uid === Number(maxGiftUid)
-        );
-        this.maxGiftUser = maxGiftUser.name;
-        this.giftUserCount = Object.keys(giftUserMap).length;
+        return map;
+      }, {});
+      let goldTotal = 0;
+      let maxGold = 0;
+      let maxGiftUid;
+      for (const key in giftUserMap) {
+        if (giftUserMap[key] > maxGold) {
+          maxGold = giftUserMap[key];
+          maxGiftUid = key;
+        }
+        goldTotal = goldTotal + giftUserMap[key];
       }
+      this.goldTotal = goldTotal.toFixed(1) * 1000;
+      const maxGiftUser =
+        gifts.find((gift) => gift.uid === Number(maxGiftUid)) || {};
+      this.maxGiftUser = maxGiftUser.name;
+      this.giftUserCount = Object.keys(giftUserMap).length;
 
       // --- comment ---
       const comments = await commentDB.find(query, {
         projection: { uid: 1, name: 1, sendAt: 1 },
       });
       const commentUids = comments.map((c) => c.uid);
-      if (comments.length) {
-        const commentCountMap = countBy(commentUids);
-        let maxCommentCount = 0;
-        let maxCommentUid;
-        for (const uid in commentCountMap) {
-          if (commentCountMap[uid] > maxCommentCount) {
-            maxCommentCount = commentCountMap[uid];
-            maxCommentUid = uid;
-          }
+      const commentCountMap = countBy(commentUids);
+      let maxCommentCount = 0;
+      let maxCommentUid;
+      for (const uid in commentCountMap) {
+        if (commentCountMap[uid] > maxCommentCount) {
+          maxCommentCount = commentCountMap[uid];
+          maxCommentUid = uid;
         }
-        const maxCommentUser = comments.find(
-          (c) => c.uid === Number(maxCommentUid)
-        );
-        this.maxCommentUser = maxCommentUser.name;
-        this.generateChart(comments);
       }
+      const maxCommentUser =
+        comments.find((c) => c.uid === Number(maxCommentUid)) || {};
+      this.maxCommentUser = maxCommentUser.name;
+      this.generateChart(comments);
 
       // --- interact ---
       const interacts = await interactDB.find(query, {
@@ -178,7 +171,7 @@ export default {
 
     changeDateRange([startTime, endTime]) {
       this.dateRange = [new Date(startTime), new Date(endTime)];
-      this.isDateRangeChanged = true
+      this.isDateRangeChanged = true;
     },
     clearDateRange() {
       setTimeout(() => {
@@ -196,7 +189,7 @@ export default {
       for (const comment of comments) {
         // 计算出与开始时间差，除以间隔时间，即index
         const delta = comment.sendAt - startDate.getTime();
-        const index = Math.ceil(delta / (60 * 1000));
+        const index = Math.floor(delta / (60 * 1000));
         data[index]++;
       }
 
@@ -224,7 +217,7 @@ export default {
         },
         yAxis: {
           type: "value",
-          boundaryGap: [0, "100%"],
+          boundaryGap: false,
         },
         dataZoom: [
           {
@@ -294,7 +287,7 @@ export default {
         times.push(`${MM}:${SS}`);
       }
       this.times = times;
-      this.isDateRangeChanged = false
+      this.isDateRangeChanged = false;
     },
   },
 };
