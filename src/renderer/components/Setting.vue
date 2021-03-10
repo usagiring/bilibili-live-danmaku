@@ -72,11 +72,12 @@
               />
               {{ " 元" }}
             </div>
-            <div>
+            <div class="setting-key">
+              <span class="setting-key-text">字体</span>
               <Select
+                :style="{ width: '100px', display: 'inline-block' }"
                 :value="danmakuFont"
                 @on-change="changeDanmakuFont"
-                filterable
                 @on-open-change="onOpenFontSelectChange"
                 size="small"
               >
@@ -228,9 +229,26 @@ import Store from "electron-store";
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
-import { DEFAULT_AVATAR, USER_DATA_PATH } from "../../service/const";
+import {
+  DEFAULT_AVATAR,
+  USER_DATA_PATH,
+  DEFAULT_FONTS,
+  DEFAULT_COMMON_FONT_FAMILIES,
+} from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
 import { userDB, backup, deleteData } from "../../service/nedb";
+const defaultFonts = [
+  ...DEFAULT_FONTS.map((font) => ({
+    key: font,
+    value: font,
+    type: "default",
+  })),
+  ...DEFAULT_COMMON_FONT_FAMILIES.map((font) => ({
+    key: font,
+    value: font,
+    type: "common",
+  })),
+];
 
 export default {
   components: {
@@ -241,63 +259,7 @@ export default {
     return {
       collapse: ["1", "2", "3", "4"],
       USER_DATA_PATH: USER_DATA_PATH,
-      fonts: [
-        {
-          key: "inherit",
-          value: "inherit",
-          type: "default",
-        },
-        {
-          key: "initial",
-          value: "initial",
-          type: "default",
-        },
-        {
-          key: "unset",
-          value: "unset",
-          type: "default",
-        },
-        {
-          key: "serif",
-          value: "serif",
-          type: "common",
-        },
-        {
-          key: "sans-serif",
-          value: "sans-serif",
-          type: "common",
-        },
-        {
-          key: "monospace",
-          value: "monospace",
-          type: "common",
-        },
-        {
-          key: "cursive",
-          value: "cursive",
-          type: "common",
-        },
-        {
-          key: "fantasy",
-          value: "fantasy",
-          type: "common",
-        },
-        {
-          key: "emoji",
-          value: "emoji",
-          type: "common",
-        },
-        {
-          key: "math",
-          value: "math",
-          type: "common",
-        },
-        {
-          key: "fangsong",
-          value: "fangsong",
-          type: "common",
-        },
-      ],
+      fonts: defaultFonts,
 
       editors: [
         // ***** normal *****
@@ -452,6 +414,13 @@ export default {
         },
       ],
     };
+  },
+  mounted() {
+    this.fonts.push({
+      key: this.danmakuFont,
+      value: this.danmakuFont,
+      type: "custom",
+    });
   },
   computed: {
     realRoomId() {
@@ -705,17 +674,17 @@ export default {
     async getFonts() {
       const fonts = await FontList.getFonts({ disableQuoting: true });
       this.fonts = [
-      ...this.fonts,
-      ...fonts.map((font) => ({ key: font, value: font, type: "custom" })),
-    ];
+        ...defaultFonts,
+        ...fonts.map((font) => ({ key: font, value: font, type: "custom" })),
+      ];
     },
 
     async onOpenFontSelectChange(value) {
-      if(value) {
-        await this.getFonts()
+      if (value) {
+        await this.getFonts();
       }
     },
-    changeDanmakuFont(value) {
+    async changeDanmakuFont(value) {
       this.$store.dispatch("UPDATE_CONFIG", {
         danmakuFont: value,
       });

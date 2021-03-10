@@ -17,6 +17,7 @@ const state = {
   recordStartTime: 0,
   isRecording: false,
   recordDir: "",
+  danmakuFont: 'unset',
 
   optionstring: "{A}\n{B}\n{C}",
   container_style: {

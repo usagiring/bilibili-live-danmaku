@@ -145,6 +145,20 @@ export const EXAMPLE_MESSAGES = [
 
 export const COLORS = OPTION_CONFIG.COLORS || ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
 
+export const DEFAULT_FONTS = [
+  'inherit',
+  'initial',
+  'unset'
+]
+
+export const DEFAULT_COMMON_FONT_FAMILIES = [
+  'serif',
+  'sans-serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+]
+
 export const IPC_CHECK_FOR_UPDATE = 'IPC_CHECK_FOR_UPDATE'
 export const IPC_UPDATE_AVAILABLE = 'IPC_UPDATE_AVAILABLE'
 export const IPC_DOWNLOAD_UPDATE = 'IPC_DOWNLOAD_UPDATE'
