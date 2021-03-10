@@ -144,7 +144,7 @@
           right: '0',
         }"
       ></div>
-      <transition-group name="fade" tag="div" class="message-content">
+      <transition-group name="fade" tag="div" class="message-content" :style="{ 'font-family': danmakuFont }">
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type === 'comment'">
             <p :style="getMessageStyleByRole(message)">
@@ -282,6 +282,9 @@ export default {
     },
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
+    },
+    danmakuFont() {
+      return this.$store.state.Config.danmakuFont || 'auto';
     },
     avatarSizeStyle() {
       const avatarSize = this.$store.state.Config.avatarSize;

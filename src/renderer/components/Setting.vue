@@ -50,6 +50,7 @@
                 :min="0"
                 size="small"
               />
+              {{ " ms" }}
             </div>
             <div class="setting-key">
               <span class="setting-key-text">礼物栏展示大于</span>
@@ -59,6 +60,7 @@
                 :min="0"
                 size="small"
               />
+              {{ " 元" }}
             </div>
             <div class="setting-key">
               <span class="setting-key-text">弹幕礼物展示大于</span>
@@ -68,6 +70,47 @@
                 :min="0"
                 size="small"
               />
+              {{ " 元" }}
+            </div>
+            <div>
+              <Select
+                :value="danmakuFont"
+                @on-change="changeDanmakuFont"
+                filterable
+                @on-open-change="onOpenFontSelectChange"
+                size="small"
+              >
+                <OptionGroup label="全局值">
+                  <Option
+                    v-for="item in fonts.filter(
+                      (font) => font.type === 'default'
+                    )"
+                    :value="item.value"
+                    :key="item.key"
+                    >{{ item.value }}</Option
+                  >
+                </OptionGroup>
+                <OptionGroup label="通用字体族">
+                  <Option
+                    v-for="item in fonts.filter(
+                      (font) => font.type === 'common'
+                    )"
+                    :value="item.value"
+                    :key="item.key"
+                    >{{ item.value }}</Option
+                  >
+                </OptionGroup>
+                <OptionGroup label="系统">
+                  <Option
+                    v-for="item in fonts.filter(
+                      (font) => font.type === 'custom'
+                    )"
+                    :value="item.value"
+                    :key="item.key"
+                    >{{ item.value }}</Option
+                  >
+                </OptionGroup>
+              </Select>
             </div>
             <div>
               <Checkbox
@@ -182,15 +225,12 @@
 import { remote } from "electron";
 const window = remote.getCurrentWindow();
 import Store from "electron-store";
+import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import { DEFAULT_AVATAR, USER_DATA_PATH } from "../../service/const";
 import { getGuardInfo } from "../../service/bilibili-api";
-import {
-  userDB,
-  backup,
-  deleteData,
-} from "../../service/nedb";
+import { userDB, backup, deleteData } from "../../service/nedb";
 
 export default {
   components: {
@@ -201,6 +241,63 @@ export default {
     return {
       collapse: ["1", "2", "3", "4"],
       USER_DATA_PATH: USER_DATA_PATH,
+      fonts: [
+        {
+          key: "inherit",
+          value: "inherit",
+          type: "default",
+        },
+        {
+          key: "initial",
+          value: "initial",
+          type: "default",
+        },
+        {
+          key: "unset",
+          value: "unset",
+          type: "default",
+        },
+        {
+          key: "serif",
+          value: "serif",
+          type: "common",
+        },
+        {
+          key: "sans-serif",
+          value: "sans-serif",
+          type: "common",
+        },
+        {
+          key: "monospace",
+          value: "monospace",
+          type: "common",
+        },
+        {
+          key: "cursive",
+          value: "cursive",
+          type: "common",
+        },
+        {
+          key: "fantasy",
+          value: "fantasy",
+          type: "common",
+        },
+        {
+          key: "emoji",
+          value: "emoji",
+          type: "common",
+        },
+        {
+          key: "math",
+          value: "math",
+          type: "common",
+        },
+        {
+          key: "fangsong",
+          value: "fangsong",
+          type: "common",
+        },
+      ],
 
       editors: [
         // ***** normal *****
@@ -365,6 +462,9 @@ export default {
     },
     background() {
       return this.$store.state.Config["container_style"]["background"];
+    },
+    danmakuFont() {
+      return this.$store.state.Config.danmakuFont;
     },
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
@@ -600,6 +700,25 @@ export default {
       // 清空用户数据缓存
       await userDB.remove({}, { multi: true });
       window.reload();
+    },
+
+    async getFonts() {
+      const fonts = await FontList.getFonts({ disableQuoting: true });
+      this.fonts = [
+      ...this.fonts,
+      ...fonts.map((font) => ({ key: font, value: font, type: "custom" })),
+    ];
+    },
+
+    async onOpenFontSelectChange(value) {
+      if(value) {
+        await this.getFonts()
+      }
+    },
+    changeDanmakuFont(value) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        danmakuFont: value,
+      });
     },
   },
 };
