@@ -715,7 +715,7 @@ export default {
 .setting-right-content {
   margin: 10px;
   padding: 5px;
-  height: 360px;
+  height: 500px;
 
   border-radius: 12px;
   border: solid 1px gray;

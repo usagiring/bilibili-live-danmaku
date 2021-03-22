@@ -1,3 +1,4 @@
+import moment from "moment";
 import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
 import { getUserInfo } from './bilibili-api'
 
@@ -68,4 +69,8 @@ export function parseDownloadRate(value, unitIndex = 0) {
 
 export function parseHexColor(colorNumber) {
   return `#${colorNumber.toString(16).padStart(6, '0')}`
+}
+
+export function dateFormat(date) {
+  return moment(date).format("YYYY-MM-DD HH:mm:ss");
 }

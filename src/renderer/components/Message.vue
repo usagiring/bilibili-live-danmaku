@@ -142,18 +142,17 @@
           >
             <template v-for="gift in gifts">
               <div :key="gift._id" :style="{ padding: '0 10px' }">
-                <p class="date-style" :style="{ padding: '0 8px' }">
+                <!-- <p class="date-style" :style="{ padding: '0 8px' }">
                   {{ dateFormat(gift.sendAt) }}
-                </p>
+                </p> -->
                 <template v-if="gift.type === 'superChat'">
-                  <GiftCard v-bind="gift">{{ gift.comment }}</GiftCard>
+                  <GiftCardMini v-bind="gift">{{ `: ${gift.comment}` }}</GiftCardMini>
                 </template>
                 <template v-if="gift.type === 'gift'">
-                  <GiftCard v-bind="gift">{{
-                    `${gift.name} 赠送了 ${gift.giftNumber} 个 ${gift.giftName}`
-                  }}</GiftCard>
+                  <GiftCardMini v-bind="gift">{{
+                    `: 赠送了 ${gift.giftNumber}个 ${gift.giftName}`
+                  }}</GiftCardMini>
                 </template>
-                <!-- <div class='devider'></div> -->
               </div>
             </template>
           </Scroll>
@@ -174,17 +173,17 @@ import {
   interactDB,
   giftDB,
 } from "../../service/nedb";
-import GiftCard from "./GiftCard";
+import GiftCardMini from "./GiftCardMini";
 import FanMedal from "./FanMedal";
 
 export default {
   components: {
-    GiftCard,
+    GiftCardMini,
     FanMedal,
   },
   data() {
     return {
-      split1: 0.7,
+      split1: 0.6,
       split2: 0.7,
       roomId: 0,
       userId: null,
