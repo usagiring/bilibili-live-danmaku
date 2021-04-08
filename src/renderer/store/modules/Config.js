@@ -18,6 +18,7 @@ const state = {
   isRecording: false,
   recordDir: "",
   danmakuFont: 'unset',
+  isWithCookie: false,
 
   optionstring: "{A}\n{B}\n{C}",
   container_style: {

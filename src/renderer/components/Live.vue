@@ -83,6 +83,12 @@
             </div>
           </div>
         </Tooltip>
+        <Checkbox
+          class="setting-checkbox"
+          :value="isWithCookie"
+          @on-change="withCookie"
+          >带上Cookie录制/播放</Checkbox
+        >
       </div>
     </div>
 
@@ -129,7 +135,11 @@
 import * as flvjs from "flv.js";
 import { remote } from "electron";
 const dialog = remote.dialog;
-import recorder from "../../service/bilibili-recorder";
+import {
+  record,
+  getRandomPlayUrl,
+  cancelRecord,
+} from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
 import { DEFAULT_RECORD_DIR } from "../../service/const";
 import { parseDownloadRate, parseHexColor } from "../../service/util";
@@ -222,6 +232,9 @@ export default {
     isRecording() {
       return this.$store.state.Config.isRecording;
     },
+    isWithCookie() {
+      return this.$store.state.Config.isWithCookie;
+    },
     recordStartTime() {
       return this.$store.state.Config.recordStartTime;
     },
@@ -249,11 +262,12 @@ export default {
   methods: {
     async startRecord() {
       try {
-        const { id } = await recorder.record(
-          this.realRoomId,
-          this.recordDir,
-          this.recordQuality
-        );
+        const { id } = await record({
+          roomId: this.realRoomId,
+          recordDir: this.recordDir,
+          quality: this.recordQuality,
+          cookie: this.isWithCookie ? this.userCookie: undefined,
+        });
 
         emitter.on(`${id}-download-rate`, ({ bps, totalSize }) => {
           this.downloadRate = parseDownloadRate(bps);
@@ -273,21 +287,22 @@ export default {
       }
     },
     async cancelRecord() {
-      recorder.cancelRecord(this.recordId);
+      cancelRecord(this.recordId);
       this.$store.dispatch("UPDATE_CONFIG_TEMP", {
         recordStartTime: 0,
         isRecording: false,
         recordId: "",
       });
-      
+
       emitter.removeAllListeners(`${this.recordId}-download-rate`);
       clearInterval(this.recordTimer);
     },
     async play() {
-      const playUrl = await recorder.getRandomPlayUrl(
-        this.realRoomId,
-        this.playQuality
-      );
+      const playUrl = await getRandomPlayUrl({
+        roomId: this.realRoomId,
+        quality: this.playQuality,
+        cookie: this.isWithCookie ? this.userCookie: undefined,
+      });
       console.log(playUrl);
 
       if (flvjs.isSupported()) {
@@ -415,6 +430,12 @@ export default {
       } finally {
         this.isWearing = false;
       }
+    },
+
+    async withCookie(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isWithCookie: status,
+      });
     },
 
     // onResize: function () {

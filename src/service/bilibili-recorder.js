@@ -14,41 +14,58 @@ const qualityMap = {
   '流畅': 80
 }
 
-class Recorder {
-  constructor() {
-    this.recorder = new BilibiliRecorder(
-      {
-        emitter: emitter
-      },
-      { adapter: httpAdapter, }
-    )
-  }
+const recorder = new BilibiliRecorder(
+  {
+    emitter: emitter
+  },
+  { adapter: httpAdapter, }
+)
 
-  async record(roomId, __recordDir, quality) {
-    const recordDir = __recordDir || DEFAULT_RECORD_DIR
-    const qn = quality ? qualityMap[quality] : 400
-    console.log(`record: ROOM_ID: ${roomId} RECORD_DIR: ${recordDir}`)
-    try {
-      const stat = fs.statSync(recordDir)
-      assert.ok(stat.isDirectory())
-    } catch (e) {
-      console.log(e)
-      fs.mkdirSync(recordDir)
-    }
-
-    const output = path.join(recordDir, `./${roomId}_${Date.now()}.flv`)
-    console.log(`record: OUTPUT: ${output}`)
-    return this.recorder.record({ roomId, output, qn })
-  }
-
-  async getRandomPlayUrl(roomId, quality) {
-    const qn = quality ? qualityMap[quality] : 400
-    return this.recorder.getRandomPlayUrl({ roomId, qn })
-  }
-
-  async cancelRecord(id) {
-    return this.recorder.cancelRecord(id)
-  }
+export {
+  record,
+  getRandomPlayUrl,
+  cancelRecord
 }
 
-export default new Recorder()
+async function record({ roomId, recordDir, quality, cookie }) {
+  const _recordDir = recordDir || DEFAULT_RECORD_DIR
+  const qn = quality ? qualityMap[quality] : 400
+  console.log(`record: ROOM_ID: ${roomId} RECORD_DIR: ${_recordDir}`)
+  try {
+    const stat = fs.statSync(_recordDir)
+    assert.ok(stat.isDirectory())
+  } catch (e) {
+    console.log(e)
+    fs.mkdirSync(_recordDir)
+  }
+
+  const output = path.join(_recordDir, `./${roomId}_${Date.now()}.flv`)
+  console.log(`record: OUTPUT: ${output}`)
+
+  const axiosOptions = {}
+  if (cookie) {
+    axiosOptions.headers = {
+      cookie: cookie
+    }
+  }
+  return recorder.record({ roomId, output, qn }, axiosOptions)
+}
+
+async function getRandomPlayUrl({ roomId, quality, cookie }) {
+  const qn = quality ? qualityMap[quality] : 400
+  const axiosOptions = {}
+  if (cookie) {
+    axiosOptions.headers = {
+      cookie: cookie
+    }
+  }
+  return recorder.getRandomPlayUrl({ roomId, qn }, axiosOptions)
+}
+
+async function cancelRecord(id) {
+  return recorder.cancelRecord(id)
+}
+
+emitter.on('RECORD_START', () => {
+  record
+})

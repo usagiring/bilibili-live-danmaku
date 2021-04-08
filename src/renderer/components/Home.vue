@@ -621,8 +621,12 @@ export default {
           const { fans, fans_club } = data.data;
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
+        } else if (data.cmd === "LIVE") {
+          // thi
+        } else if (data.cmd === "PAR") {
         } else {
           // console.log(data);
+
           otherDB.insert(data);
         }
       }
