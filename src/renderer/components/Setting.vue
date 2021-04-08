@@ -137,6 +137,11 @@
                 >显示粉丝牌</Checkbox
               >
             </div>
+            <div>
+              <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard"
+                >使用礼物小卡片</Checkbox
+              >
+            </div>
           </div>
         </Panel>
         <Panel name="2">
@@ -465,6 +470,9 @@ export default {
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
     },
+    isUseMiniGiftCard() {
+      return this.$store.state.Config.isUseMiniGiftCard;
+    },
     windowOpacity() {
       return this.$store.state.Config.windowOpacity * 100;
     },
@@ -687,6 +695,11 @@ export default {
     async changeDanmakuFont(value) {
       this.$store.dispatch("UPDATE_CONFIG", {
         danmakuFont: value,
+      });
+    },
+    async useMiniGiftCard(value) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isUseMiniGiftCard: value,
       });
     },
   },

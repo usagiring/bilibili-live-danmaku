@@ -65,7 +65,3 @@ async function getRandomPlayUrl({ roomId, quality, cookie }) {
 async function cancelRecord(id) {
   return recorder.cancelRecord(id)
 }
-
-emitter.on('RECORD_START', () => {
-  record
-})

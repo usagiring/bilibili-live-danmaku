@@ -19,6 +19,7 @@ const state = {
   recordDir: "",
   danmakuFont: 'unset',
   isWithCookie: false,
+  isUseMiniGiftCard: false,
 
   optionstring: "{A}\n{B}\n{C}",
   container_style: {

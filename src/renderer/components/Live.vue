@@ -266,7 +266,7 @@ export default {
           roomId: this.realRoomId,
           recordDir: this.recordDir,
           quality: this.recordQuality,
-          cookie: this.isWithCookie ? this.userCookie: undefined,
+          cookie: this.isWithCookie ? this.userCookie : undefined,
         });
 
         emitter.on(`${id}-download-rate`, ({ bps, totalSize }) => {
@@ -287,7 +287,11 @@ export default {
       }
     },
     async cancelRecord() {
-      cancelRecord(this.recordId);
+      try {
+        cancelRecord(this.recordId);
+      } catch (e) {
+        console.warn(e);
+      }
       this.$store.dispatch("UPDATE_CONFIG_TEMP", {
         recordStartTime: 0,
         isRecording: false,
@@ -301,7 +305,7 @@ export default {
       const playUrl = await getRandomPlayUrl({
         roomId: this.realRoomId,
         quality: this.playQuality,
-        cookie: this.isWithCookie ? this.userCookie: undefined,
+        cookie: this.isWithCookie ? this.userCookie : undefined,
       });
       console.log(playUrl);
 

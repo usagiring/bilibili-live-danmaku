@@ -18,7 +18,9 @@ export {
   getGuardInfo,
   getPlayUrl,
   sendMessage,
-  wearMedal
+  wearMedal,
+  getBagList,
+  sendBagGift
 }
 
 const defaultHeaders = {
@@ -126,4 +128,41 @@ async function wearMedal(medalId, userCookie) {
     adapter: httpAdapter
   })
   return res
+}
+
+async function getBagList(roomId, userCookie) {
+  const res = await axios.get(`https://api.live.bilibili.com/xlive/web-room/v1/gift/bag_list?t=${Date.now()}&room_id=${roomId}`, params, {
+    headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),
+    adapter: httpAdapter
+  })
+  return res
+}
+
+async function sendBagGift(data, userCookie) {
+  const { uid, gift_id, ruid, bag_id, rnd, biz_id, price } = data
+  const cookies = cookie.parse(userCookie);
+  const csrf = cookies.bili_jct;
+  const params = querystring.stringify({
+    uid,
+    gift_id,
+    ruid,
+    send_ruid: 0,
+    gift_num: 1,
+    bag_id,
+    platform: 'pc',
+    biz_code: 'live',
+    biz_id,
+    rnd: rnd || Math.floor(Date.now() / 1000 - 10000),
+    storm_beat_id: 0,
+    price: price || 0,
+    csrf_token: csrf,
+    csrf: csrf,
+  });
+
+  const res = await axios.post(`https://api.live.bilibili.com/gift/v2/live/bag_send`, params, {
+    headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),
+    adapter: httpAdapter
+  })
+  return res
+
 }

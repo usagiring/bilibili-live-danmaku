@@ -14,7 +14,12 @@
       @wheel.prevent="giftScroll"
       @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined"
       @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined"
-      :style="{ position: 'absolute', top: '0px', width: '100%', height: `${gifts.length ? '36px': '0px' }` }"
+      :style="{
+        position: 'absolute',
+        top: '0px',
+        width: '100%',
+        height: `${gifts.length ? '36px' : '0px'}`,
+      }"
     >
       <div class="gift-show-content-wrapper" id="gift-show-content-wrapper">
         <transition-group name="fade">
@@ -127,7 +132,10 @@
         </transition-group>
       </div>
     </div>
-    <div class="message-content-wrapper" :style="{top: `${gifts.length ? '36px': '0px' }`}">
+    <div
+      class="message-content-wrapper"
+      :style="{ top: `${gifts.length ? '36px' : '0px'}` }"
+    >
       <div
         :style="{
           position: 'absolute',
@@ -144,7 +152,12 @@
           right: '0',
         }"
       ></div>
-      <transition-group name="fade" tag="div" class="message-content" :style="{ 'font-family': danmakuFont }">
+      <transition-group
+        name="fade"
+        tag="div"
+        class="message-content"
+        :style="{ 'font-family': danmakuFont }"
+      >
         <p :key="message.id" v-for="message in messages">
           <template v-if="message.type === 'comment'">
             <p :style="getMessageStyleByRole(message)">
@@ -204,8 +217,8 @@
             </p>
           </template>
           <template v-if="message.type === 'superChat'">
-            <GiftCard v-bind="message">
-              <div>
+            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
+              <div :style="{ padding: '10px' }">
                 {{ message.comment }}
                 <template v-if="message.commentJPN">
                   <div class="divider"></div>
@@ -213,11 +226,24 @@
                 </template>
               </div>
             </GiftCard>
+            <GiftCardMini v-else v-bind="message">{{
+              `: ${message.comment}`
+            }}</GiftCardMini>
           </template>
           <template v-if="message.type === 'gift'">
-            <GiftCard v-bind="message">{{
+            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message" >
+              <span :style="{
+                display: 'inline-block',
+                padding: '10px 0px 10px 10px',
+              }">{{
               `${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`
-            }}</GiftCard>
+            }}</span>
+            <img :style="{ 'vertical-align': 'middle', width: '35px' }" :src="giftGifMap[message.giftId]">
+            </GiftCard>
+            <GiftCardMini v-else v-bind="message">{{
+              `: 赠送了 ${message.giftNumber}个 ${message.giftName}`
+            }}
+            </GiftCardMini>
           </template>
         </p>
       </transition-group>
@@ -233,16 +259,19 @@ import {
   DEFAULT_AVATAR,
   INTERACT_TYPE,
   GUARD_ICON_MAP,
+  GIFT_CONFIG_MAP,
 } from "../../service/const";
 import { getPriceProperties } from "../../service/util";
 import SimilarCommentBadge from "./SimilarCommentBadge";
 import GiftCard from "./GiftCard";
+import GiftCardMini from "./GiftCardMini";
 import FanMedal from "./FanMedal";
 
 export default {
   components: {
     SimilarCommentBadge,
     GiftCard,
+    GiftCardMini,
     FanMedal,
   },
   props: ["isPreview", "isSingleWindow"],
@@ -250,6 +279,7 @@ export default {
     return {
       giftHover: [],
       DEFAULT_AVATAR,
+      giftGifMap: {}
     };
   },
   watch: {
@@ -283,8 +313,11 @@ export default {
     isShowAvatar() {
       return this.$store.state.Config.isShowAvatar;
     },
+    isUseMiniGiftCard() {
+      return this.$store.state.Config.isUseMiniGiftCard;
+    },
     danmakuFont() {
-      return this.$store.state.Config.danmakuFont || 'auto';
+      return this.$store.state.Config.danmakuFont || "auto";
     },
     avatarSizeStyle() {
       const avatarSize = this.$store.state.Config.avatarSize;
@@ -373,7 +406,9 @@ export default {
       return this.$store.state.Config["3_comment"];
     },
   },
-  mounted() {},
+  mounted() {
+    this.giftGifMap = GIFT_CONFIG_MAP
+  },
   methods: {
     getMessageStyleByRole(message) {
       return this[`${message.role}_message`];

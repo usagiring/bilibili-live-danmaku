@@ -1,4 +1,5 @@
 import moment from "moment";
+import fs from 'fs';
 import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
 import { getUserInfo } from './bilibili-api'
 
@@ -73,4 +74,11 @@ export function parseHexColor(colorNumber) {
 
 export function dateFormat(date) {
   return moment(date).format("YYYY-MM-DD HH:mm:ss");
+}
+
+export function setGiftConfigMap(gifts) {
+  const giftConfigMap = gifts.reduce((map, gift) => {
+    return Object.assign(map, { [gift.id]: gift.webp })
+  }, {})
+  fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
 }

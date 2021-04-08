@@ -1,6 +1,6 @@
 <template>
   <div
-    :style="{ border: `solid 1px ${priceProperties.backgroundBottomColor}` }"
+    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
     class="message-super-chat"
   >
     <div
@@ -9,7 +9,7 @@
         padding: '10px',
       }"
     >
-      <span class="date-style">
+      <span v-if="showTime" class="date-style">
         {{ dateFormat(sendAt) }}
       </span>
       <Avatar :src="avatar" size="small" />
@@ -41,6 +41,7 @@ export default {
     "giftNumber",
     "isGuardGift",
     "sendAt",
+    "showTime"
   ],
   methods: {
     dateFormat: dateFormat,
@@ -51,7 +52,7 @@ export default {
 <style scoped>
 .message-super-chat {
   border-radius: 10px;
-  border: solid 1px rgba(66, 125, 158, 1);
+  border: solid 0.5px rgba(66, 125, 158, 1);
   margin: 5px;
   overflow: hidden;
 }

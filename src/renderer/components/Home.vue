@@ -150,7 +150,11 @@ import { uniq, debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
-import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
+import {
+  getUserInfoThrottle,
+  parseDownloadRate,
+  // setGiftConfigMap,
+} from "../../service/util";
 import {
   init,
   close,
@@ -160,7 +164,12 @@ import {
   parseGift,
 } from "../../service/bilibili-live-ws";
 import emitter from "../../service/event";
-import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
+import { record, cancelRecord } from "../../service/bilibili-recorder";
+import {
+  getRoomInfoV2,
+  getGuardInfo,
+  // getGiftConfig,
+} from "../../service/bilibili-api";
 import {
   commentDB,
   interactDB,
@@ -176,6 +185,7 @@ import {
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
 } from "../../service/const";
+let LIVE_COUNT = 0;
 
 export default {
   data() {
@@ -260,6 +270,18 @@ export default {
     },
     realRoomId() {
       return this.$store.state.Config.realRoomId;
+    },
+    recordDir() {
+      return this.$store.state.Config.recordDir || DEFAULT_RECORD_DIR;
+    },
+    userCookie() {
+      return this.$store.state.Config.userCookie;
+    },
+    isWithCookie() {
+      return this.$store.state.Config.isWithCookie;
+    },
+    recordId() {
+      return this.$store.state.Config.recordId;
     },
   },
   methods: {
@@ -471,6 +493,7 @@ export default {
         sendAt: new Date() - 0,
         giftNumber: payload.giftNumber,
         giftName: payload.giftName,
+        giftId: payload.giftId,
         isGuardGift: payload.isGuardGift,
       });
     },
@@ -614,6 +637,27 @@ export default {
           if (msg.cmd === "INTERACT_WORD") return;
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
+          if (msg.cmd === "LIVE") {
+            this.liveStatus = 1;
+            LIVE_COUNT++;
+            console.log(`LIVE_COUNT: ${LIVE_COUNT}`);
+            if (LIVE_COUNT === 2) {
+              console.log("auto record start...");
+              this.startRecord();
+            }
+            if (LIVE_COUNT > 2) {
+              console.log("auto record restart...");
+              this.cancelRecord();
+              this.startRecord();
+            }
+          }
+
+          if (msg.cmd === "PREPARING") {
+            this.liveStatus = 0;
+            LIVE_COUNT = 0;
+            console.log("auto record stop...");
+            this.cancelRecord();
+          }
           otherDB.insert(msg);
         });
       } else {
@@ -621,12 +665,7 @@ export default {
           const { fans, fans_club } = data.data;
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
-        } else if (data.cmd === "LIVE") {
-          // thi
-        } else if (data.cmd === "PAR") {
         } else {
-          // console.log(data);
-
           otherDB.insert(data);
         }
       }
@@ -662,8 +701,44 @@ export default {
         this.isAppUpdateStarting = false;
       });
     },
+
+    async startRecord() {
+      try {
+        const { id } = await record({
+          roomId: this.realRoomId,
+          recordDir: this.recordDir,
+          quality: "原画",
+          cookie: this.isWithCookie ? this.userCookie : undefined,
+        });
+
+        this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+          recordId: id,
+          recordStartTime: Date.now(),
+          isRecording: true,
+        });
+      } catch (e) {
+        this.$Message.error(`录制失败: ${e.message}`);
+      }
+    },
+    async cancelRecord() {
+      try {
+        cancelRecord(this.recordId);
+      } catch (e) {
+        console.warn(e);
+      }
+      this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+        recordStartTime: 0,
+        isRecording: false,
+        recordId: "",
+      });
+
+      emitter.removeAllListeners(`${this.recordId}-download-rate`);
+    },
   },
   async mounted() {
+    // getGiftConfig(5440).then((data) => {
+    //   setGiftConfigMap(data.data.list);
+    // });
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
       this.hasNewVersion = true;
     });

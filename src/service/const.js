@@ -1,10 +1,11 @@
-const YAML = require('yaml')
-const fs = require('fs')
-const file = fs.readFileSync(`config.yaml`, 'utf8')
-const OPTION_CONFIG = YAML.parse(file)
 const path = require('path')
-
+const fs = require('fs')
+const YAML = require('yaml')
 const electron = require('electron')
+
+const config = fs.readFileSync(`config.yaml`, 'utf8')
+const OPTION_CONFIG = YAML.parse(config)
+
 export const USER_DATA_PATH = path.join((electron.app || electron.remote.app).getPath('userData'), '/data')
 console.log(USER_DATA_PATH)
 export const DEFAULT_RECORD_DIR = path.join((electron.app || electron.remote.app).getPath('exe'), '../record')
@@ -164,3 +165,4 @@ export const IPC_UPDATE_AVAILABLE = 'IPC_UPDATE_AVAILABLE'
 export const IPC_DOWNLOAD_UPDATE = 'IPC_DOWNLOAD_UPDATE'
 export const IPC_DOWNLOAD_PROGRESS = 'IPC_DOWNLOAD_PROGRESS'
 export const IPC_UPDATE_DOWNLOADED = 'IPC_UPDATE_DOWNLOADED'
+export const GIFT_CONFIG_MAP = JSON.parse(fs.readFileSync(`gift_config`, 'utf8'))

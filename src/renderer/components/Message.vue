@@ -146,10 +146,10 @@
                   {{ dateFormat(gift.sendAt) }}
                 </p> -->
                 <template v-if="gift.type === 'superChat'">
-                  <GiftCardMini v-bind="gift">{{ `: ${gift.comment}` }}</GiftCardMini>
+                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.comment}` }}</GiftCardMini>
                 </template>
                 <template v-if="gift.type === 'gift'">
-                  <GiftCardMini v-bind="gift">{{
+                  <GiftCardMini v-bind="gift" :showTime="true">{{
                     `: 赠送了 ${gift.giftNumber}个 ${gift.giftName}`
                   }}</GiftCardMini>
                 </template>
