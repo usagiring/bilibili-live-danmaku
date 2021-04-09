@@ -129,12 +129,17 @@
             ></i-switch
             >&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
-              <span @click="alwaysOnTop">窗口置顶</span>
+              <span>窗口置顶</span>
               <i-switch
                 v-model="isAlwaysOnTop"
                 @on-change="alwaysOnTop"
               ></i-switch>
             </template>
+            <span>自动录制</span>
+            <i-switch
+              :value="isAutoRecord"
+              @on-change="changeAutoRecord"
+            ></i-switch>
           </div>
         </div>
         <div class="layout-content">
@@ -185,7 +190,11 @@ import {
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
 } from "../../service/const";
-let LIVE_COUNT = 0;
+
+// 0 未开播
+// 1 准备中（web开推流码）
+// 2 直播中（obs开始推流）
+let LIVE_STATUS = 0;
 
 export default {
   data() {
@@ -283,6 +292,9 @@ export default {
     recordId() {
       return this.$store.state.Config.recordId;
     },
+    isAutoRecord() {
+      return this.$store.state.Config.isAutoRecord;
+    },
   },
   methods: {
     async connect(status) {
@@ -317,6 +329,11 @@ export default {
         this.fansNumber = attention;
         this.fansClubNumber = fansclub || 0;
         this.liveStatus = liveStatus;
+
+        if (liveStatus === 1 && this.isAutoRecord) {
+          LIVE_STATUS = 2;
+          this.startRecord();
+        }
 
         const guardInfo = await getGuardInfo(roomId, uid);
         // this.guardNumber = guardInfo.data.info.num;
@@ -638,14 +655,15 @@ export default {
           if (msg.cmd === "DANMU_MSG") return;
           if (msg.cmd === "SEND_GIFT") return;
           if (msg.cmd === "LIVE") {
+            // 直播中
             this.liveStatus = 1;
-            LIVE_COUNT++;
-            console.log(`LIVE_COUNT: ${LIVE_COUNT}`);
-            if (LIVE_COUNT === 2) {
+            LIVE_STATUS++;
+            console.log(`LIVE_STATUS: ${LIVE_STATUS}`);
+            if (LIVE_STATUS === 2) {
               console.log("auto record start...");
               this.startRecord();
             }
-            if (LIVE_COUNT > 2) {
+            if (LIVE_STATUS > 2) {
               console.log("auto record restart...");
               this.cancelRecord();
               this.startRecord();
@@ -653,8 +671,9 @@ export default {
           }
 
           if (msg.cmd === "PREPARING") {
+            // 未开播
             this.liveStatus = 0;
-            LIVE_COUNT = 0;
+            LIVE_STATUS = 0;
             console.log("auto record stop...");
             this.cancelRecord();
           }
@@ -704,6 +723,9 @@ export default {
 
     async startRecord() {
       try {
+        if (!this.realRoomId) {
+          throw new Error("roomId required.");
+        }
         const { id } = await record({
           roomId: this.realRoomId,
           recordDir: this.recordDir,
@@ -733,6 +755,12 @@ export default {
       });
 
       emitter.removeAllListeners(`${this.recordId}-download-rate`);
+    },
+
+    async changeAutoRecord(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isAutoRecord: status,
+      });
     },
   },
   async mounted() {

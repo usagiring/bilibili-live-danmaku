@@ -82,7 +82,7 @@
     ]
   },
   "dependencies": {
-    "@tokine/bilibili-recorder": "^0.0.8",
+    "@tokine/bilibili-recorder": "^0.0.9",
     "animate.css": "^4.1.0",
     "axios": "^0.21.1",
     "cookie": "^0.4.1",

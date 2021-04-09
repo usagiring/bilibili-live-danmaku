@@ -20,6 +20,7 @@ const state = {
   danmakuFont: 'unset',
   isWithCookie: false,
   isUseMiniGiftCard: false,
+  isAutoRecord: false,
 
   optionstring: "{A}\n{B}\n{C}",
   container_style: {
