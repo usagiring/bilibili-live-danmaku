@@ -175,6 +175,9 @@
               <Button @click="refreshInfo">刷新直播间信息</Button>
             </div>
             <div class="setting-key">
+              <Button @click="setGiftConfig">刷新礼物信息</Button>
+            </div>
+            <div class="setting-key">
               <Poptip
                 confirm
                 title="确认还原默认设置？"
@@ -240,7 +243,8 @@ import {
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
 } from "../../service/const";
-import { getGuardInfo } from "../../service/bilibili-api";
+import { setGiftConfigMap } from "../../service/util";
+import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
 import { userDB, backup, deleteData } from "../../service/nedb";
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
@@ -702,6 +706,10 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", {
         isUseMiniGiftCard: value,
       });
+    },
+    async setGiftConfig() {
+      const data = await getGiftConfig(this.realRoomId);
+      setGiftConfigMap(data.data.list);
     },
   },
 };

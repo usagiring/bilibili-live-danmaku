@@ -158,7 +158,6 @@ const { BrowserWindow } = remote;
 import {
   getUserInfoThrottle,
   parseDownloadRate,
-  // setGiftConfigMap,
 } from "../../service/util";
 import {
   init,
@@ -173,7 +172,6 @@ import { record, cancelRecord } from "../../service/bilibili-recorder";
 import {
   getRoomInfoV2,
   getGuardInfo,
-  // getGiftConfig,
 } from "../../service/bilibili-api";
 import {
   commentDB,
@@ -189,6 +187,7 @@ import {
   IPC_DOWNLOAD_UPDATE,
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
+  SET_DANMAKU_ON_TOP_LEVEL
 } from "../../service/const";
 
 // 0 未开播
@@ -436,7 +435,7 @@ export default {
     },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
-      this.win.setAlwaysOnTop(status);
+      this.win.setAlwaysOnTop(status, SET_DANMAKU_ON_TOP_LEVEL);
       this.win.setIgnoreMouseEvents(status, { forward: true });
       this.$store.dispatch("UPDATE_CONFIG", {
         isAlwaysOnTop: status,
@@ -767,9 +766,6 @@ export default {
     },
   },
   async mounted() {
-    // getGiftConfig(5440).then((data) => {
-    //   setGiftConfigMap(data.data.list);
-    // });
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
       this.hasNewVersion = true;
     });
