@@ -41,8 +41,8 @@
 <script>
 import moment from "moment";
 import { commentDB, interactDB, giftDB, userDB } from "../../service/nedb";
-import { uniq, countBy } from "lodash";
-import * as echarts from 'echarts';
+import { countBy } from "lodash";
+import * as echarts from "echarts";
 // import * as echarts from "echarts/core";
 // import { LineChart } from "echarts/charts";
 // import {
@@ -162,11 +162,15 @@ export default {
         projection: { uid: 1 },
       });
       const interactUids = interacts.map((interact) => interact.uid);
-      this.interactUserCount = uniq([
-        ...giftUids,
-        ...commentUids,
-        ...interactUids,
-      ]).length;
+
+      const countMap = commentUids
+        .concat(giftUids)
+        .concat(interactUids)
+        .reduce((map, i) => {
+          map[i] = 1;
+          return map;
+        }, {});
+      this.interactUserCount = Object.keys(countMap).length;
     },
 
     changeDateRange([startTime, endTime]) {

@@ -421,6 +421,7 @@ export default {
     };
   },
   mounted() {
+    if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
     this.fonts.push({
       key: this.danmakuFont,
       value: this.danmakuFont,

@@ -5,6 +5,7 @@
       color: 'white',
       'font-size': '12px',
       border: `solid 0.5px ${medalColorBorder}`,
+      padding: '0px 2px'
     }"
     >{{ `${medalName}${medalLevel}` }}</span
   >

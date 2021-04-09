@@ -288,7 +288,7 @@ export default {
     },
     async cancelRecord() {
       try {
-        cancelRecord(this.recordId);
+        await cancelRecord(this.recordId);
       } catch (e) {
         console.warn(e);
       }

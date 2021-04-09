@@ -151,7 +151,7 @@
 </template>
 
 <script>
-import { uniq, debounce } from "lodash";
+import { debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
@@ -295,6 +295,9 @@ export default {
     isAutoRecord() {
       return this.$store.state.Config.isAutoRecord;
     },
+    isRecording() {
+      return this.$store.state.Config.isRecording;
+    },
   },
   methods: {
     async connect(status) {
@@ -330,7 +333,7 @@ export default {
         this.fansClubNumber = fansclub || 0;
         this.liveStatus = liveStatus;
 
-        if (liveStatus === 1 && this.isAutoRecord) {
+        if (liveStatus === 1 && this.isAutoRecord && !this.isRecording) {
           LIVE_STATUS = 2;
           this.startRecord();
         }
@@ -357,8 +360,8 @@ export default {
 
       if (status) {
         this.win = new BrowserWindow({
-          width: this.windowWidth || 320,
-          height: this.windowHeight || 350,
+          width: this.windowWidth || 480,
+          height: this.windowHeight || 540,
           // x, y,
           x: this.windowX || 0,
           y: this.windowY || 0,
@@ -744,7 +747,7 @@ export default {
     },
     async cancelRecord() {
       try {
-        cancelRecord(this.recordId);
+        await cancelRecord(this.recordId);
       } catch (e) {
         console.warn(e);
       }
@@ -794,9 +797,14 @@ export default {
           { projection: { uid: 1 } }
         ),
       ]);
-      this.peopleNumber = uniq(
-        [...comments, ...gifts, ...interacts].map((i) => i.uid)
-      ).length;
+      const countMap = comments
+        .concat(gifts)
+        .concat(interacts)
+        .reduce((map, i) => {
+          map[i.uid] = 1;
+          return map;
+        }, {});
+      this.peopleNumber = Object.keys(countMap).length;
     }, 10000);
   },
   beforeDestroy() {
