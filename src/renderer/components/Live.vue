@@ -316,13 +316,22 @@ export default {
           this.flvPlayer.destroy();
           this.flvPlayer = null;
         }
-        this.flvPlayer = flvjs.createPlayer({
-          type: "flv",
-          url: playUrl,
-        });
-        // {
-        //   headers
-        // }
+
+        let headers;
+        if (this.withCookie && this.userCookie) {
+          headers = {
+            cookie: this.userCookie,
+          };
+        }
+        this.flvPlayer = flvjs.createPlayer(
+          {
+            type: "flv",
+            url: playUrl,
+          },
+          {
+            headers,
+          }
+        );
 
         this.flvPlayer.on("error", (e) => {
           this.$Message.error(`播放失败: ${e}`);
