@@ -318,7 +318,7 @@ export default {
         }
 
         let headers;
-        if (this.withCookie && this.userCookie) {
+        if (this.isWithCookie && this.userCookie) {
           headers = {
             cookie: this.userCookie,
           };
