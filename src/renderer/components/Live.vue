@@ -98,7 +98,27 @@
       :style="{ height: `${this.resolution}px` }"
     ></video>
     <div :style="{ padding: '0 20px 5px 10px' }">
-      <FanMedal v-if="medalData" v-bind="medalData"></FanMedal>
+      <template v-if="medalData">
+        <FanMedal v-bind="medalData"></FanMedal>
+      </template>
+      <template v-else>
+        <Tooltip placement="top">
+          <Button
+            @click="getMedalData"
+            :disabled="!this.userCookie"
+            :loading="getMedalDataLoading"
+            size="small"
+            :style="{ 'font-size': '12px' }"
+          >
+            获取当前佩戴粉丝牌</Button
+          >
+          <div slot="content" :style="{ 'white-space': 'normal' }">
+            <div>
+              <p>会同时触发进入房间消息</p>
+            </div>
+          </div>
+        </Tooltip>
+      </template>
       <Input
         v-model="message"
         placeholder="弹幕..."
@@ -167,6 +187,7 @@ export default {
       recordQuality: "原画",
       playQuality: "超清",
       resolution: "480",
+      getMedalDataLoading: false,
       qualities: [
         {
           key: 1,
@@ -243,7 +264,7 @@ export default {
     },
   },
   mounted() {
-    this.getMedalData();
+    // this.getMedalData();
 
     if (this.isRecording) {
       this.recordDuring = Date.now() - this.recordStartTime;
@@ -403,6 +424,8 @@ export default {
 
     async getMedalData() {
       if (!this.userCookie) return;
+      this.getMedalDataLoading = true;
+      // 该接口会同时触发进入房间消息！
       const { data } = await getInfoByUser(this.realRoomId, this.userCookie);
       const { medal } = data || {};
       const { curr_weared, is_weared } = medal || {};
@@ -421,6 +444,7 @@ export default {
         medalName: medal_name,
         medalLevel: level,
       };
+      this.getMedalDataLoading = false;
     },
 
     async wearCurrentMedal() {
