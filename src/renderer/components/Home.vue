@@ -23,10 +23,10 @@
             <Icon type="md-play" />
             <span v-if="!isCollapsed">直播</span>
           </MenuItem>
-          <!-- <MenuItem name="1-5" to="/lottery">
+          <MenuItem name="1-6" to="/lottery">
             <Icon type="md-bonfire" />
             <span v-if="!isCollapsed">祈愿</span>
-          </MenuItem> -->
+          </MenuItem>
         </Menu>
       </Sider>
       <Layout>
