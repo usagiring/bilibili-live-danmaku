@@ -238,7 +238,7 @@
               }">{{
               `${message.name} 赠送了 ${message.giftNumber} 个 ${message.giftName}`
             }}</span>
-            <img :style="{ 'vertical-align': 'middle', width: '35px' }" :src="giftGifMap[message.giftId]">
+            <img :style="{ 'vertical-align': 'middle', width: '35px' }" :src="giftGifMap[message.giftId] && giftGifMap[message.giftId].webp">
             </GiftCard>
             <GiftCardMini v-else v-bind="message">{{
               `: 赠送了 ${message.giftNumber}个 ${message.giftName}`

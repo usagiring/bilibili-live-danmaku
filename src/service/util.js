@@ -78,7 +78,13 @@ export function dateFormat(date) {
 
 export function setGiftConfigMap(gifts) {
   const giftConfigMap = gifts.reduce((map, gift) => {
-    return Object.assign(map, { [gift.id]: gift.webp })
+    return Object.assign(map, {
+      [gift.id]: {
+        webp: gift.webp,
+        name: gift.name,
+        price: gift.price
+      }
+    })
   }, {})
   fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
 }
