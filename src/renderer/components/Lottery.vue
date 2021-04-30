@@ -34,7 +34,11 @@
           filterable
           size="small"
         >
-          <Option v-for="gift in gifts" :value="gift.value" :key="gift.key">
+          <Option
+            v-for="gift in giftSelectors"
+            :value="gift.value"
+            :key="gift.key"
+          >
             <img
               :style="{ 'vertical-align': 'middle', width: '30px' }"
               :src="gift.webp"
@@ -44,8 +48,14 @@
         </Select>
       </div>
     </div>
-    <Button>开始统计</Button>
-    <Button>祈愿</Button>
+    <Button @click="start">开始</Button>
+    <Button @click="inoru">祈愿</Button>
+    <div>
+      <template v-for="info of userGiftsSorted">
+        {{ `${info.name}(${info.uid}): ${info.giftNumber}` }}
+
+      </template>
+    </div>
   </div>
 </template>
 
@@ -53,11 +63,12 @@
 // 统计一段时间内送礼
 // 检测开启天选自动开始统计
 // 发送弹幕或者送礼抽奖
+import { sortBy } from 'lodash' 
 import { GIFT_CONFIG_MAP } from "../../service/const";
 import emitter from "../../service/event";
-const gifts = [];
+const giftSelectors = [];
 for (const key in GIFT_CONFIG_MAP) {
-  gifts.push({
+  giftSelectors.push({
     key: key,
     value: key,
     label: GIFT_CONFIG_MAP[key].name,
@@ -70,19 +81,28 @@ export default {
     return {
       isDanmaku: true,
       isGift: false,
-      gifts: gifts,
+      giftSelectors: giftSelectors,
       medalLevel: 0,
       danmakuText: "",
       selectedGiftId: 0,
       userGiftMap: {},
+      gifts: [],
+      userGiftsSorted: [],
     };
+  },
+  components: {
+    // userGiftsSorted() {
+    //   return sortBy(Object.values(this.userGiftMap), '-giftNumber')
+    // }
   },
   beforeDestroy() {
     this.stop();
   },
   methods: {
     start() {
-      emitter.on("message", this.onLotteryMessage);
+      console.log('2132')
+      // emitter.on("message", this.onLotteryMessage);
+      this.onLotteryMessage([])
     },
     stop() {
       // const listenerCount = emitter.listenerCount("message");
@@ -96,28 +116,52 @@ export default {
       if (this.isDanmaku) {
       }
       if (this.isGift) {
-        const gifts = data
-          .map(parseGift)
-          .fitler(
-            (gift) =>
-              gift &&
-              gift.type === "gift" &&
-              `${gift.giftId}` === `${selectedGiftId}`
-          );
+        const gifts = [
+          {
+            giftId: 1,
+            giftNumber: 1,
+            uid: 1,
+            name: 'u1'
+          },
+          {
+            giftId: 2,
+            giftNumber: 1,
+            uid: 2,
+            name: 'u2'
+          },
+          {
+            giftId: 1,
+            giftNumber: 2,
+            uid: 1,
+            name: 'u1'
+          }
+        ]
+        // const gifts = data
+        //   .map(parseGift)
+        //   .fitler(
+        //     (gift) =>
+        //       gift &&
+        //       gift.type === "gift" &&
+        //       `${gift.giftId}` === `${selectedGiftId}`
+          // );
 
         gifts.forEach((gift) => {
           const { uid, name, giftNumber } = gift;
-          userGiftMap[uid] = userGiftMap[uid] || {
-            name,
-            giftNumber: 0,
-          };
-          userGiftMap[uid] = {
-            name,
-            giftNumber: userGiftMap[uid].giftNumber
-              ? userGiftMap[uid].giftNumber + giftNumber
-              : 0,
-          };
+          if (!this.userGiftMap[uid]) {
+            this.userGiftMap[uid] = {
+              uid,
+              name,
+              giftNumber: giftNumber,
+            };
+          } else {
+            this.userGiftMap[uid].giftNumber =
+              this.userGiftMap[uid].giftNumber + giftNumber;
+          }
+          this.gifts.push(gift);
         });
+
+        this.userGiftsSorted  = sortBy(Object.values(this.userGiftMap), '-giftNumber')
+        console.log(this.userGiftsSorted, this.gifts)
       }
     },
 
@@ -126,6 +170,10 @@ export default {
     },
     changeSelectGift(value) {
       console.log(value);
+    },
+    inoru() {
+      const index = parseInt(Math.random() * this.gifts.length);
+      return this.gifts[index]
     },
   },
 };
