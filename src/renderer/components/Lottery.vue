@@ -5,9 +5,11 @@
         class="selector-content"
         :style="isDanmaku && { border: '2px solid orange' }"
       >
-        <Radio class="" :value="isDanmaku" @on-change="selectDanmakuOrGift"
-          >弹幕</Radio
-        >
+        <Radio
+          class=""
+          :value="isDanmaku"
+          @on-change="selectDanmakuOrGift"
+        >弹幕</Radio>
         <span class="inline-text">牌子等级大于</span>
         <InputNumber
           v-model="medalLevel"
@@ -26,7 +28,10 @@
         class="selector-content"
         :style="isGift && { border: '2px solid orange' }"
       >
-        <Radio :value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
+        <Radio
+          :value="isGift"
+          @on-change="selectDanmakuOrGift"
+        >礼物</Radio>
         <Select
           :style="{ width: '200px', display: 'inline-block' }"
           :value="gifts"
@@ -51,9 +56,12 @@
     <Button @click="start">开始</Button>
     <Button @click="inoru">祈愿</Button>
     <div>
+      <span>总数: {{ count }}</span>
+      <span>价值: {{ totalPrice }}</span>
+    </div>
+    <div>
       <template v-for="info of userGiftsSorted">
-        {{ `${info.name}(${info.uid}): ${info.giftNumber}` }}
-
+        {{`${info.name}(${info.uid}): ${info.giftNumber} ${Number((info.price / totalPrice) * 100).toFixed(2)}%;`}}
       </template>
     </div>
   </div>
@@ -63,7 +71,7 @@
 // 统计一段时间内送礼
 // 检测开启天选自动开始统计
 // 发送弹幕或者送礼抽奖
-import { sortBy } from 'lodash' 
+import { sortBy } from "lodash";
 import { GIFT_CONFIG_MAP } from "../../service/const";
 import emitter from "../../service/event";
 const giftSelectors = [];
@@ -88,6 +96,8 @@ export default {
       userGiftMap: {},
       gifts: [],
       userGiftsSorted: [],
+      count: 0,
+      totalPrice: 0,
     };
   },
   components: {
@@ -100,9 +110,8 @@ export default {
   },
   methods: {
     start() {
-      console.log('2132')
       // emitter.on("message", this.onLotteryMessage);
-      this.onLotteryMessage([])
+      this.onLotteryMessage([]);
     },
     stop() {
       // const listenerCount = emitter.listenerCount("message");
@@ -113,6 +122,7 @@ export default {
 
     async onLotteryMessage(data) {
       if (!Array.isArray(data)) return;
+      console.log(this.isDanmaku, this.isGift);
       if (this.isDanmaku) {
       }
       if (this.isGift) {
@@ -121,21 +131,24 @@ export default {
             giftId: 1,
             giftNumber: 1,
             uid: 1,
-            name: 'u1'
+            name: "u1",
+            price: 300,
           },
           {
             giftId: 2,
             giftNumber: 1,
             uid: 2,
-            name: 'u2'
+            name: "u2",
+            price: 200,
           },
           {
             giftId: 1,
             giftNumber: 2,
             uid: 1,
-            name: 'u1'
-          }
-        ]
+            name: "u1",
+            price: 100,
+          },
+        ];
         // const gifts = data
         //   .map(parseGift)
         //   .fitler(
@@ -143,25 +156,28 @@ export default {
         //       gift &&
         //       gift.type === "gift" &&
         //       `${gift.giftId}` === `${selectedGiftId}`
-          // );
+        // );
 
         gifts.forEach((gift) => {
-          const { uid, name, giftNumber } = gift;
+          const { uid, name, giftNumber = 1, price = 0 } = gift;
           if (!this.userGiftMap[uid]) {
             this.userGiftMap[uid] = {
               uid,
               name,
               giftNumber: giftNumber,
+              price: Number(giftNumber * price).toFixed(2),
             };
           } else {
-            this.userGiftMap[uid].giftNumber =
-              this.userGiftMap[uid].giftNumber + giftNumber;
+            this.userGiftMap[uid].giftNumber = this.userGiftMap[uid].giftNumber + giftNumber;
+            this.userGiftMap[uid].price = Number(this.userGiftMap[uid].price + giftNumber * price).toFixed(2);
           }
+          this.count = this.count + giftNumber;
+          this.totalPrice = Number(this.totalPrice + giftNumber * price).toFixed(2);
           this.gifts.push(gift);
         });
 
-        this.userGiftsSorted  = sortBy(Object.values(this.userGiftMap), '-giftNumber')
-        console.log(this.userGiftsSorted, this.gifts)
+        this.userGiftsSorted = sortBy(Object.values(this.userGiftMap), "-giftNumber");
+        console.log(this.userGiftsSorted, this.gifts);
       }
     },
 
@@ -173,7 +189,7 @@ export default {
     },
     inoru() {
       const index = parseInt(Math.random() * this.gifts.length);
-      return this.gifts[index]
+      return this.gifts[index];
     },
   },
 };
