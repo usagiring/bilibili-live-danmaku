@@ -1,55 +1,29 @@
 <template>
   <div class="layout">
     <Layout :style="{ minHeight: '100vh' }">
-      <Sider
-        collapsible
-        :collapsed-width="78"
-        v-model="isCollapsed"
-      >
-        <Menu
-          theme="dark"
-          width="auto"
-          :class="menuitemClasses"
-        >
-          <MenuItem
-            name="1-1"
-            to="/setting"
-          >
+      <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
+        <Menu theme="dark" width="auto" :class="menuitemClasses">
+          <MenuItem name="1-1" to="/setting">
           <Icon type="md-build" />
           <span v-if="!isCollapsed">设置</span>
           </MenuItem>
-          <MenuItem
-            name="1-2"
-            to="/message"
-          >
+          <MenuItem name="1-2" to="/message">
           <Icon type="md-chatboxes" />
           <span v-if="!isCollapsed">消息</span>
           </MenuItem>
-          <MenuItem
-            name="1-3"
-            to="/vote"
-          >
+          <MenuItem name="1-3" to="/vote">
           <Icon type="md-pie" />
           <span v-if="!isCollapsed">投票</span>
           </MenuItem>
-          <MenuItem
-            name="1-4"
-            to="/statistic"
-          >
+          <MenuItem name="1-4" to="/statistic">
           <Icon type="md-stats" />
           <span v-if="!isCollapsed">统计</span>
           </MenuItem>
-          <MenuItem
-            name="1-5"
-            to="/live"
-          >
+          <MenuItem name="1-5" to="/live">
           <Icon type="md-play" />
           <span v-if="!isCollapsed">直播</span>
           </MenuItem>
-          <MenuItem
-            name="1-6"
-            to="/lottery"
-          >
+          <MenuItem name="1-6" to="/lottery">
           <Icon type="md-bonfire" />
           <span v-if="!isCollapsed">祈愿</span>
           </MenuItem>
@@ -58,18 +32,10 @@
       <Layout>
         <div class="layout-header">
           <div class="avatar-wrapper">
-            <Avatar
-              :icon="avatar ? undefined : 'ios-person'"
-              :src="avatar ? avatar : undefined"
-              size="large"
-            />&nbsp;&nbsp;
+            <Avatar :icon="avatar ? undefined : 'ios-person'" :src="avatar ? avatar : undefined" size="large" />&nbsp;&nbsp;
             <span>{{ username ? username : "未连接" }}</span>
             &nbsp;
-            <Tag
-              v-if="username"
-              type="border"
-              :color="liveStatus === 1 ? 'green' : 'silver'"
-            >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
+            <Tag v-if="username" type="border" :color="liveStatus === 1 ? 'green' : 'silver'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
           </div>
 
           <div class="status-wrapper">
@@ -108,34 +74,16 @@
           <!-- <div> -->
 
           <!-- </div> -->
-          <div
-            class="updater-wrapper"
-            v-if="hasNewVersion"
-          >
+          <div class="updater-wrapper" v-if="hasNewVersion">
             <template v-if="!isAppUpdating">
-              <Button
-                shape="circle"
-                type="dashed"
-                @click="updateApp"
-                :loading="isAppUpdateStarting"
-              >
-                <Icon
-                  type="md-arrow-round-up"
-                  color="green"
-                />
+              <Button shape="circle" type="dashed" @click="updateApp" :loading="isAppUpdateStarting">
+                <Icon type="md-arrow-round-up" color="green" />
                 <span :style="{ color: 'green' }">更新</span>
               </Button>
             </template>
             <template v-else>
-              <i-circle
-                :percent="percent"
-                :size="60"
-                :style="{ top: '2px' }"
-              >
-                <span
-                  class="demo-Circle-inner"
-                  style="font-size: 12px"
-                >{{
+              <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
+                <span class="demo-Circle-inner" style="font-size: 12px">{{
                   downloadRate
                 }}</span>
               </i-circle>
@@ -145,51 +93,22 @@
         <div class="layout-header2">
           <div>
             <span>连接直播间</span>
-            <AutoComplete
-              :value="displayRoomId"
-              @on-change="changeRoomId"
-              placeholder="请输入房间号"
-              size="small"
-              :disabled="isConnected"
-              style="width: 120px"
-              :filter-method="filterRoomId"
-            >
-              <Option
-                v-for="room in historyRooms"
-                :value="room.roomId"
-                :key="room.roomId"
-              >
-                <Avatar
-                  :src="room.face || DEFAULT_AVATAR"
-                  size="small"
-                />
+            <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
+              <Option v-for="room in historyRooms" :value="room.roomId" :key="room.roomId">
+                <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
                 {{ `${room.uname} (${room.roomId})` }}
+                <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
               </Option>
             </AutoComplete>
-            <i-switch
-              :value="isConnected"
-              :loading="isConnecting"
-              @on-change="connect"
-              :disabled="!displayRoomId"
-            />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <i-switch :value="isConnected" :loading="isConnecting" @on-change="connect" :disabled="!displayRoomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
-            <i-switch
-              :value="isShowDanmakuWindow"
-              :loading="isShowDanmakuWindowLoading"
-              @on-change="showDanmakuWindow"
-            ></i-switch>&nbsp;&nbsp;&nbsp;
+            <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span>窗口置顶</span>
-              <i-switch
-                v-model="isAlwaysOnTop"
-                @on-change="alwaysOnTop"
-              ></i-switch>
+              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
             <span>自动录制</span>
-            <i-switch
-              :value="isAutoRecord"
-              @on-change="changeAutoRecord"
-            ></i-switch>
+            <i-switch :value="isAutoRecord" @on-change="changeAutoRecord"></i-switch>
           </div>
         </div>
         <div class="layout-content">
@@ -205,10 +124,7 @@ import { debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
-import {
-  getUserInfoThrottle,
-  parseDownloadRate,
-} from "../../service/util";
+import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
 import {
   init,
   close,
@@ -219,10 +135,7 @@ import {
 } from "../../service/bilibili-live-ws";
 import emitter from "../../service/event";
 import { record, cancelRecord } from "../../service/bilibili-recorder";
-import {
-  getRoomInfoV2,
-  getGuardInfo,
-} from "../../service/bilibili-api";
+import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
   commentDB,
   interactDB,
@@ -238,7 +151,7 @@ import {
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
   SET_DANMAKU_ON_TOP_LEVEL,
-  DEFAULT_RECORD_DIR
+  DEFAULT_RECORD_DIR,
 } from "../../service/const";
 
 // 0 未开播
@@ -348,7 +261,15 @@ export default {
     },
     historyRooms() {
       return this.$store.state.Config.historyRooms;
-    }
+    },
+    // filteredRooms() {
+    //   return this.historyRooms.filter(room => {
+    //     const index = `${room.roomId}`.indexOf(`${this.displayRoomId}`)
+    //     if (!~index) return false
+    //     // room.highLightIndex = index
+    //     return true
+    //   })
+    // }
   },
   methods: {
     async connect(status) {
@@ -357,7 +278,7 @@ export default {
         const { data } = await getRoomInfoV2(this.displayRoomId);
         if (!data) {
           this.$Message.error("连接失败")
-          this.isConnecting = false;
+          this.isConnecting = false
           return
         }
 
@@ -403,10 +324,20 @@ export default {
           ruid: uid,
           medalId: medal_id,
           medalName: medal_name,
-        }
+        };
         // 加入历史连接房间号
-        if (!this.historyRooms.find(room => room.roomId === roomId)) {
-          config.historyRooms = [...this.historyRooms, { roomId, uname, face }]
+        if (!this.historyRooms.find((room) => room.roomId === roomId)) {
+          if (this.historyRooms.length > 9) {
+            config.historyRooms = [
+              ...this.historyRooms.slice(1),
+              { roomId, uname, face },
+            ];
+          } else {
+            config.historyRooms = [
+              ...this.historyRooms,
+              { roomId, uname, face },
+            ];
+          }
         }
         this.$store.dispatch("UPDATE_CONFIG", config);
       } else {
@@ -592,14 +523,14 @@ export default {
 
     changeRoomId(roomId) {
       try {
-        if (typeof roomId === 'string') {
-          roomId = roomId.replace(/[^\d]/g, '')
+        if (typeof roomId === "string") {
+          roomId = roomId.replace(/[^\d]/g, "");
         }
       } catch (e) {
-        console.log(e)
-        this.$Message.warning('请输入正确数字')
+        console.log(e);
+        this.$Message.warning("请输入正确数字");
       }
-      this.displayRoomId = roomId
+      this.displayRoomId = roomId;
     },
 
     onMessage: async function (data) {
@@ -834,10 +765,14 @@ export default {
       });
     },
 
-    filterRoomId(value, option) {
-      console.log(value, option)
-      return true
-    }
+    removeHistoryRoom(room) {
+      const historyRooms = this.historyRooms.filter(
+        (e) => e.roomId !== room.roomId
+      );
+      this.$store.dispatch("UPDATE_CONFIG", {
+        historyRooms: historyRooms,
+      });
+    },
   },
   async mounted() {
     this.displayRoomId = this.$store.state.Config.realRoomId;
@@ -959,7 +894,17 @@ export default {
   font-size: 22px;
 }
 
-.ivu-select::v-deep .ivu-icon {
+/* .ivu-select::v-deep .ivu-icon {
   display: none;
+} */
+
+.remove-history-room {
+  vertical-align: middle;
+  font-size: 15px;
+  margin-left: 2px;
+}
+
+.remove-history-room:hover {
+  color: crimson;
 }
 </style>
