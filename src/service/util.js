@@ -72,8 +72,8 @@ export function parseHexColor(colorNumber) {
   return `#${colorNumber.toString(16).padStart(6, '0')}`
 }
 
-export function dateFormat(date) {
-  return moment(date).format("YYYY-MM-DD HH:mm:ss");
+export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
+  return moment(date).format(formatter);
 }
 
 export function setGiftConfigMap(gifts) {

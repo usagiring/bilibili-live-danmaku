@@ -26,6 +26,7 @@ const state = {
   container_style: {
     background: "rgba(0, 0, 0, 0.3)"
   },
+  historyRooms: [],
 
   '0_message': {
     background: 'rgba(0,0,0,0)'

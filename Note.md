@@ -11,6 +11,7 @@ Col -> i-col
 
 ### vue
 单文件组件设置body style 需要在生命周期beforecreate时设置（需探究原因）
+v-deep 作用于 scope 中更深层的子元素
 
 ### vuex-electron
 默认使用 electron-store 存储

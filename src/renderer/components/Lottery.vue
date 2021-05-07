@@ -53,11 +53,26 @@
         </Select>
       </div>
     </div>
-    <Button @click="start">开始</Button>
-    <Button @click="inoru">祈愿</Button>
+    <div class="button-cotainer">
+      <template v-if="isRunning">
+        <Button
+          @click="start"
+          type="primary"
+        >少女祈愿中</Button>
+      </template>
+      <template v-else>
+        <Button
+          @click="start"
+          type="primary"
+        >祈愿</Button>
+      </template>
+
+      <span :style="{ display: 'inline-block', width: '80px', 'margin-left': '10px' }">总数: {{ count }}</span>
+      <span :style="{ display: 'inline-block', 'margin-left': '10px' }">总金瓜子: {{ totalPrice }}</span>
+    </div>
+
     <div>
-      <span>总数: {{ count }}</span>
-      <span>价值: {{ totalPrice }}</span>
+      
     </div>
     <div>
       <template v-for="info of userGiftsSorted">
@@ -98,6 +113,7 @@ export default {
       userGiftsSorted: [],
       count: 0,
       totalPrice: 0,
+      isRunning: false
     };
   },
   components: {
@@ -112,12 +128,11 @@ export default {
     start() {
       // emitter.on("message", this.onLotteryMessage);
       this.onLotteryMessage([]);
+      this.isRunning = true
     },
     stop() {
-      // const listenerCount = emitter.listenerCount("message");
-      // // 如果只有1个监听者，即主监听器，不处理
-      // if (listenerCount <= 1) return;
       emitter.removeListener("message", this.onLotteryMessage);
+      this.isRunning = false
     },
 
     async onLotteryMessage(data) {
@@ -165,17 +180,18 @@ export default {
               uid,
               name,
               giftNumber: giftNumber,
-              price: Number(giftNumber * price).toFixed(2),
+              price: giftNumber * price,
             };
           } else {
-            this.userGiftMap[uid].giftNumber = this.userGiftMap[uid].giftNumber + giftNumber;
-            this.userGiftMap[uid].price = Number(this.userGiftMap[uid].price + giftNumber * price).toFixed(2);
+            this.userGiftMap[uid].giftNumber = this.userGiftMap[uid].giftNumber + giftNumber
+            this.userGiftMap[uid].price = this.userGiftMap[uid].price + giftNumber * price
           }
-          this.count = this.count + giftNumber;
-          this.totalPrice = Number(this.totalPrice + giftNumber * price).toFixed(2);
+          this.count = this.count + giftNumber
+          this.totalPrice = this.totalPrice + giftNumber * price
           this.gifts.push(gift);
         });
 
+        console.log(this.totalPrice)
         this.userGiftsSorted = sortBy(Object.values(this.userGiftMap), "-giftNumber");
         console.log(this.userGiftsSorted, this.gifts);
       }
@@ -207,5 +223,10 @@ export default {
   margin: 5px 20px;
   padding: 10px;
   border: 2px solid white;
+}
+.button-cotainer {
+  padding: 15px;
+  margin: 0 20px;
+  border-top: 1px solid silver;
 }
 </style>

@@ -5,6 +5,7 @@ import httpAdapter from './http'
 import { strict as assert } from 'assert'
 import { DEFAULT_RECORD_DIR } from './const'
 import emitter from './event'
+import { dateFormat } from './util'
 
 const qualityMap = {
   "原画": 10000,
@@ -39,7 +40,7 @@ async function record({ roomId, recordDir, quality, cookie }) {
     fs.mkdirSync(_recordDir)
   }
 
-  const output = path.join(_recordDir, `./${roomId}_${Date.now()}.flv`)
+  const output = path.join(_recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYY-MM-DD_HH:mm:ss')}.flv`)
   console.log(`record: OUTPUT: ${output}`)
 
   const axiosOptions = {}

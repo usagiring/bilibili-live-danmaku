@@ -15,7 +15,7 @@
           </Button>
         </template>
         {{ recordDuringFormat }}
-        <div :style="{ display: 'inline-block', width: '70px' }">
+        <div :style="{ display: 'inline-block', width: '80px', 'text-align': 'center' }">
           {{ downloadRate }}
         </div>
         <Select

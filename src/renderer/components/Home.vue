@@ -1,31 +1,57 @@
 <template>
   <div class="layout">
     <Layout :style="{ minHeight: '100vh' }">
-      <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
-        <Menu theme="dark" width="auto" :class="menuitemClasses">
-          <MenuItem name="1-1" to="/setting">
-            <Icon type="md-build" />
-            <span v-if="!isCollapsed">设置</span>
+      <Sider
+        collapsible
+        :collapsed-width="78"
+        v-model="isCollapsed"
+      >
+        <Menu
+          theme="dark"
+          width="auto"
+          :class="menuitemClasses"
+        >
+          <MenuItem
+            name="1-1"
+            to="/setting"
+          >
+          <Icon type="md-build" />
+          <span v-if="!isCollapsed">设置</span>
           </MenuItem>
-          <MenuItem name="1-2" to="/message">
-            <Icon type="md-chatboxes" />
-            <span v-if="!isCollapsed">消息</span>
+          <MenuItem
+            name="1-2"
+            to="/message"
+          >
+          <Icon type="md-chatboxes" />
+          <span v-if="!isCollapsed">消息</span>
           </MenuItem>
-          <MenuItem name="1-3" to="/vote">
-            <Icon type="md-pie" />
-            <span v-if="!isCollapsed">投票</span>
+          <MenuItem
+            name="1-3"
+            to="/vote"
+          >
+          <Icon type="md-pie" />
+          <span v-if="!isCollapsed">投票</span>
           </MenuItem>
-          <MenuItem name="1-4" to="/statistic">
-            <Icon type="md-stats" />
-            <span v-if="!isCollapsed">统计</span>
+          <MenuItem
+            name="1-4"
+            to="/statistic"
+          >
+          <Icon type="md-stats" />
+          <span v-if="!isCollapsed">统计</span>
           </MenuItem>
-          <MenuItem name="1-5" to="/live">
-            <Icon type="md-play" />
-            <span v-if="!isCollapsed">直播</span>
+          <MenuItem
+            name="1-5"
+            to="/live"
+          >
+          <Icon type="md-play" />
+          <span v-if="!isCollapsed">直播</span>
           </MenuItem>
-          <MenuItem name="1-6" to="/lottery">
-            <Icon type="md-bonfire" />
-            <span v-if="!isCollapsed">祈愿</span>
+          <MenuItem
+            name="1-6"
+            to="/lottery"
+          >
+          <Icon type="md-bonfire" />
+          <span v-if="!isCollapsed">祈愿</span>
           </MenuItem>
         </Menu>
       </Sider>
@@ -43,8 +69,7 @@
               v-if="username"
               type="border"
               :color="liveStatus === 1 ? 'green' : 'silver'"
-              >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag
-            >
+            >{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
           </div>
 
           <div class="status-wrapper">
@@ -83,7 +108,10 @@
           <!-- <div> -->
 
           <!-- </div> -->
-          <div class="updater-wrapper" v-if="hasNewVersion">
+          <div
+            class="updater-wrapper"
+            v-if="hasNewVersion"
+          >
             <template v-if="!isAppUpdating">
               <Button
                 shape="circle"
@@ -91,13 +119,23 @@
                 @click="updateApp"
                 :loading="isAppUpdateStarting"
               >
-                <Icon type="md-arrow-round-up" color="green" />
+                <Icon
+                  type="md-arrow-round-up"
+                  color="green"
+                />
                 <span :style="{ color: 'green' }">更新</span>
               </Button>
             </template>
             <template v-else>
-              <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
-                <span class="demo-Circle-inner" style="font-size: 12px">{{
+              <i-circle
+                :percent="percent"
+                :size="60"
+                :style="{ top: '2px' }"
+              >
+                <span
+                  class="demo-Circle-inner"
+                  style="font-size: 12px"
+                >{{
                   downloadRate
                 }}</span>
               </i-circle>
@@ -107,14 +145,31 @@
         <div class="layout-header2">
           <div>
             <span>连接直播间</span>
-            <InputNumber
+            <!-- <InputNumber
               :value="roomId"
               @on-change="changeRoomId"
               placeholder="请输入房间号"
               size="small"
               :disabled="isConnected"
               style="width: 120px"
-            />
+            /> -->
+            <Select
+              style="width: 120px"
+              placeholder="请输入房间号"
+              :disabled="isConnected"
+              size="small"
+              filterable
+              not-found-text="暂无历史记录"
+              @on-query-change="changeRoomId"
+            >
+              <Option
+                v-for="room in historyRooms"
+                :value="room.roomId"
+                :key="room.roomId"
+              >
+                <span>{{ room.uname }}</span>
+              </Option>
+            </Select>
             <i-switch
               :value="isConnected"
               :loading="isConnecting"
@@ -126,8 +181,7 @@
               :value="isShowDanmakuWindow"
               :loading="isShowDanmakuWindowLoading"
               @on-change="showDanmakuWindow"
-            ></i-switch
-            >&nbsp;&nbsp;&nbsp;
+            ></i-switch>&nbsp;&nbsp;&nbsp;
             <template v-if="isShowDanmakuWindow">
               <span>窗口置顶</span>
               <i-switch
@@ -298,6 +352,9 @@ export default {
     isRecording() {
       return this.$store.state.Config.isRecording;
     },
+    historyRooms() {
+      return this.$store.state.Config.historyRooms;
+    }
   },
   methods: {
     async connect(status) {
@@ -340,19 +397,28 @@ export default {
 
         const guardInfo = await getGuardInfo(roomId, uid);
         // this.guardNumber = guardInfo.data.info.num;
-        this.$store.dispatch("UPDATE_CONFIG", {
+        const config = {
           isConnected: status,
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
           ruid: uid,
           medalId: medal_id,
           medalName: medal_name,
-        });
+        }
+        // 加入历史连接房间号
+        if (!this.historyRooms.find(room => room.roomId === roomId)) {
+          config.historyRooms = [...this.historyRooms, { roomId, uname, face }]
+        }
+        this.$store.dispatch("UPDATE_CONFIG", config);
       } else {
         close();
         this.initial();
       }
       this.isConnecting = false;
+    },
+
+    onChangeRoomId(value) {
+      console.log(value)
     },
     showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
@@ -529,6 +595,7 @@ export default {
     },
 
     changeRoomId(roomId) {
+      console.log(roomId)
       this.$store.dispatch("UPDATE_CONFIG", {
         roomId: roomId,
       });
@@ -882,5 +949,9 @@ export default {
   transition: font-size 0.2s ease 0.2s, transform 0.2s ease 0.2s;
   vertical-align: middle;
   font-size: 22px;
+}
+
+.ivu-select::v-deep .ivu-icon {
+  display: none;
 }
 </style>
