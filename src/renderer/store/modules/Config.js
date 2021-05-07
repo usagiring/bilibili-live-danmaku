@@ -1,6 +1,7 @@
 // {role}_{prop}: { [property: string]: string }
 const state = {
   roomId: 1,
+  displayRoomId: 1,
   isConnected: false,
   isShowAvatar: true,
   isShowMemberShipIcon: true,

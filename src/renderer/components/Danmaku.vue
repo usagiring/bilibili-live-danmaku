@@ -56,7 +56,6 @@
                   }"
                 >
                   <Avatar
-                    class
                     :src="gift.avatar || DEFAULT_AVATAR"
                     size="small"
                   />

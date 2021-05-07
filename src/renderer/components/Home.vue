@@ -145,36 +145,32 @@
         <div class="layout-header2">
           <div>
             <span>连接直播间</span>
-            <!-- <InputNumber
-              :value="roomId"
+            <AutoComplete
+              :value="displayRoomId"
               @on-change="changeRoomId"
               placeholder="请输入房间号"
               size="small"
               :disabled="isConnected"
               style="width: 120px"
-            /> -->
-            <Select
-              style="width: 120px"
-              placeholder="请输入房间号"
-              :disabled="isConnected"
-              size="small"
-              filterable
-              not-found-text="暂无历史记录"
-              @on-query-change="changeRoomId"
+              :filter-method="filterRoomId"
             >
               <Option
                 v-for="room in historyRooms"
                 :value="room.roomId"
                 :key="room.roomId"
               >
-                <span>{{ room.uname }}</span>
+                <Avatar
+                  :src="room.face || DEFAULT_AVATAR"
+                  size="small"
+                />
+                {{ `${room.uname} (${room.roomId})` }}
               </Option>
-            </Select>
+            </AutoComplete>
             <i-switch
               :value="isConnected"
               :loading="isConnecting"
               @on-change="connect"
-              :disabled="!roomId"
+              :disabled="!displayRoomId"
             />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span>弹幕窗</span>
             <i-switch
@@ -253,6 +249,7 @@ let LIVE_STATUS = 0;
 export default {
   data() {
     return {
+      displayRoomId: 0,
       isCollapsed: true,
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
@@ -289,9 +286,6 @@ export default {
     console.log(`listenerCount: ${listenerCount}`);
   },
   computed: {
-    roomId() {
-      return this.$store.state.Config.roomId;
-    },
     menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
     },
@@ -359,9 +353,13 @@ export default {
   methods: {
     async connect(status) {
       this.isConnecting = true;
-      if (status && this.roomId) {
-        const { data } = await getRoomInfoV2(this.roomId);
-        console.log(data);
+      if (status && this.displayRoomId) {
+        const { data } = await getRoomInfoV2(this.displayRoomId);
+        if (!data) {
+          this.$Message.error("连接失败")
+          this.isConnecting = false;
+          return
+        }
 
         const {
           uid,
@@ -401,6 +399,7 @@ export default {
           isConnected: status,
           guardNumber: guardInfo.data.info.num,
           realRoomId: roomId,
+          displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
           ruid: uid,
           medalId: medal_id,
           medalName: medal_name,
@@ -417,9 +416,6 @@ export default {
       this.isConnecting = false;
     },
 
-    onChangeRoomId(value) {
-      console.log(value)
-    },
     showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
       this.isShowDanmakuWindowLoading = true;
@@ -595,10 +591,15 @@ export default {
     },
 
     changeRoomId(roomId) {
-      console.log(roomId)
-      this.$store.dispatch("UPDATE_CONFIG", {
-        roomId: roomId,
-      });
+      try {
+        if (typeof roomId === 'string') {
+          roomId = roomId.replace(/[^\d]/g, '')
+        }
+      } catch (e) {
+        console.log(e)
+        this.$Message.warning('请输入正确数字')
+      }
+      this.displayRoomId = roomId
     },
 
     onMessage: async function (data) {
@@ -669,7 +670,7 @@ export default {
 
           if (gift.type === "superChat") {
             let data = await giftDB.findOne({
-              roomId: this.roomId,
+              roomId: this.realRoomId,
               superChatId: gift.superChatId,
             });
 
@@ -696,7 +697,7 @@ export default {
             let data;
             if (gift.batchComboId) {
               const comboGift = await giftDB.findOne({
-                roomId: this.roomId,
+                roomId: this.realRoomId,
                 batchComboId: gift.batchComboId,
               });
               if (comboGift) {
@@ -832,8 +833,15 @@ export default {
         isAutoRecord: status,
       });
     },
+
+    filterRoomId(value, option) {
+      console.log(value, option)
+      return true
+    }
   },
   async mounted() {
+    this.displayRoomId = this.$store.state.Config.realRoomId;
+
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
       this.hasNewVersion = true;
     });
