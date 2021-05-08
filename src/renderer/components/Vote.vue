@@ -2,16 +2,7 @@
   <div>
     <Row>
       <i-col span="7">
-        <Input
-          class="option-input"
-          :value="optionstring"
-          @on-change="changeInput"
-          type="textarea"
-          :rows="7"
-          placeholder="输入备选项，使用换行分隔"
-          :disabled="isWatching"
-          :style="{ width: '90%', padding: '5px' }"
-        />
+        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ width: '90%', padding: '5px' }" />
         <Tooltip placement="top">
           <Icon type="md-alert" class="info-icon" />
           <div slot="content">
@@ -29,15 +20,8 @@
         </Tooltip>
       </i-col>
       <i-col span="2">
-        <Button
-          class="vote-button"
-          @click="start"
-          :disabled="isWatching || !isConnected"
-          >开始</Button
-        >
-        <Button class="vote-button" @click="stop" :disabled="!isWatching"
-          >停止</Button
-        >
+        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
+        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
         <Button class="vote-button" @click="showVoteRecord">记录</Button>
       </i-col>
       <i-col span="15">
@@ -52,14 +36,7 @@
         <div id="chart"></div>
       </i-col>
     </Row>
-    <Modal
-      v-model="modal1"
-      scrollable
-      footer-hide
-      lock-scroll
-      transfer
-      :styles="{ height: '70%', overflow: 'auto' }"
-    >
+    <Modal v-model="modal1" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(value, uid) in userMap">
         <p :key="uid">
           {{ value }}

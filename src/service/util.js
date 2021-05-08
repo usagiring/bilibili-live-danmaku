@@ -88,3 +88,21 @@ export function setGiftConfigMap(gifts) {
   }, {})
   fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
 }
+
+// [{ ... , probability: number }]
+export function getRandomItem(items) {
+  const total = items.reduce((total, item) => {
+    return total + item.probability
+  }, 0)
+  const factor = Math.random() * total
+  let threshold = 0
+
+  for (let i = 0; i < items.length; i++) {
+    threshold += items[i].probability
+    if (threshold > factor) {
+      return items[i]
+    }
+  }
+
+  return null
+}

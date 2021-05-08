@@ -243,7 +243,7 @@ import {
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
 } from "../../service/const";
-import { setGiftConfigMap } from "../../service/util";
+import { setGiftConfigMap, getRandomItem } from "../../service/util";
 import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
 import { userDB, backup, deleteData } from "../../service/nedb";
 const defaultFonts = [
@@ -579,17 +579,9 @@ export default {
           probability: 10,
         },
       ];
-      // const randomType = types[Math.floor(Math.random() * types.length)];
-      const totalProbability = 100;
-      let randomNumber2 = Math.floor(Math.random() * totalProbability);
-      let randomType = "";
-      for (let i = 0; i < types.length; i++) {
-        if (randomNumber2 - types[i].probability < 0) {
-          randomType = types[i].name;
-          break;
-        }
-        randomNumber2 = randomNumber2 - types[i].probability;
-      }
+
+      const randomType = getRandomItem(types).name
+      
       if (randomType === "gift") {
         const gift = {
           id: randomNumber,
