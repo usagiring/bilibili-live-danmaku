@@ -679,7 +679,6 @@ export default {
             console.log("auto record stop...");
             this.cancelRecord();
           }
-          otherDB.insert(msg);
         });
       } else {
         if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
@@ -687,7 +686,6 @@ export default {
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
         } else {
-          otherDB.insert(data);
         }
       }
     },

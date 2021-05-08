@@ -9,7 +9,7 @@
       </div>
       <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
         <Radio :value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
-        <Select :style="{ width: '200px', display: 'inline-block' }" v-model="selectedGiftIds" filterable size="small">
+        <Select :style="{ width: '400px', display: 'inline-block' }" v-model="selectedGiftIds" filterable multiple size="small">
           <Option v-for="gift in giftSelectors" :value="gift.key" :key="gift.key" :label="gift.label">
             <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp" />
             <span>{{ gift.value }}</span>
@@ -17,30 +17,60 @@
           </Option>
         </Select>
       </div>
+      <div class="selector-content">
+        <Input placeholder="一些描述..." v-model="description"></Input>
+      </div>
     </div>
     <div class="button-cotainer">
       <template v-if="isRunning">
-        <Button @click="stop" type="primary">少女祈愿中</Button>
+        <Button @click="iNoRu" type="primary">少女祈愿中</Button>
       </template>
       <template v-else>
         <Button @click="start" type="primary">祈愿</Button>
       </template>
+      <Button @click="showHistoryModal" type="primary">历史记录</Button>
 
-      <span :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
-      <!-- <span :style="{ 'margin': '0px 10px' }">总金瓜子: {{ totalPrice }}</span> -->
+      <span v-if="isDanmaku" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
+      <span v-if="isGift" :style="{ 'margin': '0px 10px' }">总金瓜子: {{ totalPrice }}</span>
       <span :style="{ 'margin-left': '30px' }" v-if="aTaRi.name">
-        恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold' }" @on-click="openBiliUserSpace(aTaRi.userId)"> {{ aTaRi.name }} </span>
+        恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.name }} </span>
       </span>
     </div>
 
     <div class="candidate-container">
-      <template v-for="info of userGiftsSorted">
-        <div class="candidate" :key="info.uid">
+      <template v-if="isDanmaku">
+        <div v-for="info of userComments" class="candidate" :key="`${info.uid}`">
           <Avatar :src="info.avatar" size="small" />
-          {{`${info.name}: 赠送了 ${info.giftNumber} 个 ${info.giftName}(${Number((info.price / totalPrice) * 100).toFixed(2)}%)`}}
+          {{`${info.name}: ${info.comment}`}}
+          <span :style="{'margin-left': '5px'}">
+            {{`( ${count ? (1 / count * 100).toFixed(2) : 0}% )`}}
+          </span>
+        </div>
+      </template>
+      <template v-else>
+        <div v-for="info of userGiftsSorted" class="candidate" :key="`${info.uid}:${info.giftId}`">
+          <Avatar :src="info.avatar" size="small" />
+          {{`${info.name}: 赠送了 ${info.giftNumber} 个 ${info.giftName}`}}
+          <span :style="{'margin-left': '5px'}">
+            {{`( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2): 0}% )`}}
+          </span>
         </div>
       </template>
     </div>
+
+    <Modal v-model="historyModal" title="中奖记录" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
+      <template v-for="history in histories">
+        <p :key="history.uid">
+          {{ `${history.name}(${history.uid}) ${history.time}` }}
+          <span :style="{color: 'gray'}">
+            {{ history.description }}
+          </span>
+        </p>
+      </template>
+      <div slot="footer">
+        <Button type="error" @click="removeAllHistory">清空</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -51,9 +81,11 @@
 import { sortBy } from "lodash";
 import { shell } from "electron";
 import emitter from "../../service/event";
-import { getRandomItem } from '../../service/util'
+import { getRandomItem, dateFormat } from '../../service/util'
 import { GIFT_CONFIG_MAP, DEFAULT_AVATAR } from "../../service/const";
-import { parseGift } from "../../service/bilibili-live-ws";
+import { parseGift, parseComment } from "../../service/bilibili-live-ws";
+import { lotteryDB } from '../../service/nedb'
+
 const giftSelectors = [];
 for (const key in GIFT_CONFIG_MAP) {
   giftSelectors.push({
@@ -67,54 +99,95 @@ for (const key in GIFT_CONFIG_MAP) {
 export default {
   data() {
     return {
+      description: '',
       isDanmaku: true,
       isGift: false,
+      historyModal: false,
+      histories: [],
       giftSelectors,
       medalLevel: 0,
       danmakuText: "",
       selectedGiftIds: [],
       userGiftMap: {},
-      gifts: [],
-      userGiftsSorted: [],
-      count: 0,
-      totalPrice: 0,
+      // gifts: [],
+      userCommentMap: {},
+      userComments: [],
+      // userGiftsSorted: [],
+      // count: 0,
+      // totalPrice: 0,
       isRunning: false,
-      aTaRi: {}
+      aTaRi: {},
     };
   },
-  components: {
+  computed: {
     userGiftsSorted() {
       return sortBy(Object.values(this.userGiftMap), '-price')
     },
+    // userComments() {
+    //   return Object.values(this.userCommentMap)
+    // },
+    count() {
+      return this.userComments.length
+    },
     totalPrice() {
-      return this.userGiftMap.reduce((sum, userGift) => {
+      return Object.values(this.userGiftMap).reduce((sum, userGift) => {
         return sum + userGift.price
       }, 0)
-    }
+    },
+    realRoomId() {
+      return this.$store.state.Config.realRoomId;
+    },
   },
   beforeDestroy() {
     this.stop();
   },
   methods: {
+    init() {
+      this.userGiftMap = {}
+      this.aTaRi = {}
+      this.userCommentMap = {}
+      this.userComments = []
+    },
     start() {
+      this.init()
       emitter.on("message", this.onLotteryMessage)
       this.isRunning = true;
     },
-    stop() {
+    async stop() {
       emitter.removeListener("message", this.onLotteryMessage);
-      this.aTaRi = this.iNoRu()
-      this.isRunning = false;
     },
 
     async onLotteryMessage(data) {
       if (!Array.isArray(data)) return;
       if (this.isDanmaku) {
+        const comments = data
+          .filter((msg) => msg.cmd === "DANMU_MSG")
+          .map(parseComment);
+        for (const comment of comments) {
+          // 已经记录过的用户不再重复统计
+          if (this.userCommentMap[comment.uid]) continue;
+          // 当前房间粉丝牌等级过滤
+          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
+          const regexp = new RegExp(this.danmakuText, "i")
+          const isMatch = regexp.test(comment.comment)
+          if (!isMatch) continue;
+
+          // 记录统计
+          const data = {
+            uid: comment.uid,
+            name: comment.name,
+            comment: comment.comment,
+            avatar: comment.avatar || DEFAULT_AVATAR,
+          }
+          this.userCommentMap[comment.uid] = data
+          this.userComments = [data, ...this.userComments]
+        }
       }
       if (this.isGift) {
         const gifts = data
           .map(parseGift)
           .filter((gift) => {
-            return gift && gift.type === "gift" && this.selectedGiftId.includes(gift.giftId)
+            return gift && gift.type === "gift" && this.selectedGiftIds.includes(`${gift.giftId}`)
           });
 
         gifts.forEach((gift) => {
@@ -130,55 +203,101 @@ export default {
           const key = `${uid}:${giftId}`
           const userGift = this.userGiftMap[key]
           if (!userGift) {
-            this.userGiftMap[key] = {
-              // uid,
-              name,
-              avatar,
-              giftName,
-              giftNumber: giftNumber,
-              price: giftNumber * price,
+            // 计算属性需要完全替换
+            this.userGiftMap = {
+              ...this.userGiftMap,
+              [key]: {
+                uid,
+                giftId,
+                name,
+                avatar,
+                giftName,
+                giftNumber: giftNumber,
+                price: giftNumber * price,
+              }
             }
           } else {
             userGift.giftNumber = userGift.giftNumber + giftNumber
             userGift.price = userGift.price + giftNumber * price
+            this.userGiftMap = Object.assign(this.userGiftMap, {
+              [key]: userGift
+            })
           }
-          // this.count = this.count + giftNumber;
-          // this.gifts.push(gift);
         });
-
       }
     },
 
     selectDanmakuOrGift() {
       [this.isDanmaku, this.isGift] = [this.isGift, this.isDanmaku];
     },
-    iNoRu() {
-      const userPriceMap = {}
-      for (const key in userGiftMap) {
-        const [uid] = key.split(':')
-        const userGift = userGiftMap[key]
+    async iNoRu() {
+      this.stop()
 
-        if (!userPriceMap[uid]) {
-          userPriceMap[uid] = {
-            uid,
-            name: userGift.name,
-            price: userGift.price
+      if (this.isDanmaku) {
+        const withProbability = this.userComments.map(comment => {
+          comment.probability = 1 / this.count
+          return comment
+        })
+        const randomItem = getRandomItem(withProbability)
+        if (!randomItem) return
+        this.aTaRi = randomItem
+        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+          time: Date.now(),
+          description: this.description
+        }))
+      }
+      if (this.isGift) {
+        const userPriceMap = {}
+        for (const key in this.userGiftMap) {
+          const [uid] = key.split(':')
+          const userGift = this.userGiftMap[key]
+
+          if (!userPriceMap[uid]) {
+            userPriceMap[uid] = {
+              uid,
+              name: userGift.name,
+              price: userGift.price
+            }
+          } else {
+            userPriceMap[uid].price = userPriceMap[uid].price + userGift.price
           }
-        } else {
-          userPriceMap[uid].price = userPriceMap[uid].price + userGift.price
         }
+
+        // 附加概率
+        for (const key in userPriceMap) {
+          userPriceMap[key].probability = Number((userPriceMap[key].price / this.totalPrice).toFixed(3))
+        }
+
+        const randomItem = getRandomItem(Object.values(userPriceMap))
+        if (!randomItem) return
+
+        this.aTaRi = randomItem
+        this.isRunning = false;
+        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+          time: Date.now(),
+          description: this.description
+        }))
       }
 
-      // 附加概率
-      for (const key in userPriceMap) {
-        userPriceMap[key].probability = Number((userPriceMap[key].price / this.totalPrice).toFixed(3))
-      }
-
-      return getRandomItem(Object.values(userPriceMap))
+      this.isRunning = false
     },
     openBiliUserSpace(userId) {
       shell.openExternal(`https://space.bilibili.com/${userId}`);
     },
+
+    async showHistoryModal() {
+      this.historyModal = true
+
+      const histories = await lotteryDB.find({})
+      this.histories = histories.map(history => {
+        history.time = dateFormat(history.time)
+        return history
+      })
+    },
+    async removeAllHistory() {
+      await lotteryDB.deleteMany({})
+      this.histories = []
+    }
   },
 };
 </script>
@@ -193,7 +312,7 @@ export default {
 }
 .selector-content {
   margin: 5px 20px;
-  padding: 10px;
+  padding: 5px 10px;
   border: 2px solid white;
 }
 .button-cotainer {

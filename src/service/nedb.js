@@ -8,6 +8,7 @@ const commentDB = new Datastore({ filename: `${USER_DATA_PATH}/comment`, autoloa
 const giftDB = new Datastore({ filename: `${USER_DATA_PATH}/gift`, autoload: true });
 const interactDB = new Datastore({ filename: `${USER_DATA_PATH}/interact`, autoload: true });
 const otherDB = new Datastore({ filename: `${USER_DATA_PATH}/other`, autoload: true });
+const lotteryDB = new Datastore({ filename: `${USER_DATA_PATH}/lottery`, autoload: true });
 
 userDB.loadDatabase();
 commentDB.loadDatabase();
@@ -126,6 +127,14 @@ function wrapper(db) {
           resolve(numRemoved)
         })
       })
+    },
+    deleteMany: (query, options = { multi: true }) => {
+      return new Promise((resolve, reject) => {
+        db.remove(query, options, (err, numRemoved) => {
+          if (err) reject(err)
+          resolve(numRemoved)
+        })
+      })
     }
   }
 }
@@ -141,12 +150,14 @@ export function backup() {
   fs.copyFileSync(`${USER_DATA_PATH}/comment`, `${BACKUP_DIR}/comment`)
   fs.copyFileSync(`${USER_DATA_PATH}/gift`, `${BACKUP_DIR}/gift`)
   fs.copyFileSync(`${USER_DATA_PATH}/interact`, `${BACKUP_DIR}/interact`)
+  fs.copyFileSync(`${USER_DATA_PATH}/lottery`, `${BACKUP_DIR}/lottery`)
 }
 
 export function deleteData() {
   fs.unlinkSync(`${USER_DATA_PATH}/comment`)
   fs.unlinkSync(`${USER_DATA_PATH}/gift`)
   fs.unlinkSync(`${USER_DATA_PATH}/interact`)
+  fs.unlinkSync(`${USER_DATA_PATH}/lottery`)
   fs.unlinkSync(`${USER_DATA_PATH}/other`)
 }
 
@@ -155,6 +166,7 @@ const commentDBWrapper = wrapper(commentDB)
 const giftDBWrapper = wrapper(giftDB)
 const interactDBWrapper = wrapper(interactDB)
 const otherDBWrapper = wrapper(otherDB)
+const lotteryDBWrapper = wrapper(lotteryDB)
 
 export {
   userDBWrapper as userDB,
@@ -162,4 +174,5 @@ export {
   giftDBWrapper as giftDB,
   interactDBWrapper as interactDB,
   otherDBWrapper as otherDB,
+  lotteryDBWrapper as lotteryDB
 }

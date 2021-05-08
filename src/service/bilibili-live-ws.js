@@ -292,6 +292,7 @@ function parseComment(msg) {
     Object.assign(comment, {
       medalLevel,
       medalName,
+      medalRoomId,
       medalColorBorder: `#${medalColorBorder.toString(16).padStart(6, '0')}`,
       medalColorStart: `#${medalColorStart.toString(16).padStart(6, '0')}`,
       medalColorEnd: `#${medalColorEnd.toString(16).padStart(6, '0')}`,
