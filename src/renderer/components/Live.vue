@@ -347,15 +347,18 @@ export default {
         this.flvPlayer = flvjs.createPlayer(
           {
             type: "flv",
+            isLive: true,
             url: playUrl,
           },
           {
             headers,
+            autoCleanupSourceBuffer: true
           }
         );
 
-        this.flvPlayer.on("error", (e) => {
+        this.flvPlayer.on(flvjs.Events.ERROR, (e) => {
           this.$Message.error(`播放失败: ${e}`);
+          console.log(e)
         });
 
         this.flvPlayer.attachMediaElement(livePlayer);

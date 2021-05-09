@@ -7,29 +7,18 @@
           <div slot="content">
             <div>
               <span class="setting-key-text">窗口背景色</span>
-              <ColorPicker
-                :value="background"
-                @on-active-change="updateBackground"
-                size="small"
-                alpha
-              />
+              <ColorPicker :value="background" @on-active-change="updateBackground" size="small" alpha />
             </div>
             <div>
               <span class="setting-key-text">透明度</span>
               <div class="avatar-controller-slider">
-                <Slider
-                  :value="windowOpacity"
-                  @on-change="changeOpacity"
-                ></Slider>
+                <Slider :value="windowOpacity" @on-change="changeOpacity"></Slider>
               </div>
             </div>
             <div>
               <span class="setting-key-text">头像大小</span>
               <div class="avatar-controller-slider">
-                <Slider
-                  :value="avatarSize"
-                  @on-change="changeAvatarSize"
-                ></Slider>
+                <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
               </div>
             </div>
             <div class="setting-key">
@@ -44,112 +33,60 @@
                   </div>
                 </Tooltip>
               </span>
-              <InputNumber
-                :value="combineSimilarTime"
-                @on-change="changeCombineSimilarTime"
-                :min="0"
-                size="small"
-              />
+              <InputNumber :value="combineSimilarTime" @on-change="changeCombineSimilarTime" :min="0" size="small" />
               {{ " ms" }}
             </div>
             <div class="setting-key">
               <span class="setting-key-text">礼物栏展示大于</span>
-              <InputNumber
-                :value="showGiftThreshold"
-                @on-change="changeShowGiftThreshold"
-                :min="0"
-                size="small"
-              />
+              <InputNumber :value="showGiftThreshold" @on-change="changeShowGiftThreshold" :min="0" size="small" />
               {{ " 元" }}
             </div>
             <div class="setting-key">
               <span class="setting-key-text">弹幕礼物展示大于</span>
-              <InputNumber
-                :value="showGiftCardThreshold"
-                @on-change="changeShowGiftCardThreshold"
-                :min="0"
-                size="small"
-              />
+              <InputNumber :value="showGiftCardThreshold" @on-change="changeShowGiftCardThreshold" :min="0" size="small" />
               {{ " 元" }}
             </div>
             <div class="setting-key">
               <span class="setting-key-text">字体</span>
-              <Select
-                :style="{ width: '100px', display: 'inline-block' }"
-                :value="danmakuFont"
-                @on-change="changeDanmakuFont"
-                @on-open-change="onOpenFontSelectChange"
-                size="small"
-              >
+              <Select :style="{ width: '100px', display: 'inline-block' }" :value="danmakuFont" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange" size="small">
                 <OptionGroup label="全局值">
-                  <Option
-                    v-for="item in fonts.filter(
+                  <Option v-for="item in fonts.filter(
                       (font) => font.type === 'default'
-                    )"
-                    :value="item.value"
-                    :key="item.key"
-                    >{{ item.value }}</Option
-                  >
+                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
                 </OptionGroup>
                 <OptionGroup label="通用字体族">
-                  <Option
-                    v-for="item in fonts.filter(
+                  <Option v-for="item in fonts.filter(
                       (font) => font.type === 'common'
-                    )"
-                    :value="item.value"
-                    :key="item.key"
-                    >{{ item.value }}</Option
-                  >
+                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
                 </OptionGroup>
                 <OptionGroup label="系统">
-                  <Option
-                    v-for="item in fonts.filter(
+                  <Option v-for="item in fonts.filter(
                       (font) => font.type === 'custom'
-                    )"
-                    :value="item.value"
-                    :key="item.key"
-                    >{{ item.value }}</Option
-                  >
+                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
                 </OptionGroup>
               </Select>
             </div>
             <div>
-              <Checkbox
-                :value="isShowInteractInfo"
-                @on-change="showInteractInfo"
-                >显示交互消息</Checkbox
-              >
+              <Checkbox :value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
             </div>
             <div>
-              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift"
-                >展示银瓜子礼物</Checkbox
-              >
+              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
             </div>
             <div>
-              <Checkbox
-                :value="isShowMemberShipIcon"
-                @on-change="showMemberShipIcon"
-                >显示舰队图标</Checkbox
-              >
+              <Checkbox :value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
             </div>
             <div>
-              <Checkbox :value="isShowFanMedal" @on-change="showFanMedal"
-                >显示粉丝牌</Checkbox
-              >
+              <Checkbox :value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
             </div>
             <div>
-              <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard"
-                >使用礼物小卡片</Checkbox
-              >
+              <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
             </div>
           </div>
         </Panel>
         <Panel name="2">
           普通
           <div slot="content">
-            <template
-              v-for="item in editors.filter((editor) => editor.role === 0)"
-            >
+            <template v-for="item in editors.filter((editor) => editor.role === 0)">
               <div :key="item.id" class="setting-key">
                 <SettingEditor v-bind="item" />
               </div>
@@ -159,9 +96,7 @@
         <Panel name="3">
           舰长
           <div slot="content">
-            <template
-              v-for="item in editors.filter((editor) => editor.role === 3)"
-            >
+            <template v-for="item in editors.filter((editor) => editor.role === 3)">
               <div :key="item.id" class="setting-key">
                 <SettingEditor v-bind="item" />
               </div>
@@ -178,36 +113,17 @@
               <Button @click="setGiftConfig">刷新礼物信息</Button>
             </div>
             <div class="setting-key">
-              <Poptip
-                confirm
-                title="确认还原默认设置？"
-                placement="right"
-                width="300"
-                @on-ok="clearAllSetting"
-              >
+              <Poptip confirm title="确认还原默认设置？" placement="right" width="300" @on-ok="clearAllSetting">
                 <Button>还原默认设置</Button>
               </Poptip>
             </div>
             <div class="setting-key">
-              <Poptip
-                confirm
-                :title="`确认备份并清理数据库？建议仅在启动明显变慢时操作。备份文件夹: ${USER_DATA_PATH}`"
-                placement="right"
-                width="400"
-                word-wrap
-                @on-ok="backupAndClearDB"
-              >
+              <Poptip confirm :title="`确认备份并清理数据库？建议仅在启动明显变慢时操作。备份文件夹: ${USER_DATA_PATH}`" placement="right" width="400" word-wrap @on-ok="backupAndClearDB">
                 <Button>备份并清理数据库</Button>
               </Poptip>
             </div>
             <div class="setting-key">
-              <Poptip
-                confirm
-                title="确认清理用户缓存？用于刷新用户头像，不建议经常清理"
-                placement="right"
-                width="400"
-                @on-ok="clearUserDB"
-              >
+              <Poptip confirm title="确认清理用户缓存？用于刷新用户头像，不建议经常清理" placement="right" width="400" @on-ok="clearUserDB">
                 <Button>清理用户缓存</Button>
               </Poptip>
             </div>
@@ -581,7 +497,7 @@ export default {
       ];
 
       const randomType = getRandomItem(types).name
-      
+
       if (randomType === "gift") {
         const gift = {
           id: randomNumber,

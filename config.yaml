@@ -4,6 +4,8 @@ GET_USER_INFO_FREQUENCY_LIMIT: 1000
 SET_DANMAKU_ON_TOP_LEVEL: 'floating'
 # 图表色彩
 COLORS: ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+# 最多记录历史房间号
+MAX_HISTORY_ROOM: 15
 # 礼物色彩区分, 1～6 分别对应B站 6档SC价格
 PRICE_PROPERTIES:
   1:

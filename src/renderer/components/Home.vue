@@ -11,21 +11,21 @@
           <Icon type="md-chatboxes" />
           <span v-if="!isCollapsed">消息</span>
           </MenuItem>
-          <MenuItem name="1-3" to="/vote">
-          <Icon type="md-pie" />
-          <span v-if="!isCollapsed">投票</span>
-          </MenuItem>
-          <MenuItem name="1-4" to="/statistic">
-          <Icon type="md-stats" />
-          <span v-if="!isCollapsed">统计</span>
-          </MenuItem>
           <MenuItem name="1-5" to="/live">
           <Icon type="md-play" />
           <span v-if="!isCollapsed">直播</span>
           </MenuItem>
+          <MenuItem name="1-3" to="/vote">
+          <Icon type="md-pie" />
+          <span v-if="!isCollapsed">投票</span>
+          </MenuItem>
           <MenuItem name="1-6" to="/lottery">
           <Icon type="md-bonfire" />
           <span v-if="!isCollapsed">祈愿</span>
+          </MenuItem>
+          <MenuItem name="1-4" to="/statistic">
+          <Icon type="md-stats" />
+          <span v-if="!isCollapsed">统计</span>
           </MenuItem>
         </Menu>
       </Sider>
@@ -152,6 +152,7 @@ import {
   IPC_UPDATE_DOWNLOADED,
   SET_DANMAKU_ON_TOP_LEVEL,
   DEFAULT_RECORD_DIR,
+  MAX_HISTORY_ROOM
 } from "../../service/const";
 
 // 0 未开播
@@ -327,7 +328,7 @@ export default {
         };
         // 加入历史连接房间号
         if (!this.historyRooms.find((room) => room.roomId === roomId)) {
-          if (this.historyRooms.length > 9) {
+          if (this.historyRooms.length > MAX_HISTORY_ROOM) {
             config.historyRooms = [
               ...this.historyRooms.slice(1),
               { roomId, uname, face },
@@ -679,6 +680,7 @@ export default {
             console.log("auto record stop...");
             this.cancelRecord();
           }
+          // otherDB.insert(msg);
         });
       } else {
         if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
@@ -686,6 +688,7 @@ export default {
           this.fansNumber = fans;
           this.fansClubNumber = fans_club;
         } else {
+          // otherDB.insert(data);
         }
       }
     },

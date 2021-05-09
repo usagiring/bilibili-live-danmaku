@@ -13,7 +13,7 @@
           <Option v-for="gift in giftSelectors" :value="gift.key" :key="gift.key" :label="gift.label">
             <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp" />
             <span>{{ gift.value }}</span>
-            <span :style="{color: 'silver'}">{{ gift.key }}</span>
+            <span :style="{color: 'silver'}">{{ `id: ${gift.key}` }}</span>
           </Option>
         </Select>
       </div>
@@ -28,10 +28,12 @@
       <template v-else>
         <Button @click="start" type="primary">祈愿</Button>
       </template>
-      <Button @click="showHistoryModal" type="primary">历史记录</Button>
-
-      <span v-if="isDanmaku" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
-      <span v-if="isGift" :style="{ 'margin': '0px 10px' }">总金瓜子: {{ totalPrice }}</span>
+      <div :style="{ float: 'right' }">
+        <Checkbox :value="isShowProbability" @on-change="showProbability">显示概率</Checkbox>
+        <Button @click="showHistoryModal">中奖记录</Button>
+      </div>
+      <span v-if="isDanmaku && isShowProbability" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
+      <span v-if="isGift && isShowProbability" :style="{ 'margin': '0px 10px' }">总价值: {{ totalPrice.toFixed(1) }}</span>
       <span :style="{ 'margin-left': '30px' }" v-if="aTaRi.name">
         恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.name }} </span>
       </span>
@@ -42,16 +44,16 @@
         <div v-for="info of userComments" class="candidate" :key="`${info.uid}`">
           <Avatar :src="info.avatar" size="small" />
           {{`${info.name}: ${info.comment}`}}
-          <span :style="{'margin-left': '5px'}">
+          <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
             {{`( ${count ? (1 / count * 100).toFixed(2) : 0}% )`}}
           </span>
         </div>
       </template>
       <template v-else>
-        <div v-for="info of userGiftsSorted" class="candidate" :key="`${info.uid}:${info.giftId}`">
+        <div v-for="info of userGifts" class="candidate" :key="`${info.uid}:${info.giftId}`">
           <Avatar :src="info.avatar" size="small" />
           {{`${info.name}: 赠送了 ${info.giftNumber} 个 ${info.giftName}`}}
-          <span :style="{'margin-left': '5px'}">
+          <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
             {{`( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2): 0}% )`}}
           </span>
         </div>
@@ -112,6 +114,7 @@ export default {
       // gifts: [],
       userCommentMap: {},
       userComments: [],
+      isShowProbability: false,
       // userGiftsSorted: [],
       // count: 0,
       // totalPrice: 0,
@@ -120,8 +123,8 @@ export default {
     };
   },
   computed: {
-    userGiftsSorted() {
-      return sortBy(Object.values(this.userGiftMap), '-price')
+    userGifts() {
+      return Object.values(this.userGiftMap)
     },
     // userComments() {
     //   return Object.values(this.userCommentMap)
@@ -167,7 +170,9 @@ export default {
           // 已经记录过的用户不再重复统计
           if (this.userCommentMap[comment.uid]) continue;
           // 当前房间粉丝牌等级过滤
-          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
+          if (this.medalLevel) {
+            if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
+          }
           const regexp = new RegExp(this.danmakuText, "i")
           const isMatch = regexp.test(comment.comment)
           if (!isMatch) continue;
@@ -202,6 +207,10 @@ export default {
           } = gift;
           const key = `${uid}:${giftId}`
           const userGift = this.userGiftMap[key]
+          // test: 小心心
+          // if (giftId === 30607) {
+          //   price = 1
+          // }
           if (!userGift) {
             // 计算属性需要完全替换
             this.userGiftMap = {
@@ -232,6 +241,7 @@ export default {
     },
     async iNoRu() {
       this.stop()
+      this.isRunning = false
 
       if (this.isDanmaku) {
         const withProbability = this.userComments.map(comment => {
@@ -278,9 +288,12 @@ export default {
           description: this.description
         }))
       }
-
-      this.isRunning = false
     },
+
+    showProbability(value) {
+      this.isShowProbability = value
+    },
+
     openBiliUserSpace(userId) {
       shell.openExternal(`https://space.bilibili.com/${userId}`);
     },
