@@ -7,6 +7,7 @@ const options = {
   USER_DATA_PATH,
   PORT: 3000,
 }
+console.log(options)
 bridge(options)
 
 export default bridge
