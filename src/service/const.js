@@ -168,3 +168,6 @@ export const IPC_UPDATE_DOWNLOADED = 'IPC_UPDATE_DOWNLOADED'
 export const GIFT_CONFIG_MAP = JSON.parse(fs.readFileSync(`gift_config`, 'utf8'))
 export const SET_DANMAKU_ON_TOP_LEVEL = OPTION_CONFIG.SET_DANMAKU_ON_TOP_LEVEL || 'floating'
 export const MAX_HISTORY_ROOM = OPTION_CONFIG.MAX_HISTORY_ROOM || 9
+export const PORT = OPTION_CONFIG.PORT || 8081
+export const BASE_URL = `http://127.0.0.1:${PORT}`
+export const BASE_WS_URL = `ws://127.0.0.1:${PORT}`

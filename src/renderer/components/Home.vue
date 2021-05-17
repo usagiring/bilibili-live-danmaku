@@ -124,27 +124,12 @@ import { debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
-import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
-import {
-  init,
-  close,
-  getIsWsConnected,
-  parseComment,
-  parseInteractWord,
-  parseGift,
-} from "../../service/bilibili-live-ws";
+import { parseDownloadRate } from "../../service/util";
+import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect } from '../../service/api'
 import emitter from "../../service/event";
 import { record, cancelRecord } from "../../service/bilibili-recorder";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
-  commentDB,
-  interactDB,
-  userDB,
-  otherDB,
-  giftDB,
-} from "../../service/nedb";
-import {
-  DEFAULT_AVATAR,
   IPC_CHECK_FOR_UPDATE,
   IPC_UPDATE_AVAILABLE,
   IPC_DOWNLOAD_UPDATE,
@@ -152,7 +137,8 @@ import {
   IPC_UPDATE_DOWNLOADED,
   SET_DANMAKU_ON_TOP_LEVEL,
   DEFAULT_RECORD_DIR,
-  MAX_HISTORY_ROOM
+  MAX_HISTORY_ROOM,
+  BASE_WS_URL
 } from "../../service/const";
 
 // 0 未开播
@@ -188,23 +174,59 @@ export default {
     };
   },
   created() {
-    this.initial();
+  },
+  async mounted() {
+    await this.initial();
+    const ws = new WebSocket(BASE_WS_URL)
 
-    emitter.on("message", this.onMessage);
+    ws.onopen = () => { }
 
-    emitter.on("ninki", async (data) => {
-      this.ninkiNumber = data.count;
-    });
+    ws.onmessage = (msg) => {
+      const payload = JSON.parse(msg.data)
 
-    const listenerCount = emitter.listenerCount("message");
-    console.log(`listenerCount: ${listenerCount}`);
+      if (payload.cmd === 'ROOM_REAL_TIME_MESSAGE_UPDATE') {
+        this.onFansNumber(payload.payload)
+      }
+      if (payload.cmd === 'NINKI') {
+        this.onNinKi(payload.payload)
+      }
+
+      if (payload.cmd === "LIVE") {
+        // 直播中
+        this.liveStatus = 1;
+        LIVE_STATUS++;
+        console.log(`LIVE_STATUS: ${LIVE_STATUS}`);
+        if (LIVE_STATUS === 2) {
+          console.log("auto record start...");
+          this.startRecord();
+        }
+        if (LIVE_STATUS > 2) {
+          console.log("auto record restart...");
+          this.cancelRecord();
+          this.startRecord();
+        }
+      }
+
+      if (payload.cmd === "PREPARING") {
+        // 未开播
+        this.liveStatus = 0;
+        LIVE_STATUS = 0;
+        console.log("auto record stop...");
+        this.cancelRecord();
+      }
+    }
+
+    ws.onclose = (code) => {
+      console.log('ws close: ', code)
+    }
+
+    ws.onerror = (err) => {
+      console.error(err)
+    }
   },
   computed: {
     menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
-    },
-    messages() {
-      return this.$store.state.Message.messages;
     },
     isConnected() {
       return this.$store.state.Config.isConnected;
@@ -296,7 +318,7 @@ export default {
           online,
         } = data.room_info;
 
-        await init({ roomId: Number(roomId), uid: 0 });
+        await connectRoom({ roomId: Number(roomId), uid: 0 });
 
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
@@ -342,8 +364,8 @@ export default {
         }
         this.$store.dispatch("UPDATE_CONFIG", config);
       } else {
-        close();
-        this.initial();
+        await disconnect({ roomId: displayRoomId })
+        this.initial()
       }
       this.isConnecting = false;
     },
@@ -411,7 +433,7 @@ export default {
       }
     },
 
-    initial() {
+    async initial() {
       this.username = "";
       this.avatar = null;
       this.ninkiNumber = 0;
@@ -423,8 +445,10 @@ export default {
       const payload = {
         guardNumber: 0,
       };
+
+      const result = await getRoomStatus({ roomId })
       Object.assign(payload, {
-        isConnected: getIsWsConnected(),
+        isConnected: result.data.isConnected
       });
       this.$store.dispatch("UPDATE_CONFIG", payload);
     },
@@ -435,91 +459,6 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", {
         isAlwaysOnTop: status,
       });
-    },
-    sendComment(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "comment",
-        uid: payload.uid,
-        name: payload.name,
-        comment: payload.comment,
-        sendAt: payload.sendAt,
-        isAdmin: payload.isAdmin,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-        role: payload.guard,
-
-        medalLevel: payload.medalLevel,
-        medalName: payload.medalName,
-        medalColorBorder: payload.medalColorBorder,
-        medalColorStart: payload.medalColorStart,
-        medalColorEnd: payload.medalColorEnd,
-      });
-    },
-    sendInteractWord(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "interactWord",
-        uid: payload.uid,
-        identities: payload.identities,
-        name: payload.name,
-        color: payload.nameColor,
-        sendAt: payload.timestamp,
-        msgType: payload.msgType,
-
-        medalLevel: payload.medalLevel,
-        medalName: payload.medalName,
-        medalColorBorder: payload.medalColorBorder,
-        medalColorStart: payload.medalColorStart,
-        medalColorEnd: payload.medalColorEnd,
-      });
-    },
-    sendSuperChat(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "superChat",
-
-        uid: payload.uid,
-        name: payload.name,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-
-        price: payload.price,
-
-        commentJPN: payload.commentJPN,
-        comment: payload.comment,
-        sendAt: new Date() - 0,
-
-        superChatId: Number(payload.superChatId),
-        time: payload.time,
-        startTime: payload.startTime,
-        endTime: payload.endTime,
-      });
-    },
-    sendGift(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "gift",
-        uid: payload.uid,
-        name: payload.name,
-        batchComboId: payload.batchComboId,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-
-        price: payload.price,
-        sendAt: new Date() - 0,
-        giftNumber: payload.giftNumber,
-        giftName: payload.giftName,
-        giftId: payload.giftId,
-        isGuardGift: payload.isGuardGift,
-      });
-    },
-
-    parseUser(data) {
-      return {
-        uid: data.mid,
-        name: data.name,
-        avatar: data.face,
-        sex: data.sex,
-        level: data.level,
-      };
     },
 
     changeRoomId(roomId) {
@@ -534,163 +473,15 @@ export default {
       this.displayRoomId = roomId;
     },
 
-    onMessage: async function (data) {
-      if (Array.isArray(data)) {
-        // console.log(data);
-        const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
-          .map(parseComment);
+    onFansNumber(payload) {
+      const { fansNumber, fansClubNumber } = payload;
+      this.fansNumber = fansNumber;
+      this.fansClubNumber = fansClubNumber;
+    },
 
-        for (const comment of comments) {
-          // console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-
-          if (this.isShowAvatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: comment.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(comment.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            comment.avatar = (user || {}).avatar;
-          }
-
-          const data = await commentDB.insert(comment);
-          await this.sendComment(data);
-        }
-
-        const interactWords = data
-          .filter((msg) => msg.cmd === "INTERACT_WORD")
-          .map(parseInteractWord);
-
-        for (const interactWord of interactWords) {
-          // console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
-          const data = await interactDB.insert(interactWord);
-          if (this.isShowInteractInfo) {
-            this.sendInteractWord(data);
-          }
-        }
-
-        const gifts = data.map(parseGift).filter(Boolean);
-
-        for (const gift of gifts) {
-          if (!gift.avatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: gift.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(gift.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // TODO 全局 errorHandler
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            gift.avatar = (user || {}).avatar;
-          }
-
-          if (gift.type === "superChat") {
-            let data = await giftDB.findOne({
-              roomId: this.realRoomId,
-              superChatId: gift.superChatId,
-            });
-
-            // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
-            if (data) {
-              if (gift.commentJPN) {
-                data = await giftDB.update(
-                  { _id: data._id },
-                  {
-                    $set: { commentJPN: gift.commentJPN },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              } else {
-                // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
-                continue;
-              }
-            } else {
-              data = await giftDB.insert(gift);
-            }
-
-            this.sendSuperChat(data);
-          } else if (gift.type === "gift") {
-            let data;
-            if (gift.batchComboId) {
-              const comboGift = await giftDB.findOne({
-                roomId: this.realRoomId,
-                batchComboId: gift.batchComboId,
-              });
-              if (comboGift) {
-                data = await giftDB.update(
-                  { _id: comboGift._id },
-                  {
-                    $set: {
-                      giftNumber: comboGift.giftNumber + gift.giftNumber,
-                    },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              }
-            }
-            if (!data) {
-              data = await giftDB.insert(gift);
-            }
-            if (!this.isShowSilverGift && gift.coinType === "silver") continue;
-            if (gift.coinType === "silver") gift.price = 0;
-            this.sendGift(data);
-          }
-        }
-
-        data.forEach((msg) => {
-          if (msg.cmd === "INTERACT_WORD") return;
-          if (msg.cmd === "DANMU_MSG") return;
-          if (msg.cmd === "SEND_GIFT") return;
-          if (msg.cmd === "LIVE") {
-            // 直播中
-            this.liveStatus = 1;
-            LIVE_STATUS++;
-            console.log(`LIVE_STATUS: ${LIVE_STATUS}`);
-            if (LIVE_STATUS === 2) {
-              console.log("auto record start...");
-              this.startRecord();
-            }
-            if (LIVE_STATUS > 2) {
-              console.log("auto record restart...");
-              this.cancelRecord();
-              this.startRecord();
-            }
-          }
-
-          if (msg.cmd === "PREPARING") {
-            // 未开播
-            this.liveStatus = 0;
-            LIVE_STATUS = 0;
-            console.log("auto record stop...");
-            this.cancelRecord();
-          }
-          // otherDB.insert(msg);
-        });
-      } else {
-        if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
-          const { fans, fans_club } = data.data;
-          this.fansNumber = fans;
-          this.fansClubNumber = fans_club;
-        } else {
-          // otherDB.insert(data);
-        }
-      }
+    onNinKi(payload) {
+      const { ninkiNumber } = payload;
+      this.ninkiNumber = ninkiNumber;
     },
 
     async updateApp() {
@@ -790,34 +581,11 @@ export default {
     this.peopleTimer = setInterval(async () => {
       // console.log("peopleTimer");
       if (!this.realRoomId && !this.isConnected) return;
-      const tenMinutesAgo = new Date() - 1000 * 60 * 10;
-      const [comments, gifts, interacts] = await Promise.all([
-        commentDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-        giftDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-        interactDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-      ]);
-      const countMap = comments
-        .concat(gifts)
-        .concat(interacts)
-        .reduce((map, i) => {
-          map[i.uid] = 1;
-          return map;
-        }, {});
-      this.peopleNumber = Object.keys(countMap).length;
+      const result = await getRealTimeViewersCount({ roomId })
+      this.peopleNumber = result.data
     }, 10000);
   },
   beforeDestroy() {
-    emitter.removeListener("message", this.onMessage);
-
     if (this.giftTimer) {
       clearInterval(this.giftTimer);
     }

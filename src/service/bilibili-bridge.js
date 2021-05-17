@@ -1,11 +1,11 @@
 import bridge from 'bilibili-bridge'
 import store from '../renderer/store'
-import { USER_DATA_PATH } from './const'
+import { USER_DATA_PATH, PORT } from './const'
 
 const options = {
   ...store.state.Config,
   USER_DATA_PATH,
-  PORT: 3000,
+  PORT: PORT,
 }
 console.log(options)
 bridge(options)
