@@ -2,27 +2,17 @@
   <div>
     <span class="setting-key-text">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber
-        :value="value"
-        @on-change="updateStyle"
-        :min="0"
-        :step="numberStep || 1"
-        size="small"
-        :style="{ width: '55px' }"
-      />
+      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker
-        :value="value"
-        @on-active-change="updateStyle"
-        size="small"
-        alpha
-      />
+      <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
     </template>
   </div>
 </template>
 
 <script>
+import { updateSetting } from '../../service/api'
+
 export default {
   props: ["type", "name", "role", "prop", "styleName", "numberStep"],
   data() {
@@ -55,7 +45,17 @@ export default {
           [this.styleName]:
             this.type === "InputNumber" ? this.pxFormatter(value) : value,
         },
-      });
+      })
+
+      const data = {
+        [objKey]: {
+          ...state[objKey],
+          ...{
+            [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value,
+          }
+        }
+      }
+      await updateSetting(data)
     },
     pxFormatter: (value) => `${value}px`,
     pxParser: (value) => Number(value.replace("px", "")),

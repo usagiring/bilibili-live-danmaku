@@ -161,7 +161,7 @@ import {
 } from "../../service/const";
 import { setGiftConfigMap, getRandomItem } from "../../service/util";
 import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
-import { userDB, backup, deleteData } from "../../service/nedb";
+import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -400,24 +400,19 @@ export default {
   },
   methods: {
     showMemberShipIcon(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowMemberShipIcon: status,
-      });
+      const data = { isShowMemberShipIcon: status, }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     showFanMedal(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowFanMedal: status,
-      });
-    },
-    showAvatar(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowAvatar: status,
-      });
+      const data = { isShowFanMedal: status }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     showInteractInfo(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowInteractInfo: status,
-      });
+      const data = { isShowInteractInfo: status }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     sendTestMessage() {
       this.$store.dispatch(
@@ -429,6 +424,7 @@ export default {
     clearAllSetting() {
       const store = new Store({ name: "vuex" });
       store.clear();
+      await replaceSetting(store.state.Config)
       window.reload();
     },
 
@@ -440,14 +436,16 @@ export default {
       });
     },
     changeAvatarSize(size) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         avatarSize: size,
-      });
-      if (size === 0) {
-        this.showAvatar(false);
-      } else {
-        this.showAvatar(true);
       }
+      if (size === 0) {
+        data.isShowAvatar = false
+      } else {
+        data.isShowAvatar = true
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     changeOpacity(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
@@ -456,26 +454,34 @@ export default {
     },
 
     changeCombineSimilarTime(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         combineSimilarTime: number,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     changeShowGiftThreshold(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         showGiftThreshold: number,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     changeShowGiftCardThreshold(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         showGiftCardThreshold: number,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     showSilverGift(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         isShowSilverGift: status,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     randomMessageGenerator() {
@@ -559,12 +565,14 @@ export default {
       }
     },
 
-    clearExampleDanmaku() {
-      this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
+    async clearExampleDanmaku() {
+      await clearMessage()
+      // this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
     },
 
-    clearDanmaku() {
-      this.$store.dispatch("CLEAR_MESSAGE");
+    async clearDanmaku() {
+      await clearMessage()
+      // this.$store.dispatch("CLEAR_MESSAGE");
     },
 
     async refreshInfo() {
@@ -576,19 +584,15 @@ export default {
     },
 
     async backupAndClearDB() {
-      // 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
-      backup();
-      deleteData();
-      // await commentDB.remove({}, { multi: true });
-      // await giftDB.remove({}, { multi: true });
-      // await interactDB.remove({}, { multi: true });
-      // await otherDB.remove({}, { multi: true });
+      // 从 ./data 里备份 comment gift interact, 并 removeall
+      await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
+      await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
       window.reload();
     },
 
     async clearUserDB() {
       // 清空用户数据缓存
-      await userDB.remove({}, { multi: true });
+      await clearDB({ names: ['user'] })
       window.reload();
     },
 
@@ -606,14 +610,18 @@ export default {
       }
     },
     async changeDanmakuFont(value) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         danmakuFont: value,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async useMiniGiftCard(value) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         isUseMiniGiftCard: value,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async setGiftConfig() {
       const data = await getGiftConfig(this.realRoomId);
