@@ -37,7 +37,7 @@ export default {
     },
   },
   methods: {
-    updateStyle(value) {
+    async updateStyle(value) {
       value = value || 0;
       this.$store.dispatch("UPDATE_STYLE", {
         role: this.role,

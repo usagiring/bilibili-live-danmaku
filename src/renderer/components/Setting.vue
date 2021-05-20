@@ -399,22 +399,22 @@ export default {
     },
   },
   methods: {
-    showMemberShipIcon(status) {
+    async showMemberShipIcon(status) {
       const data = { isShowMemberShipIcon: status, }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    showFanMedal(status) {
+    async showFanMedal(status) {
       const data = { isShowFanMedal: status }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    showInteractInfo(status) {
+    async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    sendTestMessage() {
+    async sendTestMessage() {
       // this.$store.dispatch(
       //   "ADD_EXAMPLE_MESSAGE",
       //   this.randomMessageGenerator()
@@ -427,7 +427,7 @@ export default {
       })
     },
 
-    clearAllSetting() {
+    async clearAllSetting() {
       const store = new Store({ name: "vuex" });
       store.clear();
       await replaceSetting(store.state.Config)
@@ -441,7 +441,7 @@ export default {
         },
       });
     },
-    changeAvatarSize(size) {
+    async changeAvatarSize(size) {
       const data = {
         avatarSize: size,
       }
@@ -453,13 +453,13 @@ export default {
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    changeOpacity(number) {
+    async changeOpacity(number) {
       this.$store.dispatch("UPDATE_CONFIG", {
         windowOpacity: Number((number / 100).toFixed(2)),
       });
     },
 
-    changeCombineSimilarTime(number) {
+    async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
       }
@@ -467,14 +467,14 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    changeShowGiftThreshold(number) {
+    async changeShowGiftThreshold(number) {
       const data = {
         showGiftThreshold: number,
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    changeShowGiftCardThreshold(number) {
+    async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
@@ -482,7 +482,7 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    showSilverGift(status) {
+    async showSilverGift(status) {
       const data = {
         isShowSilverGift: status,
       }

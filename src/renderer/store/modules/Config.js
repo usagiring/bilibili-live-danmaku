@@ -29,61 +29,61 @@ const state = {
   },
   historyRooms: [],
 
-  '0_message': {
+  message_lv0: {
     background: 'rgba(0,0,0,0)'
   },
-  '0_name': {
+  name_lv0: {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0px',
     '-webkit-text-stroke-color': 'white',
     color: 'white'
   },
-  '0_comment': {
+  comment_lv0: {
     'font-size': '16px',
     color: 'white',
     "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
-  '3_message': {
+  message_lv3: {
     background: 'rgba(0,0,0,0)'
   },
-  '3_name': {
+  name_lv3: {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0px',
     '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
-  '3_comment': {
+  comment_lv3: {
     'font-size': '16px',
     color: 'white',
     "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
-  '2_message': {
+  message_lv2: {
     background: 'rgba(0,0,0,0)'
   },
-  '2_name': {
+  name_lv2: {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0.2px',
     '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
-  '2_comment': {
+  comment_lv2: {
     'font-size': '16px',
     color: 'white',
     "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 
-  '1_message': {
+  message_lv1: {
     background: 'rgba(0,0,0,0)'
   },
-  '1_name': {
+  name_lv1: {
     'font-size': '16px',
     '-webkit-text-stroke-width': '0.2px',
     '-webkit-text-stroke-color': 'crimson',
     color: 'white'
   },
-  '1_comment': {
+  comment_lv1: {
     'font-size': '16px',
     color: 'white',
     "-webkit-text-stroke-color": 'rgba(0,0,0,0)'

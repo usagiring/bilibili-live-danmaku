@@ -160,14 +160,14 @@ export default {
       if (this.isDanmaku && data.cmd === 'COMMENT') {
         const comment = data.payload
         // 已经记录过的用户不再重复统计
-        if (this.userCommentMap[comment.uid]) continue;
+        if (this.userCommentMap[comment.uid]) return;
         // 当前房间粉丝牌等级过滤
         if (this.medalLevel) {
-          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
+          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) return
         }
         const regexp = new RegExp(this.danmakuText, "i")
         const isMatch = regexp.test(comment.comment)
-        if (!isMatch) continue;
+        if (!isMatch) return;
 
         // 记录统计
         const data = {

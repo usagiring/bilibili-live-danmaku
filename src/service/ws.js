@@ -1,4 +1,4 @@
-import { BASE_WS_URL } from "../../service/const";
+import { BASE_WS_URL } from "./const";
 const ws = new WebSocket(BASE_WS_URL)
 ws.onopen = () => { }
 

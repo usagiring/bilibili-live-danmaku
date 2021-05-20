@@ -263,11 +263,11 @@ export default {
       if (data.cmd !== 'COMMENT') return
       const comment = data.payload
       // 已经记录过的用户不再重复统计
-      if (this.userMap[comment.uid]) continue;
+      if (this.userMap[comment.uid]) return;
       const index = this.regexps.findIndex((regexp) => {
         return regexp.test(comment.comment);
       });
-      if (!~index) continue;
+      if (!~index) return;
       // 记录统计
       this.userMap[
         comment.uid
