@@ -93,7 +93,7 @@ const state = {
 
 const mutations = {
   UPDATE_STYLE(state, payload) {
-    const objKey = `${payload.role}_${payload.prop}`
+    const objKey = `${payload.prop}_lv${payload.role}`
     state[objKey] = { ...state[objKey], ...payload.style }
   },
 

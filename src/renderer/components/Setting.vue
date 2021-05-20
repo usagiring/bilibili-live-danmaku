@@ -161,7 +161,7 @@ import {
 } from "../../service/const";
 import { setGiftConfigMap, getRandomItem } from "../../service/util";
 import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
-import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting } from '../../service/api'
+import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -415,10 +415,16 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     sendTestMessage() {
-      this.$store.dispatch(
-        "ADD_EXAMPLE_MESSAGE",
-        this.randomMessageGenerator()
-      );
+      // this.$store.dispatch(
+      //   "ADD_EXAMPLE_MESSAGE",
+      //   this.randomMessageGenerator()
+      // )
+
+      const randomMessage = this.randomMessageGenerator()
+      await sendExampleMessages({
+        type: randomMessage.type,
+        data: randomMessage
+      })
     },
 
     clearAllSetting() {

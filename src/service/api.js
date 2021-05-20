@@ -55,3 +55,39 @@ export async function clearMessage() {
   const res = await axios.post(`${BASE_URL}/api/messages/clear`)
   return res.data
 }
+
+export async function queryGifts(body) {
+  const res = await axios.post(`${BASE_URL}/api/gifts/query`, body)
+  return res.data
+}
+
+export async function queryInteracts(body) {
+  const res = await axios.post(`${BASE_URL}/api/interacts/query`, body)
+  return res.data
+}
+
+export async function queryComments(body) {
+  const res = await axios.post(`${BASE_URL}/api/comments/query`, body)
+  return res.data
+}
+
+export async function countComments(body) {
+  const res = await axios.post(`${BASE_URL}/api/comments/count`, body)
+  return res.data
+}
+
+export async function countInteracts(body) {
+  const res = await axios.post(`${BASE_URL}/api/interacts/count`, body)
+  return res.data
+}
+
+export async function countGifts(body) {
+  const res = await axios.post(`${BASE_URL}/api/gifts/count`, body)
+  return res.data
+}
+
+export async function sendExampleMessages (body) {
+  const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)
+  return res.data
+
+}

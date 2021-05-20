@@ -20,7 +20,8 @@ export default {
   },
   computed: {
     value() {
-      const value = this.$store.state.Config[`${this.role}_${this.prop}`][
+      const objKey = `${this.prop}_lv${this.role}`
+      const value = this.$store.state.Config[objKey][
         `${this.styleName}`
       ];
 
@@ -47,12 +48,11 @@ export default {
         },
       })
 
+      const objKey = `${this.prop}_lv${this.role}`
       const data = {
         [objKey]: {
           ...state[objKey],
-          ...{
-            [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value,
-          }
+          [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value,
         }
       }
       await updateSetting(data)

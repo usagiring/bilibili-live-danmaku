@@ -70,8 +70,7 @@ import * as echarts from "echarts";
 // ]);
 
 import { shuffle } from "lodash";
-import { parseComment } from "../../service/bilibili-live-ws";
-import emitter from "../../service/event";
+import ws from '../../service/ws'
 import { COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 
@@ -147,15 +146,17 @@ export default {
     start() {
       this.init();
 
-      this.isWatching = true;
+      this.isWatching = true
 
-      emitter.on("message", this.onVoteMessage);
+      ws.addEventListener('message', this.onVoteMessage)
+      // emitter.on("message", this.onVoteMessage);
     },
     stop() {
-      const listenerCount = emitter.listenerCount("message");
+      // const listenerCount = emitter.listenerCount("message");
       // 如果只有1个监听者，即主监听器，不处理
-      if (listenerCount <= 1) return;
-      emitter.removeListener("message", this.onVoteMessage);
+      // if (listenerCount <= 1) return;
+      ws.removeEventListener('message', this.onVoteMessage)
+      // emitter.removeListener("message", this.onVoteMessage);
       this.isWatching = false;
     },
 
@@ -259,29 +260,24 @@ export default {
       return color;
     },
     onVoteMessage: async function (data) {
-      if (!Array.isArray(data)) return;
-      const comments = data
-        .filter((msg) => msg.cmd === "DANMU_MSG")
-        .map(parseComment);
-
-      for (const comment of comments) {
-        // 已经记录过的用户不再重复统计
-        if (this.userMap[comment.uid]) continue;
-        const index = this.regexps.findIndex((regexp) => {
-          return regexp.test(comment.comment);
-        });
-        if (!~index) continue;
-        // 记录统计
-        this.userMap[
-          comment.uid
-        ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
-        console.log(
-          `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
-        );
-        // 输入图表
-        this.data[index].value++;
-        this.makeChart();
-      }
+      if (data.cmd !== 'COMMENT') return
+      const comment = data.payload
+      // 已经记录过的用户不再重复统计
+      if (this.userMap[comment.uid]) continue;
+      const index = this.regexps.findIndex((regexp) => {
+        return regexp.test(comment.comment);
+      });
+      if (!~index) continue;
+      // 记录统计
+      this.userMap[
+        comment.uid
+      ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
+      console.log(
+        `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
+      );
+      // 输入图表
+      this.data[index].value++;
+      this.makeChart();
     },
 
     changeInput(e) {

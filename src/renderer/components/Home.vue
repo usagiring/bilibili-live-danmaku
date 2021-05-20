@@ -140,6 +140,7 @@ import {
   MAX_HISTORY_ROOM,
   BASE_WS_URL
 } from "../../service/const";
+import ws from '../../service/ws'
 
 // 0 未开播
 // 1 准备中（web开推流码）
@@ -177,10 +178,6 @@ export default {
   },
   async mounted() {
     await this.initial();
-    const ws = new WebSocket(BASE_WS_URL)
-
-    ws.onopen = () => { }
-
     ws.onmessage = (msg) => {
       const payload = JSON.parse(msg.data)
 
@@ -214,14 +211,6 @@ export default {
         console.log("auto record stop...");
         this.cancelRecord();
       }
-    }
-
-    ws.onclose = (code) => {
-      console.log('ws close: ', code)
-    }
-
-    ws.onerror = (err) => {
-      console.error(err)
     }
   },
   computed: {

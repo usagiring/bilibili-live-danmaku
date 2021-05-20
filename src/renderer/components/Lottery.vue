@@ -77,16 +77,11 @@
 </template>
 
 <script>
-// 统计一段时间内送礼
-// 检测开启天选自动开始统计
-// 发送弹幕或者送礼抽奖
-import { sortBy } from "lodash";
 import { shell } from "electron";
-import emitter from "../../service/event";
 import { getRandomItem, dateFormat } from '../../service/util'
 import { GIFT_CONFIG_MAP, DEFAULT_AVATAR } from "../../service/const";
-import { parseGift, parseComment } from "../../service/bilibili-live-ws";
 import { lotteryDB } from '../../service/nedb'
+import ws from '../../service/ws'
 
 const giftSelectors = [];
 for (const key in GIFT_CONFIG_MAP) {
@@ -153,47 +148,40 @@ export default {
     },
     start() {
       this.init()
-      emitter.on("message", this.onLotteryMessage)
+      // emitter.on("message", this.onLotteryMessage)
+      ws.addEventListener('message', this.onLotteryMessage)
       this.isRunning = true;
     },
     async stop() {
-      emitter.removeListener("message", this.onLotteryMessage);
+      ws.removeEventListener("message", this.onLotteryMessage);
     },
 
     async onLotteryMessage(data) {
-      if (!Array.isArray(data)) return;
-      if (this.isDanmaku) {
-        const comments = data
-          .filter((msg) => msg.cmd === "DANMU_MSG")
-          .map(parseComment);
-        for (const comment of comments) {
-          // 已经记录过的用户不再重复统计
-          if (this.userCommentMap[comment.uid]) continue;
-          // 当前房间粉丝牌等级过滤
-          if (this.medalLevel) {
-            if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
-          }
-          const regexp = new RegExp(this.danmakuText, "i")
-          const isMatch = regexp.test(comment.comment)
-          if (!isMatch) continue;
-
-          // 记录统计
-          const data = {
-            uid: comment.uid,
-            name: comment.name,
-            comment: comment.comment,
-            avatar: comment.avatar || DEFAULT_AVATAR,
-          }
-          this.userCommentMap[comment.uid] = data
-          this.userComments = [data, ...this.userComments]
+      if (this.isDanmaku && data.cmd === 'COMMENT') {
+        const comment = data.payload
+        // 已经记录过的用户不再重复统计
+        if (this.userCommentMap[comment.uid]) continue;
+        // 当前房间粉丝牌等级过滤
+        if (this.medalLevel) {
+          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
         }
+        const regexp = new RegExp(this.danmakuText, "i")
+        const isMatch = regexp.test(comment.comment)
+        if (!isMatch) continue;
+
+        // 记录统计
+        const data = {
+          uid: comment.uid,
+          name: comment.name,
+          comment: comment.comment,
+          avatar: comment.avatar || DEFAULT_AVATAR,
+        }
+        this.userCommentMap[comment.uid] = data
+        this.userComments = [data, ...this.userComments]
       }
-      if (this.isGift) {
-        const gifts = data
-          .map(parseGift)
-          .filter((gift) => {
-            return gift && gift.type === "gift" && this.selectedGiftIds.includes(`${gift.giftId}`)
-          });
+      if (this.isGift && data.cmd === 'GIFT') {
+        const gift = data.payload
+        if(!this.selectedGiftIds.includes(`${gift.giftId}`)) return
 
         gifts.forEach((gift) => {
           const {
