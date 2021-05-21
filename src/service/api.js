@@ -42,7 +42,7 @@ export async function backupDB({ names }) {
 
 // { [any]: any }
 export async function updateSetting(settings) {
-  const res = await axios.get(`${BASE_URL}/api/settings/merge`, settings)
+  const res = await axios.put(`${BASE_URL}/api/settings/merge`, settings)
   return res.data
 }
 

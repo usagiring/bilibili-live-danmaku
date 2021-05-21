@@ -353,7 +353,7 @@ export default {
         }
         this.$store.dispatch("UPDATE_CONFIG", config);
       } else {
-        await disconnect({ roomId: displayRoomId })
+        await disconnect({ roomId: this.displayRoomId })
         this.initial()
       }
       this.isConnecting = false;
@@ -569,8 +569,8 @@ export default {
 
     this.peopleTimer = setInterval(async () => {
       // console.log("peopleTimer");
-      if (!this.realRoomId && !this.isConnected) return;
-      const result = await getRealTimeViewersCount({ roomId })
+      if (!this.realRoomId || !this.isConnected) return;
+      const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
       this.peopleNumber = result.data
     }, 10000);
   },

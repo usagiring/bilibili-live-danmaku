@@ -50,10 +50,7 @@ export default {
 
       const objKey = `${this.prop}_lv${this.role}`
       const data = {
-        [objKey]: {
-          ...state[objKey],
-          [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value,
-        }
+        [objKey]: { [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value }
       }
       await updateSetting(data)
     },
