@@ -177,6 +177,8 @@ export default {
   created() {
   },
   async mounted() {
+    this.displayRoomId = this.realRoomId;
+
     await this.initial();
     ws.onmessage = (msg) => {
       const payload = JSON.parse(msg.data)
@@ -212,6 +214,23 @@ export default {
         this.cancelRecord();
       }
     }
+
+    ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
+      this.hasNewVersion = true;
+    });
+    ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
+    this.giftTimer = setInterval(() => {
+      // console.log("giftTimer");
+      this.$store.dispatch("GIFT_TIMER");
+    }, 1000);
+
+    this.peopleTimer = setInterval(async () => {
+      // console.log("peopleTimer");
+      if (!this.realRoomId || !this.isConnected) return;
+      const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
+      this.peopleNumber = result.data
+    }, 10000);
+
   },
   computed: {
     menuitemClasses: function () {
@@ -379,9 +398,14 @@ export default {
           resizable: true,
         });
 
+        // const winURL =
+        //   process.env.NODE_ENV === "development"
+        //     ? `http://localhost:9080/#/danmaku-window`
+        //     : `file://${__dirname}/index.html#danmaku-window`;
+
         const winURL =
           process.env.NODE_ENV === "development"
-            ? `http://localhost:9080/#/danmaku-window`
+            ? `file://${__dirname}/node_modules/bilibili-danmaku-page?port=8081`
             : `file://${__dirname}/index.html#danmaku-window`;
         this.win.loadURL(winURL);
         this.win.on("close", (e) => {
@@ -435,7 +459,8 @@ export default {
         guardNumber: 0,
       };
 
-      const result = await getRoomStatus({ roomId })
+      const result = await getRoomStatus({ roomId: this.realRoomId })
+      console.log(result)
       Object.assign(payload, {
         isConnected: result.data.isConnected
       });
@@ -554,25 +579,6 @@ export default {
         historyRooms: historyRooms,
       });
     },
-  },
-  async mounted() {
-    this.displayRoomId = this.$store.state.Config.realRoomId;
-
-    ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
-      this.hasNewVersion = true;
-    });
-    ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
-    this.giftTimer = setInterval(() => {
-      // console.log("giftTimer");
-      this.$store.dispatch("GIFT_TIMER");
-    }, 1000);
-
-    this.peopleTimer = setInterval(async () => {
-      // console.log("peopleTimer");
-      if (!this.realRoomId || !this.isConnected) return;
-      const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
-      this.peopleNumber = result.data
-    }, 10000);
   },
   beforeDestroy() {
     if (this.giftTimer) {
