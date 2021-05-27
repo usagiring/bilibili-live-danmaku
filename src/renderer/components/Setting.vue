@@ -106,9 +106,9 @@
         <Panel name="4">
           高级
           <div slot="content">
-            <div class="setting-key">
+            <!-- <div class="setting-key">
               <Button @click="refreshInfo">刷新直播间信息</Button>
-            </div>
+            </div> -->
             <div class="setting-key">
               <Button @click="setGiftConfig">刷新礼物信息</Button>
             </div>
@@ -138,9 +138,9 @@
           <Button @click="clearExampleDanmaku">还原默认预览弹幕</Button>
           <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
-        <div class="setting-right-content" :style="{ background: background }">
-          <Danmaku :isPreview="true" />
-        </div>
+        <!-- <div class="setting-right-content" :style="{ background: background }"> -->
+        <iframe class="setting-right-content" id="preview-container" src="http://localhost:8081?example=true&port=8081" />
+        <!-- </div> -->
       </div>
     </i-col>
   </Row>
@@ -158,6 +158,7 @@ import {
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
+  EXAMPLE_MESSAGES
 } from "../../service/const";
 import { setGiftConfigMap, getRandomItem } from "../../service/util";
 import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
@@ -341,6 +342,8 @@ export default {
     };
   },
   mounted() {
+    this.initExamleMessages()
+
     if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
     this.fonts.push({
       key: this.danmakuFont,
@@ -427,6 +430,17 @@ export default {
       })
     },
 
+    initExamleMessages() {
+      console.log(123)
+      EXAMPLE_MESSAGES.forEach(message => {
+        console.log(message)
+        sendExampleMessages({
+          type: message.type,
+          data: message
+        })
+      })
+    },
+
     async clearAllSetting() {
       const store = new Store({ name: "vuex" });
       store.clear();
@@ -496,15 +510,15 @@ export default {
       const types = [
         {
           name: "gift",
-          probability: 10,
+          probability: 30,
         },
         {
           name: "comment",
-          probability: 80,
+          probability: 30,
         },
         {
           name: "superChat",
-          probability: 10,
+          probability: 30,
         },
       ];
 
@@ -512,6 +526,7 @@ export default {
 
       if (randomType === "gift") {
         const gift = {
+          _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
           name: `bli_${randomNumber}`,
@@ -519,13 +534,14 @@ export default {
           price: Math.floor(Math.random() * 10),
           giftNumber: 1,
           giftName: "随机礼物",
-          avatar: DEFAULT_AVATAR,
+          guard: 3,
           role: 3,
           sendAt: new Date() - 0,
           batchComboId: randomNumber,
           // batchComboId: 1,
         };
         gift.role = randomRole;
+        gift.guard = randomRole;
         if (Math.random() * 2 < 1) {
           gift.giftName = "舰长";
           gift.isGuardGift = true;
@@ -535,6 +551,7 @@ export default {
       }
       if (randomType === "superChat") {
         const superChat = {
+          _id: randomNumber,
           id: randomNumber,
           // id: 3333333,
           uid: randomNumber,
@@ -542,31 +559,34 @@ export default {
           // superChatId: 3333333,
           name: `bli_${randomNumber}`,
           type: "superChat",
-          avatar: DEFAULT_AVATAR,
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
           price: Math.floor(Math.random() * 10),
           role: 3,
+          guard: 3,
           sendAt: new Date() - 0,
         };
         if (Math.random() * 2 < 1) {
           superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
         }
         superChat.role = randomRole;
+        superChat.guard = randomRole;
         return superChat;
       }
 
       if (randomType === "comment") {
         const comment = {
+          _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "comment",
-          avatar: DEFAULT_AVATAR,
           comment: `一条弹幕哟～`,
           role: 3,
+          guard: 3,
           sendAt: new Date() - 0,
         };
         comment.role = randomRole;
+        comment.guard = randomRole;
         return comment;
       }
     },
@@ -581,13 +601,13 @@ export default {
       // this.$store.dispatch("CLEAR_MESSAGE");
     },
 
-    async refreshInfo() {
-      // 暂时只刷新舰长数
-      const guardInfo = await getGuardInfo(this.realRoomId, this.ruid);
-      this.$store.dispatch("UPDATE_CONFIG", {
-        guardNumber: guardInfo.data.info.num,
-      });
-    },
+    // async refreshInfo() {
+    //   // 暂时只刷新舰长数
+    //   const guardInfo = await getGuardInfo(this.realRoomId, this.ruid);
+    //   this.$store.dispatch("UPDATE_CONFIG", {
+    //     guardNumber: guardInfo.data.info.num,
+    //   });
+    // },
 
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall
@@ -657,6 +677,7 @@ export default {
 }
 
 .setting-right-content {
+  width: 95%;
   margin: 10px;
   padding: 5px;
   height: 500px;

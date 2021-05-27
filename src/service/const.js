@@ -84,12 +84,13 @@ export const GET_USER_INFO_FREQUENCY_LIMIT = OPTION_CONFIG.GET_USER_INFO_FREQUEN
 
 export const EXAMPLE_MESSAGES = [
   {
+    _id: 1,
     id: 1,
     type: "comment",
     uid: "123456",
     name: "bli_123456",
     comment: "这是一条测试弹幕哟～",
-    avatar: DEFAULT_AVATAR,
+    guard: 3,
     role: 3,
     similar: 1,
     medalName: '测试者',
@@ -99,15 +100,17 @@ export const EXAMPLE_MESSAGES = [
     "medalColorEnd": "#5d7b9e"
   },
   {
+    _id: 2,
     id: 2,
+    guard: 0,
     uid: "654321",
     name: "bli_654321",
     type: "comment",
     comment: "～哟幕弹试测条一是这",
-    avatar: DEFAULT_AVATAR,
     role: 0
   },
   {
+    _id: 6,
     id: 6,
     uid: "12345",
     name: "bli_12345",
@@ -116,8 +119,8 @@ export const EXAMPLE_MESSAGES = [
     commentJPN: "これはテスト用のスパチャだよ〜",
     price: 50,
     totalPrice: 50,
-    avatar: DEFAULT_AVATAR,
-    role: 0
+    role: 0,
+    guard: 0
   },
   // {
   //   id: 7,
@@ -131,16 +134,17 @@ export const EXAMPLE_MESSAGES = [
   //   giftName: '测试礼物'
   // },
   {
+    _id: 8,
     id: 8,
     type: "gift",
     uid: 777777,
     name: 'bli_777777',
-    avatar: DEFAULT_AVATAR,
     isGuardGift: true,
     price: 198,
     giftNumber: 1,
     totalPrice: 198,
-    giftName: '舰长'
+    giftName: '舰长',
+    guard: 1
   }
 ]
 
