@@ -127,7 +127,7 @@ const { BrowserWindow } = remote;
 import { parseDownloadRate } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect } from '../../service/api'
 import emitter from "../../service/event";
-import { record, cancelRecord } from "../../service/bilibili-recorder";
+import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
   IPC_CHECK_FOR_UPDATE,
@@ -138,7 +138,7 @@ import {
   SET_DANMAKU_ON_TOP_LEVEL,
   DEFAULT_RECORD_DIR,
   MAX_HISTORY_ROOM,
-  BASE_WS_URL
+  PORT
 } from "../../service/const";
 import ws from '../../service/ws'
 
@@ -220,13 +220,8 @@ export default {
       this.hasNewVersion = true;
     });
     ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
-    this.giftTimer = setInterval(() => {
-      // console.log("giftTimer");
-      this.$store.dispatch("GIFT_TIMER");
-    }, 1000);
 
     this.peopleTimer = setInterval(async () => {
-      // console.log("peopleTimer");
       if (!this.realRoomId || !this.isConnected) return;
       const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
       this.peopleNumber = result.data
@@ -255,9 +250,6 @@ export default {
     },
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
-    },
-    showGiftThreshold() {
-      return this.$store.state.Config.showGiftThreshold;
     },
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
@@ -332,6 +324,11 @@ export default {
 
         await connectRoom({ roomId: Number(roomId), uid: 0 });
 
+        const config = {
+          isConnected: status,
+        };
+        this.$store.dispatch("UPDATE_CONFIG", config);
+
 
         if (liveStatus === 1 && this.isAutoRecord && !this.isRecording) {
           LIVE_STATUS = 2;
@@ -365,6 +362,7 @@ export default {
 
     async initRoomInfo() {
       const { data } = await getRoomInfoV2(this.displayRoomId);
+      console.log(data)
 
       const {
         uid,
@@ -401,7 +399,6 @@ export default {
         isConnected: status,
         realRoomId: roomId,
         displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
-        ruid: uid,
         medalId: medal_id,
         medalName: medal_name,
       };
@@ -437,8 +434,8 @@ export default {
 
         const winURL =
           process.env.NODE_ENV === "development"
-            ? `http://localhost:${8081}?port=${8081}`
-            : `http://localhost:${8081}?port=${8081}`;
+            ? `http://localhost:${PORT}?port=${PORT}`
+            : `http://localhost:${PORT}?port=${PORT}`;
         this.win.loadURL(winURL);
         this.win.on("close", (e) => {
           this.isShowDanmakuWindow = false;
@@ -512,7 +509,6 @@ export default {
           roomId = roomId.replace(/[^\d]/g, "");
         }
       } catch (e) {
-        console.log(e);
         this.$Message.warning("请输入正确数字");
       }
       this.displayRoomId = roomId;
@@ -572,11 +568,11 @@ export default {
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });
 
-        this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+        setStatus({
           recordId: id,
           recordStartTime: Date.now(),
           isRecording: true,
-        });
+        })
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`);
       }
@@ -587,11 +583,11 @@ export default {
       } catch (e) {
         console.warn(e);
       }
-      this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+      setStatus({
+        recordId: '',
         recordStartTime: 0,
         isRecording: false,
-        recordId: "",
-      });
+      })
 
       emitter.removeAllListeners(`${this.recordId}-download-rate`);
     },

@@ -15,6 +15,8 @@ const qualityMap = {
   '流畅': 80
 }
 
+const __status = {}
+
 const recorder = new BilibiliRecorder(
   {
     emitter: emitter
@@ -25,7 +27,9 @@ const recorder = new BilibiliRecorder(
 export {
   record,
   getRandomPlayUrl,
-  cancelRecord
+  cancelRecord,
+  setStatus,
+  getStatus,
 }
 
 async function record({ roomId, recordDir, quality, cookie }) {
@@ -40,7 +44,7 @@ async function record({ roomId, recordDir, quality, cookie }) {
     fs.mkdirSync(_recordDir)
   }
 
-  const output = path.join(_recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYY-MM-DD_HH:mm:ss')}.flv`)
+  const output = path.join(_recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
   console.log(`record: OUTPUT: ${output}`)
 
   const axiosOptions = {}
@@ -65,4 +69,12 @@ async function getRandomPlayUrl({ roomId, quality, cookie }) {
 
 async function cancelRecord(id) {
   return recorder.cancelRecord(id)
+}
+
+function setStatus(status) {
+  return Object.assign(__status, status)
+}
+
+function getStatus() {
+  return __status
 }

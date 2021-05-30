@@ -7,7 +7,7 @@
       left: '4px',
       right: '4px',
       '-webkit-user-select': 'none',
-      opacity: windowOpacity,
+      opacity: opacity,
     }"
   >
     <div
@@ -326,8 +326,8 @@ export default {
         "line-height": `${avatarSize}px`,
       };
     },
-    windowOpacity() {
-      return this.$store.state.Config.windowOpacity;
+    opacity() {
+      return this.$store.state.Config.opacity;
     },
 
     messages() {

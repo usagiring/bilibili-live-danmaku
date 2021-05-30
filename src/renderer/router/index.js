@@ -37,11 +37,6 @@ export default new Router({
       ]
     },
     {
-      path: '/danmaku-window',
-      name: 'DanmakuWindow',
-      component: () => import('@/components/DanmakuWindow.vue')
-    },
-    {
       path: '*',
       redirect: () => import('@/components/NotFound.vue')
     }

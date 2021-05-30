@@ -82,6 +82,7 @@
     ]
   },
   "dependencies": {
+    "@tokine/bilibili-bridge": "^0.0.1",
     "@tokine/bilibili-recorder": "^0.0.9",
     "axios": "^0.21.1",
     "cookie": "^0.4.1",

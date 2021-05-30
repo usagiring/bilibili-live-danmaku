@@ -1,15 +1,11 @@
-import path from 'path'
-import bridge from 'bilibili-bridge'
+import bridge from '@tokine/bilibili-bridge'
 import store from '../renderer/store'
-import { USER_DATA_PATH, PORT } from './const'
+import { USER_DATA_PATH, PORT, EXAMPLE_MESSAGES, DEFAULT_SERVER_CONFIG } from './const'
 
 const options = {
+  ...DEFAULT_SERVER_CONFIG,
   ...store.state.Config,
-  USER_DATA_PATH,
-  PORT: PORT,
-  HTML_PATH: path.join(__dirname, '../../../bilibili-danmaku-page/dist')
 }
-console.log(options)
 bridge(options)
 
 export default bridge

@@ -19,7 +19,7 @@
 
 <script>
 import moment from "moment";
-import { queryComments, countComments, queryInteracts, queryGifts } from '../../service/api'
+import { queryComments, queryInteracts, queryGifts, countComments } from '../../service/api'
 import { countBy } from "lodash";
 import * as echarts from "echarts";
 // import * as echarts from "echarts/core";
@@ -60,7 +60,6 @@ export default {
     this.roomId = this.$store.state.Config.realRoomId;
     const start = moment().startOf("day").toDate();
     const end = moment().endOf("day").toDate();
-    console.log(start, end);
     this.dateRange = [start, end];
     this.statistic();
   },
@@ -79,7 +78,7 @@ export default {
         query.sendAt = query.sendAt || {};
         query.sendAt.$lte = end - 0;
       }
-      const commentCount = await countComments({ query })
+      const { data: commentCount } = await countComments({ query })
       this.commentCount = commentCount;
       const giftQuery = {
         ...query,
@@ -87,7 +86,7 @@ export default {
       };
 
       // --- gift ---
-      let gifts = await queryGifts({
+      let { data: gifts } = await queryGifts({
         query: giftQuery,
       })
       // let gifts = await giftDB.find(giftQuery);
@@ -121,7 +120,7 @@ export default {
       this.giftUserCount = Object.keys(giftUserMap).length;
 
       // --- comment ---
-      const comments = await queryComments({
+      const { data: comments } = await queryComments({
         query,
         projection: { uid: 1, name: 1, sendAt: 1 },
       })
@@ -144,7 +143,7 @@ export default {
       this.generateChart(comments);
 
       // --- interact ---
-      const interacts = await queryInteracts({
+      const { data: interacts } = await queryInteracts({
         query,
         projection: { uid: 1 },
       })

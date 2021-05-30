@@ -80,7 +80,7 @@
 import { shell } from "electron";
 import { getRandomItem, dateFormat } from '../../service/util'
 import { GIFT_CONFIG_MAP, DEFAULT_AVATAR } from "../../service/const";
-import { lotteryDB } from '../../service/nedb'
+import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
 import ws from '../../service/ws'
 
 const giftSelectors = [];
@@ -156,7 +156,8 @@ export default {
       ws.removeEventListener("message", this.onLotteryMessage);
     },
 
-    async onLotteryMessage(data) {
+    async onLotteryMessage(msg) {
+      const data = JSON.parse(msg.data)
       if (this.isDanmaku && data.cmd === 'COMMENT') {
         const comment = data.payload
         // 已经记录过的用户不再重复统计
@@ -170,18 +171,18 @@ export default {
         if (!isMatch) return;
 
         // 记录统计
-        const data = {
+        const history = {
           uid: comment.uid,
           name: comment.name,
           comment: comment.comment,
           avatar: comment.avatar || DEFAULT_AVATAR,
         }
-        this.userCommentMap[comment.uid] = data
-        this.userComments = [data, ...this.userComments]
+        this.userCommentMap[comment.uid] = history
+        this.userComments = [history, ...this.userComments]
       }
       if (this.isGift && data.cmd === 'GIFT') {
         const gift = data.payload
-        if(!this.selectedGiftIds.includes(`${gift.giftId}`)) return
+        if (!this.selectedGiftIds.includes(`${gift.giftId}`)) return
 
         gifts.forEach((gift) => {
           const {
@@ -239,10 +240,14 @@ export default {
         const randomItem = getRandomItem(withProbability)
         if (!randomItem) return
         this.aTaRi = randomItem
-        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        await addLotteryHistory(Object.assign({}, this.aTaRi, {
           time: Date.now(),
           description: this.description
         }))
+        // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        //   time: Date.now(),
+        //   description: this.description
+        // }))
       }
       if (this.isGift) {
         const userPriceMap = {}
@@ -271,10 +276,15 @@ export default {
 
         this.aTaRi = randomItem
         this.isRunning = false;
-        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        await addLotteryHistory(Object.assign({}, this.aTaRi, {
           time: Date.now(),
           description: this.description
         }))
+
+        // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        //   time: Date.now(),
+        //   description: this.description
+        // }))
       }
     },
 
@@ -289,14 +299,16 @@ export default {
     async showHistoryModal() {
       this.historyModal = true
 
-      const histories = await lotteryDB.find({})
+      const { data: histories } = await queryLotteryHistories({})
+      // const histories = await lotteryDB.find({})
       this.histories = histories.map(history => {
         history.time = dateFormat(history.time)
         return history
       })
     },
     async removeAllHistory() {
-      await lotteryDB.deleteMany({})
+      await deleteLotteryHistories({})
+      // await lotteryDB.deleteMany({})
       this.histories = []
     }
   },

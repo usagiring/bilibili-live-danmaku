@@ -12,7 +12,7 @@
             <div>
               <span class="setting-key-text">透明度</span>
               <div class="avatar-controller-slider">
-                <Slider :value="windowOpacity" @on-change="changeOpacity"></Slider>
+                <Slider :value="opacity" @on-change="changeOpacity"></Slider>
               </div>
             </div>
             <div>
@@ -38,7 +38,7 @@
             </div>
             <div class="setting-key">
               <span class="setting-key-text">礼物栏展示大于</span>
-              <InputNumber :value="showGiftThreshold" @on-change="changeShowGiftThreshold" :min="0" size="small" />
+              <InputNumber :value="showHeadlineThreshold" @on-change="changeShowHeadlineThreshold" :min="0" size="small" />
               {{ " 元" }}
             </div>
             <div class="setting-key">
@@ -109,9 +109,9 @@
             <!-- <div class="setting-key">
               <Button @click="refreshInfo">刷新直播间信息</Button>
             </div> -->
-            <div class="setting-key">
+            <!-- <div class="setting-key">
               <Button @click="setGiftConfig">刷新礼物信息</Button>
-            </div>
+            </div> -->
             <div class="setting-key">
               <Poptip confirm title="确认还原默认设置？" placement="right" width="300" @on-ok="clearAllSetting">
                 <Button>还原默认设置</Button>
@@ -135,7 +135,7 @@
       <div class="setting-right">
         <div class="setting-right-header">
           <Button @click="sendTestMessage">发送测试弹幕</Button>
-          <Button @click="clearExampleDanmaku">还原默认预览弹幕</Button>
+          <Button @click="clearExampleDanmaku">恢复默认测试弹幕</Button>
           <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
         <!-- <div class="setting-right-content" :style="{ background: background }"> -->
@@ -154,15 +154,14 @@ import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
 import Danmaku from "./Danmaku";
 import {
-  DEFAULT_AVATAR,
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
-  EXAMPLE_MESSAGES
+  DEFAULT_SERVER_CONFIG
 } from "../../service/const";
 import { setGiftConfigMap, getRandomItem } from "../../service/util";
-import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
-import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages } from '../../service/api'
+import { getGiftConfig } from "../../service/bilibili-api";
+import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, clearExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -199,6 +198,14 @@ export default {
         },
         {
           id: Math.random(),
+          type: "ColorPicker",
+          name: "名称前景色",
+          role: 0,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
           role: 0,
@@ -214,14 +221,7 @@ export default {
           prop: "name",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "名称前景色",
-          role: 0,
-          prop: "name",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "InputNumber",
@@ -229,6 +229,14 @@ export default {
           role: 0,
           prop: "comment",
           styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "评论前景色",
+          role: 0,
+          prop: "comment",
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -247,14 +255,7 @@ export default {
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "评论前景色",
-          role: 0,
-          prop: "comment",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "ColorPicker",
@@ -274,6 +275,14 @@ export default {
         },
         {
           id: Math.random(),
+          type: "ColorPicker",
+          name: "名称前景色",
+          role: 3,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
           role: 3,
@@ -289,14 +298,7 @@ export default {
           prop: "name",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "名称前景色",
-          role: 3,
-          prop: "name",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "InputNumber",
@@ -304,6 +306,14 @@ export default {
           role: 3,
           prop: "comment",
           styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "评论前景色",
+          role: 3,
+          prop: "comment",
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -322,14 +332,7 @@ export default {
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "评论前景色",
-          role: 3,
-          prop: "comment",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "ColorPicker",
@@ -342,7 +345,7 @@ export default {
     };
   },
   mounted() {
-    this.initExamleMessages()
+    // this.initExamleMessages()
 
     if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
     this.fonts.push({
@@ -355,11 +358,8 @@ export default {
     realRoomId() {
       return this.$store.state.Config.realRoomId;
     },
-    ruid() {
-      return this.$store.state.Config.ruid;
-    },
     background() {
-      return this.$store.state.Config["container_style"]["background"];
+      return this.$store.state.Config.background;
     },
     danmakuFont() {
       return this.$store.state.Config.danmakuFont;
@@ -382,8 +382,8 @@ export default {
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
     },
-    showGiftThreshold() {
-      return this.$store.state.Config.showGiftThreshold;
+    showHeadlineThreshold() {
+      return this.$store.state.Config.showHeadlineThreshold;
     },
     showGiftCardThreshold() {
       return this.$store.state.Config.showGiftCardThreshold;
@@ -397,8 +397,8 @@ export default {
     isUseMiniGiftCard() {
       return this.$store.state.Config.isUseMiniGiftCard;
     },
-    windowOpacity() {
-      return this.$store.state.Config.windowOpacity * 100;
+    opacity() {
+      return this.$store.state.Config.opacity * 100;
     },
   },
   methods: {
@@ -430,30 +430,29 @@ export default {
       })
     },
 
-    initExamleMessages() {
-      console.log(123)
-      EXAMPLE_MESSAGES.forEach(message => {
-        console.log(message)
-        sendExampleMessages({
-          type: message.type,
-          data: message
-        })
-      })
-    },
+    // initExamleMessages() {
+    //   EXAMPLE_MESSAGES.forEach(message => {
+    //     sendExampleMessages({
+    //       type: message.type,
+    //       data: message
+    //     })
+    //   })
+    // },
 
     async clearAllSetting() {
-      const store = new Store({ name: "vuex" });
-      store.clear();
-      await replaceSetting(store.state.Config)
-      window.reload();
+      await replaceSetting(DEFAULT_SERVER_CONFIG)
+
+      const store = new Store({ name: "vuex" })
+      store.clear()
+      window.reload()
     },
 
-    updateBackground(color) {
-      this.$store.dispatch("UPDATE_CONTAINER_STYLE", {
-        style: {
-          background: color,
-        },
-      });
+    async updateBackground(color) {
+      const data = {
+        background: color,
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeAvatarSize(size) {
       const data = {
@@ -468,9 +467,11 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeOpacity(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        windowOpacity: Number((number / 100).toFixed(2)),
-      });
+      const data = {
+        opacity: Number((number / 100).toFixed(2)),
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+      await updateSetting(data)
     },
 
     async changeCombineSimilarTime(number) {
@@ -481,9 +482,9 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    async changeShowGiftThreshold(number) {
+    async changeShowHeadlineThreshold(number) {
       const data = {
-        showGiftThreshold: number,
+        showHeadlineThreshold: number,
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
@@ -510,15 +511,15 @@ export default {
       const types = [
         {
           name: "gift",
-          probability: 30,
+          probability: 10,
         },
         {
           name: "comment",
-          probability: 30,
+          probability: 80,
         },
         {
           name: "superChat",
-          probability: 30,
+          probability: 10,
         },
       ];
 
@@ -531,12 +532,12 @@ export default {
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "gift",
-          price: Math.floor(Math.random() * 10),
+          price: Math.floor(Math.random() * 100),
           giftNumber: 1,
           giftName: "随机礼物",
           guard: 3,
           role: 3,
-          sendAt: new Date() - 0,
+          sendAt: Date.now(),
           batchComboId: randomNumber,
           // batchComboId: 1,
         };
@@ -560,10 +561,10 @@ export default {
           name: `bli_${randomNumber}`,
           type: "superChat",
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
-          price: Math.floor(Math.random() * 10),
+          price: Math.floor(Math.random() * 100),
           role: 3,
           guard: 3,
-          sendAt: new Date() - 0,
+          sendAt: Date.now(),
         };
         if (Math.random() * 2 < 1) {
           superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
@@ -583,7 +584,7 @@ export default {
           comment: `一条弹幕哟～`,
           role: 3,
           guard: 3,
-          sendAt: new Date() - 0,
+          sendAt: Date.now(),
         };
         comment.role = randomRole;
         comment.guard = randomRole;
@@ -592,7 +593,7 @@ export default {
     },
 
     async clearExampleDanmaku() {
-      await clearMessage()
+      await clearExampleMessage()
       // this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
     },
 
@@ -600,14 +601,6 @@ export default {
       await clearMessage()
       // this.$store.dispatch("CLEAR_MESSAGE");
     },
-
-    // async refreshInfo() {
-    //   // 暂时只刷新舰长数
-    //   const guardInfo = await getGuardInfo(this.realRoomId, this.ruid);
-    //   this.$store.dispatch("UPDATE_CONFIG", {
-    //     guardNumber: guardInfo.data.info.num,
-    //   });
-    // },
 
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall
@@ -679,7 +672,6 @@ export default {
 .setting-right-content {
   width: 95%;
   margin: 10px;
-  padding: 5px;
   height: 500px;
 
   border-radius: 12px;

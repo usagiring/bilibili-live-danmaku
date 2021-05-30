@@ -36,7 +36,7 @@
         <div id="chart"></div>
       </i-col>
     </Row>
-    <Modal v-model="modal1" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
+    <Modal v-model="modal1" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(value, uid) in userMap">
         <p :key="uid">
           {{ value }}
@@ -259,7 +259,8 @@ export default {
       colorPool.push(color);
       return color;
     },
-    onVoteMessage: async function (data) {
+    onVoteMessage: async function (msg) {
+      const data = JSON.parse(msg.data)
       if (data.cmd !== 'COMMENT') return
       const comment = data.payload
       // 已经记录过的用户不再重复统计
@@ -269,12 +270,7 @@ export default {
       });
       if (!~index) return;
       // 记录统计
-      this.userMap[
-        comment.uid
-      ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
-      console.log(
-        `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
-      );
+      this.userMap[comment.uid] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
       // 输入图表
       this.data[index].value++;
       this.makeChart();

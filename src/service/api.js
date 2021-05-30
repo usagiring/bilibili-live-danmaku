@@ -27,14 +27,14 @@ export async function getRoomStatus({ roomId }) {
 }
 
 export async function clearDB({ names }) {
-  const res = await axios.get(`${BASE_URL}/api/dbs/clear`, {
+  const res = await axios.post(`${BASE_URL}/api/dbs/clear`, {
     names
   })
   return res.data
 }
 
 export async function backupDB({ names }) {
-  const res = await axios.get(`${BASE_URL}/api/dbs/backup`, {
+  const res = await axios.post(`${BASE_URL}/api/dbs/backup`, {
     names
   })
   return res.data
@@ -47,7 +47,12 @@ export async function updateSetting(settings) {
 }
 
 export async function replaceSetting(settings) {
-  const res = await axios.get(`${BASE_URL}/api/settings/replace`, settings)
+  const res = await axios.put(`${BASE_URL}/api/settings/replace`, settings)
+  return res.data
+}
+
+export async function clearExampleMessage() {
+  const res = await axios.post(`${BASE_URL}/api/messages/examples/clear`)
   return res.data
 }
 
@@ -71,6 +76,21 @@ export async function queryComments(body) {
   return res.data
 }
 
+export async function queryLotteryHistories(body) {
+  const res = await axios.post(`${BASE_URL}/api/lottery-histories/query`, body)
+  return res.data
+}
+
+export async function deleteLotteryHistories(body) {
+  const res = await axios.delete(`${BASE_URL}/api/lottery-histories`, body)
+  return res.data
+}
+
+export async function addLotteryHistory(body) {
+  const res = await axios.post(`${BASE_URL}/api/lottery-histories`, body)
+  return res.data
+}
+
 export async function countComments(body) {
   const res = await axios.post(`${BASE_URL}/api/comments/count`, body)
   return res.data
@@ -86,7 +106,8 @@ export async function countGifts(body) {
   return res.data
 }
 
-export async function sendExampleMessages (body) {
+
+export async function sendExampleMessages(body) {
   const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)
   return res.data
 

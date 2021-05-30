@@ -18,17 +18,8 @@
         <div :style="{ display: 'inline-block', width: '80px', 'text-align': 'center' }">
           {{ downloadRate }}
         </div>
-        <Select
-          :value="recordQuality"
-          style="width: 70px"
-          @on-change="changeRecordQuality"
-        >
-          <Option
-            v-for="quality in qualities"
-            :value="quality.value"
-            :key="quality.key"
-            >{{ quality.value }}</Option
-          >
+        <Select :value="recordQuality" style="width: 70px" @on-change="changeRecordQuality">
+          <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
         </Select>
         <Button @click="openRecordSaveFolderSelector" shape="circle">
           选择文件夹
@@ -40,38 +31,13 @@
           <Icon type="md-play" color="green" />
           播放
         </Button>
-        <Select
-          :value="playQuality"
-          style="width: 70px"
-          @on-change="changePlayQuality"
-        >
-          <Option
-            v-for="quality in qualities"
-            :value="quality.value"
-            :key="quality.key"
-            >{{ quality.value }}</Option
-          >
+        <Select :value="playQuality" style="width: 70px" @on-change="changePlayQuality">
+          <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
         </Select>
-        <Select
-          :value="resolution"
-          style="width: 70px"
-          @on-change="changeResolutions"
-        >
-          <Option
-            v-for="resolution in resolutions"
-            :value="resolution.value"
-            :key="resolution.key"
-            >{{ resolution.value }}</Option
-          >
+        <Select :value="resolution" style="width: 70px" @on-change="changeResolutions">
+          <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
         </Select>
-        <Input
-          :value="userCookie"
-          @on-change="changeCookie"
-          type="password"
-          placeholder="Cookie..."
-          clearable
-          style="width: 150px"
-        />
+        <Input :value="userCookie" @on-change="changeCookie" type="password" placeholder="Cookie..." clearable style="width: 150px" />
         <Tooltip placement="top">
           <Icon type="md-alert" :style="{ 'font-size': '20px' }" />
           <div slot="content" :style="{ 'white-space': 'normal' }">
@@ -83,35 +49,19 @@
             </div>
           </div>
         </Tooltip>
-        <Checkbox
-          class="setting-checkbox"
-          :value="isWithCookie"
-          @on-change="withCookie"
-          >带上Cookie录制/播放</Checkbox
-        >
+        <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
       </div>
     </div>
 
-    <video
-      id="livePlayer"
-      controls
-      :style="{ height: `${this.resolution}px` }"
-    ></video>
+    <video id="livePlayer" controls :style="{ height: `${this.resolution}px` }"></video>
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
         <FanMedal v-bind="medalData"></FanMedal>
       </template>
       <template v-else>
         <Tooltip placement="top">
-          <Button
-            @click="getMedalData"
-            :disabled="!this.userCookie"
-            :loading="getMedalDataLoading"
-            size="small"
-            :style="{ 'font-size': '12px' }"
-          >
-            获取当前佩戴粉丝牌</Button
-          >
+          <Button @click="getMedalData" :disabled="!this.userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px' }">
+            获取当前佩戴粉丝牌</Button>
           <div slot="content" :style="{ 'white-space': 'normal' }">
             <div>
               <p>会同时触发进入房间消息</p>
@@ -119,21 +69,10 @@
           </div>
         </Tooltip>
       </template>
-      <Input
-        v-model="message"
-        placeholder="弹幕..."
-        @on-keyup.ctrl.enter="sendMessage"
-        clearable
-        :style="{ width: '360px' }"
-      />
+      <Input v-model="message" placeholder="弹幕..." @on-keyup.ctrl.enter="sendMessage" clearable :style="{ width: '360px' }" />
 
       <Tooltip placement="top">
-        <Button
-          @click="sendMessage"
-          :disabled="!this.message || !this.userCookie || !this.realRoomId"
-          :loading="isSending"
-          >发送</Button
-        >
+        <Button @click="sendMessage" :disabled="!this.message || !this.userCookie || !this.realRoomId" :loading="isSending">发送</Button>
         <div slot="content" :style="{ 'white-space': 'normal' }">
           <div :style="{ color: 'red' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
@@ -141,12 +80,7 @@
           </div>
         </div>
       </Tooltip>
-      <Button
-        @click="wearCurrentMedal"
-        :disabled="!this.userCookie || !this.medalId"
-        :loading="isWearing"
-        >佩戴当前直播间牌子</Button
-      >
+      <Button @click="wearCurrentMedal" :disabled="!this.userCookie || !this.medalId" :loading="isWearing">佩戴当前直播间牌子</Button>
     </div>
   </div>
 </template>
@@ -159,6 +93,8 @@ import {
   record,
   getRandomPlayUrl,
   cancelRecord,
+  getStatus,
+  setStatus
 } from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
 import { DEFAULT_RECORD_DIR } from "../../service/const";
@@ -169,6 +105,7 @@ import {
   wearMedal,
 } from "../../service/bilibili-api";
 import FanMedal from "./FanMedal";
+import { stat } from 'original-fs';
 
 export default {
   components: {
@@ -188,6 +125,9 @@ export default {
       playQuality: "超清",
       resolution: "480",
       getMedalDataLoading: false,
+      recordStartTime: 0,
+      recordId: '',
+      isRecording: false,
       qualities: [
         {
           key: 1,
@@ -250,21 +190,16 @@ export default {
     userCookie() {
       return this.$store.state.Config.userCookie;
     },
-    isRecording() {
-      return this.$store.state.Config.isRecording;
-    },
     isWithCookie() {
       return this.$store.state.Config.isWithCookie;
-    },
-    recordStartTime() {
-      return this.$store.state.Config.recordStartTime;
-    },
-    recordId() {
-      return this.$store.state.Config.recordId;
     },
   },
   mounted() {
     // this.getMedalData();
+    const status = getStatus()
+    this.recordStartTime = status.recordStartTime
+    this.recordId = status.recordId
+    this.isRecording = status.isRecording
 
     if (this.isRecording) {
       this.recordDuring = Date.now() - this.recordStartTime;
@@ -294,11 +229,15 @@ export default {
           this.downloadRate = parseDownloadRate(bps);
         });
 
-        this.$store.dispatch("UPDATE_CONFIG_TEMP", {
-          recordId: id,
-          recordStartTime: Date.now(),
+        this.recordId = id
+        this.recordStartTime = Date.now()
+        this.isRecording = true
+
+        setStatus({
+          recordStartTime: this.recordStartTime,
           isRecording: true,
-        });
+          recordId: id,
+        })
 
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - this.recordStartTime;
@@ -313,11 +252,16 @@ export default {
       } catch (e) {
         console.warn(e);
       }
-      this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+
+      this.recordId = ""
+      this.recordStartTime = 0
+      this.isRecording = false
+
+      setStatus({
         recordStartTime: 0,
         isRecording: false,
         recordId: "",
-      });
+      })
 
       emitter.removeAllListeners(`${this.recordId}-download-rate`);
       clearInterval(this.recordTimer);

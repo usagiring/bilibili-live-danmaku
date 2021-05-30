@@ -22,8 +22,7 @@ export default {
   async mounted() {
     this.healthChecker = setInterval(async () => {
       try {
-        const res = await touch()
-        console.log(res)
+        await touch()
         this.isLoading = false
         clearInterval(this.healthChecker)
       } catch (e) {

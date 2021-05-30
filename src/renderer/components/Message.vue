@@ -158,14 +158,14 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      const comments = await queryComments({
+      const { data: comments } = await queryComments({
         query,
         sort: sort || { sendAt: -1 },
         limit: 20,
@@ -194,14 +194,14 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      const interacts = await queryInteracts({
+      const { data: interacts } = await queryInteracts({
         query,
         sort: sort || { sendAt: -1 },
         limit: 20,
@@ -231,7 +231,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -241,7 +241,7 @@ export default {
       if (!this.isShowSilverGift) {
         query.coinType = "gold";
       }
-      const gifts = await queryGifts({
+      const { data: gifts } = await queryGifts({
         query,
         sort: sort || { sendAt: -1 },
         limit: 20,
