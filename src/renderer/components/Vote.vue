@@ -261,7 +261,7 @@ export default {
     onVoteMessage: async function (data) {
       if (!Array.isArray(data)) return;
       const comments = data
-        .filter((msg) => msg.cmd === "DANMU_MSG")
+        .filter((msg) => ~msg.cmd.indexOf("DANMU_MSG"))
         .map(parseComment);
 
       for (const comment of comments) {

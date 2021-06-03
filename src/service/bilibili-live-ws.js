@@ -276,7 +276,7 @@ function getEncoder() {
 }
 
 function parseComment(msg) {
-  if (msg.cmd !== "DANMU_MSG") return
+  if (!~msg.cmd.indexOf("DANMU_MSG")) return
   const [uid, name, isAdmin] = msg.info[2];
   const [medalLevel, medalName, medalAnchorName, medalRoomId, medalColor, , , medalColorBorder, medalColorStart, medalColorEnd] = msg.info[3]
   const comment = {
