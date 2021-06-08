@@ -79,19 +79,10 @@
 <script>
 import { shell } from "electron";
 import { getRandomItem, dateFormat } from '../../service/util'
-import { GIFT_CONFIG_MAP, DEFAULT_AVATAR } from "../../service/const";
+import { DEFAULT_AVATAR } from "../../service/const";
+import { getGiftConfig } from "../../service/api";
 import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
 import ws from '../../service/ws'
-
-const giftSelectors = [];
-for (const key in GIFT_CONFIG_MAP) {
-  giftSelectors.push({
-    key: key,
-    value: GIFT_CONFIG_MAP[key].name,
-    label: GIFT_CONFIG_MAP[key].name,
-    webp: GIFT_CONFIG_MAP[key].webp,
-  });
-}
 
 export default {
   data() {
@@ -101,7 +92,7 @@ export default {
       isGift: false,
       historyModal: false,
       histories: [],
-      giftSelectors,
+      giftSelectors: [],
       medalLevel: 0,
       danmakuText: "",
       selectedGiftIds: [],
@@ -135,6 +126,18 @@ export default {
     realRoomId() {
       return this.$store.state.Config.realRoomId;
     },
+  },
+  async mounted() {
+    const giftConfig = await getGiftConfig()
+    for (const key in giftConfig) {
+      const { name, webp } = giftConfig[key]
+      this.giftSelectors.push({
+        key: key,
+        value: name,
+        label: name,
+        webp: webp,
+      });
+    }
   },
   beforeDestroy() {
     this.stop();

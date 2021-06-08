@@ -10,7 +10,7 @@ Col -> i-col
 包裹性就是父元素的宽度会收缩到和内部元素宽度一样。
 
 ### vue
-单文件组件设置body style 需要在生命周期beforecreate时设置（需探究原因）
+单文件组件设置body style 需要在生命周期beforecreate时设置，透明窗体需要提前设置背景透明
 v-deep 作用于 scope 中更深层的子元素
 
 ### vuex-electron

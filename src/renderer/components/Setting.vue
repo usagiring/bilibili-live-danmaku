@@ -152,15 +152,13 @@ const window = remote.getCurrentWindow();
 import Store from "electron-store";
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
-import Danmaku from "./Danmaku";
 import {
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
   DEFAULT_SERVER_CONFIG
 } from "../../service/const";
-import { setGiftConfigMap, getRandomItem } from "../../service/util";
-import { getGiftConfig } from "../../service/bilibili-api";
+import { getRandomItem } from "../../service/util";
 import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, clearExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
@@ -178,7 +176,6 @@ const defaultFonts = [
 export default {
   components: {
     SettingEditor,
-    Danmaku,
   },
   data() {
     return {
@@ -641,10 +638,6 @@ export default {
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
-    },
-    async setGiftConfig() {
-      const data = await getGiftConfig(this.realRoomId);
-      setGiftConfigMap(data.data.list);
     },
   },
 };

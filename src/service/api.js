@@ -110,5 +110,9 @@ export async function countGifts(body) {
 export async function sendExampleMessages(body) {
   const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)
   return res.data
+}
 
+export async function getGiftConfig() {
+  const res = await axios.get(`${BASE_URL}/api/gifts/config`)
+  return res.data
 }
