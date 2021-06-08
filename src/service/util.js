@@ -76,18 +76,18 @@ export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
   return moment(date).format(formatter);
 }
 
-export function setGiftConfigMap(gifts) {
-  const giftConfigMap = gifts.reduce((map, gift) => {
-    return Object.assign(map, {
-      [gift.id]: {
-        webp: gift.webp,
-        name: gift.name,
-        price: gift.price
-      }
-    })
-  }, {})
-  fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
-}
+// export function setGiftConfigMap(gifts) {
+//   const giftConfigMap = gifts.reduce((map, gift) => {
+//     return Object.assign(map, {
+//       [gift.id]: {
+//         webp: gift.webp,
+//         name: gift.name,
+//         price: gift.price
+//       }
+//     })
+//   }, {})
+//   fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
+// }
 
 // [{ ... , probability: number }]
 export function getRandomItem(items) {

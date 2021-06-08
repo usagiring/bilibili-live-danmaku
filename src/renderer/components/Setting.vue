@@ -127,6 +127,31 @@
                 <Button>清理用户缓存</Button>
               </Poptip>
             </div>
+            <div class="setting-key">
+              <Input :value="userCookie" @on-change="changeCookie" type="password" placeholder="Cookie..." clearable style="width: 150px" />
+              <Tooltip placement="top">
+                <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
+                <div slot="content" :style="{ 'white-space': 'normal' }">
+                  <div>
+                    <p>输入Cookie可以使用发送弹幕/更换粉丝牌等功能。</p>
+                    <p :style="{ color: 'pink' }">
+                      Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！
+                    </p>
+                  </div>
+                </div>
+              </Tooltip>
+            </div>
+            <div class="setting-key">
+              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">自动录制</Checkbox>
+              <Tooltip placement="top">
+                <Icon type="md-help" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
+                <div slot="content" :style="{ 'white-space': 'normal' }">
+                  <div>
+                    <p>当连接直播间时，如果开播会自动开始录制</p>
+                  </div>
+                </div>
+              </Tooltip>
+            </div>
           </div>
         </Panel>
       </Collapse>
@@ -152,15 +177,13 @@ const window = remote.getCurrentWindow();
 import Store from "electron-store";
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
-import Danmaku from "./Danmaku";
 import {
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
   DEFAULT_SERVER_CONFIG
 } from "../../service/const";
-import { setGiftConfigMap, getRandomItem } from "../../service/util";
-import { getGiftConfig } from "../../service/bilibili-api";
+import { getRandomItem } from "../../service/util";
 import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, clearExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
@@ -178,7 +201,6 @@ const defaultFonts = [
 export default {
   components: {
     SettingEditor,
-    Danmaku,
   },
   data() {
     return {
@@ -399,6 +421,9 @@ export default {
     },
     opacity() {
       return this.$store.state.Config.opacity * 100;
+    },
+    userCookie() {
+      return this.$store.state.Config.userCookie;
     },
   },
   methods: {
@@ -628,6 +653,7 @@ export default {
         await this.getFonts();
       }
     },
+
     async changeDanmakuFont(value) {
       const data = {
         danmakuFont: value,
@@ -635,6 +661,7 @@ export default {
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
+
     async useMiniGiftCard(value) {
       const data = {
         isUseMiniGiftCard: value,
@@ -642,9 +669,11 @@ export default {
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    async setGiftConfig() {
-      const data = await getGiftConfig(this.realRoomId);
-      setGiftConfigMap(data.data.list);
+
+    async changeCookie(e) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        userCookie: e.target.value,
+      });
     },
   },
 };

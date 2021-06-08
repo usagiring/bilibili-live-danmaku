@@ -11,21 +11,25 @@
           <Icon type="md-chatboxes" />
           <span v-if="!isCollapsed">消息</span>
           </MenuItem>
-          <MenuItem name="1-5" to="/live">
+          <MenuItem name="1-3" to="/live">
           <Icon type="md-play" />
           <span v-if="!isCollapsed">直播</span>
           </MenuItem>
-          <MenuItem name="1-3" to="/vote">
+          <MenuItem name="1-4" to="/vote">
           <Icon type="md-pie" />
           <span v-if="!isCollapsed">投票</span>
           </MenuItem>
-          <MenuItem name="1-6" to="/lottery">
+          <MenuItem name="1-5" to="/lottery">
           <Icon type="md-bonfire" />
           <span v-if="!isCollapsed">祈愿</span>
           </MenuItem>
-          <MenuItem name="1-4" to="/statistic">
+          <MenuItem name="1-6" to="/statistic">
           <Icon type="md-stats" />
           <span v-if="!isCollapsed">统计</span>
+          </MenuItem>
+          <MenuItem name="1-7" to="/help">
+          <Icon type="md-help" />
+          <span v-if="!isCollapsed">帮助</span>
           </MenuItem>
         </Menu>
       </Sider>

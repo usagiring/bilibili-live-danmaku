@@ -33,8 +33,7 @@
       "dist/electron/**/*"
     ],
     "extraFiles": [
-      "config.yaml",
-      "gift_config"
+      "config.yaml"
     ],
     "dmg": {
       "contents": [

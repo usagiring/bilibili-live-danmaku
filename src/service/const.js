@@ -183,7 +183,6 @@ export const IPC_UPDATE_AVAILABLE = 'IPC_UPDATE_AVAILABLE'
 export const IPC_DOWNLOAD_UPDATE = 'IPC_DOWNLOAD_UPDATE'
 export const IPC_DOWNLOAD_PROGRESS = 'IPC_DOWNLOAD_PROGRESS'
 export const IPC_UPDATE_DOWNLOADED = 'IPC_UPDATE_DOWNLOADED'
-export const GIFT_CONFIG_MAP = JSON.parse(fs.readFileSync(`gift_config`, 'utf8'))
 export const SET_DANMAKU_ON_TOP_LEVEL = OPTION_CONFIG.SET_DANMAKU_ON_TOP_LEVEL || 'floating'
 export const MAX_HISTORY_ROOM = OPTION_CONFIG.MAX_HISTORY_ROOM || 9
 export const PORT = OPTION_CONFIG.PORT || 8081
@@ -281,5 +280,6 @@ export const DEFAULT_SERVER_CONFIG = {
   USER_DATA_PATH,
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
-  HTML_PATH: path.join(__dirname, '../../../bilibili-danmaku-page/dist'),
+  // HTML_PATH: path.join(__dirname, '../../../bilibili-danmaku-page/dist'),
+  HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
 }
