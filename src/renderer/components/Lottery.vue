@@ -128,7 +128,7 @@ export default {
     },
   },
   async mounted() {
-    const giftConfig = await getGiftConfig()
+    const { data: giftConfig } = await getGiftConfig()
     for (const key in giftConfig) {
       const { name, webp } = giftConfig[key]
       this.giftSelectors.push({
@@ -313,6 +313,10 @@ export default {
       await deleteLotteryHistories({})
       // await lotteryDB.deleteMany({})
       this.histories = []
+    },
+
+    async autoWatchLottery() {
+      ws.addEventListener('message', this.onLotteryMessage)
     }
   },
 };

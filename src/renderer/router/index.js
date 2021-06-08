@@ -33,6 +33,14 @@ export default new Router({
         {
           path: 'live',
           component: () => import('@/components/Live.vue')
+        },
+        {
+          path: 'help',
+          component: () => import('@/components/Help.vue')
+        },
+        {
+          path: '',
+          component: () => import('@/components/Introduction.vue')
         }
       ]
     },

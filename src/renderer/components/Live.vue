@@ -37,18 +37,6 @@
         <Select :value="resolution" style="width: 70px" @on-change="changeResolutions">
           <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
         </Select>
-        <Input :value="userCookie" @on-change="changeCookie" type="password" placeholder="Cookie..." clearable style="width: 150px" />
-        <Tooltip placement="top">
-          <Icon type="md-alert" :style="{ 'font-size': '20px' }" />
-          <div slot="content" :style="{ 'white-space': 'normal' }">
-            <div>
-              <p>输入Cookie可以使用发送弹幕等功能。</p>
-              <p :style="{ color: 'red' }">
-                Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！
-              </p>
-            </div>
-          </div>
-        </Tooltip>
         <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
       </div>
     </div>
@@ -74,9 +62,10 @@
       <Tooltip placement="top">
         <Button @click="sendMessage" :disabled="!this.message || !this.userCookie || !this.realRoomId" :loading="isSending">发送</Button>
         <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div :style="{ color: 'red' }">
+          <div :style="{ color: 'pink' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
             <p>请谨慎使用此功能！</p>
+            <p>快捷键: ctrl + enter</p>
           </div>
         </div>
       </Tooltip>
@@ -105,7 +94,6 @@ import {
   wearMedal,
 } from "../../service/bilibili-api";
 import FanMedal from "./FanMedal";
-import { stat } from 'original-fs';
 
 export default {
   components: {
@@ -357,12 +345,6 @@ export default {
       } finally {
         this.isSending = false;
       }
-    },
-
-    changeCookie(e) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        userCookie: e.target.value,
-      });
     },
 
     changeResolutions(value) {
