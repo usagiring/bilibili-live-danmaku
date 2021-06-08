@@ -187,44 +187,42 @@ export default {
         const gift = data.payload
         if (!this.selectedGiftIds.includes(`${gift.giftId}`)) return
 
-        gifts.forEach((gift) => {
-          const {
-            uid,
-            name,
-            giftId,
-            giftName,
-            giftNumber = 1,
-            price = 0,
-            avatar = DEFAULT_AVATAR,
-          } = gift;
-          const key = `${uid}:${giftId}`
-          const userGift = this.userGiftMap[key]
-          // test: 小心心
-          // if (giftId === 30607) {
-          //   price = 1
-          // }
-          if (!userGift) {
-            // 计算属性需要完全替换
-            this.userGiftMap = {
-              ...this.userGiftMap,
-              [key]: {
-                uid,
-                giftId,
-                name,
-                avatar,
-                giftName,
-                giftNumber: giftNumber,
-                price: giftNumber * price,
-              }
+        const {
+          uid,
+          name,
+          giftId,
+          giftName,
+          giftNumber = 1,
+          price = 0,
+          avatar = DEFAULT_AVATAR,
+        } = gift;
+        const key = `${uid}:${giftId}`
+        const userGift = this.userGiftMap[key]
+        // test: 小心心
+        // if (giftId === 30607) {
+        //   price = 1
+        // }
+        if (!userGift) {
+          // 计算属性需要完全替换
+          this.userGiftMap = {
+            ...this.userGiftMap,
+            [key]: {
+              uid,
+              giftId,
+              name,
+              avatar,
+              giftName,
+              giftNumber: giftNumber,
+              price: giftNumber * price,
             }
-          } else {
-            userGift.giftNumber = userGift.giftNumber + giftNumber
-            userGift.price = userGift.price + giftNumber * price
-            this.userGiftMap = Object.assign(this.userGiftMap, {
-              [key]: userGift
-            })
           }
-        });
+        } else {
+          userGift.giftNumber = userGift.giftNumber + giftNumber
+          userGift.price = userGift.price + giftNumber * price
+          this.userGiftMap = Object.assign(this.userGiftMap, {
+            [key]: userGift
+          })
+        }
       }
     },
 

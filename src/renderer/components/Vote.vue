@@ -1,10 +1,25 @@
 <template>
   <div>
     <Row>
-      <i-col span="7">
-        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ width: '90%', padding: '5px' }" />
+      <i-col span="6">
+        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ padding: '5px' }" />
+      </i-col>
+      <i-col span="2">
+        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
+        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
+        <Button class="vote-button" @click="showVoteRecord">记录</Button>
+      </i-col>
+      <i-col span="16">
+        <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
+          <Button @click="barChart" :disabled="!isWatching">
+            <Icon type="md-podium" />
+          </Button>
+          <Button @click="pieChart" :disabled="!isWatching">
+            <Icon type="md-pie" />
+          </Button>
+        </ButtonGroup>
         <Tooltip placement="top">
-          <Icon type="md-alert" class="info-icon" />
+          <Icon type="md-help" class="info-icon" :style="{'font-size': '16px', 'vertical-align': 'middle'}" />
           <div slot="content">
             <div class="description-text">
               <p>
@@ -18,21 +33,6 @@
             </div>
           </div>
         </Tooltip>
-      </i-col>
-      <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
-        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
-        <Button class="vote-button" @click="showVoteRecord">记录</Button>
-      </i-col>
-      <i-col span="15">
-        <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-          <Button @click="barChart" :disabled="!isWatching">
-            <Icon type="md-podium" />
-          </Button>
-          <Button @click="pieChart" :disabled="!isWatching">
-            <Icon type="md-pie" />
-          </Button>
-        </ButtonGroup>
         <div id="chart"></div>
       </i-col>
     </Row>
@@ -288,8 +288,6 @@ export default {
 <style scoped>
 .description-text {
   white-space: normal;
-  width: 200px;
-  font-size: 12px;
 }
 
 #chart {
@@ -298,16 +296,11 @@ export default {
 }
 
 .vote-button {
-  margin-top: 5px;
+  margin: 5px 0 0 15px;
 }
 
 .option-input {
   vertical-align: top;
   display: inline-block;
-}
-
-.info-icon {
-  display: inline-block;
-  padding-top: 8px;
 }
 </style>

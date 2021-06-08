@@ -36,7 +36,7 @@
       <Layout>
         <div class="layout-header">
           <div class="avatar-wrapper">
-            <Avatar :icon="avatar ? undefined : 'ios-person'" :src="avatar ? avatar : undefined" size="large" />&nbsp;&nbsp;
+            <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />&nbsp;&nbsp;
             <span>{{ username ? username : "未连接" }}</span>
             &nbsp;
             <Tag v-if="username" type="border" :color="liveStatus === 1 ? 'green' : 'silver'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
@@ -111,8 +111,6 @@
               <span>窗口置顶</span>
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
-            <span>自动录制</span>
-            <i-switch :value="isAutoRecord" @on-change="changeAutoRecord"></i-switch>
           </div>
         </div>
         <div class="layout-content">

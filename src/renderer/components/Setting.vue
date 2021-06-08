@@ -25,7 +25,7 @@
               <span class="setting-key-text">
                 重复弹幕合并
                 <Tooltip placement="top">
-                  <Icon type="md-alert" class="info-icon" />
+                  <Icon type="md-help" class="info-icon" />
                   <div slot="content">
                     <div class="description-text">
                       <p>多少毫秒内重复的弹幕将被合并</p>
@@ -142,9 +142,9 @@
               </Tooltip>
             </div>
             <div class="setting-key">
-              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">自动录制</Checkbox>
+              <Checkbox :value="isAutoRecord" @on-change="changeAutoRecord" :style="{ height: '30px','line-height': '30px'}">自动录制</Checkbox>
               <Tooltip placement="top">
-                <Icon type="md-help" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
+                <Icon type="md-help" />
                 <div slot="content" :style="{ 'white-space': 'normal' }">
                   <div>
                     <p>当连接直播间时，如果开播会自动开始录制</p>
@@ -425,6 +425,9 @@ export default {
     userCookie() {
       return this.$store.state.Config.userCookie;
     },
+    isAutoRecord() {
+      return this.$store.state.Config.isAutoRecord;
+    },
   },
   methods: {
     async showMemberShipIcon(status) {
@@ -673,6 +676,12 @@ export default {
     async changeCookie(e) {
       this.$store.dispatch("UPDATE_CONFIG", {
         userCookie: e.target.value,
+      });
+    },
+
+    async changeAutoRecord(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isAutoRecord: status,
       });
     },
   },
