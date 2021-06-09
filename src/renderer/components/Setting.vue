@@ -160,7 +160,7 @@
       <div class="setting-right">
         <div class="setting-right-header">
           <Button @click="sendTestMessage">发送测试弹幕</Button>
-          <Button @click="clearExampleDanmaku">恢复默认测试弹幕</Button>
+          <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button>
           <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
         <!-- <div class="setting-right-content" :style="{ background: background }"> -->
@@ -184,7 +184,7 @@ import {
   DEFAULT_SERVER_CONFIG
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
-import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, clearExampleMessage } from '../../service/api'
+import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -620,8 +620,8 @@ export default {
       }
     },
 
-    async clearExampleDanmaku() {
-      await clearExampleMessage()
+    async restoreExampleDanmaku() {
+      await restoreExampleMessage()
       // this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
     },
 

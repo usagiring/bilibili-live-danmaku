@@ -51,8 +51,8 @@ export async function replaceSetting(settings) {
   return res.data
 }
 
-export async function clearExampleMessage() {
-  const res = await axios.post(`${BASE_URL}/api/messages/examples/clear`)
+export async function restoreExampleMessage() {
+  const res = await axios.post(`${BASE_URL}/api/messages/examples/restore`)
   return res.data
 }
 
