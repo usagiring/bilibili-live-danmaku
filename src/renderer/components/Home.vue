@@ -4,7 +4,7 @@
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
           <MenuItem name="1-1" to="/setting">
-          <Icon type="md-build" />
+          <Icon type="md-palette" />
           <span v-if="!isCollapsed">设置</span>
           </MenuItem>
           <MenuItem name="1-2" to="/message">
@@ -28,6 +28,10 @@
           <span v-if="!isCollapsed">统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/help">
+          <Icon type="md-settings" />
+          <span v-if="!isCollapsed">设置</span>
+          </MenuItem>
+          <MenuItem name="1-8" to="/help">
           <Icon type="md-help" />
           <span v-if="!isCollapsed">帮助</span>
           </MenuItem>

@@ -12,7 +12,7 @@ export default new Router({
       children: [
         {
           path: 'setting',
-          component: () => import('@/components/Setting.vue')
+          component: () => import('@/components/StyleSetting.vue')
         },
         {
           path: 'message',

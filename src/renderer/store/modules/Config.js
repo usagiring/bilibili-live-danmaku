@@ -12,12 +12,6 @@ const mutations = {
       state[key] = payload[key]
     }
   },
-
-  UPDATE_CONFIG_TEMP(state, payload) {
-    for (const key in payload) {
-      state[key] = payload[key]
-    }
-  }
 }
 
 const actions = {
@@ -28,10 +22,6 @@ const actions = {
   async UPDATE_CONFIG({ commit }, payload) {
     commit('UPDATE_CONFIG', payload)
   },
-
-  async UPDATE_CONFIG_TEMP({ commit }, payload) {
-    commit('UPDATE_CONFIG_TEMP', payload)
-  }
 }
 
 export default {
