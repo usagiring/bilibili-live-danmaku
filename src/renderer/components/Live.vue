@@ -382,8 +382,10 @@ export default {
       try {
         const result = await wearMedal(this.medalId, this.userCookie);
         this.medalData = null;
+        this.getMedalDataLoading = true
         setTimeout(async () => {
           await this.getMedalData();
+          this.getMedalDataLoading = false
         }, 3000);
         if (result.data.code === 0) {
           this.$Message.success("佩戴成功");

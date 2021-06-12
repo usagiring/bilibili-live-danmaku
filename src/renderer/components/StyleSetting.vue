@@ -121,19 +121,15 @@
 </template>
 
 <script>
-import { remote } from "electron";
-const window = remote.getCurrentWindow();
-import Store from "electron-store";
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
 import {
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
-  DEFAULT_SERVER_CONFIG
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
-import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, restoreExampleMessage } from '../../service/api'
+import { updateSetting, clearMessage, sendExampleMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -374,9 +370,6 @@ export default {
     userCookie() {
       return this.$store.state.Config.userCookie;
     },
-    isAutoRecord() {
-      return this.$store.state.Config.isAutoRecord;
-    },
   },
   methods: {
     async showMemberShipIcon(status) {
@@ -395,33 +388,11 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async sendTestMessage() {
-      // this.$store.dispatch(
-      //   "ADD_EXAMPLE_MESSAGE",
-      //   this.randomMessageGenerator()
-      // )
-
       const randomMessage = this.randomMessageGenerator()
       await sendExampleMessages({
         type: randomMessage.type,
         data: randomMessage
       })
-    },
-
-    // initExamleMessages() {
-    //   EXAMPLE_MESSAGES.forEach(message => {
-    //     sendExampleMessages({
-    //       type: message.type,
-    //       data: message
-    //     })
-    //   })
-    // },
-
-    async clearAllSetting() {
-      await replaceSetting(DEFAULT_SERVER_CONFIG)
-
-      const store = new Store({ name: "vuex" })
-      store.clear()
-      window.reload()
     },
 
     async updateBackground(color) {
@@ -579,19 +550,6 @@ export default {
       // this.$store.dispatch("CLEAR_MESSAGE");
     },
 
-    async backupAndClearDB() {
-      // 从 ./data 里备份 comment gift interact, 并 removeall
-      await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      window.reload();
-    },
-
-    async clearUserDB() {
-      // 清空用户数据缓存
-      await clearDB({ names: ['user'] })
-      window.reload();
-    },
-
     async getFonts() {
       const fonts = await FontList.getFonts({ disableQuoting: true });
       this.fonts = [
@@ -620,18 +578,6 @@ export default {
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
-    },
-
-    async changeCookie(e) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        userCookie: e.target.value,
-      });
-    },
-
-    async changeAutoRecord(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isAutoRecord: status,
-      });
     },
   },
 };

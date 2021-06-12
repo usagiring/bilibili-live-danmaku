@@ -11,7 +11,7 @@ export default new Router({
       component: () => import('@/components/Home.vue'),
       children: [
         {
-          path: 'setting',
+          path: 'style',
           component: () => import('@/components/StyleSetting.vue')
         },
         {
@@ -37,6 +37,10 @@ export default new Router({
         {
           path: 'help',
           component: () => import('@/components/Help.vue')
+        },
+        {
+          path: 'config',
+          component: () => import('@/components/Config.vue')
         },
         {
           path: '',

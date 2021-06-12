@@ -4,6 +4,9 @@ const YAML = require('yaml')
 const electron = require('electron')
 
 const config = fs.readFileSync(`config.yaml`, 'utf8')
+const packageJSON = JSON.parse(fs.readFileSync(`package.json`, 'utf8'))
+export const version = packageJSON.version
+
 const OPTION_CONFIG = YAML.parse(config)
 
 export const USER_DATA_PATH = path.join((electron.app || electron.remote.app).getPath('userData'), '/data')
@@ -189,10 +192,7 @@ export const PORT = OPTION_CONFIG.PORT || 8081
 export const BASE_URL = `http://127.0.0.1:${PORT}`
 export const BASE_WS_URL = `ws://127.0.0.1:${PORT}`
 
-export const DEFAULT_CONFIG = {
-  roomId: 1,
-  displayRoomId: 1,
-  isConnected: false,
+export const DEFAULT_STYLE = {
   isShowAvatar: true,
   isShowMemberShipIcon: true,
   isShowFanMedal: true,
@@ -202,17 +202,10 @@ export const DEFAULT_CONFIG = {
   isShowInteractInfo: false,
   showGiftCardThreshold: 0,
   isShowSilverGift: false,
-  guardNumber: 0,
   opacity: 1,
-  recordDir: "",
   danmakuFont: 'unset',
-  isWithCookie: false,
   isUseMiniGiftCard: false,
-  isAutoRecord: false,
-
-  optionstring: "{A}\n{B}\n{C}",
   background: "rgba(0, 0, 0, 0.3)",
-  historyRooms: [],
 
   message_lv0: {
     background: 'rgba(0,0,0,0)'
@@ -274,8 +267,20 @@ export const DEFAULT_CONFIG = {
     "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
   },
 }
+export const DEFAULT_CONFIG = {
+  roomId: 1,
+  displayRoomId: 1,
+  isConnected: false,
+  guardNumber: 0,
+  recordDir: "",
+  isWithCookie: false,
+  isAutoRecord: false,
+  optionstring: "{A}\n{B}\n{C}",
+  historyRooms: [],
+}
 
 export const DEFAULT_SERVER_CONFIG = {
+  ...DEFAULT_STYLE,
   ...DEFAULT_CONFIG,
   USER_DATA_PATH,
   PORT: PORT,

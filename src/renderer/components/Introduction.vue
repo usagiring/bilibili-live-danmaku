@@ -8,19 +8,20 @@
     <p class="intro-img-container">
       <Icon :style="{'font-size': '48px', 'cursor': 'pointer'}" type="logo-github" @click="openGithub" />
     </p>
+    <p class="intro-img-container">v{{version}}</p>
   </div>
 </template>
 
 <script>
-import { shell, remote } from "electron";
-const window = remote.getCurrentWindow();
+import { shell } from "electron";
+import { version } from '../../service/const'
 export default {
   data() {
     return {
+      version
     };
   },
   methods: {
-
     openGithub() {
       shell.openExternal(`https://github.com/usagiring/bilibili-live-danmaku`);
     },
@@ -34,7 +35,7 @@ export default {
   padding-top: 64px;
 }
 .intro-img {
-  filter: blur(3px);
+  filter: blur(2px);
 }
 .intro-img:hover {
   filter: blur(0);

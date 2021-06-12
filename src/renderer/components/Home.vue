@@ -3,37 +3,37 @@
     <Layout :style="{ minHeight: '100vh' }">
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
-          <MenuItem name="1-1" to="/setting">
-          <Icon type="md-palette" />
-          <span v-if="!isCollapsed">设置</span>
+          <MenuItem name="1-1" to="/style">
+          <Icon type="md-color-palette" />
+          <span>设置</span>
           </MenuItem>
           <MenuItem name="1-2" to="/message">
           <Icon type="md-chatboxes" />
-          <span v-if="!isCollapsed">消息</span>
+          <span>消息</span>
           </MenuItem>
           <MenuItem name="1-3" to="/live">
           <Icon type="md-play" />
-          <span v-if="!isCollapsed">直播</span>
+          <span>直播</span>
           </MenuItem>
           <MenuItem name="1-4" to="/vote">
           <Icon type="md-pie" />
-          <span v-if="!isCollapsed">投票</span>
+          <span>投票</span>
           </MenuItem>
           <MenuItem name="1-5" to="/lottery">
           <Icon type="md-bonfire" />
-          <span v-if="!isCollapsed">祈愿</span>
+          <span>祈愿</span>
           </MenuItem>
           <MenuItem name="1-6" to="/statistic">
           <Icon type="md-stats" />
-          <span v-if="!isCollapsed">统计</span>
+          <span>统计</span>
           </MenuItem>
-          <MenuItem name="1-7" to="/help">
+          <MenuItem name="1-7" to="/config">
           <Icon type="md-settings" />
-          <span v-if="!isCollapsed">设置</span>
+          <span>设置</span>
           </MenuItem>
           <MenuItem name="1-8" to="/help">
           <Icon type="md-help" />
-          <span v-if="!isCollapsed">帮助</span>
+          <span>帮助</span>
           </MenuItem>
         </Menu>
       </Sider>
@@ -290,9 +290,6 @@ export default {
     isAutoRecord() {
       return this.$store.state.Config.isAutoRecord;
     },
-    isRecording() {
-      return this.$store.state.Config.isRecording;
-    },
     historyRooms() {
       return this.$store.state.Config.historyRooms;
     },
@@ -335,8 +332,8 @@ export default {
         };
         this.$store.dispatch("UPDATE_CONFIG", config);
 
-
-        if (liveStatus === 1 && this.isAutoRecord && !this.isRecording) {
+        const { isRecording } = getStatus()
+        if (liveStatus === 1 && this.isAutoRecord && !isRecording) {
           LIVE_STATUS = 2;
           this.startRecord();
         }
@@ -679,6 +676,9 @@ export default {
   transition: font-size 0.2s ease, transform 0.2s ease;
   vertical-align: middle;
   font-size: 16px;
+}
+.ivu-menu-item > i {
+  margin-right: 2px;
 }
 .collapsed-menu span {
   width: 0px;

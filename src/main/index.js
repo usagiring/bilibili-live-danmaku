@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
+import path from 'path'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
 import '../renderer/store'
 import '../service/bilibili-bridge'
@@ -26,8 +27,10 @@ function createWindow() {
     width: 1200,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    icon: path.join(__dirname, '../../build/icons/icon.ico')
   })
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.loadURL(winURL)
 

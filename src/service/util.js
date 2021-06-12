@@ -1,5 +1,4 @@
 import moment from "moment";
-import fs from 'fs';
 import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
 import { getUserInfo } from './bilibili-api'
 
