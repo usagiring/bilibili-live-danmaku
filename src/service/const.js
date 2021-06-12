@@ -4,8 +4,7 @@ const YAML = require('yaml')
 const electron = require('electron')
 
 const config = fs.readFileSync(`config.yaml`, 'utf8')
-const packageJSON = JSON.parse(fs.readFileSync(`package.json`, 'utf8'))
-export const version = packageJSON.version
+export const version = (electron.app || electron.remote.app).getVersion()
 
 const OPTION_CONFIG = YAML.parse(config)
 
