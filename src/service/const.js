@@ -285,6 +285,6 @@ export const DEFAULT_SERVER_CONFIG = {
   USER_DATA_PATH,
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
-  HTML_PATH: path.join('D:\\Mirror\\bilibili-live-danmaku\\node_modules\\@tokine\\bilibili-danmaku-page'),
-  // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
+  // HTML_PATH: path.join('D:\\Mirror\\bilibili-live-danmaku\\node_modules\\@tokine\\bilibili-danmaku-page'),
+  HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
 }
