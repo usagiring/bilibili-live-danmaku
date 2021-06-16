@@ -322,9 +322,6 @@ export default {
     });
   },
   computed: {
-    realRoomId() {
-      return this.$store.state.Config.realRoomId;
-    },
     background() {
       return this.$store.state.Config.background;
     },
@@ -354,9 +351,6 @@ export default {
     },
     showGiftCardThreshold() {
       return this.$store.state.Config.showGiftCardThreshold;
-    },
-    messages() {
-      return this.$store.state.Message.exampleMessages;
     },
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;

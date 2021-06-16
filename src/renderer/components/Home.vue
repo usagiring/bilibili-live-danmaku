@@ -115,6 +115,9 @@
               <span>窗口置顶</span>
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
+            <Tooltip placement="right" content="录制中">
+              <Icon v-if="isRecording" :style="{'font-size': '20px', 'color': 'crimson', 'vertical-align':'middle'}" type="ios-radio-button-on" />
+            </Tooltip>
           </div>
         </div>
         <div class="layout-content">
@@ -167,6 +170,7 @@ export default {
       hasNewVersion: false,
       isAppUpdating: false,
       isAppUpdateStarting: false,
+      isRecording: false,
       downloadRate: "0 KB/s",
       percent: 0,
 
@@ -240,6 +244,14 @@ export default {
       this.guardNumber = guardInfo.data.info.num;
     }, 60000)
 
+    const { isRecording } = getStatus()
+    this.isRecording = isRecording
+    emitter.on('record-start', () => {
+      this.isRecording = true
+    })
+    emitter.on('record-cancel', () => {
+      this.isRecording = false
+    })
   },
   computed: {
     menuitemClasses: function () {
@@ -247,18 +259,6 @@ export default {
     },
     isConnected() {
       return this.$store.state.Config.isConnected || false;
-    },
-    isShowAvatar() {
-      return this.$store.state.Config.isShowAvatar;
-    },
-    isShowInteractInfo() {
-      return this.$store.state.Config.isShowInteractInfo;
-    },
-    combineSimilarTime() {
-      return this.$store.state.Config.combineSimilarTime;
-    },
-    isShowSilverGift() {
-      return this.$store.state.Config.isShowSilverGift;
     },
     windowWidth() {
       return this.$store.state.Config.windowWidth;
@@ -283,9 +283,6 @@ export default {
     },
     isWithCookie() {
       return this.$store.state.Config.isWithCookie;
-    },
-    recordId() {
-      return this.$store.state.Config.recordId;
     },
     isAutoRecord() {
       return this.$store.state.Config.isAutoRecord;
@@ -576,13 +573,19 @@ export default {
           recordStartTime: Date.now(),
           isRecording: true,
         })
+        emitter.emit('record-start')
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`);
       }
     },
     async cancelRecord() {
+      const { recordId } = getStatus()
+      if (!recordId) {
+        console.warn(new Error('recordId not found.'));
+        return
+      }
       try {
-        await cancelRecord(this.recordId);
+        await cancelRecord(recordId);
       } catch (e) {
         console.warn(e);
       }
@@ -591,14 +594,7 @@ export default {
         recordStartTime: 0,
         isRecording: false,
       })
-
-      emitter.removeAllListeners(`${this.recordId}-download-rate`);
-    },
-
-    async changeAutoRecord(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isAutoRecord: status,
-      });
+      emitter.emit('record-cancel')
     },
 
     removeHistoryRoom(room) {

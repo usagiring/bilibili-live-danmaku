@@ -2,7 +2,7 @@
   <div class="help-container">
     <p>OBS浏览器捕获：http://127.0.0.1:8081</p>
 
-    <p>关于 bug / feature：请向<span :style="{color: 'crimson', cursor: 'pointer', padding: '0 3px'}" @click="openBiliSpace">我</span>反馈</p>
+    <p>关于 bug / feature：请向<span :style="{color: 'crimson', cursor: 'pointer', padding: '0 3px'}" @click="openBiliSpace">@其妙</span>反馈</p>
     <p :style="{'padding-top': '64px'}">
       <Icon :style="{'font-size': '48px', 'cursor': 'pointer'}" type="logo-github" @click="openGithub" />
     </p>

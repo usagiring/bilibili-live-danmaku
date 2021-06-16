@@ -4,13 +4,13 @@
       <div :style="{ display: 'inline-block' }">
         <template v-if="!this.isRecording">
           <Button @click="startRecord" shape="circle">
-            <Icon type="md-radio-button-on" color="red" />
+            <Icon type="ios-radio-button-on" color="crimson" />
             录制
           </Button>
         </template>
         <template v-else>
           <Button @click="cancelRecord" shape="circle">
-            <Icon type="md-square" color="red" />
+            <Icon type="ios-square" color="crimson" />
             停止
           </Button>
         </template>
@@ -113,8 +113,6 @@ export default {
       playQuality: "超清",
       resolution: "480",
       getMedalDataLoading: false,
-      recordStartTime: 0,
-      recordId: '',
       isRecording: false,
       qualities: [
         {
@@ -184,24 +182,25 @@ export default {
   },
   mounted() {
     // this.getMedalData();
-    const status = getStatus()
-    this.recordStartTime = status.recordStartTime
-    this.recordId = status.recordId
-    this.isRecording = status.isRecording
+    const { recordStartTime, recordId, isRecording } = getStatus()
+    this.isRecording = isRecording
 
     if (this.isRecording) {
-      this.recordDuring = Date.now() - this.recordStartTime;
+      this.recordDuring = Date.now() - recordStartTime;
       this.recordTimer = setInterval(() => {
-        this.recordDuring = Date.now() - this.recordStartTime;
+        this.recordDuring = Date.now() - recordStartTime;
       }, 1000);
 
-      emitter.on(`${this.recordId}-download-rate`, ({ bps, totalSize }) => {
+      emitter.on(`${recordId}-download-rate`, ({ bps, totalSize }) => {
         this.downloadRate = parseDownloadRate(bps);
       });
     }
   },
   beforeDestroy() {
-    emitter.removeAllListeners(`${this.recordId}-download-rate`);
+    const { recordId } = getStatus()
+    if (recordId) {
+      emitter.removeAllListeners(`${recordId}-download-rate`);
+    }
   },
   methods: {
     async startRecord() {
@@ -217,32 +216,36 @@ export default {
           this.downloadRate = parseDownloadRate(bps);
         });
 
-        this.recordId = id
-        this.recordStartTime = Date.now()
         this.isRecording = true
+        const recordStartTime = Date.now()
 
         setStatus({
-          recordStartTime: this.recordStartTime,
+          recordStartTime,
           isRecording: true,
           recordId: id,
         })
 
         this.recordTimer = setInterval(() => {
-          this.recordDuring = Date.now() - this.recordStartTime;
+          this.recordDuring = Date.now() - recordStartTime;
         }, 1000);
+
+        emitter.emit('record-start')
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`);
       }
     },
     async cancelRecord() {
+      const { recordId } = getStatus()
+      if (!recordId) {
+        console.warn(new Error('recordId not found.'));
+        return
+      }
       try {
-        await cancelRecord(this.recordId);
+        await cancelRecord(recordId);
       } catch (e) {
         console.warn(e);
       }
 
-      this.recordId = ""
-      this.recordStartTime = 0
       this.isRecording = false
 
       setStatus({
@@ -251,8 +254,9 @@ export default {
         recordId: "",
       })
 
-      emitter.removeAllListeners(`${this.recordId}-download-rate`);
+      emitter.removeAllListeners(`${recordId}-download-rate`);
       clearInterval(this.recordTimer);
+      emitter.emit('record-cancel')
     },
     async play() {
       const playUrl = await getRandomPlayUrl({
