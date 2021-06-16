@@ -55,6 +55,27 @@
           </div>
         </div>
       </Tooltip>
+      <Tooltip placement="top" content="该功能仍在beta阶段，可能不稳定">
+        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+          <Icon type="ios-flask" />
+        </span>
+      </Tooltip>
+    </div>
+    <div class="config-item-container">
+      <Checkbox :value="isWatchLottery" @on-change="changeWatchLottery" :style="{ height: '30px','line-height': '30px'}">自动记录天选时刻</Checkbox>
+      <Tooltip placement="top">
+        <Icon type="md-help" />
+        <div slot="content" :style="{ 'white-space': 'normal' }">
+          <div>
+            <p>当直播间开启天选时刻，会开始统计相关信息</p>
+          </div>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" content="该功能仍在beta阶段，可能不稳定">
+        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+          <Icon type="ios-flask" />
+        </span>
+      </Tooltip>
     </div>
   </div>
 </template>
@@ -62,7 +83,6 @@
 <script>
 import { remote } from "electron";
 const window = remote.getCurrentWindow();
-import Store from "electron-store";
 import {
   USER_DATA_PATH,
   DEFAULT_STYLE
@@ -82,6 +102,9 @@ export default {
     },
     isAutoRecord() {
       return this.$store.state.Config.isAutoRecord;
+    },
+    isWatchLottery() {
+      return this.$store.state.Config.isWatchLottery;
     },
   },
   methods: {
@@ -116,6 +139,12 @@ export default {
     async changeAutoRecord(status) {
       this.$store.dispatch("UPDATE_CONFIG", {
         isAutoRecord: status,
+      });
+    },
+
+    async changeWatchLottery(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isWatchLottery: status,
       });
     },
   }

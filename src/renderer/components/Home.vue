@@ -116,7 +116,15 @@
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
             <Tooltip placement="right" content="录制中">
-              <Icon v-if="isRecording" :style="{'font-size': '20px', 'color': 'crimson', 'vertical-align':'middle'}" type="ios-radio-button-on" />
+              <span v-if="isRecording" class="record-icon">
+                <Icon :style="{position: 'absolute'}" type="ios-radio-button-on" />
+              </span>
+            </Tooltip>
+            <Tooltip placement="right" content="天选时刻中">
+              <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
+            </Tooltip>
+            <Tooltip placement="right" content="天选时刻获奖">
+              <Icon v-if="!isLottering && lotteryAwardUsers" type="md-cube" />
             </Tooltip>
           </div>
         </div>
@@ -171,6 +179,7 @@ export default {
       isAppUpdating: false,
       isAppUpdateStarting: false,
       isRecording: false,
+      isLottering: false,
       downloadRate: "0 KB/s",
       percent: 0,
 
@@ -223,6 +232,22 @@ export default {
         LIVE_STATUS = 0;
         console.log("auto record stop...");
         this.cancelRecord();
+      }
+
+      // 天选时刻开始
+      if (payload.cmd === 'ANCHOR_LOT_START') {
+        this.isLottering = true
+        this.onLotteryStart(payload.payload)
+      }
+
+      // 天选时刻结束
+      if (payload.cmd === 'ANCHOR_LOT_END') {
+        this.isLottering = false
+      }
+
+      if (payload.cmd === 'ANCHOR_LOT_AWARD') {
+        this.isLottering = false
+        this.onLotteryAward(payload.payload)
       }
     }
 
@@ -298,6 +323,9 @@ export default {
     //     return true
     //   })
     // }
+    isWatchLottery() {
+      return this.$store.state.Config.isWatchLottery;
+    },
   },
   methods: {
     async connect(status) {
@@ -605,6 +633,35 @@ export default {
         historyRooms: historyRooms,
       });
     },
+
+    onLotteryStart(payload) {
+      // 读取礼物 /弹幕信息
+      // 记录接下来一段时间的数据
+      // 收到award或者end结束。
+      const {
+        award_name, // description
+        award_num,
+        danmu,
+        gift_id,
+        gift_name,
+        gift_num,
+        gift_price, // 金瓜子
+        id,
+        max_time,
+        room_id,
+      } = payload
+
+    },
+
+    onLotteryAward(payload) {
+      const {
+        id,
+        award_name,
+        award_num,
+        award_users,
+      } = payload
+      // uid, uname, face, level, color = award_users
+    }
   },
   beforeDestroy() {
     if (this.giftTimer) {
@@ -699,5 +756,67 @@ export default {
 
 .remove-history-room:hover {
   color: crimson;
+}
+
+.record-icon {
+  font-size: 20px;
+  color: crimson;
+  vertical-align: middle;
+  position: relative;
+  display: inherit;
+  height: 20px;
+  width: 20px;
+}
+.record-icon::before,
+.record-icon::after {
+  content: "";
+  position: absolute;
+  top: 1.5px;
+  bottom: 1.5px;
+  right: 1.5px;
+  left: 1.5px;
+  border-top: solid 1px crimson;
+  transition: all 0.5s;
+  animation: rotate 2s infinite linear;
+  border-radius: 50%;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.lottery-icon {
+  font-size: 20px;
+  color: dodgerblue;
+  vertical-align: middle;
+  transition: all 0.5s;
+  animation: rotateX 3s infinite linear;
+}
+
+@keyframes rotateX {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  25% {
+    transform: rotateY(45deg);
+  }
+
+  50% {
+    transform: rotateY(180deg);
+  }
+
+  75% {
+    transform: rotateY(225deg);
+  }
+
+  100% {
+    transform: rotateY(360deg);
+  }
 }
 </style>

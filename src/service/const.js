@@ -274,6 +274,7 @@ export const DEFAULT_CONFIG = {
   recordDir: "",
   isWithCookie: false,
   isAutoRecord: false,
+  isWatchLottery: false,
   optionstring: "{A}\n{B}\n{C}",
   historyRooms: [],
 }
