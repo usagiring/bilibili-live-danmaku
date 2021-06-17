@@ -129,7 +129,7 @@ import {
   DEFAULT_COMMON_FONT_FAMILIES,
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
-import { updateSetting, clearMessage, sendExampleMessages, restoreExampleMessage } from '../../service/api'
+import { mergeSetting, clearMessage, sendExampleMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -368,17 +368,17 @@ export default {
   methods: {
     async showMemberShipIcon(status) {
       const data = { isShowMemberShipIcon: status, }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async showFanMedal(status) {
       const data = { isShowFanMedal: status }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async sendTestMessage() {
@@ -393,7 +393,7 @@ export default {
       const data = {
         background: color,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeAvatarSize(size) {
@@ -405,7 +405,7 @@ export default {
       } else {
         data.isShowAvatar = true
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeOpacity(number) {
@@ -413,14 +413,14 @@ export default {
         opacity: Number((number / 100).toFixed(2)),
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
-      await updateSetting(data)
+      await mergeSetting(data)
     },
 
     async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -428,14 +428,14 @@ export default {
       const data = {
         showHeadlineThreshold: number,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -443,7 +443,7 @@ export default {
       const data = {
         isShowSilverGift: status,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -562,7 +562,7 @@ export default {
       const data = {
         danmakuFont: value,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -570,7 +570,7 @@ export default {
       const data = {
         isUseMiniGiftCard: value,
       }
-      await updateSetting(data)
+      await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
   },

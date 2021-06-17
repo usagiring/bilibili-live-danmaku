@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { updateSetting } from '../../service/api'
+import { mergeSetting } from '../../service/api'
 
 export default {
   props: ["type", "name", "role", "prop", "styleName", "numberStep"],
@@ -52,7 +52,7 @@ export default {
       const data = {
         [objKey]: { [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value }
       }
-      await updateSetting(data)
+      await mergeSetting(data)
     },
     pxFormatter: (value) => `${value}px`,
     pxParser: (value) => Number(value.replace("px", "")),

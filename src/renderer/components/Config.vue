@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="config-item-container">
-      <Poptip confirm title="确认还原弹幕样式？" placement="right" width="300" @on-ok="clearAllSetting">
+      <Poptip confirm title="确认还原弹幕样式？" placement="right" width="300" @on-ok="restoreDefaultStyleSetting">
         <Button class="config-item">还原默认弹幕样式</Button>
       </Poptip>
     </div>
@@ -32,6 +32,7 @@
       </Tooltip>
     </div>
     <div class="config-item-container">
+      Cookie
       <Input class="config-item" :value="userCookie" @on-change="changeCookie" type="password" placeholder="Cookie..." clearable />
       <Tooltip placement="top">
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
@@ -46,7 +47,9 @@
       </Tooltip>
     </div>
     <div class="config-item-container">
-      <Checkbox :value="isAutoRecord" @on-change="changeAutoRecord" :style="{ height: '30px','line-height': '30px'}">自动录制</Checkbox>
+      <Checkbox :value="isAutoRecord" @on-change="changeAutoRecord" :style="{ height: '30px','line-height': '30px'}">
+        自动录制
+      </Checkbox>
       <Tooltip placement="top">
         <Icon type="md-help" />
         <div slot="content" :style="{ 'white-space': 'normal' }">
@@ -55,7 +58,7 @@
           </div>
         </div>
       </Tooltip>
-      <Tooltip placement="top" content="该功能仍在beta阶段，可能不稳定">
+      <Tooltip placement="top" content="实验性功能，可能不稳定">
         <span :style="{'font-size': '12px', color: 'dodgerblue'}">
           <Icon type="ios-flask" />
         </span>
@@ -77,6 +80,52 @@
         </span>
       </Tooltip>
     </div> -->
+    <div class="config-item-container">
+      <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
+      <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." :disabled="!isAutoReply" />
+      <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}" :disabled="!isAutoReply">银瓜子</Checkbox>
+      <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
+      <Tooltip placement="top">
+        <Icon type="md-help" />
+        <div slot="content" :style="{ 'white-space': 'normal' }">
+          <p>支持占位符替换语法: {keywords}</p>
+          <p>目前支持 user.name, gift.name</p>
+          <p>例如: 感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 xxx 赠送的 xx礼物 </p>
+          <p :style="{color: 'pink'}">注意：同一用户一分钟内不会重复回复</p>
+          <p :style="{color: 'pink'}">由于B站弹幕限制，不保证回复每次都成功发出</p>
+        </div>
+      </Tooltip>
+      <Tooltip placement="top" content="实验性功能，可能不稳定">
+        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+          <Icon type="ios-flask" />
+        </span>
+      </Tooltip>
+    </div>
+
+    <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
+      <template v-for="(rule, index) in advancedAutoReplyRules">
+        <div :key="index" :style="{'margin-bottom': '10px'}">
+          <Select :style="{ width: '100px', display: 'inline-block' }" v-model="rule.giftId" filterable transfer>
+            <Option v-for="gift in giftSelectors" :value="gift.key" :key="gift.key" :label="gift.label">
+              <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp" />
+              <span>{{ gift.value }}</span>
+              <span :style="{color: 'silver'}">{{ `id: ${gift.key}` }}</span>
+            </Option>
+          </Select>
+          <!-- <span> >= </span> -->
+          <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
+          <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
+          <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
+        </div>
+      </template>
+      <Button @click="addAutoReplyRule" type="primary" long>
+        <Icon :style="{'font-weight': 'bold'}" type="md-add" />
+      </Button>
+      <div slot="footer">
+        <Button type="primary" @click="submitAutoReplyRules">确定</Button>
+        <Button type="error" @click="restoreDefaultAutoReplyRule">清空</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -85,16 +134,34 @@ import { remote } from "electron";
 const window = remote.getCurrentWindow();
 import {
   USER_DATA_PATH,
-  DEFAULT_STYLE
+  DEFAULT_STYLE,
 } from "../../service/const";
 
-import { clearDB, backupDB, updateSetting, clearMessage, replaceSetting, sendExampleMessages, restoreExampleMessage } from '../../service/api'
+import { clearDB, backupDB, updateSetting, getGiftConfig } from '../../service/api'
 
 export default {
   data() {
     return {
       USER_DATA_PATH: USER_DATA_PATH,
+      advancedAutoReplyRuleModal: false,
+      giftSelectors: [],
+      selectedGiftIds: [],
+      advancedAutoReplyRules: []
     };
+  },
+  async mounted() {
+    const { data: giftConfig } = await getGiftConfig()
+    for (const key in giftConfig) {
+      const { name, webp } = giftConfig[key]
+      this.giftSelectors.push({
+        key: key,
+        value: name,
+        label: name,
+        webp: webp,
+      });
+    }
+
+    this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
   },
   computed: {
     userCookie() {
@@ -106,13 +173,22 @@ export default {
     isWatchLottery() {
       return this.$store.state.Config.isWatchLottery;
     },
+    autoReplyRules() {
+      return this.$store.state.Config.autoReplyRules;
+    },
+    autoReplyText() {
+      return this.$store.state.Config.autoReplyRules[0].text;
+    },
+    onlyGold() {
+      return this.$store.state.Config.autoReplyRules[0].onlyGold;
+    },
+    isAutoReply() {
+      return this.$store.state.Config.isAutoReply;
+    }
   },
   methods: {
-    async clearAllSetting() {
-      await replaceSetting(DEFAULT_STYLE)
-
-      // const store = new Store({ name: "vuex" })
-      // store.clear()
+    async restoreDefaultStyleSetting() {
+      await updateSetting(DEFAULT_STYLE)
       this.$store.dispatch("UPDATE_CONFIG", DEFAULT_STYLE);
       window.reload()
     },
@@ -147,6 +223,76 @@ export default {
         isWatchLottery: status,
       });
     },
+
+    async changeAutoReplyText(e) {
+      const [defaultRule, ...rest] = this.autoReplyRules
+      const __copy = Object.assign({}, defaultRule)
+      __copy.text = e.target.value
+      const data = {
+        autoReplyRules: [__copy, ...rest],
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data);
+    },
+
+    async changeOnlyGold(status) {
+      const [defaultRule, ...rest] = this.autoReplyRules
+      const __copy = Object.assign({}, defaultRule)
+      __copy.onlyGold = !status
+      const data = {
+        autoReplyRules: [__copy, ...rest],
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data);
+    },
+
+    showAdvancedAutoReplyRule() {
+      if (!this.isAutoReply) return
+      this.advancedAutoReplyRuleModal = true
+    },
+
+    // 清空高级规则，保留第一条默认规则
+    async restoreDefaultAutoReplyRule() {
+      this.advancedAutoReplyRules = []
+      const data = {
+        autoReplyRules: [this.autoReplyRules[0]],
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$Message.success('清空成功！')
+    },
+
+    addAutoReplyRule() {
+      const autoReplyRules = [...this.autoReplyRules]
+      const initRule = {
+        priority: Math.max(...autoReplyRules.map(r => r.priority)) + 1,
+        giftNumber: 0,
+        giftId: null,
+        text: ''
+      }
+      this.advancedAutoReplyRules.push(initRule)
+    },
+
+    async submitAutoReplyRules() {
+      const data = {
+        autoReplyRules: [this.autoReplyRules[0], ...this.advancedAutoReplyRules]
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$Message.success('保存成功！')
+    },
+
+    removeAutoReplyRule(index) {
+      this.advancedAutoReplyRules.splice(index, 1)
+    },
+
+    async changeAutoReply(status) {
+      const data = {
+        isAutoReply: status
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    }
   }
 };
 </script>
@@ -157,5 +303,20 @@ export default {
 }
 .config-item {
   width: 150px;
+}
+.close-icon {
+  color: crimson;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.settings-icon {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.settings-icon:hover {
+  color: deepskyblue;
 }
 </style>

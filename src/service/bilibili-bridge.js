@@ -7,7 +7,7 @@ const options = {
   ...store.state.Config,
 }
 
-delete options.userCookie
+// delete options.userCookie
 bridge(options)
 
 export default bridge

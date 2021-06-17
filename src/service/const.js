@@ -190,6 +190,7 @@ export const MAX_HISTORY_ROOM = OPTION_CONFIG.MAX_HISTORY_ROOM || 9
 export const PORT = OPTION_CONFIG.PORT || 8081
 export const BASE_URL = `http://127.0.0.1:${PORT}`
 export const BASE_WS_URL = `ws://127.0.0.1:${PORT}`
+const SAVE_ALL_BILI_MESSAGE = OPTION_CONFIG.SAVE_ALL_BILI_MESSAGE || false
 
 export const DEFAULT_STYLE = {
   isShowAvatar: true,
@@ -277,14 +278,26 @@ export const DEFAULT_CONFIG = {
   isWatchLottery: false,
   optionstring: "{A}\n{B}\n{C}",
   historyRooms: [],
+  autoReplyRules: [{
+    priority: 0,
+    text: '',
+    onlyGold: true
+  }]
 }
 
 export const DEFAULT_SERVER_CONFIG = {
   ...DEFAULT_STYLE,
-  ...DEFAULT_CONFIG,
+  roomId: 1,
+  isConnected: false,
+  // autoReplyRules: [{
+  //   priority: 0,
+  //   text: '',
+  //   onlyGold: true
+  // }],
   USER_DATA_PATH,
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
+  SAVE_ALL_BILI_MESSAGE,
   // HTML_PATH: path.join('D:\\Mirror\\bilibili-live-danmaku\\node_modules\\@tokine\\bilibili-danmaku-page'),
   HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
 }
