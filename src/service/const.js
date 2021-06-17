@@ -278,6 +278,7 @@ export const DEFAULT_CONFIG = {
   isWatchLottery: false,
   optionstring: "{A}\n{B}\n{C}",
   historyRooms: [],
+  isAutoReply: false,
   autoReplyRules: [{
     priority: 0,
     text: '',

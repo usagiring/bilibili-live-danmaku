@@ -207,9 +207,11 @@ export default {
     },
 
     async changeCookie(e) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         userCookie: e.target.value,
-      });
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     async changeAutoRecord(status) {
