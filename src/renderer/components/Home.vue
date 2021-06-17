@@ -123,9 +123,9 @@
             <Tooltip placement="right" content="天选时刻中">
               <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
             </Tooltip>
-            <Tooltip placement="right" content="天选时刻获奖">
+            <!-- <Tooltip placement="right" content="天选时刻获奖">
               <Icon v-if="!isLottering && lotteryAwardUsers" type="md-cube" />
-            </Tooltip>
+            </Tooltip> -->
           </div>
         </div>
         <div class="layout-content">
@@ -237,7 +237,7 @@ export default {
       // 天选时刻开始
       if (payload.cmd === 'ANCHOR_LOT_START') {
         this.isLottering = true
-        this.onLotteryStart(payload.payload)
+        // this.onLotteryStart(payload.payload)
       }
 
       // 天选时刻结束
@@ -247,8 +247,77 @@ export default {
 
       if (payload.cmd === 'ANCHOR_LOT_AWARD') {
         this.isLottering = false
-        this.onLotteryAward(payload.payload)
+        // this.onLotteryAward(payload.payload)
       }
+
+      // if (this.isLottering && this.isWatchLottery && payload.cmd === 'COMMENT') {
+      //   // if (this.isDanmaku) {
+      //   const comment = payload.payload
+      //   // 已经记录过的用户不再重复统计
+      //   if (this.userCommentMap[comment.uid]) return;
+      //   // 当前房间粉丝牌等级过滤
+      //   if (this.medalLevel) {
+      //     if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) return
+      //   }
+      //   const regexp = new RegExp(this.danmakuText, "i")
+      //   const isMatch = regexp.test(comment.comment)
+      //   if (!isMatch) return;
+
+      //   // 记录统计
+      //   const history = {
+      //     uid: comment.uid,
+      //     name: comment.name,
+      //     comment: comment.comment,
+      //     avatar: comment.avatar || DEFAULT_AVATAR,
+      //   }
+      //   this.userCommentMap[comment.uid] = history
+      //   this.userComments = [history, ...this.userComments]
+      //   // }
+      // }
+
+      // if (this.isLottering && this.isWatchLottery && payload.cmd === 'GIFT') {
+      //   // if (this.isGift && data.cmd === 'GIFT') {
+      //   const gift = payload.payload
+      //   if (!this.selectedGiftIds.includes(`${gift.giftId}`)) return
+
+      //   const {
+      //     uid,
+      //     name,
+      //     giftId,
+      //     giftName,
+      //     giftNumber = 1,
+      //     price = 0,
+      //     avatar = DEFAULT_AVATAR,
+      //   } = gift;
+      //   const key = `${uid}:${giftId}`
+      //   const userGift = this.userGiftMap[key]
+      //   // test: 小心心
+      //   // if (giftId === 30607) {
+      //   //   price = 1
+      //   // }
+      //   if (!userGift) {
+      //     // 计算属性需要完全替换
+      //     this.userGiftMap = {
+      //       ...this.userGiftMap,
+      //       [key]: {
+      //         uid,
+      //         giftId,
+      //         name,
+      //         avatar,
+      //         giftName,
+      //         giftNumber: giftNumber,
+      //         price: giftNumber * price,
+      //       }
+      //     }
+      //   } else {
+      //     userGift.giftNumber = userGift.giftNumber + giftNumber
+      //     userGift.price = userGift.price + giftNumber * price
+      //     this.userGiftMap = Object.assign(this.userGiftMap, {
+      //       [key]: userGift
+      //     })
+      //   }
+      //   // }
+      // }
     }
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
@@ -639,18 +708,17 @@ export default {
       // 记录接下来一段时间的数据
       // 收到award或者end结束。
       const {
-        award_name, // description
-        award_num,
-        danmu,
-        gift_id,
-        gift_name,
-        gift_num,
-        gift_price, // 金瓜子
         id,
-        max_time,
-        room_id,
+        roomId,
+        awardName,
+        awardNumber,
+        danmaku,
+        giftId,
+        giftName,
+        giftNumber,
+        giftPrice,
+        maxTime,
       } = payload
-
     },
 
     onLotteryAward(payload) {

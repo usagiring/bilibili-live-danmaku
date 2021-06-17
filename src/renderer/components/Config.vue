@@ -61,7 +61,7 @@
         </span>
       </Tooltip>
     </div>
-    <div class="config-item-container">
+    <!-- <div class="config-item-container">
       <Checkbox :value="isWatchLottery" @on-change="changeWatchLottery" :style="{ height: '30px','line-height': '30px'}">自动记录天选时刻</Checkbox>
       <Tooltip placement="top">
         <Icon type="md-help" />
@@ -76,7 +76,7 @@
           <Icon type="ios-flask" />
         </span>
       </Tooltip>
-    </div>
+    </div> -->
   </div>
 </template>
 
