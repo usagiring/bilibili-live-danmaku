@@ -84,6 +84,7 @@
       <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
       <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." :disabled="!isAutoReply" />
       <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}" :disabled="!isAutoReply">银瓜子</Checkbox>
+      <Checkbox :value="onlyMyselfRoom" @on-change="changeOnlyMyselfRoom" :style="{ height: '30px','line-height': '30px'}" :disabled="!isAutoReply">仅自己直播间</Checkbox>
       <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
       <Tooltip placement="top">
         <Icon type="md-help" />
@@ -181,6 +182,9 @@ export default {
     },
     onlyGold() {
       return this.$store.state.Config.autoReplyRules[0].onlyGold;
+    },
+    onlyMyselfRoom() {
+      return this.$store.state.Config.onlyMyselfRoom;
     },
     isAutoReply() {
       return this.$store.state.Config.isAutoReply;
@@ -291,6 +295,14 @@ export default {
     async changeAutoReply(status) {
       const data = {
         isAutoReply: status
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeOnlyMyselfRoom(status) {
+      const data = {
+        onlyMyselfRoom: status
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)

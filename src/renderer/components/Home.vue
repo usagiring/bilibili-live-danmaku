@@ -142,7 +142,7 @@ import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
 import { parseDownloadRate } from "../../service/util";
-import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect } from '../../service/api'
+import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from "../../service/event";
 import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
@@ -214,12 +214,14 @@ export default {
         // 直播中
         this.liveStatus = 1;
         LIVE_STATUS++;
-        console.log(`LIVE_STATUS: ${LIVE_STATUS}`);
-        if (LIVE_STATUS === 2) {
-          console.log("auto record start...");
-          this.startRecord();
+        if (this.isAutoRecord && LIVE_STATUS === 2) {
+          // 延时 5s 等待服务端延时
+          setTimeout(() => {
+            console.log("auto record start...");
+            this.startRecord();
+          }, 5000)
         }
-        if (LIVE_STATUS > 2) {
+        if (this.isAutoRecord && LIVE_STATUS > 2) {
           console.log("auto record restart...");
           this.cancelRecord();
           this.startRecord();
@@ -416,6 +418,10 @@ export default {
       this.liveStatus = liveStatus;
       this.roomUserId = uid
 
+      // 传递 当前主播userId
+      await updateSetting({
+        roomUserId: uid
+      })
       getGuardInfo(roomId, uid)
         .then(guardInfo => {
           this.guardNumber = guardInfo.data.info.num;
