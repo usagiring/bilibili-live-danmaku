@@ -12,7 +12,7 @@
             <div>
               <span class="setting-key-text">透明度</span>
               <div class="avatar-controller-slider">
-                <Slider :value="windowOpacity" @on-change="changeOpacity"></Slider>
+                <Slider :value="opacity" @on-change="changeOpacity"></Slider>
               </div>
             </div>
             <div>
@@ -25,7 +25,7 @@
               <span class="setting-key-text">
                 重复弹幕合并
                 <Tooltip placement="top">
-                  <Icon type="md-alert" class="info-icon" />
+                  <Icon type="md-help" class="info-icon" />
                   <div slot="content">
                     <div class="description-text">
                       <p>多少毫秒内重复的弹幕将被合并</p>
@@ -38,7 +38,7 @@
             </div>
             <div class="setting-key">
               <span class="setting-key-text">礼物栏展示大于</span>
-              <InputNumber :value="showGiftThreshold" @on-change="changeShowGiftThreshold" :min="0" size="small" />
+              <InputNumber :value="showHeadlineThreshold" @on-change="changeShowHeadlineThreshold" :min="0" size="small" />
               {{ " 元" }}
             </div>
             <div class="setting-key">
@@ -103,65 +103,33 @@
             </template>
           </div>
         </Panel>
-        <Panel name="4">
-          高级
-          <div slot="content">
-            <div class="setting-key">
-              <Button @click="refreshInfo">刷新直播间信息</Button>
-            </div>
-            <div class="setting-key">
-              <Button @click="setGiftConfig">刷新礼物信息</Button>
-            </div>
-            <div class="setting-key">
-              <Poptip confirm title="确认还原默认设置？" placement="right" width="300" @on-ok="clearAllSetting">
-                <Button>还原默认设置</Button>
-              </Poptip>
-            </div>
-            <div class="setting-key">
-              <Poptip confirm :title="`确认备份并清理数据库？建议仅在启动明显变慢时操作。备份文件夹: ${USER_DATA_PATH}`" placement="right" width="400" word-wrap @on-ok="backupAndClearDB">
-                <Button>备份并清理数据库</Button>
-              </Poptip>
-            </div>
-            <div class="setting-key">
-              <Poptip confirm title="确认清理用户缓存？用于刷新用户头像，不建议经常清理" placement="right" width="400" @on-ok="clearUserDB">
-                <Button>清理用户缓存</Button>
-              </Poptip>
-            </div>
-          </div>
-        </Panel>
       </Collapse>
     </i-col>
     <i-col span="16">
       <div class="setting-right">
         <div class="setting-right-header">
           <Button @click="sendTestMessage">发送测试弹幕</Button>
-          <Button @click="clearExampleDanmaku">还原默认预览弹幕</Button>
+          <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button>
           <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
-        <div class="setting-right-content" :style="{ background: background }">
-          <Danmaku :isPreview="true" />
-        </div>
+        <!-- <div class="setting-right-content" :style="{ background: background }"> -->
+        <iframe class="setting-right-content" id="preview-container" src="http://localhost:8081?example=true&port=8081" />
+        <!-- </div> -->
       </div>
     </i-col>
   </Row>
 </template>
 
 <script>
-import { remote } from "electron";
-const window = remote.getCurrentWindow();
-import Store from "electron-store";
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
-import Danmaku from "./Danmaku";
 import {
-  DEFAULT_AVATAR,
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
 } from "../../service/const";
-import { setGiftConfigMap, getRandomItem } from "../../service/util";
-import { getGuardInfo, getGiftConfig } from "../../service/bilibili-api";
-import { userDB, backup, deleteData } from "../../service/nedb";
+import { getRandomItem } from "../../service/util";
+import { mergeSetting, clearMessage, sendExampleMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -178,7 +146,6 @@ const defaultFonts = [
 export default {
   components: {
     SettingEditor,
-    Danmaku,
   },
   data() {
     return {
@@ -198,6 +165,14 @@ export default {
         },
         {
           id: Math.random(),
+          type: "ColorPicker",
+          name: "名称前景色",
+          role: 0,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
           role: 0,
@@ -213,14 +188,7 @@ export default {
           prop: "name",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "名称前景色",
-          role: 0,
-          prop: "name",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "InputNumber",
@@ -228,6 +196,14 @@ export default {
           role: 0,
           prop: "comment",
           styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "评论前景色",
+          role: 0,
+          prop: "comment",
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -246,14 +222,7 @@ export default {
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "评论前景色",
-          role: 0,
-          prop: "comment",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "ColorPicker",
@@ -273,6 +242,14 @@ export default {
         },
         {
           id: Math.random(),
+          type: "ColorPicker",
+          name: "名称前景色",
+          role: 3,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
           type: "InputNumber",
           name: "名称描边大小",
           role: 3,
@@ -288,14 +265,7 @@ export default {
           prop: "name",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "名称前景色",
-          role: 3,
-          prop: "name",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "InputNumber",
@@ -303,6 +273,14 @@ export default {
           role: 3,
           prop: "comment",
           styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "评论前景色",
+          role: 3,
+          prop: "comment",
+          styleName: "color",
         },
         {
           id: Math.random(),
@@ -321,14 +299,7 @@ export default {
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
         },
-        {
-          id: Math.random(),
-          type: "ColorPicker",
-          name: "评论前景色",
-          role: 3,
-          prop: "comment",
-          styleName: "color",
-        },
+
         {
           id: Math.random(),
           type: "ColorPicker",
@@ -341,6 +312,8 @@ export default {
     };
   },
   mounted() {
+    // this.initExamleMessages()
+
     if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
     this.fonts.push({
       key: this.danmakuFont,
@@ -349,14 +322,8 @@ export default {
     });
   },
   computed: {
-    realRoomId() {
-      return this.$store.state.Config.realRoomId;
-    },
-    ruid() {
-      return this.$store.state.Config.ruid;
-    },
     background() {
-      return this.$store.state.Config["container_style"]["background"];
+      return this.$store.state.Config.background;
     },
     danmakuFont() {
       return this.$store.state.Config.danmakuFont;
@@ -379,14 +346,11 @@ export default {
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
     },
-    showGiftThreshold() {
-      return this.$store.state.Config.showGiftThreshold;
+    showHeadlineThreshold() {
+      return this.$store.state.Config.showHeadlineThreshold;
     },
     showGiftCardThreshold() {
       return this.$store.state.Config.showGiftCardThreshold;
-    },
-    messages() {
-      return this.$store.state.Message.exampleMessages;
     },
     isShowSilverGift() {
       return this.$store.state.Config.isShowSilverGift;
@@ -394,88 +358,93 @@ export default {
     isUseMiniGiftCard() {
       return this.$store.state.Config.isUseMiniGiftCard;
     },
-    windowOpacity() {
-      return this.$store.state.Config.windowOpacity * 100;
+    opacity() {
+      return this.$store.state.Config.opacity * 100;
+    },
+    userCookie() {
+      return this.$store.state.Config.userCookie;
     },
   },
   methods: {
-    showMemberShipIcon(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowMemberShipIcon: status,
-      });
+    async showMemberShipIcon(status) {
+      const data = { isShowMemberShipIcon: status, }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    showFanMedal(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowFanMedal: status,
-      });
+    async showFanMedal(status) {
+      const data = { isShowFanMedal: status }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    showAvatar(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowAvatar: status,
-      });
+    async showInteractInfo(status) {
+      const data = { isShowInteractInfo: status }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    showInteractInfo(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isShowInteractInfo: status,
-      });
-    },
-    sendTestMessage() {
-      this.$store.dispatch(
-        "ADD_EXAMPLE_MESSAGE",
-        this.randomMessageGenerator()
-      );
+    async sendTestMessage() {
+      const randomMessage = this.randomMessageGenerator()
+      await sendExampleMessages({
+        type: randomMessage.type,
+        data: randomMessage
+      })
     },
 
-    clearAllSetting() {
-      const store = new Store({ name: "vuex" });
-      store.clear();
-      window.reload();
-    },
-
-    updateBackground(color) {
-      this.$store.dispatch("UPDATE_CONTAINER_STYLE", {
-        style: {
-          background: color,
-        },
-      });
-    },
-    changeAvatarSize(size) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        avatarSize: size,
-      });
-      if (size === 0) {
-        this.showAvatar(false);
-      } else {
-        this.showAvatar(true);
+    async updateBackground(color) {
+      const data = {
+        background: color,
       }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    changeOpacity(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        windowOpacity: Number((number / 100).toFixed(2)),
-      });
+    async changeAvatarSize(size) {
+      const data = {
+        avatarSize: size,
+      }
+      if (size === 0) {
+        data.isShowAvatar = false
+      } else {
+        data.isShowAvatar = true
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+    async changeOpacity(number) {
+      const data = {
+        opacity: Number((number / 100).toFixed(2)),
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+      await mergeSetting(data)
     },
 
-    changeCombineSimilarTime(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+    async changeCombineSimilarTime(number) {
+      const data = {
         combineSimilarTime: number,
-      });
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    changeShowGiftThreshold(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        showGiftThreshold: number,
-      });
+    async changeShowHeadlineThreshold(number) {
+      const data = {
+        showHeadlineThreshold: number,
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
-    changeShowGiftCardThreshold(number) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+    async changeShowGiftCardThreshold(number) {
+      const data = {
         showGiftCardThreshold: number,
-      });
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    showSilverGift(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+    async showSilverGift(status) {
+      const data = {
         isShowSilverGift: status,
-      });
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     randomMessageGenerator() {
@@ -500,20 +469,22 @@ export default {
 
       if (randomType === "gift") {
         const gift = {
+          _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "gift",
-          price: Math.floor(Math.random() * 10),
+          price: Math.floor(Math.random() * 100),
           giftNumber: 1,
           giftName: "随机礼物",
-          avatar: DEFAULT_AVATAR,
+          guard: 3,
           role: 3,
-          sendAt: new Date() - 0,
+          sendAt: Date.now(),
           batchComboId: randomNumber,
           // batchComboId: 1,
         };
         gift.role = randomRole;
+        gift.guard = randomRole;
         if (Math.random() * 2 < 1) {
           gift.giftName = "舰长";
           gift.isGuardGift = true;
@@ -523,6 +494,7 @@ export default {
       }
       if (randomType === "superChat") {
         const superChat = {
+          _id: randomNumber,
           id: randomNumber,
           // id: 3333333,
           uid: randomNumber,
@@ -530,66 +502,46 @@ export default {
           // superChatId: 3333333,
           name: `bli_${randomNumber}`,
           type: "superChat",
-          avatar: DEFAULT_AVATAR,
           comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
-          price: Math.floor(Math.random() * 10),
+          price: Math.floor(Math.random() * 100),
           role: 3,
-          sendAt: new Date() - 0,
+          guard: 3,
+          sendAt: Date.now(),
         };
         if (Math.random() * 2 < 1) {
           superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
         }
         superChat.role = randomRole;
+        superChat.guard = randomRole;
         return superChat;
       }
 
       if (randomType === "comment") {
         const comment = {
+          _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
           name: `bli_${randomNumber}`,
           type: "comment",
-          avatar: DEFAULT_AVATAR,
           comment: `一条弹幕哟～`,
           role: 3,
-          sendAt: new Date() - 0,
+          guard: 3,
+          sendAt: Date.now(),
         };
         comment.role = randomRole;
+        comment.guard = randomRole;
         return comment;
       }
     },
 
-    clearExampleDanmaku() {
-      this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
+    async restoreExampleDanmaku() {
+      await restoreExampleMessage()
+      // this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
     },
 
-    clearDanmaku() {
-      this.$store.dispatch("CLEAR_MESSAGE");
-    },
-
-    async refreshInfo() {
-      // 暂时只刷新舰长数
-      const guardInfo = await getGuardInfo(this.realRoomId, this.ruid);
-      this.$store.dispatch("UPDATE_CONFIG", {
-        guardNumber: guardInfo.data.info.num,
-      });
-    },
-
-    async backupAndClearDB() {
-      // 从 ./data 里备份 comment gift interact, 并 removeall, other 直接清空
-      backup();
-      deleteData();
-      // await commentDB.remove({}, { multi: true });
-      // await giftDB.remove({}, { multi: true });
-      // await interactDB.remove({}, { multi: true });
-      // await otherDB.remove({}, { multi: true });
-      window.reload();
-    },
-
-    async clearUserDB() {
-      // 清空用户数据缓存
-      await userDB.remove({}, { multi: true });
-      window.reload();
+    async clearDanmaku() {
+      await clearMessage()
+      // this.$store.dispatch("CLEAR_MESSAGE");
     },
 
     async getFonts() {
@@ -605,19 +557,21 @@ export default {
         await this.getFonts();
       }
     },
+
     async changeDanmakuFont(value) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         danmakuFont: value,
-      });
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
+
     async useMiniGiftCard(value) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const data = {
         isUseMiniGiftCard: value,
-      });
-    },
-    async setGiftConfig() {
-      const data = await getGiftConfig(this.realRoomId);
-      setGiftConfigMap(data.data.list);
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     },
   },
 };
@@ -643,8 +597,8 @@ export default {
 }
 
 .setting-right-content {
+  width: 95%;
   margin: 10px;
-  padding: 5px;
   height: 500px;
 
   border-radius: 12px;

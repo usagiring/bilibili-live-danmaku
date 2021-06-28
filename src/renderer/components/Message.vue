@@ -1,132 +1,50 @@
 <template>
   <div class="query-component">
     <div class="searcher-wrapper">
-      <Input
-        v-model="roomId"
-        placeholder="房间号"
-        clearable
-        style="width: 120px"
-        size="small"
-      />
-      <DatePicker
-        type="datetimerange"
-        format="yyyy-MM-dd HH:mm"
-        placeholder="选择时间范围"
-        style="width: 300px"
-        size="small"
-        :value="dateRange"
-        @on-change="changeDateRange"
-        @on-clear="clearDateRange"
-      ></DatePicker>
-      <Input
-        v-model="userId"
-        placeholder="用户ID"
-        clearable
-        style="width: 100px"
-        size="small"
-      />
-      <Input
-        v-model="userName"
-        placeholder="用户名"
-        clearable
-        style="width: 100px"
-        size="small"
-      />
-      <Button
-        type="primary"
-        shape="circle"
-        icon="ios-search"
-        :disabled="!roomId"
-        @click="searchAll"
-      ></Button>
-      <Checkbox
-        class="setting-checkbox"
-        :value="isShowUserSpaceLink"
-        @on-change="showUserSpaceLink"
-        >查成分</Checkbox
-      >
-      <Checkbox
-        class="setting-checkbox"
-        :value="isShowSilverGift"
-        @on-change="showSilverGift"
-        >显示银瓜子礼物</Checkbox
-      >
+      <Input v-model="roomId" placeholder="房间号" clearable style="width: 120px" size="small" />
+      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
+      <Input v-model="userId" placeholder="用户ID" clearable style="width: 100px" size="small" />
+      <Input v-model="userName" placeholder="用户名" clearable style="width: 100px" size="small" />
+      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="searchAll"></Button>
+      <Checkbox class="setting-checkbox" :value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
+      <Checkbox class="setting-checkbox" :value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
     </div>
     <div class="content-wrapper">
       <Split v-model="split1" @on-moving="splitMoving">
         <div slot="left" class="split-pane">
           <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
             <div slot="top" class="split-pane" id="split-left-top">
-              <Scroll
-                :on-reach-edge="handleReachEdgeComment"
-                :height="scrollHeightLeftTop"
-                :distance-to-edge="[10, 10]"
-              >
+              <Scroll :on-reach-edge="handleReachEdgeComment" :height="scrollHeightLeftTop" :distance-to-edge="[10, 10]">
                 <template v-for="comment in comments">
                   <div :key="comment._id" class="comment-content">
                     <span class="date-style">{{
                       dateFormat(comment.sendAt)
                     }}</span>
-                    <i
-                      v-if="comment.guard"
-                      class="guard-icon"
-                      :style="{
+                    <i v-if="comment.guard" class="guard-icon" :style="{
                         'background-image': `url(${getGuardIcon(
                           comment.guard
                         )})`,
-                      }"
-                    ></i>
-                    <FanMedal
-                      v-if="comment.medalLevel && comment.medalName"
-                      :medalLevel="comment.medalLevel"
-                      :medalName="comment.medalName"
-                      :medalColorStart="comment.medalColorStart"
-                      :medalColorEnd="comment.medalColorEnd"
-                      :medalColorBorder="comment.medalColorBorder"
-                    ></FanMedal>
+                      }"></i>
+                    <FanMedal v-if="comment.medalLevel && comment.medalName" :medalLevel="comment.medalLevel" :medalName="comment.medalName" :medalColorStart="comment.medalColorStart" :medalColorEnd="comment.medalColorEnd" :medalColorBorder="comment.medalColorBorder"></FanMedal>
                     <span>{{ `${comment.name}` }}</span>
-                    <span
-                      v-if="isShowUserSpaceLink"
-                      class="user-link"
-                      @click="openBiliUserSpace(comment.uid)"
-                      >{{ `(${comment.uid})` }}</span
-                    >
+                    <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
                     <span>{{ `: ${comment.comment}` }}</span>
                   </div>
                 </template>
               </Scroll>
             </div>
             <div slot="bottom" class="split-pane" id="split-left-bottom">
-              <Scroll
-                :on-reach-edge="handleReachEdgeInteract"
-                :height="scrollHeightLeftBottom"
-                :distance-to-edge="[10, 10]"
-              >
+              <Scroll :on-reach-edge="handleReachEdgeInteract" :height="scrollHeightLeftBottom" :distance-to-edge="[10, 10]">
                 <template v-for="interact in interacts">
                   <div :key="interact._id">
                     <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
-                    <FanMedal
-                      v-if="interact.medalLevel && interact.medalName"
-                      :medalLevel="interact.medalLevel"
-                      :medalName="interact.medalName"
-                      :medalColorStart="interact.medalColorStart"
-                      :medalColorEnd="interact.medalColorEnd"
-                      :medalColorBorder="interact.medalColorBorder"
-                    ></FanMedal>
-                    <span
-                      :style="{
+                    <FanMedal v-if="interact.medalLevel && interact.medalName" :medalLevel="interact.medalLevel" :medalName="interact.medalName" :medalColorStart="interact.medalColorStart" :medalColorEnd="interact.medalColorEnd" :medalColorBorder="interact.medalColorBorder"></FanMedal>
+                    <span :style="{
                         color: interact.nameColor
                           ? interact.nameColor
                           : undefined,
-                      }"
-                      >{{ `${interact.name}` }}</span
-                    >
-                    <span
-                      v-if="isShowUserSpaceLink"
-                      class="user-link"
-                      @click="openBiliUserSpace(interact.uid)"
-                      >{{ `(${interact.uid})` }}</span
-                    >
+                      }">{{ `${interact.name}` }}</span>
+                    <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
                     <span>{{ getInteractType(interact.msgType) }}了直播间</span>
                   </div>
                 </template>
@@ -135,11 +53,7 @@
           </Split>
         </div>
         <div slot="right" class="split-pane" id="split-right">
-          <Scroll
-            :on-reach-edge="handleReachEdgeGift"
-            :height="scrollHeightRight"
-            :distance-to-edge="[10, 10]"
-          >
+          <Scroll :on-reach-edge="handleReachEdgeGift" :height="scrollHeightRight" :distance-to-edge="[10, 10]">
             <template v-for="gift in gifts">
               <div :key="gift._id" :style="{ padding: '0 10px' }">
                 <!-- <p class="date-style" :style="{ padding: '0 8px' }">
@@ -165,14 +79,9 @@
 <script>
 import { shell, remote } from "electron";
 const window = remote.getCurrentWindow();
-import moment from "moment";
 import { GUARD_ICON_MAP, INTERACT_TYPE } from "../../service/const";
-import { getPriceProperties } from "../../service/util";
-import {
-  commentDB,
-  interactDB,
-  giftDB,
-} from "../../service/nedb";
+import { getPriceProperties, dateFormat } from "../../service/util";
+import { queryGifts, queryInteracts, queryComments } from '../../service/api'
 import GiftCardMini from "./GiftCardMini";
 import FanMedal from "./FanMedal";
 
@@ -249,17 +158,22 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      const comments = await commentDB.find(query, {
+      const { data: comments } = await queryComments({
+        query,
         sort: sort || { sendAt: -1 },
         limit: 20,
-      });
+      })
+      // const comments = await commentDB.find(query, {
+      //   sort: sort || { sendAt: -1 },
+      //   limit: 20,
+      // });
       return comments;
     },
     async searchInteract(options = {}) {
@@ -280,17 +194,22 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
         query.sendAt = query.sendAt || {};
         query.sendAt[scrollKey] = Number(scrollValue);
       }
-      const interacts = await interactDB.find(query, {
+      const { data: interacts } = await queryInteracts({
+        query,
         sort: sort || { sendAt: -1 },
         limit: 20,
-      });
+      })
+      // const interacts = await interactDB.find(query, {
+      //   sort: sort || { sendAt: -1 },
+      //   limit: 20,
+      // });
       return interacts;
     },
 
@@ -312,7 +231,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: new RegExp(this.userName) };
+        query.name = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -322,10 +241,15 @@ export default {
       if (!this.isShowSilverGift) {
         query.coinType = "gold";
       }
-      const gifts = await giftDB.find(query, {
+      const { data: gifts } = await queryGifts({
+        query,
         sort: sort || { sendAt: -1 },
         limit: 20,
-      });
+      })
+      // const gifts = await giftDB.find(query, {
+      //   sort: sort || { sendAt: -1 },
+      //   limit: 20,
+      // });
       return gifts;
     },
 
@@ -438,7 +362,7 @@ export default {
       shell.openExternal(`https://space.bilibili.com/${userId}`);
     },
     dateFormat(date) {
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
+      return dateFormat(date)
     },
     formatGift(gift) {
       gift.totalPrice = (gift.giftNumber || 1) * gift.price;

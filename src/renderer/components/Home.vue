@@ -3,36 +3,44 @@
     <Layout :style="{ minHeight: '100vh' }">
       <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
-          <MenuItem name="1-1" to="/setting">
-          <Icon type="md-build" />
-          <span v-if="!isCollapsed">设置</span>
+          <MenuItem name="1-1" to="/style">
+          <Icon type="md-color-palette" />
+          <span>样式</span>
           </MenuItem>
           <MenuItem name="1-2" to="/message">
           <Icon type="md-chatboxes" />
-          <span v-if="!isCollapsed">消息</span>
+          <span>消息</span>
           </MenuItem>
-          <MenuItem name="1-5" to="/live">
+          <MenuItem name="1-3" to="/live">
           <Icon type="md-play" />
-          <span v-if="!isCollapsed">直播</span>
+          <span>直播</span>
           </MenuItem>
-          <MenuItem name="1-3" to="/vote">
+          <MenuItem name="1-4" to="/vote">
           <Icon type="md-pie" />
-          <span v-if="!isCollapsed">投票</span>
+          <span>投票</span>
           </MenuItem>
-          <MenuItem name="1-6" to="/lottery">
+          <MenuItem name="1-5" to="/lottery">
           <Icon type="md-bonfire" />
-          <span v-if="!isCollapsed">祈愿</span>
+          <span>祈愿</span>
           </MenuItem>
-          <MenuItem name="1-4" to="/statistic">
+          <MenuItem name="1-6" to="/statistic">
           <Icon type="md-stats" />
-          <span v-if="!isCollapsed">统计</span>
+          <span>统计</span>
+          </MenuItem>
+          <MenuItem name="1-7" to="/config">
+          <Icon type="md-settings" />
+          <span>设置</span>
+          </MenuItem>
+          <MenuItem name="1-8" to="/help">
+          <Icon type="md-help" />
+          <span>帮助</span>
           </MenuItem>
         </Menu>
       </Sider>
       <Layout>
         <div class="layout-header">
           <div class="avatar-wrapper">
-            <Avatar :icon="avatar ? undefined : 'ios-person'" :src="avatar ? avatar : undefined" size="large" />&nbsp;&nbsp;
+            <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />&nbsp;&nbsp;
             <span>{{ username ? username : "未连接" }}</span>
             &nbsp;
             <Tag v-if="username" type="border" :color="liveStatus === 1 ? 'green' : 'silver'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
@@ -107,8 +115,17 @@
               <span>窗口置顶</span>
               <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
             </template>
-            <span>自动录制</span>
-            <i-switch :value="isAutoRecord" @on-change="changeAutoRecord"></i-switch>
+            <Tooltip placement="right" content="录制中">
+              <span v-if="isRecording" class="record-icon">
+                <Icon :style="{position: 'absolute'}" type="ios-radio-button-on" />
+              </span>
+            </Tooltip>
+            <Tooltip placement="right" content="天选时刻中">
+              <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
+            </Tooltip>
+            <!-- <Tooltip placement="right" content="天选时刻获奖">
+              <Icon v-if="!isLottering && lotteryAwardUsers" type="md-cube" />
+            </Tooltip> -->
           </div>
         </div>
         <div class="layout-content">
@@ -124,27 +141,12 @@ import { debounce } from "lodash";
 import { remote, ipcRenderer } from "electron";
 const { BrowserWindow } = remote;
 
-import { getUserInfoThrottle, parseDownloadRate } from "../../service/util";
-import {
-  init,
-  close,
-  getIsWsConnected,
-  parseComment,
-  parseInteractWord,
-  parseGift,
-} from "../../service/bilibili-live-ws";
+import { parseDownloadRate } from "../../service/util";
+import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from "../../service/event";
-import { record, cancelRecord } from "../../service/bilibili-recorder";
+import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
 import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
 import {
-  commentDB,
-  interactDB,
-  userDB,
-  otherDB,
-  giftDB,
-} from "../../service/nedb";
-import {
-  DEFAULT_AVATAR,
   IPC_CHECK_FOR_UPDATE,
   IPC_UPDATE_AVAILABLE,
   IPC_DOWNLOAD_UPDATE,
@@ -152,8 +154,10 @@ import {
   IPC_UPDATE_DOWNLOADED,
   SET_DANMAKU_ON_TOP_LEVEL,
   DEFAULT_RECORD_DIR,
-  MAX_HISTORY_ROOM
+  MAX_HISTORY_ROOM,
+  PORT
 } from "../../service/const";
+import ws from '../../service/ws'
 
 // 0 未开播
 // 1 准备中（web开推流码）
@@ -174,6 +178,8 @@ export default {
       hasNewVersion: false,
       isAppUpdating: false,
       isAppUpdateStarting: false,
+      isRecording: false,
+      isLottering: false,
       downloadRate: "0 KB/s",
       percent: 0,
 
@@ -184,48 +190,100 @@ export default {
       fansClubNumber: 0,
       liveStatus: 0,
       peopleNumber: 0,
-      // guardNumber: 0,
+      guardNumber: 0,
+      roomUserId: 0,
     };
   },
   created() {
-    this.initial();
+  },
+  async mounted() {
+    this.displayRoomId = this.realRoomId;
 
-    emitter.on("message", this.onMessage);
+    await this.initial();
+    ws.onmessage = (msg) => {
+      const payload = JSON.parse(msg.data)
 
-    emitter.on("ninki", async (data) => {
-      this.ninkiNumber = data.count;
+      if (payload.cmd === 'ROOM_REAL_TIME_MESSAGE_UPDATE') {
+        this.onFansNumber(payload.payload)
+      }
+      if (payload.cmd === 'NINKI') {
+        this.onNinKi(payload.payload)
+      }
+
+      if (payload.cmd === "LIVE") {
+        // 直播中
+        this.liveStatus = 1;
+        LIVE_STATUS++;
+        if (this.isAutoRecord && LIVE_STATUS === 2) {
+          // 延时 5s 等待服务端延时
+          setTimeout(() => {
+            console.log("auto record start...");
+            this.startRecord();
+          }, 5000)
+        }
+        if (this.isAutoRecord && LIVE_STATUS > 2) {
+          console.log("auto record restart...");
+          this.cancelRecord();
+          this.startRecord();
+        }
+      }
+
+      if (payload.cmd === "PREPARING") {
+        // 未开播
+        this.liveStatus = 0;
+        LIVE_STATUS = 0;
+        console.log("auto record stop...");
+        this.cancelRecord();
+      }
+
+      // 天选时刻开始
+      if (payload.cmd === 'ANCHOR_LOT_START') {
+        this.isLottering = true
+      }
+
+      // 天选时刻结束
+      if (payload.cmd === 'ANCHOR_LOT_END') {
+        this.isLottering = false
+      }
+
+      if (payload.cmd === 'ANCHOR_LOT_AWARD') {
+        this.isLottering = false
+      }
+    }
+
+    ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
+      this.hasNewVersion = true;
     });
+    ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
 
-    const listenerCount = emitter.listenerCount("message");
-    console.log(`listenerCount: ${listenerCount}`);
+    this.peopleTimer = setInterval(async () => {
+      if (!this.realRoomId || !this.isConnected) return;
+      const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
+      this.peopleNumber = result.data
+    }, 10000);
+
+    // 刷新舰长数 间隔1分钟
+    this.guardNumberTimer = setInterval(async () => {
+      if (!this.realRoomId || !this.roomUserId) return
+      const guardInfo = await getGuardInfo(this.realRoomId, this.roomUserId);
+      this.guardNumber = guardInfo.data.info.num;
+    }, 60000)
+
+    const { isRecording } = getStatus()
+    this.isRecording = isRecording
+    emitter.on('record-start', () => {
+      this.isRecording = true
+    })
+    emitter.on('record-cancel', () => {
+      this.isRecording = false
+    })
   },
   computed: {
     menuitemClasses: function () {
       return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
     },
-    messages() {
-      return this.$store.state.Message.messages;
-    },
     isConnected() {
-      return this.$store.state.Config.isConnected;
-    },
-    isShowAvatar() {
-      return this.$store.state.Config.isShowAvatar;
-    },
-    isShowInteractInfo() {
-      return this.$store.state.Config.isShowInteractInfo;
-    },
-    combineSimilarTime() {
-      return this.$store.state.Config.combineSimilarTime;
-    },
-    showGiftThreshold() {
-      return this.$store.state.Config.showGiftThreshold;
-    },
-    isShowSilverGift() {
-      return this.$store.state.Config.isShowSilverGift;
-    },
-    guardNumber() {
-      return this.$store.state.Config.guardNumber;
+      return this.$store.state.Config.isConnected || false;
     },
     windowWidth() {
       return this.$store.state.Config.windowWidth;
@@ -251,14 +309,8 @@ export default {
     isWithCookie() {
       return this.$store.state.Config.isWithCookie;
     },
-    recordId() {
-      return this.$store.state.Config.recordId;
-    },
     isAutoRecord() {
       return this.$store.state.Config.isAutoRecord;
-    },
-    isRecording() {
-      return this.$store.state.Config.isRecording;
     },
     historyRooms() {
       return this.$store.state.Config.historyRooms;
@@ -271,12 +323,17 @@ export default {
     //     return true
     //   })
     // }
+    isWatchLottery() {
+      return this.$store.state.Config.isWatchLottery;
+    },
   },
   methods: {
     async connect(status) {
       this.isConnecting = true;
+      const data = await this.initRoomInfo(data)
+
       if (status && this.displayRoomId) {
-        const { data } = await getRoomInfoV2(this.displayRoomId);
+        // const { data } = await getRoomInfoV2(this.displayRoomId);
         if (!data) {
           this.$Message.error("连接失败")
           this.isConnecting = false
@@ -284,68 +341,102 @@ export default {
         }
 
         const {
-          uid,
           room_id: roomId,
-          title,
-          cover,
-          tags,
-          background,
-          description,
           live_status: liveStatus,
-          live_start_time, // 直播开始时间 unixtime
-          online,
         } = data.room_info;
+        const {
+          uname,
+          face,
+          gender
+        } = data.anchor_info.base_info;
 
-        await init({ roomId: Number(roomId), uid: 0 });
+        await connectRoom({ roomId: Number(roomId), uid: 0 });
 
-        const { uname, face, gender } = data.anchor_info.base_info;
-        const { level, level_color } = data.anchor_info.live_info;
-        const { attention } = data.anchor_info.relation_info;
-        const { medal_name, medal_id, fansclub } =
-          data.anchor_info.medal_info || {};
-        this.username = uname;
-        this.avatar = face;
-        this.ninkiNumber = online;
-        this.fansNumber = attention;
-        this.fansClubNumber = fansclub || 0;
-        this.liveStatus = liveStatus;
+        const config = {
+          isConnected: status,
+        };
+        this.$store.dispatch("UPDATE_CONFIG", config);
 
-        if (liveStatus === 1 && this.isAutoRecord && !this.isRecording) {
+        const { isRecording } = getStatus()
+        if (liveStatus === 1 && this.isAutoRecord && !isRecording) {
           LIVE_STATUS = 2;
           this.startRecord();
         }
 
-        const guardInfo = await getGuardInfo(roomId, uid);
-        // this.guardNumber = guardInfo.data.info.num;
-        const config = {
-          isConnected: status,
-          guardNumber: guardInfo.data.info.num,
-          realRoomId: roomId,
-          displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
-          ruid: uid,
-          medalId: medal_id,
-          medalName: medal_name,
-        };
         // 加入历史连接房间号
         if (!this.historyRooms.find((room) => room.roomId === roomId)) {
+          let historyRooms = this.historyRooms
           if (this.historyRooms.length > MAX_HISTORY_ROOM) {
-            config.historyRooms = [
+            historyRooms = [
               ...this.historyRooms.slice(1),
               { roomId, uname, face },
             ];
           } else {
-            config.historyRooms = [
+            historyRooms = [
               ...this.historyRooms,
               { roomId, uname, face },
             ];
           }
+          this.$store.dispatch("UPDATE_CONFIG", {
+            historyRooms
+          })
         }
-        this.$store.dispatch("UPDATE_CONFIG", config);
       } else {
-        close();
-        this.initial();
+        await disconnect({ roomId: this.displayRoomId })
+        this.initial()
       }
       this.isConnecting = false;
+    },
+
+    async initRoomInfo() {
+      const { data } = await getRoomInfoV2(this.displayRoomId);
+      console.log(data)
+
+      const {
+        uid,
+        room_id: roomId,
+        title,
+        cover,
+        tags,
+        background,
+        description,
+        live_status: liveStatus,
+        live_start_time, // 直播开始时间 unixtime
+        online,
+      } = data.room_info;
+
+      const { uname, face, gender } = data.anchor_info.base_info;
+      const { level, level_color } = data.anchor_info.live_info;
+      const { attention } = data.anchor_info.relation_info;
+      const { medal_name, medal_id, fansclub } =
+        data.anchor_info.medal_info || {};
+      this.username = uname;
+      this.avatar = face;
+      this.ninkiNumber = online;
+      this.fansNumber = attention;
+      this.fansClubNumber = fansclub || 0;
+      this.liveStatus = liveStatus;
+      this.roomUserId = uid
+
+      // 传递 当前主播userId
+      await updateSetting({
+        roomUserId: uid
+      })
+      getGuardInfo(roomId, uid)
+        .then(guardInfo => {
+          this.guardNumber = guardInfo.data.info.num;
+        })
+
+      const config = {
+        isConnected: status,
+        realRoomId: roomId,
+        displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
+        medalId: medal_id,
+        medalName: medal_name,
+      };
+      this.$store.dispatch("UPDATE_CONFIG", config);
+
+      return data
     },
 
     showDanmakuWindow(status) {
@@ -368,10 +459,15 @@ export default {
           resizable: true,
         });
 
+        // const winURL =
+        //   process.env.NODE_ENV === "development"
+        //     ? `http://localhost:9080/#/danmaku-window`
+        //     : `file://${__dirname}/index.html#danmaku-window`;
+
         const winURL =
           process.env.NODE_ENV === "development"
-            ? `http://localhost:9080/#/danmaku-window`
-            : `file://${__dirname}/index.html#danmaku-window`;
+            ? `http://localhost:${PORT}?port=${PORT}`
+            : `http://localhost:${PORT}?port=${PORT}`;
         this.win.loadURL(winURL);
         this.win.on("close", (e) => {
           this.isShowDanmakuWindow = false;
@@ -411,22 +507,24 @@ export default {
       }
     },
 
-    initial() {
-      this.username = "";
-      this.avatar = null;
-      this.ninkiNumber = 0;
-      this.fansNumber = 0;
-      this.fansClubNumber = 0;
-      this.liveStatus = 0;
-      this.peopleNumber = 0;
+    async initial() {
+      const result = await getRoomStatus({ roomId: this.realRoomId })
+      const isConnected = result.data.isConnected
+      if (isConnected) {
+        await this.initRoomInfo()
+      } else {
+        this.username = "";
+        this.avatar = null;
+        this.ninkiNumber = 0;
+        this.fansNumber = 0;
+        this.fansClubNumber = 0;
+        this.liveStatus = 0;
+        this.peopleNumber = 0;
+      }
 
-      const payload = {
-        guardNumber: 0,
-      };
-      Object.assign(payload, {
-        isConnected: getIsWsConnected(),
-      });
-      this.$store.dispatch("UPDATE_CONFIG", payload);
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isConnected
+      })
     },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
@@ -436,91 +534,6 @@ export default {
         isAlwaysOnTop: status,
       });
     },
-    sendComment(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "comment",
-        uid: payload.uid,
-        name: payload.name,
-        comment: payload.comment,
-        sendAt: payload.sendAt,
-        isAdmin: payload.isAdmin,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-        role: payload.guard,
-
-        medalLevel: payload.medalLevel,
-        medalName: payload.medalName,
-        medalColorBorder: payload.medalColorBorder,
-        medalColorStart: payload.medalColorStart,
-        medalColorEnd: payload.medalColorEnd,
-      });
-    },
-    sendInteractWord(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "interactWord",
-        uid: payload.uid,
-        identities: payload.identities,
-        name: payload.name,
-        color: payload.nameColor,
-        sendAt: payload.timestamp,
-        msgType: payload.msgType,
-
-        medalLevel: payload.medalLevel,
-        medalName: payload.medalName,
-        medalColorBorder: payload.medalColorBorder,
-        medalColorStart: payload.medalColorStart,
-        medalColorEnd: payload.medalColorEnd,
-      });
-    },
-    sendSuperChat(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "superChat",
-
-        uid: payload.uid,
-        name: payload.name,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-
-        price: payload.price,
-
-        commentJPN: payload.commentJPN,
-        comment: payload.comment,
-        sendAt: new Date() - 0,
-
-        superChatId: Number(payload.superChatId),
-        time: payload.time,
-        startTime: payload.startTime,
-        endTime: payload.endTime,
-      });
-    },
-    sendGift(payload) {
-      this.$store.dispatch("ADD_MESSAGE", {
-        id: payload._id,
-        type: "gift",
-        uid: payload.uid,
-        name: payload.name,
-        batchComboId: payload.batchComboId,
-        avatar: payload.avatar ? `${payload.avatar}@48w_48h` : DEFAULT_AVATAR,
-
-        price: payload.price,
-        sendAt: new Date() - 0,
-        giftNumber: payload.giftNumber,
-        giftName: payload.giftName,
-        giftId: payload.giftId,
-        isGuardGift: payload.isGuardGift,
-      });
-    },
-
-    parseUser(data) {
-      return {
-        uid: data.mid,
-        name: data.name,
-        avatar: data.face,
-        sex: data.sex,
-        level: data.level,
-      };
-    },
 
     changeRoomId(roomId) {
       try {
@@ -528,169 +541,20 @@ export default {
           roomId = roomId.replace(/[^\d]/g, "");
         }
       } catch (e) {
-        console.log(e);
         this.$Message.warning("请输入正确数字");
       }
       this.displayRoomId = roomId;
     },
 
-    onMessage: async function (data) {
-      if (Array.isArray(data)) {
-        // console.log(data);
-        const comments = data
-          .filter((msg) => ~msg.cmd.indexOf("DANMU_MSG"))
-          .map(parseComment);
+    onFansNumber(payload) {
+      const { fansNumber, fansClubNumber } = payload;
+      this.fansNumber = fansNumber;
+      this.fansClubNumber = fansClubNumber;
+    },
 
-        for (const comment of comments) {
-          // console.log(`${comment.name}(${comment.uid}): ${comment.comment}`);
-
-          if (this.isShowAvatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: comment.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(comment.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            comment.avatar = (user || {}).avatar;
-          }
-
-          const data = await commentDB.insert(comment);
-          await this.sendComment(data);
-        }
-
-        const interactWords = data
-          .filter((msg) => msg.cmd === "INTERACT_WORD")
-          .map(parseInteractWord);
-
-        for (const interactWord of interactWords) {
-          // console.log(`${interactWord.name}(${interactWord.uid}) 进入了直播间`);
-          const data = await interactDB.insert(interactWord);
-          if (this.isShowInteractInfo) {
-            this.sendInteractWord(data);
-          }
-        }
-
-        const gifts = data.map(parseGift).filter(Boolean);
-
-        for (const gift of gifts) {
-          if (!gift.avatar) {
-            // 缓存 user 信息
-            let user = await userDB.findOne({ uid: gift.uid });
-            if (!user) {
-              try {
-                const data = await getUserInfoThrottle(gift.uid);
-                // 统一格式化用户数据
-                user = this.parseUser(data);
-                data.createdAt = new Date();
-                userDB.insert(user);
-              } catch (e) {
-                // TODO 全局 errorHandler
-                // throw new Error("getUserInfo limit");
-              }
-            }
-
-            gift.avatar = (user || {}).avatar;
-          }
-
-          if (gift.type === "superChat") {
-            let data = await giftDB.findOne({
-              roomId: this.realRoomId,
-              superChatId: gift.superChatId,
-            });
-
-            // 如果找到已存在sc 并且 新sc有JPN信息，需要更新
-            if (data) {
-              if (gift.commentJPN) {
-                data = await giftDB.update(
-                  { _id: data._id },
-                  {
-                    $set: { commentJPN: gift.commentJPN },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              } else {
-                // 如果新收到的gift不包含JPN信息，表示原数据齐全，直接continue
-                continue;
-              }
-            } else {
-              data = await giftDB.insert(gift);
-            }
-
-            this.sendSuperChat(data);
-          } else if (gift.type === "gift") {
-            let data;
-            if (gift.batchComboId) {
-              const comboGift = await giftDB.findOne({
-                roomId: this.realRoomId,
-                batchComboId: gift.batchComboId,
-              });
-              if (comboGift) {
-                data = await giftDB.update(
-                  { _id: comboGift._id },
-                  {
-                    $set: {
-                      giftNumber: comboGift.giftNumber + gift.giftNumber,
-                    },
-                  },
-                  { returnUpdatedDocs: true }
-                );
-              }
-            }
-            if (!data) {
-              data = await giftDB.insert(gift);
-            }
-            if (!this.isShowSilverGift && gift.coinType === "silver") continue;
-            if (gift.coinType === "silver") gift.price = 0;
-            this.sendGift(data);
-          }
-        }
-
-        data.forEach((msg) => {
-          if (msg.cmd === "INTERACT_WORD") return;
-          if (msg.cmd === "DANMU_MSG") return;
-          if (msg.cmd === "SEND_GIFT") return;
-          if (msg.cmd === "LIVE") {
-            // 直播中
-            this.liveStatus = 1;
-            LIVE_STATUS++;
-            console.log(`LIVE_STATUS: ${LIVE_STATUS}`);
-            if (LIVE_STATUS === 2) {
-              console.log("auto record start...");
-              this.startRecord();
-            }
-            if (LIVE_STATUS > 2) {
-              console.log("auto record restart...");
-              this.cancelRecord();
-              this.startRecord();
-            }
-          }
-
-          if (msg.cmd === "PREPARING") {
-            // 未开播
-            this.liveStatus = 0;
-            LIVE_STATUS = 0;
-            console.log("auto record stop...");
-            this.cancelRecord();
-          }
-          // otherDB.insert(msg);
-        });
-      } else {
-        if (data.cmd === "ROOM_REAL_TIME_MESSAGE_UPDATE") {
-          const { fans, fans_club } = data.data;
-          this.fansNumber = fans;
-          this.fansClubNumber = fans_club;
-        } else {
-          // otherDB.insert(data);
-        }
-      }
+    onNinKi(payload) {
+      const { ninkiNumber } = payload;
+      this.ninkiNumber = ninkiNumber;
     },
 
     async updateApp() {
@@ -736,34 +600,33 @@ export default {
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });
 
-        this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+        setStatus({
           recordId: id,
           recordStartTime: Date.now(),
           isRecording: true,
-        });
+        })
+        emitter.emit('record-start')
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`);
       }
     },
     async cancelRecord() {
+      const { recordId } = getStatus()
+      if (!recordId) {
+        console.warn(new Error('recordId not found.'));
+        return
+      }
       try {
-        await cancelRecord(this.recordId);
+        await cancelRecord(recordId);
       } catch (e) {
         console.warn(e);
       }
-      this.$store.dispatch("UPDATE_CONFIG_TEMP", {
+      setStatus({
+        recordId: '',
         recordStartTime: 0,
         isRecording: false,
-        recordId: "",
-      });
-
-      emitter.removeAllListeners(`${this.recordId}-download-rate`);
-    },
-
-    async changeAutoRecord(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isAutoRecord: status,
-      });
+      })
+      emitter.emit('record-cancel')
     },
 
     removeHistoryRoom(room) {
@@ -775,49 +638,7 @@ export default {
       });
     },
   },
-  async mounted() {
-    this.displayRoomId = this.$store.state.Config.realRoomId;
-
-    ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
-      this.hasNewVersion = true;
-    });
-    ipcRenderer.send(IPC_CHECK_FOR_UPDATE);
-    this.giftTimer = setInterval(() => {
-      // console.log("giftTimer");
-      this.$store.dispatch("GIFT_TIMER");
-    }, 1000);
-
-    this.peopleTimer = setInterval(async () => {
-      // console.log("peopleTimer");
-      if (!this.realRoomId && !this.isConnected) return;
-      const tenMinutesAgo = new Date() - 1000 * 60 * 10;
-      const [comments, gifts, interacts] = await Promise.all([
-        commentDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-        giftDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-        interactDB.find(
-          { roomId: this.realRoomId, sendAt: { $gte: tenMinutesAgo } },
-          { projection: { uid: 1 } }
-        ),
-      ]);
-      const countMap = comments
-        .concat(gifts)
-        .concat(interacts)
-        .reduce((map, i) => {
-          map[i.uid] = 1;
-          return map;
-        }, {});
-      this.peopleNumber = Object.keys(countMap).length;
-    }, 10000);
-  },
   beforeDestroy() {
-    emitter.removeListener("message", this.onMessage);
-
     if (this.giftTimer) {
       clearInterval(this.giftTimer);
     }
@@ -884,6 +705,9 @@ export default {
   vertical-align: middle;
   font-size: 16px;
 }
+.ivu-menu-item > i {
+  margin-right: 2px;
+}
 .collapsed-menu span {
   width: 0px;
   transition: width 0.2s ease;
@@ -903,9 +727,72 @@ export default {
   vertical-align: middle;
   font-size: 15px;
   margin-left: 2px;
+  font-weight: bold;
 }
 
 .remove-history-room:hover {
   color: crimson;
+}
+
+.record-icon {
+  font-size: 20px;
+  color: crimson;
+  vertical-align: middle;
+  position: relative;
+  display: inherit;
+  height: 20px;
+  width: 20px;
+}
+.record-icon::before,
+.record-icon::after {
+  content: "";
+  position: absolute;
+  top: 1.5px;
+  bottom: 1.5px;
+  right: 1.5px;
+  left: 1.5px;
+  border-top: solid 1px crimson;
+  transition: all 0.5s;
+  animation: rotate 2s infinite linear;
+  border-radius: 50%;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.lottery-icon {
+  font-size: 20px;
+  color: dodgerblue;
+  vertical-align: middle;
+  transition: all 0.5s;
+  animation: rotateX 3s infinite linear;
+}
+
+@keyframes rotateX {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  25% {
+    transform: rotateY(45deg);
+  }
+
+  50% {
+    transform: rotateY(180deg);
+  }
+
+  75% {
+    transform: rotateY(225deg);
+  }
+
+  100% {
+    transform: rotateY(360deg);
+  }
 }
 </style>

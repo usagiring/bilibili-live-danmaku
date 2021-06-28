@@ -1,10 +1,25 @@
 <template>
   <div>
     <Row>
-      <i-col span="7">
-        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ width: '90%', padding: '5px' }" />
+      <i-col span="6">
+        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ padding: '5px' }" />
+      </i-col>
+      <i-col span="2">
+        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
+        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
+        <Button class="vote-button" @click="showVoteRecord">记录</Button>
+      </i-col>
+      <i-col span="16">
+        <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
+          <Button @click="barChart" :disabled="!isWatching">
+            <Icon type="md-podium" />
+          </Button>
+          <Button @click="pieChart" :disabled="!isWatching">
+            <Icon type="md-pie" />
+          </Button>
+        </ButtonGroup>
         <Tooltip placement="top">
-          <Icon type="md-alert" class="info-icon" />
+          <Icon type="md-help" class="info-icon" :style="{'font-size': '16px', 'vertical-align': 'middle'}" />
           <div slot="content">
             <div class="description-text">
               <p>
@@ -18,25 +33,10 @@
             </div>
           </div>
         </Tooltip>
-      </i-col>
-      <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
-        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
-        <Button class="vote-button" @click="showVoteRecord">记录</Button>
-      </i-col>
-      <i-col span="15">
-        <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-          <Button @click="barChart" :disabled="!isWatching">
-            <Icon type="md-podium" />
-          </Button>
-          <Button @click="pieChart" :disabled="!isWatching">
-            <Icon type="md-pie" />
-          </Button>
-        </ButtonGroup>
         <div id="chart"></div>
       </i-col>
     </Row>
-    <Modal v-model="modal1" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
+    <Modal v-model="modal1" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(value, uid) in userMap">
         <p :key="uid">
           {{ value }}
@@ -70,8 +70,7 @@ import * as echarts from "echarts";
 // ]);
 
 import { shuffle } from "lodash";
-import { parseComment } from "../../service/bilibili-live-ws";
-import emitter from "../../service/event";
+import ws from '../../service/ws'
 import { COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
 
@@ -147,15 +146,17 @@ export default {
     start() {
       this.init();
 
-      this.isWatching = true;
+      this.isWatching = true
 
-      emitter.on("message", this.onVoteMessage);
+      ws.addEventListener('message', this.onVoteMessage)
+      // emitter.on("message", this.onVoteMessage);
     },
     stop() {
-      const listenerCount = emitter.listenerCount("message");
+      // const listenerCount = emitter.listenerCount("message");
       // 如果只有1个监听者，即主监听器，不处理
-      if (listenerCount <= 1) return;
-      emitter.removeListener("message", this.onVoteMessage);
+      // if (listenerCount <= 1) return;
+      ws.removeEventListener('message', this.onVoteMessage)
+      // emitter.removeListener("message", this.onVoteMessage);
       this.isWatching = false;
     },
 
@@ -258,30 +259,21 @@ export default {
       colorPool.push(color);
       return color;
     },
-    onVoteMessage: async function (data) {
-      if (!Array.isArray(data)) return;
-      const comments = data
-        .filter((msg) => ~msg.cmd.indexOf("DANMU_MSG"))
-        .map(parseComment);
-
-      for (const comment of comments) {
-        // 已经记录过的用户不再重复统计
-        if (this.userMap[comment.uid]) continue;
-        const index = this.regexps.findIndex((regexp) => {
-          return regexp.test(comment.comment);
-        });
-        if (!~index) continue;
-        // 记录统计
-        this.userMap[
-          comment.uid
-        ] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`;
-        console.log(
-          `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
-        );
-        // 输入图表
-        this.data[index].value++;
-        this.makeChart();
-      }
+    onVoteMessage: async function (msg) {
+      const data = JSON.parse(msg.data)
+      if (data.cmd !== 'COMMENT') return
+      const comment = data.payload
+      // 已经记录过的用户不再重复统计
+      if (this.userMap[comment.uid]) return;
+      const index = this.regexps.findIndex((regexp) => {
+        return regexp.test(comment.comment);
+      });
+      if (!~index) return;
+      // 记录统计
+      this.userMap[comment.uid] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
+      // 输入图表
+      this.data[index].value++;
+      this.makeChart();
     },
 
     changeInput(e) {
@@ -296,8 +288,6 @@ export default {
 <style scoped>
 .description-text {
   white-space: normal;
-  width: 200px;
-  font-size: 12px;
 }
 
 #chart {
@@ -306,16 +296,11 @@ export default {
 }
 
 .vote-button {
-  margin-top: 5px;
+  margin: 5px 0 0 15px;
 }
 
 .option-input {
   vertical-align: top;
   display: inline-block;
-}
-
-.info-icon {
-  display: inline-block;
-  padding-top: 8px;
 }
 </style>

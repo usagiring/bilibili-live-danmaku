@@ -2,27 +2,17 @@
   <div>
     <span class="setting-key-text">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber
-        :value="value"
-        @on-change="updateStyle"
-        :min="0"
-        :step="numberStep || 1"
-        size="small"
-        :style="{ width: '55px' }"
-      />
+      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker
-        :value="value"
-        @on-active-change="updateStyle"
-        size="small"
-        alpha
-      />
+      <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
     </template>
   </div>
 </template>
 
 <script>
+import { mergeSetting } from '../../service/api'
+
 export default {
   props: ["type", "name", "role", "prop", "styleName", "numberStep"],
   data() {
@@ -30,7 +20,8 @@ export default {
   },
   computed: {
     value() {
-      const value = this.$store.state.Config[`${this.role}_${this.prop}`][
+      const objKey = `${this.prop}_lv${this.role}`
+      const value = this.$store.state.Config[objKey][
         `${this.styleName}`
       ];
 
@@ -46,7 +37,7 @@ export default {
     },
   },
   methods: {
-    updateStyle(value) {
+    async updateStyle(value) {
       value = value || 0;
       this.$store.dispatch("UPDATE_STYLE", {
         role: this.role,
@@ -55,7 +46,13 @@ export default {
           [this.styleName]:
             this.type === "InputNumber" ? this.pxFormatter(value) : value,
         },
-      });
+      })
+
+      const objKey = `${this.prop}_lv${this.role}`
+      const data = {
+        [objKey]: { [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value }
+      }
+      await mergeSetting(data)
     },
     pxFormatter: (value) => `${value}px`,
     pxParser: (value) => Number(value.replace("px", "")),

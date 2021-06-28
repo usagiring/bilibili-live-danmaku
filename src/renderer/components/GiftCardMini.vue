@@ -1,18 +1,13 @@
 <template>
-  <div
-    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
-    class="message-super-chat"
-  >
-    <div
-      :style="{
+  <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
+    <div :style="{
         background: `${priceProperties.backgroundColor}`,
         padding: '10px',
-      }"
-    >
+      }">
       <span v-if="showTime" class="date-style">
         {{ dateFormat(sendAt) }}
       </span>
-      <Avatar :src="avatar" size="small" />
+      <Avatar :src="avatar || DEFAULT_AVATAR" size="small" />
       <span>{{ name }}</span>
       <template v-if="isGuardGift">
         <!-- wired space -->
@@ -29,6 +24,7 @@
 </template>
 
 <script>
+import { DEFAULT_AVATAR } from '../../service/const'
 import { dateFormat } from "../../service/util";
 
 export default {
@@ -43,6 +39,11 @@ export default {
     "sendAt",
     "showTime"
   ],
+  data() {
+    return {
+      DEFAULT_AVATAR
+    }
+  },
   methods: {
     dateFormat: dateFormat,
   },

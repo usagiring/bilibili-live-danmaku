@@ -1,30 +1,9 @@
 <template>
   <div :style="{ height: '100%' }">
     <div class="searcher-wrapper">
-      <Input
-        v-model="roomId"
-        placeholder="房间号"
-        clearable
-        style="width: 150px"
-        size="small"
-      />
-      <DatePicker
-        type="datetimerange"
-        format="yyyy-MM-dd HH:mm"
-        placeholder="选择时间范围"
-        style="width: 300px"
-        size="small"
-        :value="dateRange"
-        @on-change="changeDateRange"
-        @on-clear="clearDateRange"
-      ></DatePicker>
-      <Button
-        type="primary"
-        shape="circle"
-        icon="ios-search"
-        :disabled="!roomId"
-        @click="statistic"
-      ></Button>
+      <Input v-model="roomId" placeholder="房间号" clearable style="width: 150px" size="small" />
+      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
+      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic"></Button>
     </div>
     <div class="statistic-content">
       <p>获得金瓜子: {{ goldTotal }}</p>
@@ -40,7 +19,7 @@
 
 <script>
 import moment from "moment";
-import { commentDB, interactDB, giftDB, userDB } from "../../service/nedb";
+import { queryComments, queryInteracts, queryGifts, countComments } from '../../service/api'
 import { countBy } from "lodash";
 import * as echarts from "echarts";
 // import * as echarts from "echarts/core";
@@ -81,11 +60,10 @@ export default {
     this.roomId = this.$store.state.Config.realRoomId;
     const start = moment().startOf("day").toDate();
     const end = moment().endOf("day").toDate();
-    console.log(start, end);
     this.dateRange = [start, end];
     this.statistic();
   },
-  mounted() {},
+  mounted() { },
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;
@@ -100,7 +78,7 @@ export default {
         query.sendAt = query.sendAt || {};
         query.sendAt.$lte = end - 0;
       }
-      const commentCount = await commentDB.count(query);
+      const { data: commentCount } = await countComments({ query })
       this.commentCount = commentCount;
       const giftQuery = {
         ...query,
@@ -108,7 +86,10 @@ export default {
       };
 
       // --- gift ---
-      let gifts = await giftDB.find(giftQuery);
+      let { data: gifts } = await queryGifts({
+        query: giftQuery,
+      })
+      // let gifts = await giftDB.find(giftQuery);
       const giftUids = gifts.map((gift) => gift.uid);
       gifts = gifts.map((gift) => {
         gift.totalPrice = gift.giftNumber * gift.price;
@@ -139,9 +120,13 @@ export default {
       this.giftUserCount = Object.keys(giftUserMap).length;
 
       // --- comment ---
-      const comments = await commentDB.find(query, {
+      const { data: comments } = await queryComments({
+        query,
         projection: { uid: 1, name: 1, sendAt: 1 },
-      });
+      })
+      // const comments = await commentDB.find(query, {
+      //   projection: { uid: 1, name: 1, sendAt: 1 },
+      // });
       const commentUids = comments.map((c) => c.uid);
       const commentCountMap = countBy(commentUids);
       let maxCommentCount = 0;
@@ -158,9 +143,13 @@ export default {
       this.generateChart(comments);
 
       // --- interact ---
-      const interacts = await interactDB.find(query, {
+      const { data: interacts } = await queryInteracts({
+        query,
         projection: { uid: 1 },
-      });
+      })
+      // const interacts = await interactDB.find(query, {
+      //   projection: { uid: 1 },
+      // });
       const interactUids = interacts.map((interact) => interact.uid);
 
       const countMap = commentUids

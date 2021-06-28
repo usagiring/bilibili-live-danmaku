@@ -77,26 +77,12 @@
 </template>
 
 <script>
-// 统计一段时间内送礼
-// 检测开启天选自动开始统计
-// 发送弹幕或者送礼抽奖
-import { sortBy } from "lodash";
 import { shell } from "electron";
-import emitter from "../../service/event";
 import { getRandomItem, dateFormat } from '../../service/util'
-import { GIFT_CONFIG_MAP, DEFAULT_AVATAR } from "../../service/const";
-import { parseGift, parseComment } from "../../service/bilibili-live-ws";
-import { lotteryDB } from '../../service/nedb'
-
-const giftSelectors = [];
-for (const key in GIFT_CONFIG_MAP) {
-  giftSelectors.push({
-    key: key,
-    value: GIFT_CONFIG_MAP[key].name,
-    label: GIFT_CONFIG_MAP[key].name,
-    webp: GIFT_CONFIG_MAP[key].webp,
-  });
-}
+import { DEFAULT_AVATAR } from "../../service/const";
+import { getGiftConfig } from "../../service/api";
+import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
+import ws from '../../service/ws'
 
 export default {
   data() {
@@ -106,7 +92,7 @@ export default {
       isGift: false,
       historyModal: false,
       histories: [],
-      giftSelectors,
+      giftSelectors: [],
       medalLevel: 0,
       danmakuText: "",
       selectedGiftIds: [],
@@ -141,6 +127,18 @@ export default {
       return this.$store.state.Config.realRoomId;
     },
   },
+  async mounted() {
+    const { data: giftConfig } = await getGiftConfig()
+    for (const key in giftConfig) {
+      const { name, webp } = giftConfig[key]
+      this.giftSelectors.push({
+        key: key,
+        value: name,
+        label: name,
+        webp: webp,
+      });
+    }
+  },
   beforeDestroy() {
     this.stop();
   },
@@ -153,86 +151,78 @@ export default {
     },
     start() {
       this.init()
-      emitter.on("message", this.onLotteryMessage)
+      // emitter.on("message", this.onLotteryMessage)
+      ws.addEventListener('message', this.onLotteryMessage)
       this.isRunning = true;
     },
     async stop() {
-      emitter.removeListener("message", this.onLotteryMessage);
+      ws.removeEventListener("message", this.onLotteryMessage);
     },
 
-    async onLotteryMessage(data) {
-      if (!Array.isArray(data)) return;
-      if (this.isDanmaku) {
-        const comments = data
-          .filter((msg) => ~msg.cmd.indexOf("DANMU_MSG"))
-          .map(parseComment);
-        for (const comment of comments) {
-          // 已经记录过的用户不再重复统计
-          if (this.userCommentMap[comment.uid]) continue;
-          // 当前房间粉丝牌等级过滤
-          if (this.medalLevel) {
-            if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) continue
-          }
-          const regexp = new RegExp(this.danmakuText, "i")
-          const isMatch = regexp.test(comment.comment)
-          if (!isMatch) continue;
-
-          // 记录统计
-          const data = {
-            uid: comment.uid,
-            name: comment.name,
-            comment: comment.comment,
-            avatar: comment.avatar || DEFAULT_AVATAR,
-          }
-          this.userCommentMap[comment.uid] = data
-          this.userComments = [data, ...this.userComments]
+    async onLotteryMessage(msg) {
+      const data = JSON.parse(msg.data)
+      if (this.isDanmaku && data.cmd === 'COMMENT') {
+        const comment = data.payload
+        // 已经记录过的用户不再重复统计
+        if (this.userCommentMap[comment.uid]) return;
+        // 当前房间粉丝牌等级过滤
+        if (this.medalLevel) {
+          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) return
         }
-      }
-      if (this.isGift) {
-        const gifts = data
-          .map(parseGift)
-          .filter((gift) => {
-            return gift && gift.type === "gift" && this.selectedGiftIds.includes(`${gift.giftId}`)
-          });
+        const regexp = new RegExp(this.danmakuText, "i")
+        const isMatch = regexp.test(comment.comment)
+        if (!isMatch) return;
 
-        gifts.forEach((gift) => {
-          const {
-            uid,
-            name,
-            giftId,
-            giftName,
-            giftNumber = 1,
-            price = 0,
-            avatar = DEFAULT_AVATAR,
-          } = gift;
-          const key = `${uid}:${giftId}`
-          const userGift = this.userGiftMap[key]
-          // test: 小心心
-          // if (giftId === 30607) {
-          //   price = 1
-          // }
-          if (!userGift) {
-            // 计算属性需要完全替换
-            this.userGiftMap = {
-              ...this.userGiftMap,
-              [key]: {
-                uid,
-                giftId,
-                name,
-                avatar,
-                giftName,
-                giftNumber: giftNumber,
-                price: giftNumber * price,
-              }
+        // 记录统计
+        const history = {
+          uid: comment.uid,
+          name: comment.name,
+          comment: comment.comment,
+          avatar: comment.avatar || DEFAULT_AVATAR,
+        }
+        this.userCommentMap[comment.uid] = history
+        this.userComments = [history, ...this.userComments]
+      }
+      if (this.isGift && data.cmd === 'GIFT') {
+        const gift = data.payload
+        if (!this.selectedGiftIds.includes(`${gift.giftId}`)) return
+
+        const {
+          uid,
+          name,
+          giftId,
+          giftName,
+          giftNumber = 1,
+          price = 0,
+          avatar = DEFAULT_AVATAR,
+        } = gift;
+        const key = `${uid}:${giftId}`
+        const userGift = this.userGiftMap[key]
+        // test: 小心心
+        // if (giftId === 30607) {
+        //   price = 1
+        // }
+        if (!userGift) {
+          // 计算属性需要完全替换
+          this.userGiftMap = {
+            ...this.userGiftMap,
+            [key]: {
+              uid,
+              giftId,
+              name,
+              avatar,
+              giftName,
+              giftNumber: giftNumber,
+              price: giftNumber * price,
             }
-          } else {
-            userGift.giftNumber = userGift.giftNumber + giftNumber
-            userGift.price = userGift.price + giftNumber * price
-            this.userGiftMap = Object.assign(this.userGiftMap, {
-              [key]: userGift
-            })
           }
-        });
+        } else {
+          userGift.giftNumber = userGift.giftNumber + giftNumber
+          userGift.price = userGift.price + giftNumber * price
+          this.userGiftMap = Object.assign(this.userGiftMap, {
+            [key]: userGift
+          })
+        }
       }
     },
 
@@ -251,10 +241,14 @@ export default {
         const randomItem = getRandomItem(withProbability)
         if (!randomItem) return
         this.aTaRi = randomItem
-        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        await addLotteryHistory(Object.assign({}, this.aTaRi, {
           time: Date.now(),
           description: this.description
         }))
+        // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        //   time: Date.now(),
+        //   description: this.description
+        // }))
       }
       if (this.isGift) {
         const userPriceMap = {}
@@ -283,10 +277,15 @@ export default {
 
         this.aTaRi = randomItem
         this.isRunning = false;
-        await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        await addLotteryHistory(Object.assign({}, this.aTaRi, {
           time: Date.now(),
           description: this.description
         }))
+
+        // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
+        //   time: Date.now(),
+        //   description: this.description
+        // }))
       }
     },
 
@@ -301,15 +300,21 @@ export default {
     async showHistoryModal() {
       this.historyModal = true
 
-      const histories = await lotteryDB.find({})
+      const { data: histories } = await queryLotteryHistories({})
+      // const histories = await lotteryDB.find({})
       this.histories = histories.map(history => {
         history.time = dateFormat(history.time)
         return history
       })
     },
     async removeAllHistory() {
-      await lotteryDB.deleteMany({})
+      await deleteLotteryHistories({})
+      // await lotteryDB.deleteMany({})
       this.histories = []
+    },
+
+    async autoWatchLottery() {
+      ws.addEventListener('message', this.onLotteryMessage)
     }
   },
 };

@@ -11,8 +11,8 @@ export default new Router({
       component: () => import('@/components/Home.vue'),
       children: [
         {
-          path: 'setting',
-          component: () => import('@/components/Setting.vue')
+          path: 'style',
+          component: () => import('@/components/StyleSetting.vue')
         },
         {
           path: 'message',
@@ -33,13 +33,20 @@ export default new Router({
         {
           path: 'live',
           component: () => import('@/components/Live.vue')
+        },
+        {
+          path: 'help',
+          component: () => import('@/components/Help.vue')
+        },
+        {
+          path: 'config',
+          component: () => import('@/components/Config.vue')
+        },
+        {
+          path: '',
+          component: () => import('@/components/Introduction.vue')
         }
       ]
-    },
-    {
-      path: '/danmaku-window',
-      name: 'DanmakuWindow',
-      component: () => import('@/components/DanmakuWindow.vue')
     },
     {
       path: '*',
