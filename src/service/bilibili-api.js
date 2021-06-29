@@ -20,7 +20,8 @@ export {
   sendMessage,
   wearMedal,
   getBagList,
-  sendBagGift
+  sendBagGift,
+  getRoomInfoByIds,
 }
 
 const defaultHeaders = {
@@ -164,5 +165,13 @@ async function sendBagGift(data, userCookie) {
     adapter: httpAdapter
   })
   return res
+}
 
+async function getRoomInfoByIds(ids) {
+  if (!ids || !ids.length) return { data: [] }
+  const res = await axios.get(`https://api.live.bilibili.com/room/v1/Room/get_info_by_id?${ids.map(id => `ids[]=${id}`).join('&')}`, {
+    headers: Object.assign({}, defaultHeaders),
+    adapter: httpAdapter
+  })
+  return res.data
 }

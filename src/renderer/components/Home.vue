@@ -41,7 +41,7 @@
         <div class="layout-header">
           <div class="avatar-wrapper">
             <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />&nbsp;&nbsp;
-            <span>{{ username ? username : "未连接" }}</span>
+            <span :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : "未连接" }}</span>
             &nbsp;
             <Tag v-if="username" type="border" :color="liveStatus === 1 ? 'green' : 'silver'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
           </div>
@@ -102,9 +102,10 @@
           <div>
             <span>连接直播间</span>
             <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
-              <Option v-for="room in historyRooms" :value="room.roomId" :key="room.roomId">
+              <Option v-for="room in selfHistoryRooms" :value="room.roomId" :key="room.roomId">
                 <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
                 {{ `${room.uname} (${room.roomId})` }}
+                <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green'} : { 'font-size': '12px', color: 'silver'}">{{ room.liveStatus === 1 ? "直播中" : "未开播" }}</span>
                 <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
               </Option>
             </AutoComplete>
@@ -138,14 +139,14 @@
 
 <script>
 import { debounce } from "lodash";
-import { remote, ipcRenderer } from "electron";
+import { remote, ipcRenderer, shell } from "electron";
 const { BrowserWindow } = remote;
 
 import { parseDownloadRate } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from "../../service/event";
 import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
-import { getRoomInfoV2, getGuardInfo } from "../../service/bilibili-api";
+import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds } from "../../service/bilibili-api";
 import {
   IPC_CHECK_FOR_UPDATE,
   IPC_UPDATE_AVAILABLE,
@@ -182,6 +183,7 @@ export default {
       isLottering: false,
       downloadRate: "0 KB/s",
       percent: 0,
+      selfHistoryRooms: [],
 
       username: "",
       avatar: null,
@@ -277,6 +279,15 @@ export default {
     emitter.on('record-cancel', () => {
       this.isRecording = false
     })
+
+    await this.fillRoomLiveStatus(this.historyRooms)
+  },
+  watch: {
+    async historyRooms(newValue, oldValue) {
+      this.selfHistoryRooms = newValue
+      if (newValue.length < oldValue.length) return
+      await this.fillRoomLiveStatus(newValue)
+    }
   },
   computed: {
     menuitemClasses: function () {
@@ -637,6 +648,19 @@ export default {
         historyRooms: historyRooms,
       });
     },
+
+    async fillRoomLiveStatus(rooms) {
+      const { data } = await getRoomInfoByIds(rooms.map(room => room.roomId))
+      this.selfHistoryRooms = rooms.map(room => {
+        room.liveStatus = data[room.roomId].live_status
+        return room
+      })
+    },
+
+    openBiliLiveRoom() {
+      if (!this.isConnected || !this.realRoomId) return
+      shell.openExternal(`https://live.bilibili.com/${this.realRoomId}`)
+    }
   },
   beforeDestroy() {
     if (this.giftTimer) {
