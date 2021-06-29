@@ -1,5 +1,5 @@
 # 启动端口
-PORT: 8081
+PORT: 8080
 # 限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000以上 为比较安全的值, 
 GET_USER_INFO_FREQUENCY_LIMIT: 1000
 # 可选值 normal, floating, torn-off-menu, modal-panel, main-menu, status, pop-up-menu, screen-saver

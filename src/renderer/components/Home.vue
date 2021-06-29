@@ -201,7 +201,7 @@ export default {
   async mounted() {
     this.displayRoomId = this.realRoomId;
 
-    await this.initial();
+    await this.initRoomInfo();
     ws.onmessage = (msg) => {
       const payload = JSON.parse(msg.data)
 
@@ -266,7 +266,7 @@ export default {
 
     // 刷新舰长数 间隔1分钟
     this.guardNumberTimer = setInterval(async () => {
-      if (!this.realRoomId || !this.roomUserId) return
+      if (!this.isConnected || !this.realRoomId || !this.roomUserId) return
       const guardInfo = await getGuardInfo(this.realRoomId, this.roomUserId);
       this.guardNumber = guardInfo.data.info.num;
     }, 60000)
@@ -341,7 +341,7 @@ export default {
   methods: {
     async connect(status) {
       this.isConnecting = true;
-      const data = await this.initRoomInfo(data)
+      const data = await this.initRoomInfo(status)
 
       if (status && this.displayRoomId) {
         // const { data } = await getRoomInfoV2(this.displayRoomId);
@@ -394,60 +394,83 @@ export default {
         }
       } else {
         await disconnect({ roomId: this.displayRoomId })
-        this.initial()
       }
       this.isConnecting = false;
     },
 
-    async initRoomInfo() {
-      const { data } = await getRoomInfoV2(this.displayRoomId);
-      console.log(data)
+    async initRoomInfo(status) {
+      let isConnected
+      if (status === true) {
+        isConnected = true
+      } else if (status === false) {
+        isConnected = false
+      } else {
+        const result = await getRoomStatus({ roomId: this.realRoomId })
+        isConnected = result.data.isConnected
+      }
+      if (isConnected) {
+        const { data } = await getRoomInfoV2(this.displayRoomId);
+        console.log(data)
 
-      const {
-        uid,
-        room_id: roomId,
-        title,
-        cover,
-        tags,
-        background,
-        description,
-        live_status: liveStatus,
-        live_start_time, // 直播开始时间 unixtime
-        online,
-      } = data.room_info;
+        const {
+          uid,
+          room_id: roomId,
+          title,
+          cover,
+          tags,
+          background,
+          description,
+          live_status: liveStatus,
+          live_start_time, // 直播开始时间 unixtime
+          online,
+        } = data.room_info;
 
-      const { uname, face, gender } = data.anchor_info.base_info;
-      const { level, level_color } = data.anchor_info.live_info;
-      const { attention } = data.anchor_info.relation_info;
-      const { medal_name, medal_id, fansclub } =
-        data.anchor_info.medal_info || {};
-      this.username = uname;
-      this.avatar = face;
-      this.ninkiNumber = online;
-      this.fansNumber = attention;
-      this.fansClubNumber = fansclub || 0;
-      this.liveStatus = liveStatus;
-      this.roomUserId = uid
+        const { uname, face, gender } = data.anchor_info.base_info;
+        const { level, level_color } = data.anchor_info.live_info;
+        const { attention } = data.anchor_info.relation_info;
+        const { medal_name, medal_id, fansclub } =
+          data.anchor_info.medal_info || {};
+        this.username = uname;
+        this.avatar = face;
+        this.ninkiNumber = online;
+        this.fansNumber = attention;
+        this.fansClubNumber = fansclub || 0;
+        this.liveStatus = liveStatus;
+        this.roomUserId = uid
 
-      // 传递 当前主播userId
-      await updateSetting({
-        roomUserId: uid
-      })
-      getGuardInfo(roomId, uid)
-        .then(guardInfo => {
-          this.guardNumber = guardInfo.data.info.num;
+        // 传递 当前主播userId
+        await updateSetting({
+          roomUserId: uid
         })
+        getGuardInfo(roomId, uid)
+          .then(guardInfo => {
+            this.guardNumber = guardInfo.data.info.num;
+          })
 
-      const config = {
-        isConnected: status,
-        realRoomId: roomId,
-        displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
-        medalId: medal_id,
-        medalName: medal_name,
-      };
-      this.$store.dispatch("UPDATE_CONFIG", config);
+        const config = {
+          isConnected: true,
+          realRoomId: roomId,
+          displayRoomId: this.displayRoomId, // 输入的roomId，仅作为保留输入框值用
+          medalId: medal_id,
+          medalName: medal_name,
+        };
+        this.$store.dispatch("UPDATE_CONFIG", config);
 
-      return data
+        return data
+      } else {
+        this.username = "";
+        this.avatar = null;
+        this.ninkiNumber = 0;
+        this.fansNumber = 0;
+        this.fansClubNumber = 0;
+        this.liveStatus = 0;
+        this.peopleNumber = 0;
+        this.guardNumber = 0
+
+        this.$store.dispatch("UPDATE_CONFIG", {
+          isConnected: false
+        })
+      }
     },
 
     showDanmakuWindow(status) {
@@ -516,26 +539,6 @@ export default {
         this.win.close();
         this.win = null;
       }
-    },
-
-    async initial() {
-      const result = await getRoomStatus({ roomId: this.realRoomId })
-      const isConnected = result.data.isConnected
-      if (isConnected) {
-        await this.initRoomInfo()
-      } else {
-        this.username = "";
-        this.avatar = null;
-        this.ninkiNumber = 0;
-        this.fansNumber = 0;
-        this.fansClubNumber = 0;
-        this.liveStatus = 0;
-        this.peopleNumber = 0;
-      }
-
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isConnected
-      })
     },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);

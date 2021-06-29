@@ -81,10 +81,12 @@
       </Tooltip>
     </div> -->
     <div class="config-item-container">
-      <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
-      <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." :disabled="!isAutoReply" />
-      <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}" :disabled="!isAutoReply">银瓜子</Checkbox>
-      <Checkbox :value="onlyMyselfRoom" @on-change="changeOnlyMyselfRoom" :style="{ height: '30px','line-height': '30px'}" :disabled="!isAutoReply">仅自己直播间</Checkbox>
+      <span>礼物自动回复</span>
+      <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
+      <Checkbox :value="textReply" @on-change="">文本</Checkbox>
+      <Checkbox :value="speechReply" @on-change="">语音</Checkbox>
+      <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}">银瓜子</Checkbox>
+      <Checkbox :value="onlyMyselfRoom" @on-change="changeOnlyMyselfRoom" :style="{ height: '30px','line-height': '30px'}">仅自己直播间</Checkbox>
       <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
       <Tooltip placement="top">
         <Icon type="md-help" />
@@ -103,7 +105,7 @@
       </Tooltip>
     </div>
 
-    <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
+    <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
       <template v-for="(rule, index) in advancedAutoReplyRules">
         <div :key="index" :style="{'margin-bottom': '10px'}">
           <Select :style="{ width: '100px', display: 'inline-block' }" v-model="rule.giftId" filterable transfer>
@@ -116,6 +118,8 @@
           <!-- <span> >= </span> -->
           <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
           <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
+          <Checkbox :value="textReply" @on-change="">文本</Checkbox>
+          <Checkbox :value="speechReply" @on-change="">语音</Checkbox>
           <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
         </div>
       </template>
@@ -253,7 +257,6 @@ export default {
     },
 
     showAdvancedAutoReplyRule() {
-      if (!this.isAutoReply) return
       this.advancedAutoReplyRuleModal = true
     },
 
