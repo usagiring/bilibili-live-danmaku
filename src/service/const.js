@@ -283,7 +283,9 @@ export const DEFAULT_CONFIG = {
   autoReplyRules: [{
     priority: 0,
     text: '',
-    onlyGold: true
+    onlyGold: true,
+    isTextReply: false,
+    isSpeakReply: false,
   }]
 }
 

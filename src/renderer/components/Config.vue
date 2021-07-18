@@ -81,10 +81,11 @@
       </Tooltip>
     </div> -->
     <div class="config-item-container">
-      <span>礼物自动回复</span>
+      <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
+      <!-- <span>礼物自动回复</span> -->
       <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
-      <Checkbox :value="textReply" @on-change="">文本</Checkbox>
-      <Checkbox :value="speechReply" @on-change="">语音</Checkbox>
+      <Checkbox :value="isTextReply" @on-change="changeTextReply">文本</Checkbox>
+      <Checkbox :value="isSpeakReply" @on-change="changeSpeakReply">语音</Checkbox>
       <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}">银瓜子</Checkbox>
       <Checkbox :value="onlyMyselfRoom" @on-change="changeOnlyMyselfRoom" :style="{ height: '30px','line-height': '30px'}">仅自己直播间</Checkbox>
       <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
@@ -118,8 +119,8 @@
           <!-- <span> >= </span> -->
           <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
           <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
-          <Checkbox :value="textReply" @on-change="">文本</Checkbox>
-          <Checkbox :value="speechReply" @on-change="">语音</Checkbox>
+          <Checkbox v-model="rule.isTextReply">文本</Checkbox>
+          <Checkbox v-model="rule.isSpeakReply">语音</Checkbox>
           <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
         </div>
       </template>
@@ -192,6 +193,12 @@ export default {
     },
     isAutoReply() {
       return this.$store.state.Config.isAutoReply;
+    },
+    isTextReply() {
+      return this.$store.state.Config.autoReplyRules[0].isTextReply;
+    },
+    isSpeakReply() {
+      return this.$store.state.Config.autoReplyRules[0].isSpeakReply;
     }
   },
   methods: {
@@ -277,7 +284,9 @@ export default {
         priority: Math.max(...autoReplyRules.map(r => r.priority)) + 1,
         giftNumber: 0,
         giftId: null,
-        text: ''
+        text: '',
+        isTextReply: false,
+        isSpeakReply: false,
       }
       this.advancedAutoReplyRules.push(initRule)
     },
@@ -309,6 +318,29 @@ export default {
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeSpeakReply(status) {
+      const [defaultRule, ...rest] = this.autoReplyRules
+      const __copy = Object.assign({}, defaultRule)
+      __copy.isSpeakReply = status
+      const data = {
+        autoReplyRules: [__copy, ...rest],
+      }
+      await updateSetting(data)
+      console.log(data)
+      this.$store.dispatch("UPDATE_CONFIG", data);
+    },
+
+    async changeTextReply(status) {
+      const [defaultRule, ...rest] = this.autoReplyRules
+      const __copy = Object.assign({}, defaultRule)
+      __copy.isTextReply = status
+      const data = {
+        autoReplyRules: [__copy, ...rest],
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data);
     }
   }
 };

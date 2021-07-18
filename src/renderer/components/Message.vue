@@ -168,7 +168,7 @@ export default {
       const { data: comments } = await queryComments({
         query,
         sort: sort || { sendAt: -1 },
-        limit: 20,
+        limit: 40,
       })
       // const comments = await commentDB.find(query, {
       //   sort: sort || { sendAt: -1 },
