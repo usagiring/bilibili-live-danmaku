@@ -84,10 +84,9 @@
       <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
       <!-- <span>礼物自动回复</span> -->
       <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
-      <Checkbox :value="isTextReply" @on-change="changeTextReply">文本</Checkbox>
+      <Checkbox :value="isTextReply" @on-change="changeTextReply">文字</Checkbox>
       <Checkbox :value="isSpeakReply" @on-change="changeSpeakReply">语音</Checkbox>
       <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}">银瓜子</Checkbox>
-      <Checkbox :value="onlyMyselfRoom" @on-change="changeOnlyMyselfRoom" :style="{ height: '30px','line-height': '30px'}">仅自己直播间</Checkbox>
       <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
       <Tooltip placement="top">
         <Icon type="md-help" />
@@ -106,6 +105,19 @@
       </Tooltip>
     </div>
 
+    <div class="config-item-container">
+      <Input v-model="text" placeholder="..." :style="{display: 'inline-block', width: '300px'}" />
+      <Button type="primary" shape="circle" @click="speak">
+        <Icon type="md-play" />
+      </Button>
+      <Select :style="{ width: '100px', display: 'inline-block' }" :value="currentVoice" @on-change="onChangeVoice">
+        <Option v-for="voice in voices" :value="voice.key" :key="voice.key" :label="voice.label">
+          <span>{{ voice.value }}</span>
+        </Option>
+      </Select>
+      <InputNumber v-model="voiceSpeed" @on-change="onChangeVoiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
+    </div>
+
     <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
       <template v-for="(rule, index) in advancedAutoReplyRules">
         <div :key="index" :style="{'margin-bottom': '10px'}">
@@ -119,7 +131,7 @@
           <!-- <span> >= </span> -->
           <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
           <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
-          <Checkbox v-model="rule.isTextReply">文本</Checkbox>
+          <Checkbox v-model="rule.isTextReply">文字</Checkbox>
           <Checkbox v-model="rule.isSpeakReply">语音</Checkbox>
           <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
         </div>
@@ -143,7 +155,7 @@ import {
   DEFAULT_STYLE,
 } from "../../service/const";
 
-import { clearDB, backupDB, updateSetting, getGiftConfig } from '../../service/api'
+import { clearDB, backupDB, updateSetting, getGiftConfig, getVoices, speak as speakAPI } from '../../service/api'
 
 export default {
   data() {
@@ -152,7 +164,11 @@ export default {
       advancedAutoReplyRuleModal: false,
       giftSelectors: [],
       selectedGiftIds: [],
-      advancedAutoReplyRules: []
+      advancedAutoReplyRules: [],
+      voices: [],
+      currentVoice: '',
+      text: '',
+      voiceSpeed: 1.0
     };
   },
   async mounted() {
@@ -168,6 +184,15 @@ export default {
     }
 
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
+
+    const { data: voices } = await getVoices()
+    this.voices = voices.map(voice => {
+      return {
+        key: voice,
+        value: voice,
+        label: voice,
+      }
+    })
   },
   computed: {
     userCookie() {
@@ -341,6 +366,29 @@ export default {
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data);
+    },
+
+    async onChangeVoice(voice) {
+      // await updateSetting({
+      //   voice: voice
+      // })
+      this.currentVoice = voice
+      // this.$store.dispatch("UPDATE_CONFIG", data);
+    },
+
+    async onChangeVoiceSpeed(speed) {
+      // await updateSetting({
+      //   voiceSpeed: speed
+      // })
+      this.voiceSpeed = speed
+    },
+
+    async speak() {
+      await speakAPI({
+        text: this.text,
+        voice: this.currentVoice,
+        speed: this.voiceSpeed
+      })
     }
   }
 };

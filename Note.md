@@ -93,3 +93,27 @@ less other | grep  -v "COMBO_SEND" | grep -v "ONLINE_RANK_COUNT" | grep -v "ENTR
 }
 
 {"cmd":"ANCHOR_LOT_END","data":{"id":1217574},"_id":"M0zRZUq3C7wKsPGZ"}
+
+
+[
+  0,
+  1,
+  25,
+  16777215,
+  1627829012878,
+  791172865,
+  0,
+  '4be2ca3d',
+  0,
+  0,
+  0,
+  '',
+  2,
+  '{}',
+  {
+    voice_url: 'https%3A%2F%2Fboss.hdslb.com%2Flive-dm-voice%2Fc67ca588adb026ef4a4232da6c9dd4b31627829012.wav%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3D2663ba902868f12f%252F20210801%252Fshjd%252Fs3%252Faws4_request%26X-Amz-Date%3D20210801T144332Z%26X-Amz-Expires%3D600000%26X-Amz-SignedHeaders%3Dhost%26X-Amz-Signature%3Dcecf439309b565588eba54758b9e4dbcf43ff4a2d4ca1bc057afa138f21185f0',
+    file_format: 'wav',
+    text: '那女孩对我说，戴佳伟是个大帅哥。',
+    file_duration: 5
+  }
+]

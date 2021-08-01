@@ -121,3 +121,13 @@ export async function getGiftConfig() {
   const res = await axios.get(`${BASE_URL}/api/gifts/config`)
   return res.data
 }
+
+export async function getVoices() {
+  const res = await axios.get(`${BASE_URL}/api/voices`)
+  return res.data
+}
+
+export async function speak(body) {
+  const res = await axios.post(`${BASE_URL}/api/speak`, body)
+  return res.data
+}
