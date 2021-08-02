@@ -266,11 +266,11 @@ export default {
       // 已经记录过的用户不再重复统计
       if (this.userMap[comment.uid]) return;
       const index = this.regexps.findIndex((regexp) => {
-        return regexp.test(comment.comment);
+        return regexp.test(comment.content);
       });
       if (!~index) return;
       // 记录统计
-      this.userMap[comment.uid] = `${comment.name}(${comment.uid}): ${comment.comment} -> ${this.keywords[index]}`
+      this.userMap[comment.uid] = `${comment.uname}(${comment.uid}): ${comment.content} -> ${this.keywords[index]}`
       // 输入图表
       this.data[index].value++;
       this.makeChart();

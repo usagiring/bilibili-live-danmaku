@@ -13,10 +13,10 @@
         <Avatar :src="avatar" size="large" />
       </div>
       <div :style="{ display: 'inline-block' }">
-        <p>{{ name }}</p>
-        <template v-if="isGuardGift">
+        <p>{{ uname }}</p>
+        <template v-if="type === 2">
           <p>
-            {{ giftNumber === 1 ? `${giftName}` : `${giftName}×${giftNumber}` }}
+            {{ count === 1 ? `${name}` : `${name}×${count}` }}
           </p>
         </template>
         <template v-else-if="totalPrice">
@@ -40,11 +40,11 @@ export default {
   props: [
     "priceProperties",
     "avatar",
+    "uname",
     "name",
-    "giftName",
     "totalPrice",
-    "giftNumber",
-    "isGuardGift",
+    "count",
+    "type",
   ],
 };
 </script>

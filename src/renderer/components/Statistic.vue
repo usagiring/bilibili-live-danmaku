@@ -82,7 +82,7 @@ export default {
       this.commentCount = commentCount;
       const giftQuery = {
         ...query,
-        coinType: "gold",
+        coinType: 1,
       };
 
       // --- gift ---
@@ -92,7 +92,7 @@ export default {
       // let gifts = await giftDB.find(giftQuery);
       const giftUids = gifts.map((gift) => gift.uid);
       gifts = gifts.map((gift) => {
-        gift.totalPrice = gift.giftNumber * gift.price;
+        gift.totalPrice = gift.count * gift.price;
         return gift;
       });
       const giftUserMap = gifts.reduce((map, gift) => {
@@ -115,14 +115,14 @@ export default {
       }
       this.goldTotal = goldTotal.toFixed(1) * 1000;
       const maxGiftUser =
-        gifts.find((gift) => gift.uid === Number(maxGiftUid)) || {};
-      this.maxGiftUser = maxGiftUser.name;
+        gifts.find((gift) => Number(gift.uid) === Number(maxGiftUid)) || {};
+      this.maxGiftUser = maxGiftUser.uname;
       this.giftUserCount = Object.keys(giftUserMap).length;
 
       // --- comment ---
       const { data: comments } = await queryComments({
         query,
-        projection: { uid: 1, name: 1, sendAt: 1 },
+        projection: { uid: 1, uname: 1, sendAt: 1 },
       })
       // const comments = await commentDB.find(query, {
       //   projection: { uid: 1, name: 1, sendAt: 1 },
@@ -139,7 +139,7 @@ export default {
       }
       const maxCommentUser =
         comments.find((c) => c.uid === Number(maxCommentUid)) || {};
-      this.maxCommentUser = maxCommentUser.name;
+      this.maxCommentUser = maxCommentUser.uname;
       this.generateChart(comments);
 
       // --- interact ---

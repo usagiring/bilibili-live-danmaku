@@ -8,11 +8,11 @@
         {{ dateFormat(sendAt) }}
       </span>
       <Avatar :src="avatar || DEFAULT_AVATAR" size="small" />
-      <span>{{ name }}</span>
-      <template v-if="isGuardGift">
+      <span>{{ uname }}</span>
+      <template v-if="type === 2">
         <!-- wired space -->
         <span class="price-style">{{
-          giftNumber === 1 ? `${giftName}` : `${giftName}×${giftNumber}`
+          count === 1 ? `${name}` : `${name}×${count}`
         }}</span>
       </template>
       <template v-else-if="totalPrice">
@@ -31,11 +31,11 @@ export default {
   props: [
     "priceProperties",
     "avatar",
+    "uname",
     "name",
-    "giftName",
     "totalPrice",
-    "giftNumber",
-    "isGuardGift",
+    "count",
+    "type",
     "sendAt",
     "showTime"
   ],

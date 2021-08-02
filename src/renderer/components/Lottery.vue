@@ -34,8 +34,8 @@
       </div>
       <span v-if="isDanmaku && isShowProbability" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
       <span v-if="isGift && isShowProbability" :style="{ 'margin': '0px 10px' }">总价值: {{ totalPrice.toFixed(1) }}</span>
-      <span :style="{ 'margin-left': '30px' }" v-if="aTaRi.name">
-        恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.name }} </span>
+      <span :style="{ 'margin-left': '30px' }" v-if="aTaRi.uname">
+        恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.uname }} </span>
       </span>
     </div>
 
@@ -43,7 +43,7 @@
       <template v-if="isDanmaku">
         <div v-for="info of userComments" class="candidate" :key="`${info.uid}`">
           <Avatar :src="info.avatar" size="small" />
-          {{`${info.name}: ${info.comment}`}}
+          {{`${info.uname}: ${info.content}`}}
           <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
             {{`( ${count ? (1 / count * 100).toFixed(2) : 0}% )`}}
           </span>
@@ -52,7 +52,7 @@
       <template v-else>
         <div v-for="info of userGifts" class="candidate" :key="`${info.uid}:${info.giftId}`">
           <Avatar :src="info.avatar" size="small" />
-          {{`${info.name}: 赠送了 ${info.giftNumber} 个 ${info.giftName}`}}
+          {{`${info.uname}: 赠送了 ${info.count} 个 ${info.name}`}}
           <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
             {{`( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2): 0}% )`}}
           </span>
@@ -62,8 +62,8 @@
 
     <Modal v-model="historyModal" title="中奖记录" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
       <template v-for="history in histories">
-        <p :key="history.uid">
-          {{ `${history.name}(${history.uid}) ${history.time}` }}
+        <p :key="history._id">
+          {{ `${history.uname}(${history.uid}) ${history.awardedAt}` }}
           <span :style="{color: 'gray'}">
             {{ history.description }}
           </span>
@@ -170,14 +170,14 @@ export default {
           if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) return
         }
         const regexp = new RegExp(this.danmakuText, "i")
-        const isMatch = regexp.test(comment.comment)
+        const isMatch = regexp.test(comment.content)
         if (!isMatch) return;
 
         // 记录统计
         const history = {
           uid: comment.uid,
-          name: comment.name,
-          comment: comment.comment,
+          uname: comment.uname,
+          content: comment.content,
           avatar: comment.avatar || DEFAULT_AVATAR,
         }
         this.userCommentMap[comment.uid] = history
@@ -185,18 +185,18 @@ export default {
       }
       if (this.isGift && data.cmd === 'GIFT') {
         const gift = data.payload
-        if (!this.selectedGiftIds.includes(`${gift.giftId}`)) return
+        if (!this.selectedGiftIds.includes(`${gift.id}`)) return
 
         const {
           uid,
+          uname,
+          id,
           name,
-          giftId,
-          giftName,
-          giftNumber = 1,
+          count = 1,
           price = 0,
           avatar = DEFAULT_AVATAR,
         } = gift;
-        const key = `${uid}:${giftId}`
+        const key = `${uid}:${id}`
         const userGift = this.userGiftMap[key]
         // test: 小心心
         // if (giftId === 30607) {
@@ -208,17 +208,17 @@ export default {
             ...this.userGiftMap,
             [key]: {
               uid,
-              giftId,
-              name,
+              id,
+              uname,
               avatar,
-              giftName,
-              giftNumber: giftNumber,
-              price: giftNumber * price,
+              name,
+              count: count,
+              price: count * price,
             }
           }
         } else {
-          userGift.giftNumber = userGift.giftNumber + giftNumber
-          userGift.price = userGift.price + giftNumber * price
+          userGift.count = userGift.count + count
+          userGift.price = userGift.price + count * price
           this.userGiftMap = Object.assign(this.userGiftMap, {
             [key]: userGift
           })
@@ -242,7 +242,7 @@ export default {
         if (!randomItem) return
         this.aTaRi = randomItem
         await addLotteryHistory(Object.assign({}, this.aTaRi, {
-          time: Date.now(),
+          awardedAt: Date.now(),
           description: this.description
         }))
         // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
@@ -259,7 +259,7 @@ export default {
           if (!userPriceMap[uid]) {
             userPriceMap[uid] = {
               uid,
-              name: userGift.name,
+              uname: userGift.uname,
               price: userGift.price
             }
           } else {
@@ -278,7 +278,7 @@ export default {
         this.aTaRi = randomItem
         this.isRunning = false;
         await addLotteryHistory(Object.assign({}, this.aTaRi, {
-          time: Date.now(),
+          awardedAt: Date.now(),
           description: this.description
         }))
 
@@ -303,7 +303,7 @@ export default {
       const { data: histories } = await queryLotteryHistories({})
       // const histories = await lotteryDB.find({})
       this.histories = histories.map(history => {
-        history.time = dateFormat(history.time)
+        history.awardedAt = dateFormat(history.awardedAt)
         return history
       })
     },

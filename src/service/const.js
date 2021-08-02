@@ -90,11 +90,10 @@ export const EXAMPLE_MESSAGES = [
     payload: {
       _id: 1,
       id: 1,
-      type: "comment",
+      category: "comment",
       uid: "123456",
-      name: "bli_123456",
-      comment: "这是一条测试弹幕哟～",
-      guard: 3,
+      uname: "bli_123456",
+      content: "这是一条测试弹幕哟～",
       role: 3,
       similar: 1,
       medalName: '测试者',
@@ -109,12 +108,11 @@ export const EXAMPLE_MESSAGES = [
     payload: {
       _id: 2,
       id: 2,
-      guard: 0,
+      role: 0,
       uid: "654321",
-      name: "bli_654321",
-      type: "comment",
-      comment: "～哟幕弹试测条一是这",
-      role: 0
+      uname: "bli_654321",
+      category: "comment",
+      content: "～哟幕弹试测条一是这",
     }
   },
   {
@@ -123,15 +121,14 @@ export const EXAMPLE_MESSAGES = [
       _id: 6,
       id: 6,
       uid: "12345",
-      name: "bli_12345",
-      type: "superChat",
-      comment: "这是一条测试SuperChat哟～",
-      commentJPN: "これはテスト用のスパチャだよ〜",
+      uname: "bli_12345",
+      category: "superChat",
+      content: "这是一条测试SuperChat哟～",
+      contentJPN: "これはテスト用のスパチャだよ〜",
       price: 50,
       totalPrice: 50,
       role: 0,
-      guard: 0,
-      coinType: 'gold'
+      coinType: 1
     }
   },
   // {
@@ -150,16 +147,16 @@ export const EXAMPLE_MESSAGES = [
     payload: {
       _id: 8,
       id: 8,
-      type: "gift",
+      category: "gift",
       uid: 777777,
-      name: 'bli_777777',
-      isGuardGift: true,
+      uname: 'bli_777777',
+      type: 2,
       price: 198,
-      giftNumber: 1,
+      count: 1,
       totalPrice: 198,
-      giftName: '舰长',
-      guard: 1,
-      coinType: 'gold'
+      name: '舰长',
+      role: 1,
+      coinType: 1
     }
   }
 ]
@@ -302,6 +299,6 @@ export const DEFAULT_SERVER_CONFIG = {
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
   SAVE_ALL_BILI_MESSAGE,
-  // HTML_PATH: path.join('D:\\Mirror\\bilibili-live-danmaku\\node_modules\\@tokine\\bilibili-danmaku-page'),
   HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
+  // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
 }

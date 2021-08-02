@@ -20,13 +20,13 @@
                     <span class="date-style">{{
                       dateFormat(comment.sendAt)
                     }}</span>
-                    <i v-if="comment.guard" class="guard-icon" :style="{
+                    <i v-if="comment.role" class="guard-icon" :style="{
                         'background-image': `url(${getGuardIcon(
-                          comment.guard
+                          comment.role
                         )})`,
                       }"></i>
                     <FanMedal v-if="comment.medalLevel && comment.medalName" :medalLevel="comment.medalLevel" :medalName="comment.medalName" :medalColorStart="comment.medalColorStart" :medalColorEnd="comment.medalColorEnd" :medalColorBorder="comment.medalColorBorder"></FanMedal>
-                    <span>{{ `${comment.name}` }}</span>
+                    <span>{{ `${comment.uname}` }}</span>
                     <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
                     <!-- <span>{{ `: ${comment.comment}` }}</span> -->
                     <span>: </span>
@@ -34,7 +34,7 @@
                       <Icon type="md-play" />
                       <span>{{ `${comment.fileDuration}"` }}</span>
                     </span>
-                    <span>{{ comment.comment }}</span>
+                    <span>{{ comment.content }}</span>
                   </div>
                 </template>
               </Scroll>
@@ -46,12 +46,12 @@
                     <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
                     <FanMedal v-if="interact.medalLevel && interact.medalName" :medalLevel="interact.medalLevel" :medalName="interact.medalName" :medalColorStart="interact.medalColorStart" :medalColorEnd="interact.medalColorEnd" :medalColorBorder="interact.medalColorBorder"></FanMedal>
                     <span :style="{
-                        color: interact.nameColor
-                          ? interact.nameColor
+                        color: interact.unameColor
+                          ? interact.unameColor
                           : undefined,
-                      }">{{ `${interact.name}` }}</span>
+                      }">{{ `${interact.uname}` }}</span>
                     <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
-                    <span>{{ getInteractType(interact.msgType) }}了直播间</span>
+                    <span>{{ getInteractType(interact.type) }}了直播间</span>
                   </div>
                 </template>
               </Scroll>
@@ -65,12 +65,12 @@
                 <!-- <p class="date-style" :style="{ padding: '0 8px' }">
                   {{ dateFormat(gift.sendAt) }}
                 </p> -->
-                <template v-if="gift.type === 'superChat'">
-                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.comment}` }}</GiftCardMini>
+                <template v-if="gift.type === 3">
+                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.content}` }}</GiftCardMini>
                 </template>
-                <template v-if="gift.type === 'gift'">
+                <template v-if="gift.type === 1">
                   <GiftCardMini v-bind="gift" :showTime="true">{{
-                    `: 赠送了 ${gift.giftNumber}个 ${gift.giftName}`
+                    `: 赠送了 ${gift.count}个 ${gift.name}`
                   }}</GiftCardMini>
                 </template>
               </div>
@@ -249,7 +249,7 @@ export default {
         query.sendAt[scrollKey] = Number(scrollValue);
       }
       if (!this.isShowSilverGift) {
-        query.coinType = "gold";
+        query.coinType = 1;
       }
       const { data: gifts } = await queryGifts({
         query,
