@@ -31,9 +31,7 @@
                     <!-- <span>{{ `: ${comment.comment}` }}</span> -->
                     <span>: </span>
                     <span v-if="comment.voiceUrl" @click="playAudio(comment.voiceUrl)" class="voice-container">
-                      <span>
-                        <Icon type="md-play" />
-                      </span>
+                      <Icon type="md-play" />
                       <span>{{ `${comment.fileDuration}"` }}</span>
                     </span>
                     <span>{{ comment.comment }}</span>
@@ -405,7 +403,6 @@ export default {
     },
 
     playAudio(url) {
-      console.log(url)
       const audio = new Audio(url)
       audio.play()
     }
