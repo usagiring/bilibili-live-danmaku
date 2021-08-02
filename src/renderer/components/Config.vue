@@ -84,7 +84,7 @@
       <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
       <!-- <span>礼物自动回复</span> -->
       <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
-      <Checkbox :value="isTextReply" @on-change="changeTextReply">文字</Checkbox>
+      <Checkbox :value="isTextReply" @on-change="changeTextReply" :disabled="!userCookie">文字</Checkbox>
       <Checkbox :value="isSpeakReply" @on-change="changeSpeakReply">语音</Checkbox>
       <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}">银瓜子</Checkbox>
       <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
@@ -106,15 +106,17 @@
     </div>
 
     <div class="config-item-container">
-      <Input v-model="text" placeholder="..." :style="{display: 'inline-block', width: '300px'}" />
-      <Button type="primary" shape="circle" @click="speak">
-        <Icon type="md-play" />
+      <Input v-model="text" placeholder="让系统说..." @on-keyup.enter="speak" :style="{display: 'inline-block', width: '300px'}" />
+      <Button shape="circle" @click="speak" icon="md-play">
+        <!-- <Icon type="md-play" /> -->
       </Button>
+      声音
       <Select :style="{ width: '100px', display: 'inline-block' }" :value="currentVoice" @on-change="onChangeVoice">
         <Option v-for="voice in voices" :value="voice.key" :key="voice.key" :label="voice.label">
           <span>{{ voice.value }}</span>
         </Option>
       </Select>
+      语速
       <InputNumber v-model="voiceSpeed" @on-change="onChangeVoiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
     </div>
 
@@ -131,7 +133,7 @@
           <!-- <span> >= </span> -->
           <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
           <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
-          <Checkbox v-model="rule.isTextReply">文字</Checkbox>
+          <Checkbox v-model="rule.isTextReply" :disabled="!userCookie">文字</Checkbox>
           <Checkbox v-model="rule.isSpeakReply">语音</Checkbox>
           <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
         </div>

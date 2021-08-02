@@ -195,6 +195,10 @@ export default {
         this.downloadRate = parseDownloadRate(bps);
       });
     }
+
+    emitter.on('record-cancel', () => {
+      this.isRecording = false
+    })
   },
   beforeDestroy() {
     const { recordId } = getStatus()
