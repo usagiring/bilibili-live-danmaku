@@ -178,10 +178,10 @@ export default {
         sort: sort || { sendAt: -1 },
         limit: 40,
       })
-      comments.forEach(c => {
-        c.voiceUrl = 'https://boss.hdslb.com/live-dm-voice/5eadc703ab749222fa39b32829182b221627829056.wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2663ba902868f12f%2F20210801%2Fshjd%2Fs3%2Faws4_request&X-Amz-Date=20210801T144416Z&X-Amz-Expires=600000&X-Amz-SignedHeaders=host&X-Amz-Signature=36f89eb79658cfdb62cb32ce188586fef446f47cb762fbf3917944556608a506'
-        c.fileDuration = 5
-      })
+      // comments.forEach(c => {
+      //   c.voiceUrl = 'https://boss.hdslb.com/live-dm-voice/5eadc703ab749222fa39b32829182b221627829056.wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2663ba902868f12f%2F20210801%2Fshjd%2Fs3%2Faws4_request&X-Amz-Date=20210801T144416Z&X-Amz-Expires=600000&X-Amz-SignedHeaders=host&X-Amz-Signature=36f89eb79658cfdb62cb32ce188586fef446f47cb762fbf3917944556608a506'
+      //   c.fileDuration = 5
+      // })
       // const comments = await commentDB.find(query, {
       //   sort: sort || { sendAt: -1 },
       //   limit: 20,
