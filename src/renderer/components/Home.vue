@@ -241,6 +241,18 @@ export default {
       // 天选时刻开始
       if (payload.cmd === 'ANCHOR_LOT_START') {
         this.isLottering = true
+        this.lotteryInfo = {
+          id: id,
+          roomId: room_id,
+          awardName: award_name,
+          awardNumber: award_num,
+          danmaku: danmu,
+          giftId: gift_id,
+          giftName: gift_name,
+          giftNumber: gift_num,
+          giftPrice: gift_price,
+          maxTime: max_time,
+        }
       }
 
       // 天选时刻结束
