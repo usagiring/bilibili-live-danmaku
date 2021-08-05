@@ -27,11 +27,15 @@
           <Icon type="md-stats" />
           <span>统计</span>
           </MenuItem>
-          <MenuItem name="1-7" to="/config">
+          <MenuItem name="1-7" to="/auto-reply">
+          <Icon type="md-settings" />
+          <span>回复</span>
+          </MenuItem>
+          <MenuItem name="1-8" to="/config">
           <Icon type="md-settings" />
           <span>设置</span>
           </MenuItem>
-          <MenuItem name="1-8" to="/help">
+          <MenuItem name="1-9" to="/help">
           <Icon type="md-help" />
           <span>帮助</span>
           </MenuItem>
@@ -655,8 +659,11 @@ export default {
     async fillRoomLiveStatus(rooms) {
       const { data } = await getRoomInfoByIds(rooms.map(room => room.roomId))
       this.selfHistoryRooms = rooms.map(room => {
-        room.liveStatus = data[room.roomId].live_status
-        return room
+        // room.liveStatus = data[room.roomId].live_status
+        return {
+          ...room,
+          liveStatus: data[room.roomId].live_status
+        }
       })
     },
 

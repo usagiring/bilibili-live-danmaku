@@ -299,6 +299,5 @@ export const DEFAULT_SERVER_CONFIG = {
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
   SAVE_ALL_BILI_MESSAGE,
-  HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
 }
