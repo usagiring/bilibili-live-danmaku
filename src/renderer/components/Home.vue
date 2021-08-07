@@ -28,7 +28,7 @@
           <span>统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/auto-reply">
-          <Icon type="md-settings" />
+          <Icon type="md-repeat" />
           <span>回复</span>
           </MenuItem>
           <MenuItem name="1-8" to="/config">

@@ -277,13 +277,8 @@ export const DEFAULT_CONFIG = {
   optionstring: "{A}\n{B}\n{C}",
   historyRooms: [],
   isAutoReply: false,
-  autoReplyRules: [{
-    priority: 0,
-    text: '',
-    onlyGold: true,
-    isTextReply: false,
-    isSpeakReply: false,
-  }]
+  autoReplyRules: [
+  ]
 }
 
 export const DEFAULT_SERVER_CONFIG = {
@@ -299,5 +294,6 @@ export const DEFAULT_SERVER_CONFIG = {
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
   SAVE_ALL_BILI_MESSAGE,
+  HTML_PATH: OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
 }

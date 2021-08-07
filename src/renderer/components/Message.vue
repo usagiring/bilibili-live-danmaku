@@ -34,7 +34,8 @@
                       <Icon type="md-play" />
                       <span>{{ `${comment.fileDuration}"` }}</span>
                     </span>
-                    <span>{{ comment.content }}</span>
+                    <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl" />
+                    <span v-else>{{ comment.content }}</span>
                   </div>
                 </template>
               </Scroll>
