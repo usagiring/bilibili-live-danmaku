@@ -35,4 +35,14 @@ export default {
 
 <style>
 /* CSS */
+.drop-preview {
+  border: 1px dashed gray;
+  border-radius: 10px;
+  margin: 0 3px 0px 8px;
+  height: 25px;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
 </style>

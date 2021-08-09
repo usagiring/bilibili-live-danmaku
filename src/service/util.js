@@ -1,6 +1,6 @@
 import moment from "moment";
-import { PRICE_PROPERTIES, GET_USER_INFO_FREQUENCY_LIMIT, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
-import { getUserInfo } from './bilibili-api'
+import { PRICE_PROPERTIES, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
+import { getGiftConfig as getGiftConfigAPI } from './api'
 
 // TODO 设置一些更小的粒度？ < 1
 export function getPriceProperties(price) {
@@ -21,34 +21,6 @@ export function getPriceProperties(price) {
   }
   if (price >= 2000) {
     return PRICE_PROPERTIES["6"];
-  }
-}
-
-let isGetUserInfoLocked = false;
-let isGetUserInfoLocked20min = false
-export async function getUserInfoThrottle(uid) {
-  if (isGetUserInfoLocked) throw new Error("isGetUserInfoLocked");
-  if (isGetUserInfoLocked20min) {
-    setTimeout(() => {
-      isGetUserInfoLocked20min = false
-    }, 1000 * 60 * 20)
-    throw new Error('isGetUserInfoLocked 20min')
-  }
-  // 限制获取头像频率 避免412被封
-  // 412 和请求量和速率都有关系，阶段式限流
-  isGetUserInfoLocked = true;
-  setTimeout(() => {
-    isGetUserInfoLocked = false;
-  }, GET_USER_INFO_FREQUENCY_LIMIT);
-
-  try {
-    const { data } = await getUserInfo(uid);
-    return data;
-  } catch (e) {
-    if (e.message === 'Request failed with status code 412') {
-      isGetUserInfoLocked20min = true
-    }
-    throw e
   }
 }
 
@@ -104,4 +76,12 @@ export function getRandomItem(items) {
   }
 
   return null
+}
+
+let __giftConfig
+export async function getGiftConfig() {
+  if (__giftConfig) return __giftConfig
+  const { data: giftConfig } = await getGiftConfigAPI()
+  __giftConfig = giftConfig
+  return giftConfig
 }

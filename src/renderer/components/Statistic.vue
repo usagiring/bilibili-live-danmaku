@@ -61,9 +61,10 @@ export default {
     const start = moment().startOf("day").toDate();
     const end = moment().endOf("day").toDate();
     this.dateRange = [start, end];
+  },
+  mounted() {
     this.statistic();
   },
-  mounted() { },
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;

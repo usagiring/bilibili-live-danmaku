@@ -28,7 +28,10 @@
           <span>统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/auto-reply">
-          <Icon type="md-repeat" />
+          <div :style="{position: 'relative', 'display': 'inline-block'}">
+            <Icon type="md-repeat" />
+            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+          </div>
           <span>回复</span>
           </MenuItem>
           <MenuItem name="1-8" to="/config">
@@ -146,7 +149,7 @@ import { debounce } from "lodash";
 import { remote, ipcRenderer, shell } from "electron";
 const { BrowserWindow } = remote;
 
-import { parseDownloadRate } from "../../service/util";
+import { parseDownloadRate, getGiftConfig } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from "../../service/event";
 import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
@@ -254,6 +257,10 @@ export default {
 
       if (payload.cmd === 'ANCHOR_LOT_AWARD') {
         this.isLottering = false
+      }
+
+      if (payload.cmd === 'GIFT_CONFIG') {
+        getGiftConfig()
       }
     }
 
@@ -720,6 +727,7 @@ export default {
   height: 100%;
   width: 100%;
   background: white;
+  position: relative;
 }
 /* .ivu-btn-dashed {
   border-color: green;

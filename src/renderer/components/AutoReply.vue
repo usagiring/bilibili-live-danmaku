@@ -3,7 +3,7 @@
     <div class="tag-container">
       <Container :getChildPayload="getTagPayload" @drop="onDrop" orientation="horizontal" behaviour="copy">
         <Draggable v-for="tag in tags" :key="tag.id">
-          <div class="draggable-tag">
+          <div :class="tag.class ? `draggable-tag ${tag.class}`: 'draggable-tag'">
             {{tag.name}}
           </div>
         </Draggable>
@@ -11,12 +11,46 @@
     </div>
     <Row :style="{padding: '6px'}">
       <i-col span="1">
+        <div class="col-header">
+          <Tooltip max-width="600" transfer placement="right">
+            <Icon type="md-help" class="info-icon" />
+            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+              <p>
+                每一条回复规则由「消息类型」+「模版文本」+「规则」组成。
+              </p>
+              <p>
+                拖拽上面「标签」到规则栏。
+              </p>
+              <p>
+                目前可用<span :style="{color: 'pink'}">模版字段</span>有 {user.name} {gift.name} {comment.content} {superchat.content}
+              </p>
+              <p>
+                例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
+              </p>
+              <p>
+                每一条规则应该要有至少一条<span :style="{color: 'green'}">执行规则</span>，可以有若干条<span :style="{color: 'violet'}">限制规则</span>。
+              </p>
+              <p>
+                匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
+              </p>
+              <p>
+                部分标签可点击打开下拉窗口，进一步设置。
+              </p>
+              <p>
+                部分不合逻辑，暂未支持的组合将无法拖拽。
+              </p>
+            </div>
+          </Tooltip>
+        </div>
+
+      </i-col>
+      <i-col span="1">
         <div class="col-header">启用</div>
       </i-col>
       <i-col span="2">
-        <div class="col-header">类别</div>
+        <div class="col-header">类型</div>
       </i-col>
-      <i-col span="7">
+      <i-col span="6">
         <div class="col-header">文字模版</div>
       </i-col>
       <i-col span="13">
@@ -25,46 +59,55 @@
       <i-col span="1">
       </i-col>
     </Row>
-    <template v-for="(rule, index) in rules">
-      <Row :key="index" :style="{padding: '6px'}">
-        <i-col span="1" :style="{'text-align':'center'}">
-          <Checkbox :value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)"></Checkbox>
-        </i-col>
-        <i-col span="2">
-          <Select :value="rule.type" :style="{padding: '0 7px'}" size="small" @on-change="onChangeRuleType(index, $event)">
-            <Option v-for="(option, index) in types" :value="option.key" :key="index" :label="option.label">
-              <span>{{ option.value }}</span>
-            </Option>
-          </Select>
-        </i-col>
-        <i-col span="7">
-          <Input :value="rule.text" @on-change="changeText(index, $event)" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" />
-        </i-col>
-        <i-col span="13">
-          <Container :style="{width: '100%'}" @drop="onDrop(index, $event)" :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)" orientation="horizontal">
-            <template v-for="(tag, tagIndex) in rule.tags">
-              <div class="rule-tag" :key="tag.id">
-                <template v-if="tag.template">
-                  <Poptip placement="bottom">
-                    <span>{{ fillDisplay(tag) }} </span>
-                    <div class="" slot="content">
-                      <TagContent :template="tag.template" :data="tag.data" v-on:value-change="onDataChange(index,tagIndex, $event)" />
-                    </div>
-                  </Poptip>
-                </template>
-                <template v-else>
-                  <span>{{ fillDisplay(tag) }} </span>
-                </template>
-                <Icon type="md-close" class="remove-rule" @click="removeTag(index, tagIndex)" />
+    <Container @drop="onDropRule" :getChildPayload="getRulePayload" drag-handle-selector=".column-drag-handle">
+      <template v-for="(rule, index) in rules">
+        <Draggable :key="index">
+          <Row :style="{padding: '6px'}">
+            <i-col span="1">
+              <div>
+                <span class="column-drag-handle" style="float:left; padding:0 10px;">&#x2630;</span>
               </div>
-            </template>
-          </Container>
-        </i-col>
-        <i-col span="1">
-          <Icon type="md-close" class="remove-rule" @click="removeRule(index)" />
-        </i-col>
-      </Row>
-    </template>
+            </i-col>
+            <i-col span="1" :style="{'text-align':'center'}">
+              <Checkbox :value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)"></Checkbox>
+            </i-col>
+            <i-col span="2">
+              <Select :value="rule.type" :style="{padding: '0 7px'}" transfer size="small" @on-change="onChangeRuleType(index, $event)">
+                <Option v-for="(option, index) in types" :value="option.key" :key="index" :label="option.label">
+                  <span>{{ option.value }}</span>
+                </Option>
+              </Select>
+            </i-col>
+            <i-col span="6">
+              <Input :value="rule.text" @on-change="debouncedChangeText(index, $event)" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" />
+            </i-col>
+            <i-col span="13">
+              <Container :style="{width: '100%'}" @drop="onDrop(index, $event)" :drop-placeholder="dropPlaceholderOptions" :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)" orientation="horizontal">
+                <template v-for="(tag, tagIndex) in rule.tags">
+                  <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'" :key="tag.id">
+                    <template v-if="tag.template">
+                      <Poptip placement="bottom" transfer>
+                        <span>{{ fillDisplay(tag) }} </span>
+                        <div class="" slot="content">
+                          <TagContent :template="tag.template" :data="tag.data" v-on:value-change="onDataChange(index,tagIndex, $event)" />
+                        </div>
+                      </Poptip>
+                    </template>
+                    <template v-else>
+                      <span>{{ fillDisplay(tag) }} </span>
+                    </template>
+                    <Icon type="md-close" class="remove-rule" @click="removeTag(index, tagIndex)" />
+                  </div>
+                </template>
+              </Container>
+            </i-col>
+            <i-col span="1">
+              <Icon type="md-close" class="remove-rule" @click="removeRule(index)" />
+            </i-col>
+          </Row>
+        </Draggable>
+      </template>
+    </Container>
     <div :style="{ padding: '5px 20px'}">
       <Button @click="addRule" type="primary" long>
         <Icon :style="{'font-weight': 'bold'}" type="md-add" />
@@ -76,8 +119,9 @@
 <script>
 import { Container, Draggable } from "vue-smooth-dnd";
 import TagContent from './TagContent.vue'
-import { getVoices, speak as speakAPI, getGiftConfig, updateSetting } from '../../service/api'
-import { cloneDeep } from 'lodash'
+import { getVoices, updateSetting } from '../../service/api'
+import { getGiftConfig } from '../../service/util'
+import { cloneDeep, debounce } from 'lodash'
 
 const roleOptions = [
   {
@@ -97,10 +141,6 @@ const roleOptions = [
   }
 ]
 
-let giftOptions = [
-
-]
-
 const dropAcceptRules = {
   comment: ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'],
   gift: ['ROLE', 'GIFT', 'GOLD', 'SILVER', 'TEXT_REPLY', 'SPEAK_REPLY'],
@@ -113,6 +153,11 @@ export default {
   components: { Container, Draggable, TagContent },
   data() {
     return {
+      dropPlaceholderOptions: {
+        className: 'drop-preview',
+        animationDuration: '150',
+      },
+      giftOptions: [],
       types: [
         {
           key: 'comment',
@@ -183,17 +228,18 @@ export default {
         {
           id: 3,
           key: 'FILTER',
-          name: '关键字过滤',
-          content: '过滤规则: {filter}',
+          name: '文本匹配',
+          content: '匹配规则: {filter}',
           data: {
             filter: ''
           },
           template: {
-            title: '关键字过滤',
+            title: '文本匹配',
             rows: [
               {
                 key: 'filter',
                 display: '过滤规则',
+                placeholder: '支持正则表达式...',
                 value: '',
                 type: 'Input',
               }
@@ -216,7 +262,7 @@ export default {
                 display: '礼物',
                 value: '',
                 type: 'MultiSelect',
-                options: giftOptions
+                options: this.giftOptions
               }
             ]
           }
@@ -243,7 +289,17 @@ export default {
           id: 8,
           key: 'TEXT_REPLY',
           name: '弹幕回复',
-          content: '弹幕回复'
+          content: '弹幕回复',
+          class: 'process-tag',
+          template: {
+            title: '弹幕回复说明',
+            rows: [
+              {
+                type: 'Text',
+                value: '需要在设置里输入用户Cookie，且仅当前直播间与用户身份匹配时才会触发。'
+              }
+            ]
+          }
         },
         {
           id: 9,
@@ -254,6 +310,7 @@ export default {
             voice: '',
             speed: 1.0
           },
+          class: 'process-tag',
           template: {
             title: '语音播放',
             rows: [
@@ -284,6 +341,22 @@ export default {
       return this.$store.state.Config.autoReplyRules;
     }
   },
+  async created() {
+    this.debouncedChangeText = debounce(this.changeText, 500)
+
+    const giftOptions = []
+    const giftConfig = await getGiftConfig()
+    for (const key in giftConfig) {
+      const { name, webp } = giftConfig[key]
+      giftOptions.push({
+        key: key,
+        value: name,
+        label: name,
+        webp: webp,
+      })
+    }
+    this.giftOptions = giftOptions
+  },
   async mounted() {
     const { data: voices } = await getVoices()
     const options = voices.map(voice => {
@@ -297,22 +370,9 @@ export default {
     // TODO
     voiceTag.template.rows[0].options = options
 
-    const { data: giftConfig } = await getGiftConfig()
-    // TODO
-    const __giftOptions = []
-    for (const key in giftConfig) {
-      const { name, webp } = giftConfig[key]
-      __giftOptions.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
-      })
-    }
     const giftTag = this.tags.find(tag => tag.id === 4)
     // TODO
-    giftTag.template.rows[0].options = __giftOptions
-    giftOptions = __giftOptions
+    giftTag.template.rows[0].options = this.giftOptions
   },
   methods: {
     async onDrop(index, dropResult) {
@@ -329,8 +389,33 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
+    async onDropRule(dropResult) {
+      const { removedIndex, addedIndex, payload } = dropResult
+      const rules = cloneDeep(this.rules)
+      let itemToAdd = payload
+      if (Number.isFinite(removedIndex)) {
+        itemToAdd = rules.splice(removedIndex, 1)[0]
+      }
+
+      if (Number.isFinite(addedIndex)) {
+        rules.splice(addedIndex, 0, itemToAdd)
+      }
+      rules.forEach((rule, index) => {
+        rule.priority = index
+      })
+
+      const data = {
+        autoReplyRules: rules
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
     getTagPayload(index) {
       return this.tags[index]
+    },
+    getRulePayload(index) {
+      return this.rules[index]
     },
     fillDisplay(tag) {
       let display = tag.content
@@ -361,8 +446,7 @@ export default {
 
     giftName(tag) {
       const giftIds = tag.data.giftIds
-      // TODO giftOptions 加载顺序
-      return giftIds.map(key => (giftOptions.find(o => o.key === key) || {}).value).join(',')
+      return giftIds.map(key => (this.giftOptions.find(o => o.key === key) || {}).value).join(',')
     },
 
     async removeTag(ruleIndex, tagIndex) {
@@ -465,8 +549,7 @@ export default {
 
 <style scoped>
 .tag-container {
-  /* border: 1px solid gray; */
-  margin: 5px 0 3px 10px;
+  padding: 5px 0 3px 10px;
 }
 .draggable-tag {
   border: 1.2px dashed violet;
@@ -478,8 +561,14 @@ export default {
   user-select: none;
   cursor: move;
 }
+.process-tag {
+  border: 1.2px dashed green !important;
+}
+.sub-process-tag {
+  border: 1px solid green !important;
+}
 .rule-tag {
-  border: 1px dashed cornflowerblue;
+  border: 1px solid violet;
   border-radius: 10px;
   padding: 1px 6px;
   margin: 0 3px;
@@ -495,10 +584,10 @@ export default {
 .col-header {
   text-align: center;
 }
-
-.drop-preview {
-  border: 1px solid gray;
-  width: 80px;
-  height: 40px;
+.column-drag-handle {
+  cursor: move;
+}
+.info-icon {
+  font-size: 16px;
 }
 </style>

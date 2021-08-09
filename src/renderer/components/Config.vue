@@ -80,9 +80,9 @@
         </span>
       </Tooltip>
     </div> -->
-    <div class="config-item-container">
+    <!-- <div class="config-item-container">
       <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
-      <!-- <span>礼物自动回复</span> -->
+      <span>礼物自动回复</span> 
       <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
       <Checkbox :value="isTextReply" @on-change="changeTextReply" :disabled="!userCookie">文字</Checkbox>
       <Checkbox :value="isSpeakReply" @on-change="changeSpeakReply">语音</Checkbox>
@@ -103,7 +103,7 @@
           <Icon type="ios-flask" />
         </span>
       </Tooltip>
-    </div>
+    </div> -->
 
     <div class="config-item-container">
       <Input v-model="text" placeholder="让系统说..." @on-keyup.enter="speak" :style="{display: 'inline-block', width: '300px'}" />
@@ -157,7 +157,8 @@ import {
   DEFAULT_STYLE,
 } from "../../service/const";
 
-import { clearDB, backupDB, updateSetting, getGiftConfig, getVoices, speak as speakAPI } from '../../service/api'
+import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
+import { getGiftConfig } from '../../service/util'
 
 export default {
   data() {
@@ -174,7 +175,7 @@ export default {
     };
   },
   async mounted() {
-    const { data: giftConfig } = await getGiftConfig()
+    const giftConfig = await getGiftConfig()
     for (const key in giftConfig) {
       const { name, webp } = giftConfig[key]
       this.giftSelectors.push({

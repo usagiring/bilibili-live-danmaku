@@ -16,15 +16,17 @@
           </Select>
         </div>
         <div v-if="row.type === 'MultiSelect'">
-          <Select multiple :value="data[row.key]" :style="{ display: 'inline-block' }" @on-change="onChangeValue(row.key, $event)">
+          <Select multiple :value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :value="option.key" :key="index" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
         </div>
         <div v-if="row.type === 'Input'">
-          <span>{{row.display}}</span>
-          <Input :value="data[row.key]" @on-change="onChangeInputValue(row.key, $event)" :style="{width: '200px'}"/>
+          <Input :value="data[row.key]" :placeholder="row.placeholder" @on-change="onChangeInputValue(row.key, $event)" :style="{width: '200px'}"/>
+        </div>
+        <div v-if="row.type === 'Text'">
+          <p>{{ row.value }}</p>
         </div>
       </div>
     </template>
