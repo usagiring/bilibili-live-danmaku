@@ -47,7 +47,7 @@
         <FanMedal v-bind="medalData"></FanMedal>
       </template>
       <template v-else>
-        <Tooltip placement="top">
+        <Tooltip transfer placement="top">
           <Button @click="getMedalData" :disabled="!this.userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px' }">
             获取当前佩戴粉丝牌</Button>
           <div slot="content" :style="{ 'white-space': 'normal' }">

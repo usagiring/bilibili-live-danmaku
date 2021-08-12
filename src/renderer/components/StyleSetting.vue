@@ -474,6 +474,7 @@ export default {
           uid: randomNumber,
           uname: `bli_${randomNumber}`,
           category: 'gift',
+          coinType: 1,
           type: 1,
           price: Math.floor(Math.random() * 100),
           count: 1,
