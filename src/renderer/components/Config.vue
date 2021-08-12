@@ -120,7 +120,7 @@
       <InputNumber v-model="voiceSpeed" @on-change="onChangeVoiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
     </div>
 
-    <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
+    <!-- <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
       <template v-for="(rule, index) in advancedAutoReplyRules">
         <div :key="index" :style="{'margin-bottom': '10px'}">
           <Select :style="{ width: '100px', display: 'inline-block' }" v-model="rule.giftId" filterable transfer>
@@ -130,7 +130,7 @@
               <span :style="{color: 'silver'}">{{ `id: ${gift.key}` }}</span>
             </Option>
           </Select>
-          <!-- <span> >= </span> -->
+          <span> >= </span>
           <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
           <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
           <Checkbox v-model="rule.isTextReply" :disabled="!userCookie">文字</Checkbox>
@@ -145,7 +145,7 @@
         <Button type="primary" @click="submitAutoReplyRules">确定</Button>
         <Button type="error" @click="restoreDefaultAutoReplyRule">清空</Button>
       </div>
-    </Modal>
+    </Modal> -->
   </div>
 </template>
 
@@ -306,18 +306,18 @@ export default {
       this.$Message.success('清空成功！')
     },
 
-    addAutoReplyRule() {
-      const autoReplyRules = [...this.autoReplyRules]
-      const initRule = {
-        priority: Math.max(...autoReplyRules.map(r => r.priority)) + 1,
-        giftNumber: 0,
-        giftId: null,
-        text: '',
-        isTextReply: false,
-        isSpeakReply: false,
-      }
-      this.advancedAutoReplyRules.push(initRule)
-    },
+    // addAutoReplyRule() {
+    //   const autoReplyRules = [...this.autoReplyRules]
+    //   const initRule = {
+    //     priority: Math.max(...autoReplyRules.map(r => r.priority)) + 1,
+    //     giftNumber: 0,
+    //     giftId: null,
+    //     text: '',
+    //     isTextReply: false,
+    //     isSpeakReply: false,
+    //   }
+    //   this.advancedAutoReplyRules.push(initRule)
+    // },
 
     async submitAutoReplyRules() {
       const data = {

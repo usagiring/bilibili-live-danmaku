@@ -376,7 +376,7 @@ export default {
       return dateFormat(date)
     },
     formatGift(gift) {
-      gift.totalPrice = (gift.giftNumber || 1) * gift.price;
+      gift.totalPrice = (gift.count || 1) * gift.price;
       gift.totalPrice = Number.isInteger(gift.totalPrice)
         ? gift.totalPrice
         : gift.totalPrice.toFixed(1);

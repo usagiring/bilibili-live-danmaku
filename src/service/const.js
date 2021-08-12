@@ -128,6 +128,7 @@ export const EXAMPLE_MESSAGES = [
       price: 50,
       totalPrice: 50,
       role: 0,
+      type: 3,
       coinType: 1
     }
   },
@@ -146,7 +147,7 @@ export const EXAMPLE_MESSAGES = [
     cmd: 'EXAMPLE_GIFT',
     payload: {
       _id: 8,
-      id: 8,
+      id: 999999,
       category: "gift",
       uid: 777777,
       uname: 'bli_777777',

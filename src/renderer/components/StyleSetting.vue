@@ -384,7 +384,7 @@ export default {
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
       await sendExampleMessages({
-        type: randomMessage.type,
+        category: randomMessage.category,
         data: randomMessage
       })
     },
@@ -472,23 +472,23 @@ export default {
           _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
-          name: `bli_${randomNumber}`,
-          type: "gift",
+          uname: `bli_${randomNumber}`,
+          category: 'gift',
+          type: 1,
           price: Math.floor(Math.random() * 100),
-          giftNumber: 1,
-          giftName: "随机礼物",
-          guard: 3,
+          count: 1,
+          name: "随机礼物",
           role: 3,
           sendAt: Date.now(),
           batchComboId: randomNumber,
           // batchComboId: 1,
         };
         gift.role = randomRole;
-        gift.guard = randomRole;
         if (Math.random() * 2 < 1) {
-          gift.giftName = "舰长";
+          gift.name = "舰长";
           gift.isGuardGift = true;
           gift.price = 198;
+          gift.type = 2
         }
         return gift;
       }
@@ -498,21 +498,20 @@ export default {
           id: randomNumber,
           // id: 3333333,
           uid: randomNumber,
-          superChatId: Math.floor(Math.random() * 100000000),
+          category: 'superChat',
+          SCId: Math.floor(Math.random() * 100000000),
           // superChatId: 3333333,
-          name: `bli_${randomNumber}`,
-          type: "superChat",
-          comment: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
+          uname: `bli_${randomNumber}`,
+          type: 3,
+          content: `这是一条测试SuperChat | ${new Date().toLocaleString()}`,
           price: Math.floor(Math.random() * 100),
           role: 3,
-          guard: 3,
           sendAt: Date.now(),
         };
         if (Math.random() * 2 < 1) {
           superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
         }
         superChat.role = randomRole;
-        superChat.guard = randomRole;
         return superChat;
       }
 
@@ -521,15 +520,14 @@ export default {
           _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
-          name: `bli_${randomNumber}`,
+          category: 'comment',
+          uname: `bli_${randomNumber}`,
           type: "comment",
-          comment: `一条弹幕哟～`,
+          content: `一条弹幕哟～`,
           role: 3,
-          guard: 3,
           sendAt: Date.now(),
         };
         comment.role = randomRole;
-        comment.guard = randomRole;
         return comment;
       }
     },
