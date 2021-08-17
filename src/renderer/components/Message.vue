@@ -69,7 +69,7 @@
                 <template v-if="gift.type === 3">
                   <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.content}` }}</GiftCardMini>
                 </template>
-                <template v-if="gift.type === 1">
+                <template v-if="gift.type === 1 || gift.type === 2">
                   <GiftCardMini v-bind="gift" :showTime="true">{{
                     `: 赠送了 ${gift.count}个 ${gift.name}`
                   }}</GiftCardMini>
