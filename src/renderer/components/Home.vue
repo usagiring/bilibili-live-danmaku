@@ -28,10 +28,11 @@
           <span>统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/auto-reply">
-          <div :style="{position: 'relative', 'display': 'inline-block'}">
+          <!-- <div :style="{position: 'relative', 'display': 'inline-block'}">
             <Icon type="md-repeat" />
             <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
-          </div>
+          </div> -->
+          <Icon type="md-repeat" />
           <span>回复</span>
           </MenuItem>
           <MenuItem name="1-8" to="/config">
@@ -717,6 +718,8 @@ export default {
   line-height: 64px;
   background: white;
   position: relative;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .layout-header2 {
   height: 48px;

@@ -111,6 +111,10 @@ export async function countGifts(body) {
   return res.data
 }
 
+export async function sendMessages(body) {
+  const res = await axios.post(`${BASE_URL}/api/messages/send`, body)
+  return res.data
+}
 
 export async function sendExampleMessages(body) {
   const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)

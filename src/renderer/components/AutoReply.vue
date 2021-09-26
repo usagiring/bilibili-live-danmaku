@@ -19,7 +19,7 @@
                 每一条回复规则由「消息类型」+「模版文本」+「规则」组成。
               </p>
               <p>
-                拖拽上面「标签」到规则栏。
+                <span :style="{color: 'pink'}">拖拽</span>上面「标签」到规则栏。
               </p>
               <p>
                 目前可用<span :style="{color: 'pink'}">模版字段</span>有 {user.name} {gift.name} {comment.content} {superchat.content}
@@ -34,7 +34,7 @@
                 匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
               </p>
               <p>
-                部分标签可点击打开下拉窗口，进一步设置。
+                部分标签可<span :style="{color: 'pink'}">点击</span>打开下拉窗口，进一步设置。
               </p>
               <p>
                 部分不合逻辑，暂未支持的组合将无法拖拽。

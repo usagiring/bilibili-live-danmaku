@@ -1,135 +1,309 @@
 <template>
-  <Row>
-    <i-col span="8">
-      <Collapse simple :value="collapse">
-        <Panel name="1">
-          设置
-          <div slot="content">
-            <div>
-              <span class="setting-key-text">窗口背景色</span>
-              <ColorPicker :value="background" @on-active-change="updateBackground" size="small" alpha />
-            </div>
-            <div>
-              <span class="setting-key-text">透明度</span>
-              <div class="avatar-controller-slider">
-                <Slider :value="opacity" @on-change="changeOpacity"></Slider>
-              </div>
-            </div>
-            <div>
-              <span class="setting-key-text">头像大小</span>
-              <div class="avatar-controller-slider">
-                <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
-              </div>
-            </div>
-            <div class="setting-key">
-              <span class="setting-key-text">
-                重复弹幕合并
-                <Tooltip placement="top">
-                  <Icon type="md-help" class="info-icon" />
-                  <div slot="content">
-                    <div class="description-text">
-                      <p>多少毫秒内重复的弹幕将被合并</p>
-                    </div>
-                  </div>
-                </Tooltip>
-              </span>
-              <InputNumber :value="combineSimilarTime" @on-change="changeCombineSimilarTime" :min="0" size="small" />
-              {{ " ms" }}
-            </div>
-            <div class="setting-key">
-              <span class="setting-key-text">礼物栏展示大于</span>
-              <InputNumber :value="showHeadlineThreshold" @on-change="changeShowHeadlineThreshold" :min="0" size="small" />
-              {{ " 元" }}
-            </div>
-            <div class="setting-key">
-              <span class="setting-key-text">弹幕礼物展示大于</span>
-              <InputNumber :value="showGiftCardThreshold" @on-change="changeShowGiftCardThreshold" :min="0" size="small" />
-              {{ " 元" }}
-            </div>
-            <div class="setting-key">
-              <span class="setting-key-text">字体</span>
-              <Select :style="{ width: '100px', display: 'inline-block' }" :value="danmakuFont" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange" size="small">
-                <OptionGroup label="全局值">
-                  <Option v-for="item in fonts.filter(
+  <!-- <Row> -->
+  <!-- <i-col span="8"> -->
+  <div>
+    <div class="setting-group" :style="{'padding-top': '10px'}">
+      <!-- <Button @click="restoreExampleDanmaku">打开预览弹幕窗</Button> -->
+      <Button @click="sendTestMessage" size="small">发送测试弹幕</Button>
+      <Button @click="clearDanmaku" size="small">清空弹幕</Button>
+      <!-- <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button> -->
+    </div>
+    <div class="setting-group ">
+      <div class="border-image-default operatable-preview-text" :style="borderImageStyle">
+        <Container orientation="horizontal" :style="{'min-height': '0px'}">
+          <Draggable v-if="isShowMemberShipIcon" :style="{'vertical-align': 'middle'}">
+            <i v-if="isShowMemberShipIcon" class="guard-icon" :style="{'background-image': `url(${getGuardIcon('3')})`}"></i>
+          </Draggable>
+          <Draggable v-if="isShowFanMedal" :style="{'vertical-align': 'middle'}">
+            <FanMedal v-if="example.ML && example.MN" :medalLevel="example.ML" :medalName="example.MN" :medalColorStart="example.MCS" :medalColorEnd="example.MCE" :medalColorBorder="example.MCB"></FanMedal>
+          </Draggable>
+          <Draggable v-if="isShowAvatar" :style="{'vertical-align': 'middle'}">
+            <Avatar v-if="isShowAvatar" :src="example.avatar" :style="avatarSizeStyle" />
+          </Draggable>
+          <Draggable :style="{'vertical-align': 'middle', 'padding': '0 2px'}">
+            <span>{{ `${example.uname}` }}:</span>
+          </Draggable>
+          <Draggable :style="{'vertical-align': 'middle'}">
+            <img v-if="example.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="example.emojiUrl" />
+            <span v-else>{{ example.content }}</span>
+          </Draggable>
+        </Container>
+      </div>
+      <!-- <span>{{ `: ${comment.comment}` }}</span> -->
+      <!-- <span v-if="example.voiceUrl" @click="playAudio(example.voiceUrl)" class="voice-container">
+        <Icon type="md-play" />
+        <span>{{ `${example.fileDuration}"` }}</span>
+      </span> -->
+    </div>
+
+    <div class="divider line one-line">
+      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(0)">
+        常规设置
+        <Icon v-if="collapse[0]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </div>
+    <div class="disable-user-select" v-show="collapse[0]">
+      <div class="setting-group">
+        <div :style="{display: 'inline-block'}">
+          <span>窗体背景色</span>
+          <ColorPicker :value="background" @on-active-change="updateBackground" size="small" alpha />
+        </div>
+        <Divider type="vertical" />
+        <div :style="{display: 'inline-block'}">
+          <span :style="{'padding-right': '10px'}">整体透明度</span>
+          <div class="avatar-controller-slider">
+            <Slider :value="opacity" @on-change="changeOpacity"></Slider>
+          </div>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div :style="{display: 'inline-block'}">
+          <span>字体</span>
+          <Select :style="{ width: '100px', display: 'inline-block' }" :value="danmakuFont" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange" size="small">
+            <OptionGroup label="全局值">
+              <Option v-for="item in fonts.filter(
                       (font) => font.type === 'default'
                     )" :value="item.value" :key="item.key">{{ item.value }}</Option>
-                </OptionGroup>
-                <OptionGroup label="通用字体族">
-                  <Option v-for="item in fonts.filter(
+            </OptionGroup>
+            <OptionGroup label="通用字体族">
+              <Option v-for="item in fonts.filter(
                       (font) => font.type === 'common'
                     )" :value="item.value" :key="item.key">{{ item.value }}</Option>
-                </OptionGroup>
-                <OptionGroup label="系统">
-                  <Option v-for="item in fonts.filter(
+            </OptionGroup>
+            <OptionGroup label="系统">
+              <Option v-for="item in fonts.filter(
                       (font) => font.type === 'custom'
                     )" :value="item.value" :key="item.key">{{ item.value }}</Option>
-                </OptionGroup>
-              </Select>
-            </div>
-            <div>
-              <Checkbox :value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
-            </div>
-            <div>
-              <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
-            </div>
-            <div>
-              <Checkbox :value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
-            </div>
-            <div>
-              <Checkbox :value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
-            </div>
-            <div>
-              <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
-            </div>
+            </OptionGroup>
+          </Select>
+        </div>
+        <Divider type="vertical" />
+        <div :style="{display: 'inline-block'}">
+          <span :style="{'padding-right': '10px'}">头像大小</span>
+          <div class="avatar-controller-slider">
+            <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
           </div>
-        </Panel>
-        <Panel name="2">
-          普通
-          <div slot="content">
-            <template v-for="item in editors.filter((editor) => editor.role === 0)">
-              <div :key="item.id" class="setting-key">
-                <SettingEditor v-bind="item" />
+        </div>
+      </div>
+      <div class="setting-group">
+        <div :style="{display: 'inline-block'}">
+          <span>
+            <Tooltip placement="top" transfer>
+              重复弹幕合并
+              <div slot="content">
+                <div class="description-text">
+                  <p>多少毫秒内重复的弹幕将被合并</p>
+                </div>
               </div>
-            </template>
-          </div>
-        </Panel>
-        <Panel name="3">
-          舰长
-          <div slot="content">
-            <template v-for="item in editors.filter((editor) => editor.role === 3)">
-              <div :key="item.id" class="setting-key">
-                <SettingEditor v-bind="item" />
+            </Tooltip>
+          </span>
+          <InputNumber :value="combineSimilarTime" @on-change="changeCombineSimilarTime" :min="0" size="small" />
+          {{ " ms" }}
+        </div>
+        <Divider type="vertical" />
+        <div :style="{display: 'inline-block'}">
+          <span>
+            <Tooltip placement="top" transfer>
+              弹幕超时消失
+              <div slot="content">
+                <div class="description-text">
+                  <p>为 0 表示不消失</p>
+                </div>
               </div>
-            </template>
-          </div>
-        </Panel>
-      </Collapse>
-    </i-col>
-    <i-col span="16">
+            </Tooltip>
+          </span>
+          <InputNumber :value="hiddenExpiredTime" @on-change="changeHiddenExpiredTime" :min="0" size="small" />
+          {{ " ms" }}
+        </div>
+      </div>
+      <div class="setting-group">
+        <div :style="{display: 'inline-block'}">
+          <span>礼物栏展示大于</span>
+          <InputNumber :value="showHeadlineThreshold" @on-change="changeShowHeadlineThreshold" :min="0" size="small" />
+          {{ " 元" }}
+        </div>
+        <Divider type="vertical" />
+        <div :style="{display: 'inline-block'}">
+          <span>弹幕礼物展示大于</span>
+          <InputNumber :value="showGiftCardThreshold" @on-change="changeShowGiftCardThreshold" :min="0" size="small" />
+          {{ " 元" }}
+        </div>
+      </div>
+      <div class="setting-group">
+        <Button size='small' @click="openImageBorderModal">设置图片边框</Button>
+      </div>
+      <div class="setting-group">
+        <Checkbox :value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
+      </div>
+      <div class="setting-group">
+        <Checkbox :value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">显示顶部礼物栏</Checkbox>
+      </div>
+      <div class="setting-group">
+        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox>
+      </div>
+    </div>
+
+    <div class="divider line one-line">
+      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(1)">
+        角色：普通
+        <Icon v-if="collapse[1]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </div>
+    <div class="disable-user-select" v-show="collapse[1]">
+      <div class="setting-group">
+        名称:
+        <StyleEditor v-bind="editors[0]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[1]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[2]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[3]" />
+      </div>
+      <div class="setting-group">
+        内容:
+        <StyleEditor v-bind="editors[4]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[5]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[6]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[7]" />
+      </div>
+      <div class="setting-group">
+        整体:
+        <StyleEditor v-bind="editors[8]" />
+        <Divider type="vertical" />
+      </div>
+    </div>
+
+    <div class="divider line one-line">
+      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(2)">
+        角色：舰长及以上
+        <Icon v-if="collapse[2]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </div>
+    <div class="disable-user-select" v-show="collapse[2]">
+      <div class="setting-group">
+        名称:
+        <StyleEditor v-bind="editors[9]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[10]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[11]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[12]" />
+      </div>
+      <div class="setting-group">
+        内容:
+        <StyleEditor v-bind="editors[13]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[14]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[15]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[16]" />
+      </div>
+      <div class="setting-group">
+        整体:
+        <StyleEditor v-bind="editors[17]" />
+        <Divider type="vertical" />
+      </div>
+    </div>
+    <!-- </i-col> -->
+    <!-- <i-col span="16">
       <div class="setting-right">
         <div class="setting-right-header">
           <Button @click="sendTestMessage">发送测试弹幕</Button>
           <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button>
           <Button @click="clearDanmaku">清空弹幕池</Button>
         </div>
-        <!-- <div class="setting-right-content" :style="{ background: background }"> -->
         <iframe class="setting-right-content" id="preview-container" src="http://localhost:8081?example=true&port=8081" />
-        <!-- </div> -->
       </div>
-    </i-col>
-  </Row>
+    </i-col> -->
+    <!-- </Row> -->
+    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
+      <div :style="{ padding: '30px'}">
+        <span class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
+      </div>
+      <div class="images-container">
+        <template v-for="(item, index) in borderImages">
+          <div class="image-container" :key="index">
+            <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
+            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)" />
+          </div>
+        </template>
+        <label class="upload-file-container">
+          <input :style="{display: 'none'}" type="file" accept="image/*" @change="encodeImageFileAsURL" />
+          <Icon class="upload-file-icon" type="md-add" />
+        </label>
+      </div>
+      <div :style="{ padding: '5px 10px'}">
+        <span class="border-image-setting-text">边框宽度</span>
+        <InputNumber :value="borderWidthValue" :style="{width: '55px'}" @on-change="setBorderWidthValue"></InputNumber>
+      </div>
+      <div :style="{ padding: '5px 10px'}">
+        <span class="border-image-setting-text">
+          <Tooltip placement="top" transfer>
+            图片分割线
+            <div slot="content" :style="{ 'white-space': 'normal' }">
+              <p>border-image-slice属性会将图片分割为9个区域：四个角，四个边以及中心区域。四条切片线，从它们各自的侧面设置给定距离，控制区域的大小。</p>
+              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-slice</p>
+            </div>
+          </Tooltip>
+        </span>
+        <Input :value="borderImageSliceValue" :style="{width: '180px'}" @on-change="setBorderImageSliceValue"></Input>
+      </div>
+      <div :style="{ padding: '5px 10px'}">
+        <!-- https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-width -->
+        <span class="border-image-setting-text">图片边框宽度</span>
+        <Input :value="borderImageWidthValue" :style="{width: '180px'}" @on-change="setBorderImageWidthValue"></Input>
+      </div>
+      <div :style="{ padding: '5px 10px'}">
+        <span class="border-image-setting-text">
+          <Tooltip placement="top" transfer>
+            填充方式
+            <div slot="content" :style="{ 'white-space': 'normal' }">
+              <p>border-image-repeat定义图片如何填充边框。</p>
+              <p>可填值：stretch, repeat, round, space。</p>
+              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-repeat</p>
+            </div>
+          </Tooltip>
+        </span>
+        <Input :value="borderImageRepeatValue" :style="{width: '180px'}" @on-change="setBorderImageRepeatValue"></Input>
+      </div>
+    </Modal>
+  </div>
+
 </template>
 
 <script>
 import FontList from "font-list";
 import SettingEditor from "./SettingEditor";
+import StyleEditor from './StyleEditor'
+import FanMedal from "./FanMedal";
+import { Container, Draggable } from "vue-smooth-dnd";
 import {
   USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
+  GUARD_ICON_MAP,
+  DEFAULT_AVATAR
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
-import { mergeSetting, clearMessage, sendExampleMessages, restoreExampleMessage } from '../../service/api'
+import { cloneDeep, debounce } from 'lodash'
+import { mergeSetting, clearMessage, sendMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -146,19 +320,184 @@ const defaultFonts = [
 export default {
   components: {
     SettingEditor,
+    StyleEditor,
+    FanMedal,
+    Container,
+    Draggable,
   },
   data() {
     return {
-      collapse: ["1", "2", "3", "4"],
       USER_DATA_PATH: USER_DATA_PATH,
       fonts: defaultFonts,
+      example: { avatar: DEFAULT_AVATAR, "roomId": 21452505, "sendAt": 1628534054678, "uid": 37683400, "uname": "xxxxxxxx", "isAdmin": 0, "role": 0, "content": "示例弹幕示例弹幕示例弹幕示例弹幕示例弹幕~~~", "ML": 1, "MN": "脆鲨", "medalRoomId": 21452505, "MCB": "#5c968e", "MCS": "#5c968e", "MCE": "#5c968e", "_id": "020wdKl7EYV9c8cD" },
+      isShowBorderModal: false,
+      images: [],
+      selectedImageBorderIndex: 0,
+      collapse: [true, true, true],
+
+      // editors: [
+      //   // ***** normal *****
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "名称大小",
+      //     role: 0,
+      //     prop: "name",
+      //     styleName: "font-size",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "名称前景色",
+      //     role: 0,
+      //     prop: "name",
+      //     styleName: "color",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "名称描边大小",
+      //     role: 0,
+      //     prop: "name",
+      //     numberStep: 0.1,
+      //     styleName: "-webkit-text-stroke-width",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "名称描边颜色",
+      //     role: 0,
+      //     prop: "name",
+      //     styleName: "-webkit-text-stroke-color",
+      //   },
+
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "评论大小",
+      //     role: 0,
+      //     prop: "comment",
+      //     styleName: "font-size",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "评论前景色",
+      //     role: 0,
+      //     prop: "comment",
+      //     styleName: "color",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "评论描边大小",
+      //     role: 0,
+      //     prop: "comment",
+      //     numberStep: 0.1,
+      //     styleName: "-webkit-text-stroke-width",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "评论描边颜色",
+      //     role: 0,
+      //     prop: "comment",
+      //     styleName: "-webkit-text-stroke-color",
+      //   },
+
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "消息背景色",
+      //     role: 0,
+      //     prop: "message",
+      //     styleName: "background",
+      //   },
+      //   // ***** captain *****
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "名称大小",
+      //     role: 3,
+      //     prop: "name",
+      //     styleName: "font-size",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "名称前景色",
+      //     role: 3,
+      //     prop: "name",
+      //     styleName: "color",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "名称描边大小",
+      //     role: 3,
+      //     prop: "name",
+      //     numberStep: 0.1,
+      //     styleName: "-webkit-text-stroke-width",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "名称描边颜色",
+      //     role: 3,
+      //     prop: "name",
+      //     styleName: "-webkit-text-stroke-color",
+      //   },
+
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "评论大小",
+      //     role: 3,
+      //     prop: "comment",
+      //     styleName: "font-size",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "评论前景色",
+      //     role: 3,
+      //     prop: "comment",
+      //     styleName: "color",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "InputNumber",
+      //     name: "评论描边大小",
+      //     role: 3,
+      //     prop: "comment",
+      //     numberStep: 0.1,
+      //     styleName: "-webkit-text-stroke-width",
+      //   },
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "评论描边颜色",
+      //     role: 3,
+      //     prop: "comment",
+      //     styleName: "-webkit-text-stroke-color",
+      //   },
+
+      //   {
+      //     id: Math.random(),
+      //     type: "ColorPicker",
+      //     name: "消息背景色",
+      //     role: 3,
+      //     prop: "message",
+      //     styleName: "background",
+      //   },
+      // ],
 
       editors: [
         // ***** normal *****
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "名称大小",
+          name: "大小",
           role: 0,
           prop: "name",
           styleName: "font-size",
@@ -166,7 +505,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "名称前景色",
+          name: "颜色",
           role: 0,
           prop: "name",
           styleName: "color",
@@ -174,7 +513,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "名称描边大小",
+          name: "描边粗细",
           role: 0,
           prop: "name",
           numberStep: 0.1,
@@ -183,7 +522,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "名称描边颜色",
+          name: "描边颜色",
           role: 0,
           prop: "name",
           styleName: "-webkit-text-stroke-color",
@@ -192,7 +531,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "评论大小",
+          name: "大小",
           role: 0,
           prop: "comment",
           styleName: "font-size",
@@ -200,7 +539,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "评论前景色",
+          name: "颜色",
           role: 0,
           prop: "comment",
           styleName: "color",
@@ -208,7 +547,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "评论描边大小",
+          name: "描边粗细",
           role: 0,
           prop: "comment",
           numberStep: 0.1,
@@ -217,7 +556,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "评论描边颜色",
+          name: "描边颜色",
           role: 0,
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
@@ -226,16 +565,35 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "消息背景色",
+          name: "背景色",
           role: 0,
           prop: "message",
           styleName: "background",
         },
+
+        // {
+        //   id: Math.random(),
+        //   type: "ColorPicker",
+        //   name: "边框粗细",
+        //   role: 0,
+        //   prop: "message",
+        //   styleName: "background",
+        // },
+
+        // {
+        //   id: Math.random(),
+        //   type: "ColorPicker",
+        //   name: "边框颜色",
+        //   role: 0,
+        //   prop: "message",
+        //   styleName: "background",
+        // },
+
         // ***** captain *****
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "名称大小",
+          name: "大小",
           role: 3,
           prop: "name",
           styleName: "font-size",
@@ -243,7 +601,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "名称前景色",
+          name: "颜色",
           role: 3,
           prop: "name",
           styleName: "color",
@@ -251,7 +609,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "名称描边大小",
+          name: "描边粗细",
           role: 3,
           prop: "name",
           numberStep: 0.1,
@@ -260,7 +618,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "名称描边颜色",
+          name: "描边颜色",
           role: 3,
           prop: "name",
           styleName: "-webkit-text-stroke-color",
@@ -269,7 +627,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "评论大小",
+          name: "大小",
           role: 3,
           prop: "comment",
           styleName: "font-size",
@@ -277,7 +635,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "评论前景色",
+          name: "颜色",
           role: 3,
           prop: "comment",
           styleName: "color",
@@ -285,7 +643,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "评论描边大小",
+          name: "描边粗细",
           role: 3,
           prop: "comment",
           numberStep: 0.1,
@@ -294,7 +652,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "评论描边颜色",
+          name: "描边颜色",
           role: 3,
           prop: "comment",
           styleName: "-webkit-text-stroke-color",
@@ -303,7 +661,7 @@ export default {
         {
           id: Math.random(),
           type: "ColorPicker",
-          name: "消息背景色",
+          name: "背景色",
           role: 3,
           prop: "message",
           styleName: "background",
@@ -346,6 +704,10 @@ export default {
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
     },
+    hiddenExpiredTime() {
+      console.log(this.$store.state.Config.hiddenExpiredTime)
+      return this.$store.state.Config.hiddenExpiredTime;
+    },
     showHeadlineThreshold() {
       return this.$store.state.Config.showHeadlineThreshold;
     },
@@ -364,6 +726,47 @@ export default {
     userCookie() {
       return this.$store.state.Config.userCookie;
     },
+    avatarSizeStyle() {
+      return {
+        width: `${this.avatarSize}px`,
+        height: `${this.avatarSize}px`,
+        "line-height": `${this.avatarSize}px`,
+      };
+    },
+    borderImages() {
+      return this.$store.state.Config.borderImages;
+    },
+    borderImageStyle() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return {}
+      return {
+        'border-width': `${image['border-width']}px`,
+        'border-image-width': image['border-image-width'],
+        'border-image-repeat': image['border-image-repeat'],
+        'border-image-slice': image['border-image-slice'],
+        'border-image-source': `url(${image.dataUrl})`
+      }
+    },
+    borderImageSliceValue() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return ''
+      return image['border-image-slice']
+    },
+    borderWidthValue() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return 0
+      return image['border-width']
+    },
+    borderImageWidthValue() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return ''
+      return image['border-image-width']
+    },
+    borderImageRepeatValue() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return ''
+      return image['border-image-repeat']
+    }
   },
   methods: {
     async showMemberShipIcon(status) {
@@ -383,7 +786,7 @@ export default {
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
-      await sendExampleMessages({
+      await sendMessages({
         category: randomMessage.category,
         data: randomMessage
       })
@@ -419,6 +822,14 @@ export default {
     async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeHiddenExpiredTime(number) {
+      const data = {
+        hiddenExpiredTime: number,
       }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
@@ -572,11 +983,150 @@ export default {
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
+
+    getGuardIcon(level) {
+      return GUARD_ICON_MAP[level];
+    },
+
+    openImageBorderModal() {
+      this.isShowBorderModal = true
+    },
+
+    encodeImageFileAsURL(e) {
+      const self = this
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      reader.onloadend = function () {
+        const dataUrl = reader.result
+        self.$store.dispatch("UPDATE_CONFIG", {
+          borderImages: [...self.borderImages, {
+            dataUrl: dataUrl,
+            isSelected: self.borderImages.length ? false : true,
+            'border-width': 30,
+            'border-image-width': '1',
+            'border-image-slice': '30',
+            'border-image-repeat': 'stretch'
+          }]
+        })
+      }
+      reader.readAsDataURL(file)
+    },
+
+    selectImageBorder(index) {
+      const borderImages = cloneDeep(this.borderImages)
+      borderImages.forEach(item => {
+        item.isSelected = false
+      })
+      borderImages[index].isSelected = true
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    deleteBorderImage(index) {
+      const borderImages = this.borderImages.filter((_, i) => {
+        return i !== index
+      })
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    setBorderImageSliceValue(e) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image['border-image-slice'] = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    setBorderWidthValue(number) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image['border-width'] = number
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    setBorderImageWidthValue(e) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image['border-image-width'] = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    setBorderImageRepeatValue(e) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image['border-image-repeat'] = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
+    applyBorderImageSetting() {
+
+    },
+
+    showDanmakuWindow(status) {
+      // const { x, y } = screen.getCursorScreenPoint();
+      this.isShowDanmakuWindowLoading = true;
+
+      if (status) {
+        this.win = new BrowserWindow({
+          width: this.windowWidth || 480,
+          height: this.windowHeight || 540,
+          // x, y,
+          x: this.windowX || 0,
+          y: this.windowY || 0,
+          frame: false,
+          transparent: true,
+          hasShadow: false,
+          webPreferences: {
+            nodeIntegration: true,
+          },
+          resizable: true,
+        });
+
+        const winURL =
+          process.env.NODE_ENV === "development"
+            ? `http://localhost:${PORT}?port=${PORT}`
+            : `http://localhost:${PORT}?port=${PORT}`;
+        this.win.loadURL(winURL);
+        this.win.on("close", (e) => {
+          this.isShowDanmakuWindow = false;
+          this.isShowDanmakuWindowLoading = false;
+        });
+        // 初始化时清空弹幕池
+        this.$store.dispatch("CLEAR_MESSAGE");
+        this.isShowDanmakuWindow = true;
+        this.isShowDanmakuWindowLoading = false;
+      } else {
+        if (!this.win) return;
+        this.win.close();
+        this.win = null;
+      }
+    },
+
+    changeCollapse(index) {
+      console.log(index)
+      const collapse = [...this.collapse]
+      collapse[index] = !collapse[index]
+      this.collapse = collapse
+    },
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .setting-key {
   padding-top: 5px;
 }
@@ -606,5 +1156,120 @@ export default {
 }
 .setting-checkbox {
   vertical-align: top;
+}
+.guard-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: middle;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+// .divider {
+//   display: flex;
+// }
+
+.divider {
+  display: flex;
+
+  &:before,
+  &:after {
+    content: "";
+    flex: 1;
+  }
+}
+
+.line {
+  align-items: center;
+
+  &:before,
+  &:after {
+    height: 1px;
+    margin: 0 1em;
+  }
+}
+
+.one-line {
+  &:before,
+  &:after {
+    background: silver;
+  }
+}
+
+.upload-file-container {
+  border: 1px dashed silver;
+  display: inline-block;
+  cursor: pointer;
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+.upload-file-icon {
+  font-size: 24px;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+}
+
+.images-container {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.disable-user-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.image-container {
+  display: inline-block;
+  position: relative;
+  padding: 5px;
+}
+
+.image {
+  width: 80px;
+  height: 80px;
+  border: 2px solid silver;
+  cursor: pointer;
+}
+
+.image-selected {
+  border: 2px solid orange;
+}
+
+.close-icon {
+  color: crimson;
+  position: absolute;
+  font-size: 16px;
+  top: 0;
+  right: 0;
+}
+
+.border-image-default {
+  border-style: solid;
+  border-color: transparent;
+}
+
+.border-image-setting-text {
+  display: inline-block;
+  width: 90px;
+}
+
+.setting-group {
+  padding: 3px 20px;
+}
+
+.operatable-preview-text {
+  display: inline-block;
+  -webkit-user-select: none;
+  user-select: none;
+
+  & .smooth-dnd-draggable-wrapper {
+    cursor: move;
+  }
 }
 </style>

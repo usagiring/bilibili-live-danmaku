@@ -196,6 +196,7 @@ export const DEFAULT_STYLE = {
   isShowFanMedal: true,
   avatarSize: 24,
   combineSimilarTime: 3000,
+  hiddenExpiredTime: 0,
   showHeadlineThreshold: 30,
   isShowInteractInfo: false,
   showGiftCardThreshold: 0,
@@ -279,7 +280,8 @@ export const DEFAULT_CONFIG = {
   historyRooms: [],
   isAutoReply: false,
   autoReplyRules: [
-  ]
+  ],
+  borderImages: []
 }
 
 export const DEFAULT_SERVER_CONFIG = {

@@ -120,6 +120,18 @@
       <InputNumber v-model="voiceSpeed" @on-change="onChangeVoiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
     </div>
 
+    <div class="config-item-container">
+      色彩表
+    </div>
+
+    <div class="config-item-container">
+      获取头像速率限制
+    </div>
+
+    <div class="config-item-container">
+      弹幕窗置顶等级
+    </div>
+
     <!-- <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
       <template v-for="(rule, index) in advancedAutoReplyRules">
         <div :key="index" :style="{'margin-bottom': '10px'}">
