@@ -2,21 +2,25 @@
   <div :style="{display: 'inline-block'}">
     <span>{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
+      <InputNumber :value="value" @on-change="debouncedUpdateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
+      <ColorPicker :value="value" @on-active-change="debouncedUpdateStyle" size="small" alpha />
     </template>
   </div>
 </template>
 
 <script>
+import { debounce } from 'lodash'
 import { mergeSetting } from '../../service/api'
 
 export default {
   props: ["type", "name", "role", "prop", "styleName", "numberStep"],
   data() {
     return {};
+  },
+  created() {
+    this.debouncedUpdateStyle = debounce(this.updateStyle, 100)
   },
   computed: {
     value() {

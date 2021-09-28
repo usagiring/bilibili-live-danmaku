@@ -2,31 +2,33 @@
   <!-- <Row> -->
   <!-- <i-col span="8"> -->
   <div>
-    <div class="setting-group" :style="{'padding-top': '10px'}">
+    <div class="setting-group images-container" :style="{'padding-top': '10px'}">
       <!-- <Button @click="restoreExampleDanmaku">打开预览弹幕窗</Button> -->
       <Button @click="sendTestMessage" size="small">发送测试弹幕</Button>
       <Button @click="clearDanmaku" size="small">清空弹幕</Button>
       <!-- <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button> -->
     </div>
     <div class="setting-group ">
-      <div class="border-image-default operatable-preview-text" :style="borderImageStyle">
-        <Container orientation="horizontal" :style="{'min-height': '0px'}">
-          <Draggable v-if="isShowMemberShipIcon" :style="{'vertical-align': 'middle'}">
-            <i v-if="isShowMemberShipIcon" class="guard-icon" :style="{'background-image': `url(${getGuardIcon('3')})`}"></i>
-          </Draggable>
-          <Draggable v-if="isShowFanMedal" :style="{'vertical-align': 'middle'}">
-            <FanMedal v-if="example.ML && example.MN" :medalLevel="example.ML" :medalName="example.MN" :medalColorStart="example.MCS" :medalColorEnd="example.MCE" :medalColorBorder="example.MCB"></FanMedal>
-          </Draggable>
-          <Draggable v-if="isShowAvatar" :style="{'vertical-align': 'middle'}">
-            <Avatar v-if="isShowAvatar" :src="example.avatar" :style="avatarSizeStyle" />
-          </Draggable>
-          <Draggable :style="{'vertical-align': 'middle', 'padding': '0 2px'}">
-            <span>{{ `${example.uname}` }}:</span>
-          </Draggable>
-          <Draggable :style="{'vertical-align': 'middle'}">
-            <img v-if="example.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="example.emojiUrl" />
-            <span v-else>{{ example.content }}</span>
-          </Draggable>
+      <div class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
+        <Container @drop="onDrop($event)" orientation="horizontal" :style="{'min-height': '0px'}">
+          <template v-for="(setting, index) of messageSettings">
+            <Draggable :key="index" v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle">
+              <i class="guard-icon" :style="{'background-image': `url(${getGuardIcon('3')})`}"></i>
+            </Draggable>
+            <Draggable :key="index" v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle">
+              <FanMedal v-if="example.ML && example.MN" :medalLevel="example.ML" :medalName="example.MN" :medalColorStart="example.MCS" :medalColorEnd="example.MCE" :medalColorBorder="example.MCB"></FanMedal>
+            </Draggable>
+            <Draggable :key="index" v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle">
+              <Avatar :src="example.avatar" :style="avatarSizeStyle" />
+            </Draggable>
+            <Draggable :key="index" v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
+              <span>{{ `${example.uname}` }}:</span>
+            </Draggable>
+            <Draggable :key="index" v-if="setting.type==='comment'" class="vertical-align-middle">
+              <img v-if="example.emojiUrl" :style="{  height: '20px' }" :src="example.emojiUrl" />
+              <span v-else :style="{...comment_lv3, ...fontStyle}">{{ example.content }}</span>
+            </Draggable>
+          </template>
         </Container>
       </div>
       <!-- <span>{{ `: ${comment.comment}` }}</span> -->
@@ -59,31 +61,35 @@
       </div>
       <div class="setting-group">
         <div :style="{display: 'inline-block'}">
+          <span :style="{'padding-right': '10px'}">头像大小</span>
+          <div class="avatar-controller-slider">
+            <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
+          </div>
+        </div>
+      </div>
+      <div class="setting-group">
+        <div :style="{display: 'inline-block'}">
           <span>字体</span>
           <Select :style="{ width: '100px', display: 'inline-block' }" :value="danmakuFont" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange" size="small">
             <OptionGroup label="全局值">
-              <Option v-for="item in fonts.filter(
-                      (font) => font.type === 'default'
-                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'default')" :value="item.value" :key="item.key">{{ item.value }}</Option>
             </OptionGroup>
             <OptionGroup label="通用字体族">
-              <Option v-for="item in fonts.filter(
-                      (font) => font.type === 'common'
-                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'common')" :value="item.value" :key="item.key">{{ item.value }}</Option>
             </OptionGroup>
             <OptionGroup label="系统">
-              <Option v-for="item in fonts.filter(
-                      (font) => font.type === 'custom'
-                    )" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :value="item.value" :key="item.key">{{ item.value }}</Option>
             </OptionGroup>
           </Select>
         </div>
         <Divider type="vertical" />
         <div :style="{display: 'inline-block'}">
-          <span :style="{'padding-right': '10px'}">头像大小</span>
-          <div class="avatar-controller-slider">
-            <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
-          </div>
+          <span>粗细</span>
+          <Select :style="{ width: '100px', display: 'inline-block' }" :value="fontWeight" @on-change="changeFontWeight" size="small">
+            <Option v-for="(option, index) in fontWeightOptions" :value="option.key" :key="index" :label="option.label">
+              <span>{{ option.value }}</span>
+            </Option>
+          </Select>
         </div>
       </div>
       <div class="setting-group">
@@ -161,7 +167,7 @@
     </div>
     <div class="disable-user-select" v-show="collapse[1]">
       <div class="setting-group">
-        名称:
+        名称：
         <StyleEditor v-bind="editors[0]" />
         <Divider type="vertical" />
         <StyleEditor v-bind="editors[1]" />
@@ -171,7 +177,7 @@
         <StyleEditor v-bind="editors[3]" />
       </div>
       <div class="setting-group">
-        内容:
+        内容：
         <StyleEditor v-bind="editors[4]" />
         <Divider type="vertical" />
         <StyleEditor v-bind="editors[5]" />
@@ -181,7 +187,7 @@
         <StyleEditor v-bind="editors[7]" />
       </div>
       <div class="setting-group">
-        整体:
+        整体：
         <StyleEditor v-bind="editors[8]" />
         <Divider type="vertical" />
       </div>
@@ -196,7 +202,7 @@
     </div>
     <div class="disable-user-select" v-show="collapse[2]">
       <div class="setting-group">
-        名称:
+        名称：
         <StyleEditor v-bind="editors[9]" />
         <Divider type="vertical" />
         <StyleEditor v-bind="editors[10]" />
@@ -206,7 +212,7 @@
         <StyleEditor v-bind="editors[12]" />
       </div>
       <div class="setting-group">
-        内容:
+        内容：
         <StyleEditor v-bind="editors[13]" />
         <Divider type="vertical" />
         <StyleEditor v-bind="editors[14]" />
@@ -216,7 +222,7 @@
         <StyleEditor v-bind="editors[16]" />
       </div>
       <div class="setting-group">
-        整体:
+        整体：
         <StyleEditor v-bind="editors[17]" />
         <Divider type="vertical" />
       </div>
@@ -283,6 +289,18 @@
         </span>
         <Input :value="borderImageRepeatValue" :style="{width: '180px'}" @on-change="setBorderImageRepeatValue"></Input>
       </div>
+      <div :style="{ padding: '5px 10px'}">
+        <span class="border-image-setting-text">
+          <Tooltip placement="top" transfer>
+            outset
+            <div slot="content" :style="{ 'white-space': 'normal' }">
+              <p>border-image-outset属性定义边框图像可超出边框盒的大小。</p>
+              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-outset</p>
+            </div>
+          </Tooltip>
+        </span>
+        <Input :value="borderImageOutsetValue" :style="{width: '180px'}" @on-change="setBorderImageOutsetValue"></Input>
+      </div>
     </Modal>
   </div>
 
@@ -329,11 +347,49 @@ export default {
     return {
       USER_DATA_PATH: USER_DATA_PATH,
       fonts: defaultFonts,
-      example: { avatar: DEFAULT_AVATAR, "roomId": 21452505, "sendAt": 1628534054678, "uid": 37683400, "uname": "xxxxxxxx", "isAdmin": 0, "role": 0, "content": "示例弹幕示例弹幕示例弹幕示例弹幕示例弹幕~~~", "ML": 1, "MN": "脆鲨", "medalRoomId": 21452505, "MCB": "#5c968e", "MCS": "#5c968e", "MCE": "#5c968e", "_id": "020wdKl7EYV9c8cD" },
+      example: {
+        avatar: DEFAULT_AVATAR,
+        "roomId": 0,
+        "sendAt": 1628534054678,
+        "uid": 1,
+        "uname": "测试账号",
+        "isAdmin": 0,
+        "role": 0,
+        "content": "这是一条舰长的测试弹幕，可拖拽改变字段顺序~",
+        "ML": 21,
+        "MN": "测试者",
+        "medalRoomId": 21452505,
+        "MCB": "#5c968e",
+        "MCS": "#5c968e",
+        "MCE": "#5c968e",
+        "_id": "020wdKl7EYV9c8cD"
+      },
       isShowBorderModal: false,
       images: [],
       selectedImageBorderIndex: 0,
       collapse: [true, true, true],
+      fontWeightOptions: [
+        {
+          key: 'lighter',
+          label: 'lighter',
+          value: 'lighter',
+        },
+        {
+          key: 'normal',
+          label: 'normal',
+          value: 'normal',
+        },
+        {
+          key: 'bold',
+          label: 'bold',
+          value: 'bold',
+        },
+        {
+          key: 'bolder',
+          label: 'bolder',
+          value: 'bolder',
+        },
+      ],
 
       // editors: [
       //   // ***** normal *****
@@ -687,25 +743,28 @@ export default {
       return this.$store.state.Config.danmakuFont;
     },
     isShowAvatar() {
-      return this.$store.state.Config.isShowAvatar;
+      const settings = this.$store.state.Config.messageSettings
+      return settings.find(setting => setting.type === 'avatar').isShow
     },
     isShowMemberShipIcon() {
-      return this.$store.state.Config.isShowMemberShipIcon;
+      const settings = this.$store.state.Config.messageSettings
+      return settings.find(setting => setting.type === 'guard').isShow
     },
     isShowInteractInfo() {
       return this.$store.state.Config.isShowInteractInfo;
     },
     isShowFanMedal() {
-      return this.$store.state.Config.isShowFanMedal;
+      const settings = this.$store.state.Config.messageSettings
+      return settings.find(setting => setting.type === 'medal').isShow
     },
     avatarSize() {
-      return this.$store.state.Config.avatarSize;
+      const settings = this.$store.state.Config.messageSettings
+      return settings.find(setting => setting.type === 'avatar').size
     },
     combineSimilarTime() {
       return this.$store.state.Config.combineSimilarTime;
     },
     hiddenExpiredTime() {
-      console.log(this.$store.state.Config.hiddenExpiredTime)
       return this.$store.state.Config.hiddenExpiredTime;
     },
     showHeadlineThreshold() {
@@ -720,8 +779,14 @@ export default {
     isUseMiniGiftCard() {
       return this.$store.state.Config.isUseMiniGiftCard;
     },
+    fontWeight() {
+      return this.$store.state.Config.fontWeight;
+    },
     opacity() {
       return this.$store.state.Config.opacity * 100;
+    },
+    messageSettings() {
+      return this.$store.state.Config.messageSettings;
     },
     userCookie() {
       return this.$store.state.Config.userCookie;
@@ -744,6 +809,7 @@ export default {
         'border-image-width': image['border-image-width'],
         'border-image-repeat': image['border-image-repeat'],
         'border-image-slice': image['border-image-slice'],
+        'border-image-outset': image['border-image-outset'],
         'border-image-source': `url(${image.dataUrl})`
       }
     },
@@ -766,16 +832,44 @@ export default {
       const image = this.borderImages.find(image => image.isSelected)
       if (!image) return ''
       return image['border-image-repeat']
+    },
+    borderImageOutsetValue() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return ''
+      return image['border-image-outset']
+    },
+    message_lv3() {
+      return this.$store.state.Config.message_lv3;
+    },
+    name_lv3() {
+      return this.$store.state.Config.name_lv3;
+    },
+    comment_lv3() {
+      return this.$store.state.Config.comment_lv3;
+    },
+    fontStyle() {
+      return {
+        'font-family': this.danmakuFont,
+        'font-weight': this.fontWeight,
+      }
     }
   },
   methods: {
     async showMemberShipIcon(status) {
-      const data = { isShowMemberShipIcon: status, }
+      const settings = cloneDeep(this.messageSettings)
+      const setting = settings.find(setting => setting.type === 'guard')
+      setting.isShow = status
+
+      const data = { messageSettings: settings }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async showFanMedal(status) {
-      const data = { isShowFanMedal: status }
+      const settings = cloneDeep(this.messageSettings)
+      const setting = settings.find(setting => setting.type === 'medal')
+      setting.isShow = status
+
+      const data = { messageSettings: settings }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
@@ -800,14 +894,19 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeAvatarSize(size) {
-      const data = {
-        avatarSize: size,
-      }
+      // const data = {
+      //   avatarSize: size,
+      // }
+      const settings = cloneDeep(this.messageSettings)
+      const setting = settings.find(setting => setting.type === 'avatar')
+      setting.size = size
       if (size === 0) {
-        data.isShowAvatar = false
+        setting.isShow = false
       } else {
-        data.isShowAvatar = true
+        setting.isShow = true
       }
+
+      const data = { messageSettings: settings }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
@@ -1005,7 +1104,8 @@ export default {
             'border-width': 30,
             'border-image-width': '1',
             'border-image-slice': '30',
-            'border-image-repeat': 'stretch'
+            'border-image-repeat': 'stretch',
+            'border-image-outset': '0',
           }]
         })
       }
@@ -1072,6 +1172,16 @@ export default {
       })
     },
 
+    setBorderImageOutsetValue(e) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image['border-image-outset'] = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
+    },
+
     applyBorderImageSetting() {
 
     },
@@ -1117,11 +1227,51 @@ export default {
     },
 
     changeCollapse(index) {
-      console.log(index)
       const collapse = [...this.collapse]
       collapse[index] = !collapse[index]
       this.collapse = collapse
     },
+
+    async onDrop(dropResult) {
+      const { addedIndex, removedIndex, payload } = dropResult
+      if (removedIndex === null && addedIndex === null) return
+
+      const messageSettings = [...this.messageSettings]
+      const hiddenItems = messageSettings.map((setting, index) => {
+        if (!setting.isShow) {
+          return {
+            index,
+            data: setting
+          }
+        }
+      }).filter(Boolean)
+      const displayItems = messageSettings.filter(setting => setting.isShow)
+
+      let itemToAdd
+      if (removedIndex !== null) {
+        itemToAdd = displayItems.splice(removedIndex, 1)[0]
+      }
+      if (addedIndex !== null) {
+        displayItems.splice(addedIndex, 0, itemToAdd)
+      }
+
+      hiddenItems.forEach(item => {
+        displayItems.splice(item.index, 0, item.data)
+      })
+      const data = {
+        messageSettings: displayItems,
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeFontWeight(value) {
+      const data = {
+        fontWeight: value,
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    }
   },
 };
 </script>
@@ -1222,6 +1372,10 @@ export default {
 .disable-user-select {
   -webkit-user-select: none;
   user-select: none;
+}
+
+.vertical-align-middle {
+  vertical-align: middle !important;
 }
 
 .image-container {

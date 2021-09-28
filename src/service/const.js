@@ -279,9 +279,31 @@ export const DEFAULT_CONFIG = {
   optionstring: "{A}\n{B}\n{C}",
   historyRooms: [],
   isAutoReply: false,
+  fontWeight: 'normal',
   autoReplyRules: [
   ],
-  borderImages: []
+  borderImages: [],
+  messageSettings: [{
+    type: 'guard',
+    isShow: true,
+  },
+  {
+    type: 'medal',
+    isShow: true,
+  },
+  {
+    type: 'avatar',
+    isShow: true,
+    size: 24,
+  },
+  {
+    type: 'name',
+    isShow: true,
+  },
+  {
+    type: 'comment',
+    isShow: true,
+  }],
 }
 
 export const DEFAULT_SERVER_CONFIG = {
