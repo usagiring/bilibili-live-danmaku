@@ -283,6 +283,10 @@ export const DEFAULT_CONFIG = {
   autoReplyRules: [
   ],
   borderImages: [],
+  colors: [],
+  userInfoFrequencyLimit: 1000,
+  onTopLevel: 'floating',
+  isOnTopForce: false,
   messageSettings: [{
     type: 'guard',
     isShow: true,

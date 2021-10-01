@@ -161,7 +161,6 @@ import {
   IPC_DOWNLOAD_UPDATE,
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
-  SET_DANMAKU_ON_TOP_LEVEL,
   DEFAULT_RECORD_DIR,
   MAX_HISTORY_ROOM,
   PORT
@@ -349,6 +348,12 @@ export default {
     isWatchLottery() {
       return this.$store.state.Config.isWatchLottery;
     },
+    onTopLevel() {
+      return this.$store.state.Config.onTopLevel
+    },
+    isOnTopForce() {
+      return this.$store.state.Config.isOnTopForce
+    }
   },
   methods: {
     async connect(status) {
@@ -548,13 +553,29 @@ export default {
         this.isShowDanmakuWindowLoading = false;
       } else {
         if (!this.win) return;
+        // clear
+        if (this.checkOnTopInterval) {
+          clearInterval(this.checkOnTopInterval)
+          this.checkOnTopInterval = null
+        }
         this.win.close();
         this.win = null;
       }
     },
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
-      this.win.setAlwaysOnTop(status, SET_DANMAKU_ON_TOP_LEVEL);
+      // this.win.setVisibleOnAllWorkspaces(true)
+      if (this.isOnTopForce && status) {
+        this.checkOnTopInterval = setInterval(() => {
+          if (!this.win) return
+          this.win.moveTop()
+        }, 1000)
+      } else if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      this.win.setAlwaysOnTop(status, this.onTopLevel);
+      // this.win.setFullScreenable(false)
       this.win.setIgnoreMouseEvents(status, { forward: true });
       this.$store.dispatch("UPDATE_CONFIG", {
         isAlwaysOnTop: status,

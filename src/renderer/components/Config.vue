@@ -121,52 +121,79 @@
     </div>
 
     <div class="config-item-container">
-      色彩表
-    </div>
-
-    <div class="config-item-container">
-      获取头像速率限制
-    </div>
-
-    <div class="config-item-container">
-      弹幕窗置顶等级
-    </div>
-
-    <!-- <Modal v-model="advancedAutoReplyRuleModal" title="高级规则" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
-      <template v-for="(rule, index) in advancedAutoReplyRules">
-        <div :key="index" :style="{'margin-bottom': '10px'}">
-          <Select :style="{ width: '100px', display: 'inline-block' }" v-model="rule.giftId" filterable transfer>
-            <Option v-for="gift in giftSelectors" :value="gift.key" :key="gift.key" :label="gift.label">
-              <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp" />
-              <span>{{ gift.value }}</span>
-              <span :style="{color: 'silver'}">{{ `id: ${gift.key}` }}</span>
-            </Option>
-          </Select>
-          <span> >= </span>
-          <InputNumber v-model="rule.giftNumber" :min="0" :style="{ width: '50px' }" />
-          <Input v-model="rule.text" placeholder="回复内容..." :style="{display: 'inline-block', width: '300px'}" />
-          <Checkbox v-model="rule.isTextReply" :disabled="!userCookie">文字</Checkbox>
-          <Checkbox v-model="rule.isSpeakReply">语音</Checkbox>
-          <Icon type="md-close" class="close-icon" @click="removeAutoReplyRule(index)" />
+      <Tooltip placement="top" transfer>
+        色彩表
+        <div slot="content" :style="{ 'white-space': 'normal' }">
+          <p>控制图表、炫彩模式可选色</p>
         </div>
-      </template>
-      <Button @click="addAutoReplyRule" type="primary" long>
-        <Icon :style="{'font-weight': 'bold'}" type="md-add" />
-      </Button>
-      <div slot="footer">
-        <Button type="primary" @click="submitAutoReplyRules">确定</Button>
-        <Button type="error" @click="restoreDefaultAutoReplyRule">清空</Button>
-      </div>
-    </Modal> -->
+      </Tooltip>
+      <Select class="color-selector" :value="colors" multiple filterable allow-create @on-change="onChangeColor">
+        <Option v-for="option in colorOptions" :value="option.value" :key="option.index" :label="option.label">
+          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px'}"></span>
+          <span>{{ option.label }}</span>
+        </Option>
+      </Select>
+    </div>
+
+    <div class="config-item-container">
+      <Tooltip placement="top" transfer>
+        获取头像速率限制
+        <div slot="content" :style="{ 'white-space': 'normal' }">
+          <div>
+            <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值 </p>
+          </div>
+        </div>
+      </Tooltip>
+      <InputNumber :value="userInfoFrequencyLimit" @on-change="onChangeUserInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" />
+    </div>
+
+    <div class="config-item-container">
+      <Tooltip placement="top" transfer>
+        弹幕窗置顶等级
+        <div slot="content" :style="{ 'white-space': 'normal' }">
+          <div>
+            <p> 从上到下优先级依次升高 </p>
+            <p>
+              <span :style="{color: 'pink'}">screen-saver</span>
+              为最高置顶等级
+            </p>
+          </div>
+        </div>
+      </Tooltip>
+      <Select class="on-top-level-selector" :value="onTopLevel" @on-change="onChangeOnTopLevel" :style="{ width: '200px' }">
+        <Option v-for="(option, index) in opTopLevelOptions" :value="option" :key="index" :label="option">
+          <span>{{ option }}</span>
+        </Option>
+      </Select>
+      <Checkbox :value="isOnTopForce" @on-change="onChangeIsOnTopForce">
+        <Tooltip placement="top" transfer>
+          强制置顶
+          <div slot="content" :style="{ 'white-space': 'normal' }">
+            <div>
+              <p>如遇到全屏场景下无法展示弹幕窗，可尝试勾选该项</p>
+              <p>该选项将多次尝试置顶弹幕窗口。</p>
+              <p> <span :style="{color: 'pink'}">仅在必要时使用</span> </p>
+            </div>
+          </div>
+        </Tooltip>
+      </Checkbox>
+      <Tooltip placement="top" content="实验性功能，可能不稳定">
+        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+          <Icon type="ios-flask" />
+        </span>
+      </Tooltip>
+    </div>
   </div>
 </template>
 
 <script>
 import { remote } from "electron";
+import { uniq } from 'lodash'
 const window = remote.getCurrentWindow();
 import {
   USER_DATA_PATH,
   DEFAULT_STYLE,
+  COLORS
 } from "../../service/const";
 
 import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
@@ -183,7 +210,8 @@ export default {
       voices: [],
       currentVoice: '',
       text: '',
-      voiceSpeed: 1.0
+      voiceSpeed: 1.0,
+      opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver']
     };
   },
   async mounted() {
@@ -239,6 +267,28 @@ export default {
     },
     isSpeakReply() {
       return this.$store.state.Config.autoReplyRules[0].isSpeakReply;
+    },
+    colors() {
+      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS;
+    },
+    colorOptions() {
+      const color = uniq(COLORS, this.colors)
+      return color.map((color, index) => {
+        return {
+          key: index,
+          value: color,
+          label: color
+        }
+      })
+    },
+    userInfoFrequencyLimit() {
+      return this.$store.state.Config.userInfoFrequencyLimit
+    },
+    onTopLevel() {
+      return this.$store.state.Config.onTopLevel
+    },
+    isOnTopForce() {
+      return this.$store.state.Config.isOnTopForce
     }
   },
   methods: {
@@ -344,14 +394,6 @@ export default {
       this.advancedAutoReplyRules.splice(index, 1)
     },
 
-    async changeAutoReply(status) {
-      const data = {
-        isAutoReply: status
-      }
-      await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
-    },
-
     async changeOnlyMyselfRoom(status) {
       const data = {
         onlyMyselfRoom: status
@@ -404,6 +446,39 @@ export default {
         voice: this.currentVoice,
         speed: this.voiceSpeed
       })
+    },
+
+    async onChangeColor(value) {
+      if (!value.length) {
+        this.$Message.warning('至少需要一个值')
+      }
+      const data = {
+        colors: value
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async onChangeUserInfoFrequencyLimit(value) {
+      const data = {
+        userInfoFrequencyLimit: value
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    onChangeOnTopLevel(value) {
+      const data = {
+        onTopLevel: value
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    onChangeIsOnTopForce(value) {
+      const data = {
+        isOnTopForce: value
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
     }
   }
 };
@@ -430,5 +505,9 @@ export default {
 
 .settings-icon:hover {
   color: deepskyblue;
+}
+
+.color-selector {
+  width: 700px;
 }
 </style>
