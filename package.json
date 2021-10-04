@@ -81,8 +81,8 @@
     ]
   },
   "dependencies": {
-    "@tokine/bilibili-bridge": "^0.0.18",
-    "@tokine/bilibili-danmaku-page": "^0.1.4",
+    "@tokine/bilibili-bridge": "^0.0.19",
+    "@tokine/bilibili-danmaku-page": "^0.1.5",
     "@tokine/bilibili-recorder": "^0.0.9",
     "axios": "^0.21.1",
     "cookie": "^0.4.1",

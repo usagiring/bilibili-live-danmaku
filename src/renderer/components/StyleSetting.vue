@@ -9,7 +9,7 @@
       <!-- <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button> -->
     </div>
     <div class="setting-group ">
-      <div class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
+      <div :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
         <Container @drop="onDrop($event)" orientation="horizontal" :style="{'min-height': '0px'}">
           <template v-for="(setting, index) of messageSettings">
             <Draggable :key="index" v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle">
@@ -22,7 +22,10 @@
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </Draggable>
             <Draggable :key="index" v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
-              <span>{{ `${example.uname}` }}:</span>
+              <span>{{ `${example.uname}` }}</span>
+            </Draggable>
+            <Draggable :key="index" v-if="setting.type==='colon' && setting.isShow" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
+              <span>：</span>
             </Draggable>
             <Draggable :key="index" v-if="setting.type==='comment'" class="vertical-align-middle">
               <img v-if="example.emojiUrl" :style="{  height: '20px' }" :src="example.emojiUrl" />
@@ -49,7 +52,7 @@
       <div class="setting-group">
         <div :style="{display: 'inline-block'}">
           <span>窗体背景色</span>
-          <ColorPicker :value="background" @on-active-change="updateBackground" size="small" alpha />
+          <ColorPicker transfer :value="background" @on-active-change="debouncedUpdateBackground" size="small" alpha />
         </div>
         <Divider type="vertical" />
         <div :style="{display: 'inline-block'}">
@@ -114,7 +117,7 @@
               弹幕超时消失
               <div slot="content">
                 <div class="description-text">
-                  <p>为 0 表示不消失</p>
+                  <p>为 0 表示不消失，请至少设置2000以上</p>
                 </div>
               </div>
             </Tooltip>
@@ -149,12 +152,13 @@
       <div class="setting-group">
         <Checkbox :value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+        <Checkbox :value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">显示顶部礼物栏</Checkbox>
+        <Checkbox :value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
       </div>
       <div class="setting-group">
-        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox>
+        <!-- <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
+        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
       </div>
     </div>
 
@@ -240,8 +244,8 @@
     </i-col> -->
     <!-- </Row> -->
     <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
-      <div :style="{ padding: '30px'}">
-        <span class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
+      <div :style="{ padding: '20px'}">
+        <span :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
       </div>
       <div class="images-container">
         <template v-for="(item, index) in borderImages">
@@ -250,10 +254,13 @@
             <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)" />
           </div>
         </template>
-        <label class="upload-file-container">
+        <label v-if="borderImages.length< 4" class="upload-file-container">
           <input :style="{display: 'none'}" type="file" accept="image/*" @change="encodeImageFileAsURL" />
           <Icon class="upload-file-icon" type="md-add" />
         </label>
+      </div>
+      <div :style="{ padding: '5px 10px'}">
+        <Checkbox :value="isBorderAdaptContent" @on-change="changeBorderAdaptContent">适应文本长度</Checkbox>
       </div>
       <div :style="{ padding: '5px 10px'}">
         <span class="border-image-setting-text">边框宽度</span>
@@ -303,7 +310,6 @@
       </div>
     </Modal>
   </div>
-
 </template>
 
 <script>
@@ -321,7 +327,7 @@ import {
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
 import { cloneDeep, debounce } from 'lodash'
-import { mergeSetting, clearMessage, sendMessages, restoreExampleMessage } from '../../service/api'
+import { mergeSetting, updateSetting, clearMessage, sendMessages, restoreExampleMessage } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -725,6 +731,9 @@ export default {
       ],
     };
   },
+  created() {
+    this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
+  },
   mounted() {
     // this.initExamleMessages()
 
@@ -779,6 +788,12 @@ export default {
     isUseMiniGiftCard() {
       return this.$store.state.Config.isUseMiniGiftCard;
     },
+    isShowColon() {
+      return this.$store.state.Config.isShowColon;
+    },
+    isShowHeadline() {
+      return this.$store.state.Config.isShowHeadline;
+    },
     fontWeight() {
       return this.$store.state.Config.fontWeight;
     },
@@ -786,7 +801,7 @@ export default {
       return this.$store.state.Config.opacity * 100;
     },
     messageSettings() {
-      return this.$store.state.Config.messageSettings;
+      return this.$store.state.Config.messageSettings
     },
     userCookie() {
       return this.$store.state.Config.userCookie;
@@ -812,6 +827,11 @@ export default {
         'border-image-outset': image['border-image-outset'],
         'border-image-source': `url(${image.dataUrl})`
       }
+    },
+    isBorderAdaptContent() {
+      const image = this.borderImages.find(image => image.isSelected)
+      if (!image) return false
+      return image.isAdaptContent
     },
     borderImageSliceValue() {
       const image = this.borderImages.find(image => image.isSelected)
@@ -861,7 +881,7 @@ export default {
       setting.isShow = status
 
       const data = { messageSettings: settings }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async showFanMedal(status) {
@@ -870,7 +890,7 @@ export default {
       setting.isShow = status
 
       const data = { messageSettings: settings }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async showInteractInfo(status) {
@@ -907,7 +927,7 @@ export default {
       }
 
       const data = { messageSettings: settings }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
     async changeOpacity(number) {
@@ -1099,6 +1119,7 @@ export default {
         const dataUrl = reader.result
         self.$store.dispatch("UPDATE_CONFIG", {
           borderImages: [...self.borderImages, {
+            isAdaptContent: false,
             dataUrl: dataUrl,
             isSelected: self.borderImages.length ? false : true,
             'border-width': 30,
@@ -1114,10 +1135,11 @@ export default {
 
     selectImageBorder(index) {
       const borderImages = cloneDeep(this.borderImages)
+      const preStatus = borderImages[index].isSelected
       borderImages.forEach(item => {
         item.isSelected = false
       })
-      borderImages[index].isSelected = true
+      borderImages[index].isSelected = !preStatus
       this.$store.dispatch("UPDATE_CONFIG", {
         borderImages: borderImages
       })
@@ -1182,8 +1204,11 @@ export default {
       })
     },
 
-    applyBorderImageSetting() {
-
+    async applyBorderImageSetting() {
+      const data = {
+        borderImages: this.borderImages
+      }
+      await updateSetting(data)
     },
 
     showDanmakuWindow(status) {
@@ -1236,7 +1261,7 @@ export default {
       const { addedIndex, removedIndex, payload } = dropResult
       if (removedIndex === null && addedIndex === null) return
 
-      const messageSettings = [...this.messageSettings]
+      const messageSettings = cloneDeep(this.messageSettings)
       const hiddenItems = messageSettings.map((setting, index) => {
         if (!setting.isShow) {
           return {
@@ -1261,7 +1286,7 @@ export default {
       const data = {
         messageSettings: displayItems,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -1271,6 +1296,34 @@ export default {
       }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async showHeadLine(value) {
+      const data = {
+        isShowHeadline: value
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async showColon(status) {
+      const settings = cloneDeep(this.messageSettings)
+      const setting = settings.find(setting => setting.type === 'colon')
+      setting.isShow = status
+
+      const data = { messageSettings: settings }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeBorderAdaptContent(status) {
+      const borderImages = cloneDeep(this.borderImages)
+      const image = borderImages.find(image => image.isSelected)
+      if (!image) return
+      image.isAdaptContent = status
+      this.$store.dispatch("UPDATE_CONFIG", {
+        borderImages: borderImages
+      })
     }
   },
 };
@@ -1406,6 +1459,7 @@ export default {
 .border-image-default {
   border-style: solid;
   border-color: transparent;
+  display: inline-block;
 }
 
 .border-image-setting-text {
@@ -1425,5 +1479,14 @@ export default {
   & .smooth-dnd-draggable-wrapper {
     cursor: move;
   }
+}
+
+.description-text {
+  white-space: normal;
+}
+
+.max-width {
+  // display: inline-block;
+  width: 100%;
 }
 </style>

@@ -141,6 +141,7 @@
         <div slot="content" :style="{ 'white-space': 'normal' }">
           <div>
             <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值 </p>
+            <p>生效需重新启动</p>
           </div>
         </div>
       </Tooltip>

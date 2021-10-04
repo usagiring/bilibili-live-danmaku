@@ -165,7 +165,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: this.userName };
+        query.uname = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -205,7 +205,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: this.userName };
+        query.uname = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -242,7 +242,7 @@ export default {
         query.uid = parseInt(this.userId);
       }
       if (this.userName) {
-        query.name = { $regex: this.userName };
+        query.uname = { $regex: this.userName };
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
