@@ -124,7 +124,7 @@
       <Tooltip placement="top" transfer>
         色彩表
         <div slot="content" :style="{ 'white-space': 'normal' }">
-          <p>控制图表、炫彩模式可选色</p>
+          <p>控制图表可选色</p>
         </div>
       </Tooltip>
       <Select class="color-selector" :value="colors" multiple filterable allow-create @on-change="onChangeColor">

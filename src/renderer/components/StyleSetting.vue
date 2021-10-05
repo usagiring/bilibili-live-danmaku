@@ -789,7 +789,8 @@ export default {
       return this.$store.state.Config.isUseMiniGiftCard;
     },
     isShowColon() {
-      return this.$store.state.Config.isShowColon;
+      const settings = this.$store.state.Config.messageSettings
+      return settings.find(setting => setting.type === 'colon').isShow
     },
     isShowHeadline() {
       return this.$store.state.Config.isShowHeadline;
@@ -920,13 +921,17 @@ export default {
       const settings = cloneDeep(this.messageSettings)
       const setting = settings.find(setting => setting.type === 'avatar')
       setting.size = size
+      const data = {}
       if (size === 0) {
         setting.isShow = false
+        data.isShowAvatar = false
       } else {
         setting.isShow = true
+        data.isShowAvatar = true
       }
 
-      const data = { messageSettings: settings }
+      data.messageSettings = settings
+
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },

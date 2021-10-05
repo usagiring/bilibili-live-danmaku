@@ -2,7 +2,7 @@
 
 这是一个桌面端哔哩哔哩的直播弹幕应用（electron-vue）
 
-目前支持直播间数据统计、弹幕展示、弹幕投票等功能
+目前支持直播间数据统计、多样化自定义弹幕展示、弹幕投票、自动语音/文字回复等功能
 
 ### 下载
 https://github.com/usagiring/bilibili-live-danmaku/releases
@@ -23,12 +23,10 @@ https://github.com/usagiring/bilibili-live-danmaku/releases
 ### 说明
 - 本应用数据基于本地收集到的数据，未被应用统计到的数据不进行统计。
 - 十分内互动人数，由进入直播间、发送弹幕、送礼组成。
-- 舰长收益有波动，按照B站推送消息处理（原价）。
 
 ### TODO
 - 直播间里已有sc展示
 - 显示直播间信息，封禁词，多少级限制发言等等
-- 自动回复
 
 ### developer
 

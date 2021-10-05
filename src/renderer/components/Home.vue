@@ -106,7 +106,7 @@
             </template>
           </div>
         </div>
-        <div class="layout-header2">
+        <div class="layout-header2 disable-user-select">
           <div>
             <span>连接直播间</span>
             <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
@@ -860,5 +860,10 @@ export default {
   100% {
     transform: rotateY(360deg);
   }
+}
+
+.disable-user-select {
+  -webkit-user-select: none;
+  user-select: none;
 }
 </style>
