@@ -38,10 +38,11 @@
           <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
         </Select>
         <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
+        独立播放窗<i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow"></i-switch>
       </div>
     </div>
 
-    <video id="livePlayer" controls :style="{ height: `${this.resolution}px` }"></video>
+    <video id="live-player" controls :style="{ height: `${this.resolution}px` }"></video>
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
         <FanMedal v-bind="medalData"></FanMedal>
@@ -114,6 +115,9 @@ export default {
       resolution: "480",
       getMedalDataLoading: false,
       isRecording: false,
+      isShowLiveWindow: false,
+      isShowLiveWindowLoading: false,
+      checkOnTopInterval: null,
       qualities: [
         {
           key: 1,
@@ -271,7 +275,7 @@ export default {
       console.log(playUrl);
 
       if (flvjs.isSupported()) {
-        const livePlayer = document.getElementById("livePlayer");
+        const livePlayer = document.getElementById("live-player");
 
         if (this.flvPlayer) {
           this.flvPlayer.destroy();
@@ -414,6 +418,75 @@ export default {
       });
     },
 
+    async showLiveWindow(status) {
+      this.isShowLiveWindowLoading = true;
+
+      if (status) {
+        this.win = new BrowserWindow({
+          width: this.windowWidth || 480,
+          height: this.windowHeight || 540,
+          // x, y,
+          x: this.windowX || 0,
+          y: this.windowY || 0,
+          frame: false,
+          transparent: true,
+          hasShadow: false,
+          webPreferences: {
+            nodeIntegration: true,
+          },
+          resizable: true,
+        });
+
+        this.$store.dispatch("UPDATE_CONFIG", {
+          liveWindowId: this.win.id
+        });
+
+        const winURL =
+          process.env.NODE_ENV === "development"
+            ? `http://localhost:9080/#/danmaku-window`
+            : `file://${__dirname}/index.html#danmaku-window`;
+
+        this.win.loadURL(winURL);
+        this.win.on("close", (e) => {
+          this.isShowLiveWindow = false;
+          this.isShowLiveWindowLoading = false;
+        });
+        // this.win.on(
+        //   "resize",
+        //   debounce(() => {
+        //     const [width, height] = this.win.getSize();
+        //     this.$store.dispatch("UPDATE_CONFIG", {
+        //       windowWidth: width,
+        //       windowHeight: height,
+        //     });
+        //   }, 200)
+        // );
+        // this.win.on(
+        //   "move",
+        //   debounce(() => {
+        //     const [x, y] = this.win.getPosition();
+        //     this.$store.dispatch("UPDATE_CONFIG", {
+        //       windowX: x,
+        //       windowY: y,
+        //     });
+        //   }, 200)
+        // );
+        this.isShowLiveWindow = true;
+        this.isShowLiveWindowLoading = false;
+      } else {
+        if (!this.win) return;
+        this.$store.dispatch("UPDATE_CONFIG", {
+          liveWindowId: null
+        });
+        // clear
+        if (this.checkOnTopInterval) {
+          clearInterval(this.checkOnTopInterval)
+          this.checkOnTopInterval = null
+        }
+        this.win.close();
+        this.win = null;
+      }
+    }
     // onResize: function () {
     //   const liveWrapper = document.getElementById("live-wrapper");
     //   console.log( liveWrapper.clientHeight)

@@ -281,6 +281,7 @@ export const DEFAULT_CONFIG = {
   historyRooms: [],
   isAutoReply: false,
   fontWeight: 'normal',
+  danmakuWindowId: null,
   autoReplyRules: [
   ],
   borderImages: [

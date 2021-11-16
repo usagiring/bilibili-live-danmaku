@@ -353,7 +353,10 @@ export default {
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
-    }
+    },
+    danmakuWindowId() {
+      return this.$store.state.Config.danmakuWindowId
+    },
   },
   methods: {
     async connect(status) {
@@ -417,6 +420,13 @@ export default {
 
     async initRoomInfo(status) {
       let isConnected
+
+      const win = BrowserWindow.fromId(this.danmakuWindowId)
+      if (win) {
+        this.win = win
+        this.isShowDanmakuWindow = true
+      }
+
       if (status === true) {
         isConnected = true
       } else if (status === false) {
@@ -510,6 +520,10 @@ export default {
           resizable: true,
         });
 
+        this.$store.dispatch("UPDATE_CONFIG", {
+          danmakuWindowId: this.win.id
+        });
+
         // const winURL =
         //   process.env.NODE_ENV === "development"
         //     ? `http://localhost:9080/#/danmaku-window`
@@ -553,6 +567,9 @@ export default {
         this.isShowDanmakuWindowLoading = false;
       } else {
         if (!this.win) return;
+        this.$store.dispatch("UPDATE_CONFIG", {
+          danmakuWindowId: null
+        });
         // clear
         if (this.checkOnTopInterval) {
           clearInterval(this.checkOnTopInterval)
