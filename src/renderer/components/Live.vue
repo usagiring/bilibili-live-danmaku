@@ -39,6 +39,10 @@
         </Select>
         <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
         独立播放窗<i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow"></i-switch>
+        <Button @click="playWindowLive" shape="circle">
+          <Icon type="md-play" color="green" />
+          播放
+        </Button>
       </div>
     </div>
 
@@ -77,8 +81,8 @@
 
 <script>
 import * as flvjs from "flv.js";
-import { remote } from "electron";
-const dialog = remote.dialog;
+import { ipcRenderer, remote } from "electron";
+const { BrowserWindow, dialog } = remote;
 import {
   record,
   getRandomPlayUrl,
@@ -87,7 +91,7 @@ import {
   setStatus
 } from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
-import { DEFAULT_RECORD_DIR } from "../../service/const";
+import { DEFAULT_RECORD_DIR, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE } from "../../service/const";
 import { parseDownloadRate, parseHexColor } from "../../service/util";
 import {
   sendMessage,
@@ -118,6 +122,7 @@ export default {
       isShowLiveWindow: false,
       isShowLiveWindowLoading: false,
       checkOnTopInterval: null,
+      win: null,
       qualities: [
         {
           key: 1,
@@ -183,6 +188,9 @@ export default {
     isWithCookie() {
       return this.$store.state.Config.isWithCookie;
     },
+    liveWindowId() {
+      return this.$store.state.Config.liveWindowId;
+    },
   },
   mounted() {
     // this.getMedalData();
@@ -203,6 +211,18 @@ export default {
     emitter.on('record-cancel', () => {
       this.isRecording = false
     })
+
+    if (this.liveWindowId) {
+      const win = BrowserWindow.fromId(this.liveWindowId);
+      if (win) {
+        this.isShowLiveWindow = true
+        this.win = win
+      }
+    }
+
+    ipcRenderer.on(IPC_LIVE_WINDOW_CLOSE, () => {
+      this.closeLiveWindow()
+    });
   },
   beforeDestroy() {
     const { recordId } = getStatus()
@@ -313,6 +333,19 @@ export default {
       }
     },
 
+    async playWindowLive() {
+      const playUrl = await getRandomPlayUrl({
+        roomId: this.realRoomId,
+        quality: this.playQuality,
+        cookie: this.isWithCookie ? this.userCookie : undefined,
+      });
+      console.log(`windowId: ${this.liveWindowId}`);
+      ipcRenderer.send(IPC_LIVE_WINDOW_PLAY, {
+        windowId: this.liveWindowId,
+        playUrl,
+      });
+    },
+
     changeRecordQuality(value) {
       this.recordQuality = value;
     },
@@ -418,16 +451,32 @@ export default {
       });
     },
 
+    async closeLiveWindow() {
+      if (!this.win) return;
+      this.$store.dispatch("UPDATE_CONFIG", {
+        liveWindowId: null
+      });
+      // clear
+      if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      this.win.close();
+      this.win = null;
+      this.isShowLiveWindow = false;
+      this.isShowLiveWindowLoading = false;
+    },
+
     async showLiveWindow(status) {
       this.isShowLiveWindowLoading = true;
 
       if (status) {
-        this.win = new BrowserWindow({
-          width: this.windowWidth || 480,
-          height: this.windowHeight || 540,
+        const win = new BrowserWindow({
+          width: this.windowWidth || 640,
+          height: this.windowHeight || 320,
           // x, y,
-          x: this.windowX || 0,
-          y: this.windowY || 0,
+          x: this.windowX || 640,
+          y: this.windowY || 320,
           frame: false,
           transparent: true,
           hasShadow: false,
@@ -438,53 +487,23 @@ export default {
         });
 
         this.$store.dispatch("UPDATE_CONFIG", {
-          liveWindowId: this.win.id
+          liveWindowId: win.id
         });
 
         const winURL =
           process.env.NODE_ENV === "development"
-            ? `http://localhost:9080/#/danmaku-window`
-            : `file://${__dirname}/index.html#danmaku-window`;
+            ? `http://localhost:9080/#/live-window`
+            : `file://${__dirname}/index.html#live-window`;
 
-        this.win.loadURL(winURL);
-        this.win.on("close", (e) => {
-          this.isShowLiveWindow = false;
-          this.isShowLiveWindowLoading = false;
+        win.loadURL(winURL);
+        win.on("close", (e) => {
+          this.closeLiveWindow()
         });
-        // this.win.on(
-        //   "resize",
-        //   debounce(() => {
-        //     const [width, height] = this.win.getSize();
-        //     this.$store.dispatch("UPDATE_CONFIG", {
-        //       windowWidth: width,
-        //       windowHeight: height,
-        //     });
-        //   }, 200)
-        // );
-        // this.win.on(
-        //   "move",
-        //   debounce(() => {
-        //     const [x, y] = this.win.getPosition();
-        //     this.$store.dispatch("UPDATE_CONFIG", {
-        //       windowX: x,
-        //       windowY: y,
-        //     });
-        //   }, 200)
-        // );
+        this.win = win
         this.isShowLiveWindow = true;
         this.isShowLiveWindowLoading = false;
       } else {
-        if (!this.win) return;
-        this.$store.dispatch("UPDATE_CONFIG", {
-          liveWindowId: null
-        });
-        // clear
-        if (this.checkOnTopInterval) {
-          clearInterval(this.checkOnTopInterval)
-          this.checkOnTopInterval = null
-        }
-        this.win.close();
-        this.win = null;
+        this.closeLiveWindow()
       }
     }
     // onResize: function () {

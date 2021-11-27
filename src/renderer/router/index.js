@@ -47,14 +47,14 @@ export default new Router({
           component: () => import('@/components/Config.vue')
         },
         {
-          path: 'live-window',
-          component: () => import('@/components/LiveWindow.vue')
-        },
-        {
           path: '',
           component: () => import('@/components/Introduction.vue')
         }
       ]
+    },
+    {
+      path: '/live-window',
+      component: () => import('@/components/LiveWindow.vue')
     },
     {
       path: '*',

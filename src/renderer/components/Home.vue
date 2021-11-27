@@ -421,7 +421,13 @@ export default {
     async initRoomInfo(status) {
       let isConnected
 
-      const win = BrowserWindow.fromId(this.danmakuWindowId)
+      let win
+      console.log(this.danmakuWindowId)
+      if (this.danmakuWindowId) {
+        win = BrowserWindow.fromId(this.danmakuWindowId)
+      }
+
+      console.log(win)
       if (win) {
         this.win = win
         this.isShowDanmakuWindow = true
@@ -505,7 +511,7 @@ export default {
       this.isShowDanmakuWindowLoading = true;
 
       if (status) {
-        this.win = new BrowserWindow({
+        const win = new BrowserWindow({
           width: this.windowWidth || 480,
           height: this.windowHeight || 540,
           // x, y,
@@ -521,7 +527,7 @@ export default {
         });
 
         this.$store.dispatch("UPDATE_CONFIG", {
-          danmakuWindowId: this.win.id
+          danmakuWindowId: win.id
         });
 
         // const winURL =
@@ -533,31 +539,31 @@ export default {
           process.env.NODE_ENV === "development"
             ? `http://localhost:${PORT}?port=${PORT}`
             : `http://localhost:${PORT}?port=${PORT}`;
-        this.win.loadURL(winURL);
-        this.win.on("close", (e) => {
-          this.isShowDanmakuWindow = false;
-          this.isShowDanmakuWindowLoading = false;
+        win.loadURL(winURL);
+        win.on("close", (e) => {
+          this.closeDanmakuWindow()
         });
-        this.win.on(
+        win.on(
           "resize",
           debounce(() => {
-            const [width, height] = this.win.getSize();
+            const [width, height] = win.getSize();
             this.$store.dispatch("UPDATE_CONFIG", {
               windowWidth: width,
               windowHeight: height,
             });
           }, 200)
         );
-        this.win.on(
+        win.on(
           "move",
           debounce(() => {
-            const [x, y] = this.win.getPosition();
+            const [x, y] = win.getPosition();
             this.$store.dispatch("UPDATE_CONFIG", {
               windowX: x,
               windowY: y,
             });
           }, 200)
         );
+        this.win = win
         // this.win.on('always-on-top-changed', (e, isAlwaysOnTop) => {
 
         // })
@@ -566,19 +572,26 @@ export default {
         this.isShowDanmakuWindow = true;
         this.isShowDanmakuWindowLoading = false;
       } else {
-        if (!this.win) return;
-        this.$store.dispatch("UPDATE_CONFIG", {
-          danmakuWindowId: null
-        });
-        // clear
-        if (this.checkOnTopInterval) {
-          clearInterval(this.checkOnTopInterval)
-          this.checkOnTopInterval = null
-        }
-        this.win.close();
-        this.win = null;
+        this.closeDanmakuWindow()
       }
     },
+
+    closeDanmakuWindow() {
+      if (!this.win) return;
+      this.$store.dispatch("UPDATE_CONFIG", {
+        danmakuWindowId: null
+      });
+      // clear
+      if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      this.win.close();
+      this.win = null;
+      this.isShowDanmakuWindow = false
+      this.isShowDanmakuWindowLoading = false;
+    },
+
     alwaysOnTop(status) {
       this.win.setFocusable(!status);
       // this.win.setVisibleOnAllWorkspaces(true)

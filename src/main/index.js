@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron'
 import path from 'path'
-import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
+import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE } from '../service/const'
 import '../renderer/store'
 import '../service/bilibili-bridge'
 
@@ -72,6 +72,15 @@ app.on('activate', () => {
 import { autoUpdater } from 'electron-updater'
 
 app.on('ready', () => {
+  ipcMain.on(IPC_LIVE_WINDOW_PLAY, (event, data) => {
+    if (data.windowId) {
+      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_PLAY, data)
+    }
+  })
+  ipcMain.on(IPC_LIVE_WINDOW_CLOSE, (event, data) => {
+    mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
+  })
+
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
