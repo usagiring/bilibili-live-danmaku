@@ -147,8 +147,8 @@
 
 <script>
 import { debounce } from "lodash";
-import { remote, ipcRenderer, shell } from "electron";
-const { BrowserWindow } = remote;
+import { ipcRenderer, shell } from "electron";
+const { BrowserWindow } = require('@electron/remote')
 
 import { parseDownloadRate, getGiftConfig } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
@@ -161,9 +161,9 @@ import {
   IPC_DOWNLOAD_UPDATE,
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
-  DEFAULT_RECORD_DIR,
   MAX_HISTORY_ROOM,
-  PORT
+  PORT,
+  IPC_GET_EXE_PATH
 } from "../../service/const";
 import ws from '../../service/ws'
 
@@ -323,7 +323,7 @@ export default {
       return this.$store.state.Config.realRoomId;
     },
     recordDir() {
-      return this.$store.state.Config.recordDir || DEFAULT_RECORD_DIR;
+      return this.$store.state.Config.recordDir;
     },
     userCookie() {
       return this.$store.state.Config.userCookie;
@@ -520,9 +520,9 @@ export default {
           frame: false,
           transparent: true,
           hasShadow: false,
-          webPreferences: {
-            nodeIntegration: true,
-          },
+          // webPreferences: {
+          //   nodeIntegration: true,
+          // },
           resizable: true,
         });
 
@@ -670,9 +670,11 @@ export default {
         if (!this.realRoomId) {
           throw new Error("roomId required.");
         }
+
+        const defaultRecordPath = (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record";
         const { id } = await record({
           roomId: this.realRoomId,
-          recordDir: this.recordDir,
+          recordDir: this.recordDir || defaultRecordPath,
           quality: "原画",
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });

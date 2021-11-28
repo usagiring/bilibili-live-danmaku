@@ -1,8 +1,15 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron'
 import path from 'path'
-import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE } from '../service/const'
+import { autoUpdater } from 'electron-updater'
+import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH } from '../service/const'
 import '../renderer/store'
-import '../service/bilibili-bridge'
+import * as bilibiliBridge from '../service/bilibili-bridge'
+import { initialize, enable } from '@electron/remote/main';
+initialize()
+
+bilibiliBridge.init({
+  USER_DATA_PATH: app.getPath('userData')
+})
 
 /**
  * Set `__static` path to static files in production
@@ -26,7 +33,8 @@ function createWindow() {
     useContentSize: true,
     width: 1200,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      contextIsolation: false,
     },
     // icon: path.join(__dirname, '../../build/icons/icon.ico')
   })
@@ -40,38 +48,36 @@ function createWindow() {
     app.quit()
   })
 
+  enable(mainWindow.webContents)
+
   // mainWindow.on('close', (e) => {
   //   app.quit()
   // })
 
 }
 
-app.on('ready', createWindow)
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
-
-/**
- * Auto Updater
- *
- * Uncomment the following code below and install `electron-updater` to
- * support auto updating. Code Signing with a valid certificate is required.
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
- */
-
-
-import { autoUpdater } from 'electron-updater'
-
 app.on('ready', () => {
+  createWindow()
+
+  ipcMain.handle(IPC_GET_USER_PATH, async () => {
+    return app.getPath('userData');
+  })
+
+  ipcMain.handle(IPC_GET_EXE_PATH, async () => {
+    return app.getPath('exe');
+  })
+
+  ipcMain.handle(IPC_GET_VERSION, async () => {
+    return app.getVersion()
+  })
+
+  ipcMain.handle(IPC_ENABLE_WEB_CONTENTS, async (event, data) => {
+    console.log('IPC_ENABLE_WEB_CONTENTS', event, data)
+    if (data.windowId) {
+      enable(BrowserWindow.fromId(data.windowId).webContents)
+    }
+  })
+
   ipcMain.on(IPC_LIVE_WINDOW_PLAY, (event, data) => {
     if (data.windowId) {
       BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_PLAY, data)
@@ -81,6 +87,13 @@ app.on('ready', () => {
     mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
   })
 
+  /**
+   * Auto Updater
+   *
+   * Uncomment the following code below and install `electron-updater` to
+   * support auto updating. Code Signing with a valid certificate is required.
+   * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
+   */
   if (process.env.NODE_ENV === 'production') {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
@@ -124,5 +137,17 @@ app.on('ready', () => {
     autoUpdater.on('update-not-available', () => {
       console.log('AutoUpdate: update-not-available')
     })
+  }
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
   }
 })

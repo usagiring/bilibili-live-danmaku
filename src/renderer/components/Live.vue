@@ -27,22 +27,32 @@
         {{ recordDir }}
       </div>
       <div :style="{ 'padding-top': '3px' }">
-        <Button @click="play" shape="circle">
-          <Icon type="md-play" color="green" />
-          播放
-        </Button>
-        <Select :value="playQuality" style="width: 70px" @on-change="changePlayQuality">
-          <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
-        </Select>
-        <Select :value="resolution" style="width: 70px" @on-change="changeResolutions">
-          <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
-        </Select>
-        <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
-        独立播放窗<i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow"></i-switch>
-        <Button @click="playWindowLive" shape="circle">
-          <Icon type="md-play" color="green" />
-          播放
-        </Button>
+        <div :style="{'display': 'inline-block', width: '80px', height: '60px', 'vertical-align': 'top'}">
+          <Button @click="play" shape="circle" :style="{width: '100%', height: '100%'}">
+            <Icon type="md-play" color="green" />
+            播放
+          </Button>
+        </div>
+        <div :style="{'display': 'inline-block', 'padding-left': '10px'}">
+          <div>
+            <Select :value="playQuality" style="width: 70px" @on-change="changePlayQuality">
+              <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
+            </Select>
+            <Select :value="resolution" style="width: 70px" @on-change="changeResolutions">
+              <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
+            </Select>
+            <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
+          </div>
+          <div>
+            独立播放窗 <i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow"></i-switch>
+            <Checkbox :style="{'padding-left': '10px'}" :value="isLiveWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+            <span :style="{'padding-right': '10px'}">透明度</span>
+            <div class="avatar-controller-slider">
+              <Slider :value="liveWindowOpacity" @on-change="changeLiveWindowOpacity"></Slider>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -81,8 +91,9 @@
 
 <script>
 import * as flvjs from "flv.js";
-import { ipcRenderer, remote } from "electron";
-const { BrowserWindow, dialog } = remote;
+import { ipcRenderer } from "electron";
+import * as remote from "@electron/remote";
+const { BrowserWindow, dialog } = remote
 import {
   record,
   getRandomPlayUrl,
@@ -91,7 +102,7 @@ import {
   setStatus
 } from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
-import { DEFAULT_RECORD_DIR, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE } from "../../service/const";
+import { IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
 import { parseDownloadRate, parseHexColor } from "../../service/util";
 import {
   sendMessage,
@@ -177,7 +188,7 @@ export default {
       return this.$store.state.Config.medalId;
     },
     recordDir() {
-      return this.$store.state.Config.recordDir || DEFAULT_RECORD_DIR;
+      return this.$store.state.Config.recordDir;
     },
     recordDuringFormat() {
       return new Date(this.recordDuring).toISOString().substr(11, 8);
@@ -190,6 +201,15 @@ export default {
     },
     liveWindowId() {
       return this.$store.state.Config.liveWindowId;
+    },
+    isLiveWindowAlwaysOnTop() {
+      return this.$store.state.Config.isLiveWindowAlwaysOnTop;
+    },
+    liveWindowOpacity() {
+      return this.$store.state.Config.liveWindowOpacity * 100;
+    },
+    isOnTopForce() {
+      return this.$store.state.Config.isOnTopForce;
     },
   },
   mounted() {
@@ -233,9 +253,11 @@ export default {
   methods: {
     async startRecord() {
       try {
+        const defaultRecordPath = (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record";
+
         const { id } = await record({
           roomId: this.realRoomId,
-          recordDir: this.recordDir,
+          recordDir: this.recordDir || defaultRecordPath,
           quality: this.recordQuality,
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });
@@ -294,6 +316,11 @@ export default {
       });
       console.log(playUrl);
 
+      if (this.isShowLiveWindow) {
+        this.playWindowLive(playUrl)
+        return
+      }
+
       if (flvjs.isSupported()) {
         const livePlayer = document.getElementById("live-player");
 
@@ -333,8 +360,8 @@ export default {
       }
     },
 
-    async playWindowLive() {
-      const playUrl = await getRandomPlayUrl({
+    async playWindowLive(playUrl) {
+      playUrl = playUrl || await getRandomPlayUrl({
         roomId: this.realRoomId,
         quality: this.playQuality,
         cookie: this.isWithCookie ? this.userCookie : undefined,
@@ -467,10 +494,42 @@ export default {
       this.isShowLiveWindowLoading = false;
     },
 
+    changeAlwaysOnTop(status) {
+      this.win.setFocusable(!status);
+      // this.win.setVisibleOnAllWorkspaces(true)
+      if (this.isOnTopForce && status) {
+        this.checkOnTopInterval = setInterval(() => {
+          if (!this.win) return
+          this.win.moveTop()
+        }, 1000)
+      } else if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      this.win.setAlwaysOnTop(status, this.onTopLevel);
+      // this.win.setFullScreenable(false)
+      this.win.setIgnoreMouseEvents(status, { forward: true });
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isLiveWindowAlwaysOnTop: status,
+      });
+    },
+
+    changeLiveWindowOpacity(number) {
+      const data = {
+        liveWindowOpacity: Number((number / 100).toFixed(2)),
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
     async showLiveWindow(status) {
       this.isShowLiveWindowLoading = true;
 
       if (status) {
+        // window.open(
+        //   `http://localhost:9080/#/live-window`,
+        //   'live-window',
+        //   'frame=false,transparent=true,hasShadow=false,width=640,height=320,resizable=true'
+        // )
         const win = new BrowserWindow({
           width: this.windowWidth || 640,
           height: this.windowHeight || 320,
@@ -482,9 +541,14 @@ export default {
           hasShadow: false,
           webPreferences: {
             nodeIntegration: true,
+            contextIsolation: false,
           },
           resizable: true,
         });
+
+        await ipcRenderer.invoke(IPC_ENABLE_WEB_CONTENTS, {
+          windowId: win.id
+        })
 
         this.$store.dispatch("UPDATE_CONFIG", {
           liveWindowId: win.id
@@ -499,12 +563,17 @@ export default {
         win.on("close", (e) => {
           this.closeLiveWindow()
         });
+        // note we call `require` on `remote` here
+        // const remoteMain = remote.require("@electron/remote/main");
+        // remoteMain.enable(win.webContents);
         this.win = win
         this.isShowLiveWindow = true;
         this.isShowLiveWindowLoading = false;
       } else {
         this.closeLiveWindow()
       }
+
+      this.alwaysOnTop(status)
     }
     // onResize: function () {
     //   const liveWrapper = document.getElementById("live-wrapper");
@@ -516,7 +585,16 @@ export default {
 </script>
 
 <style scoped>
+#live-wrapper {
+  user-select: none;
+}
 #live-config-wrapper {
-  height: 70px;
+  height: 105px;
+}
+.avatar-controller-slider {
+  height: 30px;
+  display: inline-block;
+  vertical-align: bottom;
+  width: 100px;
 }
 </style>

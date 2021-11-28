@@ -84,8 +84,9 @@
 </template>
 
 <script>
-import { shell, remote } from "electron";
-const window = remote.getCurrentWindow();
+import { shell } from "electron";
+import { getCurrentWindow } from "@electron/remote";
+const window = getCurrentWindow()
 import { GUARD_ICON_MAP, INTERACT_TYPE } from "../../service/const";
 import { getPriceProperties, dateFormat } from "../../service/util";
 import { queryGifts, queryInteracts, queryComments } from '../../service/api'

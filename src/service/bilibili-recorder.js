@@ -3,7 +3,6 @@ import path from 'path'
 import BilibiliRecorder from '@tokine/bilibili-recorder'
 import httpAdapter from './http'
 import { strict as assert } from 'assert'
-import { DEFAULT_RECORD_DIR } from './const'
 import emitter from './event'
 import { dateFormat } from './util'
 
@@ -33,18 +32,17 @@ export {
 }
 
 async function record({ roomId, recordDir, quality, cookie }) {
-  const _recordDir = recordDir || DEFAULT_RECORD_DIR
   const qn = quality ? qualityMap[quality] : 400
-  console.log(`record: ROOM_ID: ${roomId} RECORD_DIR: ${_recordDir}`)
+  console.log(`record: ROOM_ID: ${roomId} RECORD_DIR: ${recordDir}`)
   try {
-    const stat = fs.statSync(_recordDir)
+    const stat = fs.statSync(recordDir)
     assert.ok(stat.isDirectory())
   } catch (e) {
     console.log(e)
-    fs.mkdirSync(_recordDir)
+    fs.mkdirSync(recordDir)
   }
 
-  const output = path.join(_recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+  const output = path.join(recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
   console.log(`record: OUTPUT: ${output}`)
 
   const axiosOptions = {}

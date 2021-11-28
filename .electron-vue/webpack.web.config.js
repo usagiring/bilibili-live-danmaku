@@ -5,7 +5,7 @@ process.env.BABEL_ENV = 'web'
 const path = require('path')
 const webpack = require('webpack')
 
-const MinifyPlugin = require("babel-minify-webpack-plugin")
+const TerserPlugin = require("terser-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -13,6 +13,12 @@ const { VueLoaderPlugin } = require('vue-loader')
 
 let webConfig = {
   devtool: '#cheap-module-eval-source-map',
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      sourceMap: true,
+    })],
+  },
   entry: {
     web: path.join(__dirname, '../src/renderer/main.js')
   },
@@ -41,7 +47,7 @@ let webConfig = {
       {
         test: /\.js$/,
         use: 'babel-loader',
-        include: [ path.resolve(__dirname, '../src/renderer') ],
+        include: [path.resolve(__dirname, '../src/renderer')],
         exclude: /node_modules/
       },
       {
@@ -82,7 +88,7 @@ let webConfig = {
   },
   plugins: [
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({filename: 'styles.css'}),
+    new MiniCssExtractPlugin({ filename: 'styles.css' }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
@@ -120,7 +126,6 @@ if (process.env.NODE_ENV === 'production') {
   webConfig.devtool = ''
 
   webConfig.plugins.push(
-    new MinifyPlugin(),
     new CopyWebpackPlugin([
       {
         from: path.join(__dirname, '../static'),

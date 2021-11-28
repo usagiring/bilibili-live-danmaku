@@ -11,13 +11,16 @@
 </template>
 
 <script>
-import { shell } from "electron";
-import { version } from '../../service/const'
+import { ipcRenderer, shell } from "electron";
+import { IPC_GET_VERSION } from '../../service/const'
 export default {
   data() {
     return {
-      version
+      version: 0
     };
+  },
+  async mounted() {
+    this.version = await ipcRenderer.invoke(IPC_GET_VERSION);
   },
   methods: {
     openGithub() {

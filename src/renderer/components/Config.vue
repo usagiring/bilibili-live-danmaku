@@ -13,7 +13,7 @@
         <Icon type="md-help" />
         <div slot="content" :style="{ 'white-space': 'normal' }">
           <div>
-            <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{USER_DATA_PATH}}</p>
+            <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{userDataPath}}</p>
           </div>
         </div>
       </Tooltip>
@@ -188,13 +188,14 @@
 </template>
 
 <script>
-import { remote } from "electron";
 import { uniq } from 'lodash'
-const window = remote.getCurrentWindow();
+import { ipcRenderer } from 'electron'
+import { getCurrentWindow } from '@electron/remote'
+const window = getCurrentWindow();
 import {
-  USER_DATA_PATH,
   DEFAULT_STYLE,
-  COLORS
+  COLORS,
+  IPC_GET_USER_PATH
 } from "../../service/const";
 
 import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
@@ -203,7 +204,7 @@ import { getGiftConfig } from '../../service/util'
 export default {
   data() {
     return {
-      USER_DATA_PATH: USER_DATA_PATH,
+      userDataPath: '',
       advancedAutoReplyRuleModal: false,
       giftSelectors: [],
       selectedGiftIds: [],
@@ -237,6 +238,8 @@ export default {
         label: voice,
       }
     })
+
+    this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
   },
   computed: {
     userCookie() {

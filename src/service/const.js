@@ -1,17 +1,8 @@
 const path = require('path')
 const fs = require('fs')
 const YAML = require('yaml')
-const electron = require('electron')
-
 const config = fs.readFileSync(`config.yaml`, 'utf8')
-export const version = (electron.app || electron.remote.app).getVersion()
-
 const OPTION_CONFIG = YAML.parse(config)
-
-export const USER_DATA_PATH = path.join((electron.app || electron.remote.app).getPath('userData'), '/data')
-console.log(USER_DATA_PATH)
-export const DEFAULT_RECORD_DIR = path.join((electron.app || electron.remote.app).getPath('exe'), '../record')
-console.log(DEFAULT_RECORD_DIR)
 
 export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'
 
@@ -185,6 +176,10 @@ export const IPC_DOWNLOAD_PROGRESS = 'IPC_DOWNLOAD_PROGRESS'
 export const IPC_UPDATE_DOWNLOADED = 'IPC_UPDATE_DOWNLOADED'
 export const IPC_LIVE_WINDOW_PLAY = 'IPC_LIVE_WINDOW_PLAY'
 export const IPC_LIVE_WINDOW_CLOSE = 'IPC_LIVE_WINDOW_CLOSE'
+export const IPC_GET_USER_PATH = 'IPC_GET_USER_PATH'
+export const IPC_GET_VERSION = 'IPC_GET_VERSION'
+export const IPC_GET_EXE_PATH = 'IPC_GET_EXE_PATH'
+export const IPC_ENABLE_WEB_CONTENTS = 'IPC_ENABLE_WEB_CONTENTS'
 export const SET_DANMAKU_ON_TOP_LEVEL = OPTION_CONFIG.SET_DANMAKU_ON_TOP_LEVEL || 'floating'
 export const MAX_HISTORY_ROOM = OPTION_CONFIG.MAX_HISTORY_ROOM || 9
 export const PORT = OPTION_CONFIG.PORT || 8081
@@ -284,6 +279,10 @@ export const DEFAULT_CONFIG = {
   isAutoReply: false,
   fontWeight: 'normal',
   danmakuWindowId: null,
+  isLiveWindowAlwaysOnTop: false,
+  liveWindowOpacity: 1,
+  liveWindowId: 0,
+  danmakuWindowId: 0,
   autoReplyRules: [
   ],
   borderImages: [
@@ -340,7 +339,7 @@ export const DEFAULT_SERVER_CONFIG = {
   //   text: '',
   //   onlyGold: true
   // }],
-  USER_DATA_PATH,
+  // USER_DATA_PATH,
   PORT: PORT,
   EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
   SAVE_ALL_BILI_MESSAGE,

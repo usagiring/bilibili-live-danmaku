@@ -1,22 +1,28 @@
 <template>
-  <div class="container">
+  <div class="container" :style="{opacity: liveWindowOpacity}">
     <video id="live-player" controls :style="{ height: `${videoHeight}px` }"></video>
   </div>
 </template>
 
 <script>
 import { debounce } from "lodash";
-import { remote, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
+import { getCurrentWindow } from '@electron/remote'
 import * as flvjs from "flv.js";
 import { IPC_LIVE_WINDOW_CLOSE, IPC_LIVE_WINDOW_PLAY } from "../../service/const";
+const win = getCurrentWindow();
 
 export default {
   data() {
     return {
-      win: null,
       flvPlayer: null,
       videoHeight: 0,
     };
+  },
+  computed: {
+    liveWindowOpacity() {
+      return this.$store.state.Config.liveWindowOpacity
+    },
   },
   beforeCreate() {
     document
@@ -24,11 +30,10 @@ export default {
       .setAttribute("style", "background-color:rgba(0,0,0,0);");
   },
   mounted() {
-    const win = remote.getCurrentWindow()
 
     const [, height] = win.getSize()
     this.videoHeight = height
-    console.log(win.getSize())
+    console.log(win.getSize(), win.id)
     ipcRenderer.on(IPC_LIVE_WINDOW_PLAY, (event, args) => {
       this.play({ playUrl: args.playUrl })
     })
@@ -39,6 +44,7 @@ export default {
         windowWidth: width,
         windowHeight: height,
       });
+      this.videoHeight = height
     }, 500))
 
     win.on("move", debounce(() => {
@@ -48,8 +54,6 @@ export default {
         windowY: y,
       });
     }, 500))
-
-    this.win = win
 
     document.addEventListener("keyup", function (e) {
       if (e.key === 'Escape') {
@@ -102,9 +106,9 @@ export default {
     },
 
     resize(width, height) {
-      if (!this.win) return
-      this.win.setSize(width, height)
-      this.win.setAspectRatio(width / height)
+      if (!win) return
+      win.setSize(width, height)
+      win.setAspectRatio(width / height)
     }
   }
 
@@ -113,12 +117,12 @@ export default {
 
 <style scoped>
 .container {
-  opacity: 0.5;
   position: absolute;
   top: 0px;
   bottom: 0px;
   left: 0px;
   right: 0px;
   background: rgba(0, 0, 0, 0);
+  -webkit-app-region: drag;
 }
 </style>

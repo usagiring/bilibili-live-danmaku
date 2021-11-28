@@ -313,17 +313,17 @@
 </template>
 
 <script>
+import { Container, Draggable } from "vue-smooth-dnd";
 import FontList from "font-list";
+
 import SettingEditor from "./SettingEditor";
 import StyleEditor from './StyleEditor'
 import FanMedal from "./FanMedal";
-import { Container, Draggable } from "vue-smooth-dnd";
 import {
-  USER_DATA_PATH,
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
   GUARD_ICON_MAP,
-  DEFAULT_AVATAR
+  DEFAULT_AVATAR,
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
 import { cloneDeep, debounce } from 'lodash'
@@ -351,7 +351,6 @@ export default {
   },
   data() {
     return {
-      USER_DATA_PATH: USER_DATA_PATH,
       fonts: defaultFonts,
       example: {
         avatar: DEFAULT_AVATAR,
@@ -734,7 +733,7 @@ export default {
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
   },
-  mounted() {
+  async mounted() {
     // this.initExamleMessages()
 
     if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
@@ -1214,46 +1213,6 @@ export default {
         borderImages: this.borderImages
       }
       await updateSetting(data)
-    },
-
-    showDanmakuWindow(status) {
-      // const { x, y } = screen.getCursorScreenPoint();
-      this.isShowDanmakuWindowLoading = true;
-
-      if (status) {
-        this.win = new BrowserWindow({
-          width: this.windowWidth || 480,
-          height: this.windowHeight || 540,
-          // x, y,
-          x: this.windowX || 0,
-          y: this.windowY || 0,
-          frame: false,
-          transparent: true,
-          hasShadow: false,
-          webPreferences: {
-            nodeIntegration: true,
-          },
-          resizable: true,
-        });
-
-        const winURL =
-          process.env.NODE_ENV === "development"
-            ? `http://localhost:${PORT}?port=${PORT}`
-            : `http://localhost:${PORT}?port=${PORT}`;
-        this.win.loadURL(winURL);
-        this.win.on("close", (e) => {
-          this.isShowDanmakuWindow = false;
-          this.isShowDanmakuWindowLoading = false;
-        });
-        // 初始化时清空弹幕池
-        this.$store.dispatch("CLEAR_MESSAGE");
-        this.isShowDanmakuWindow = true;
-        this.isShowDanmakuWindowLoading = false;
-      } else {
-        if (!this.win) return;
-        this.win.close();
-        this.win = null;
-      }
     },
 
     changeCollapse(index) {
