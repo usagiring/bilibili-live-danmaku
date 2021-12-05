@@ -147,7 +147,6 @@ export default {
         this.flvPlayer.destroy();
         this.flvPlayer = null;
       }
-      win.close();
 
       this.$store.dispatch("UPDATE_CONFIG", {
         liveWindowId: null,
@@ -158,6 +157,8 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
+
+      win.close();
     },
   }
 
