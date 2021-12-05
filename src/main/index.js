@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeImage } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
-import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH } from '../service/const'
+import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../service/const'
 import '../renderer/store'
 import * as bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main';
@@ -72,7 +72,6 @@ app.on('ready', () => {
   })
 
   ipcMain.handle(IPC_ENABLE_WEB_CONTENTS, async (event, data) => {
-    console.log('IPC_ENABLE_WEB_CONTENTS', event, data)
     if (data.windowId) {
       enable(BrowserWindow.fromId(data.windowId).webContents)
     }
@@ -83,8 +82,19 @@ app.on('ready', () => {
       BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_PLAY, data)
     }
   })
+
+  ipcMain.on(IPC_LIVE_WINDOW_ON_TOP, (event, data) => {
+    if (data.windowId) {
+      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_ON_TOP, data)
+    }
+  })
+
   ipcMain.on(IPC_LIVE_WINDOW_CLOSE, (event, data) => {
-    mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
+    if (data.windowId) {
+      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
+    } else {
+      mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
+    }
   })
 
   /**

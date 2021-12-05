@@ -9,7 +9,7 @@ import { debounce } from "lodash";
 import { ipcRenderer } from "electron";
 import { getCurrentWindow } from '@electron/remote'
 import * as flvjs from "flv.js";
-import { IPC_LIVE_WINDOW_CLOSE, IPC_LIVE_WINDOW_PLAY } from "../../service/const";
+import { IPC_LIVE_WINDOW_CLOSE, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_ON_TOP } from "../../service/const";
 const win = getCurrentWindow();
 
 export default {
@@ -17,11 +17,18 @@ export default {
     return {
       flvPlayer: null,
       videoHeight: 0,
+      checkOnTopInterval: null
     };
   },
   computed: {
     liveWindowOpacity() {
       return this.$store.state.Config.liveWindowOpacity
+    },
+    isOnTopForce() {
+      return this.$store.state.Config.isOnTopForce
+    },
+    onTopLevel() {
+      return this.$store.state.Config.onTopLevel
     },
   },
   beforeCreate() {
@@ -30,19 +37,14 @@ export default {
       .setAttribute("style", "background-color:rgba(0,0,0,0);");
   },
   mounted() {
-
     const [, height] = win.getSize()
     this.videoHeight = height
-    console.log(win.getSize(), win.id)
-    ipcRenderer.on(IPC_LIVE_WINDOW_PLAY, (event, args) => {
-      this.play({ playUrl: args.playUrl })
-    })
+    console.log(`live window id: ${win.id}`)
 
     win.on("resize", debounce(() => {
       const [width, height] = win.getSize();
       this.$store.dispatch("UPDATE_CONFIG", {
-        windowWidth: width,
-        windowHeight: height,
+        liveWindowHeight: height,
       });
       this.videoHeight = height
     }, 500))
@@ -50,16 +52,28 @@ export default {
     win.on("move", debounce(() => {
       const [x, y] = win.getPosition();
       this.$store.dispatch("UPDATE_CONFIG", {
-        windowX: x,
-        windowY: y,
+        liveWindowX: x,
+        liveWindowY: y,
       });
     }, 500))
 
     document.addEventListener("keyup", function (e) {
       if (e.key === 'Escape') {
-        // win.close();
+        this.closeLiveWindow()
         ipcRenderer.send(IPC_LIVE_WINDOW_CLOSE);
       }
+    })
+
+    ipcRenderer.on(IPC_LIVE_WINDOW_PLAY, (event, args) => {
+      this.play({ playUrl: args.playUrl })
+    })
+
+    ipcRenderer.on(IPC_LIVE_WINDOW_CLOSE, () => {
+      this.closeLiveWindow()
+    });
+
+    ipcRenderer.on(IPC_LIVE_WINDOW_ON_TOP, (event, args) => {
+      this.changeAlwaysOnTop(args.status)
     })
   },
   methods: {
@@ -91,16 +105,11 @@ export default {
 
       this.flvPlayer.on(flvjs.Events.ERROR, (e) => {
         this.$Message.error(`播放失败: ${e}`);
-        console.log(e)
       });
 
       this.flvPlayer.attachMediaElement(livePlayer);
       this.flvPlayer.load();
       await this.flvPlayer.play();
-
-      console.log(livePlayer)
-      console.log(livePlayer.offsetWidth, livePlayer.offsetHeight)
-      console.log(livePlayer.videoWidth, livePlayer.videoHeight)
 
       this.resize(livePlayer.offsetWidth, livePlayer.offsetHeight)
     },
@@ -109,7 +118,47 @@ export default {
       if (!win) return
       win.setSize(width, height)
       win.setAspectRatio(width / height)
-    }
+    },
+
+    changeAlwaysOnTop(status) {
+      win.setFocusable(!status);
+      // this.win.setVisibleOnAllWorkspaces(true)
+      if (this.isOnTopForce && status) {
+        this.checkOnTopInterval = setInterval(() => {
+          if (!win) return
+          win.moveTop()
+        }, 1000)
+      } else if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      win.setAlwaysOnTop(status, this.onTopLevel);
+      // this.win.setFullScreenable(false)
+      win.setIgnoreMouseEvents(status, { forward: true });
+      this.$store.dispatch("UPDATE_CONFIG", {
+        isLiveWindowAlwaysOnTop: status,
+      });
+    },
+
+    closeLiveWindow() {
+      if (!win) return;
+
+      if (this.flvPlayer) {
+        this.flvPlayer.destroy();
+        this.flvPlayer = null;
+      }
+      win.close();
+
+      this.$store.dispatch("UPDATE_CONFIG", {
+        liveWindowId: null,
+        isLiveWindowAlwaysOnTop: false,
+      });
+      // clear
+      if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+    },
   }
 
 };
@@ -124,5 +173,6 @@ export default {
   right: 0px;
   background: rgba(0, 0, 0, 0);
   -webkit-app-region: drag;
+  overflow: hidden;
 }
 </style>

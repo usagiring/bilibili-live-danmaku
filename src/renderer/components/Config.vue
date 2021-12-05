@@ -414,7 +414,6 @@ export default {
         autoReplyRules: [__copy, ...rest],
       }
       await updateSetting(data)
-      console.log(data)
       this.$store.dispatch("UPDATE_CONFIG", data);
     },
 

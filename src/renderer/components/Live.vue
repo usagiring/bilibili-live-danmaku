@@ -102,7 +102,7 @@ import {
   setStatus
 } from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
-import { IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
+import { IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from "../../service/const";
 import { parseDownloadRate, parseHexColor } from "../../service/util";
 import {
   sendMessage,
@@ -210,6 +210,15 @@ export default {
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce;
+    },
+    liveWindowX() {
+      return this.$store.state.Config.liveWindowX;
+    },
+    liveWindowY() {
+      return this.$store.state.Config.liveWindowY;
+    },
+    liveWindowHeight() {
+      return this.$store.state.Config.liveWindowHeight;
     },
   },
   mounted() {
@@ -479,38 +488,15 @@ export default {
     },
 
     async closeLiveWindow() {
-      if (!this.win) return;
-      this.$store.dispatch("UPDATE_CONFIG", {
-        liveWindowId: null
-      });
-      // clear
-      if (this.checkOnTopInterval) {
-        clearInterval(this.checkOnTopInterval)
-        this.checkOnTopInterval = null
-      }
-      this.win.close();
       this.win = null;
       this.isShowLiveWindow = false;
       this.isShowLiveWindowLoading = false;
     },
 
     changeAlwaysOnTop(status) {
-      this.win.setFocusable(!status);
-      // this.win.setVisibleOnAllWorkspaces(true)
-      if (this.isOnTopForce && status) {
-        this.checkOnTopInterval = setInterval(() => {
-          if (!this.win) return
-          this.win.moveTop()
-        }, 1000)
-      } else if (this.checkOnTopInterval) {
-        clearInterval(this.checkOnTopInterval)
-        this.checkOnTopInterval = null
-      }
-      this.win.setAlwaysOnTop(status, this.onTopLevel);
-      // this.win.setFullScreenable(false)
-      this.win.setIgnoreMouseEvents(status, { forward: true });
-      this.$store.dispatch("UPDATE_CONFIG", {
-        isLiveWindowAlwaysOnTop: status,
+      ipcRenderer.send(IPC_LIVE_WINDOW_ON_TOP, {
+        windowId: this.liveWindowId,
+        status
       });
     },
 
@@ -531,11 +517,11 @@ export default {
         //   'frame=false,transparent=true,hasShadow=false,width=640,height=320,resizable=true'
         // )
         const win = new BrowserWindow({
-          width: this.windowWidth || 640,
-          height: this.windowHeight || 320,
+          width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
+          height: this.liveWindowHeight || 320,
           // x, y,
-          x: this.windowX || 640,
-          y: this.windowY || 320,
+          x: this.liveWindowX || 640,
+          y: this.liveWindowY || 320,
           frame: false,
           transparent: true,
           hasShadow: false,
@@ -560,20 +546,16 @@ export default {
             : `file://${__dirname}/index.html#live-window`;
 
         win.loadURL(winURL);
-        win.on("close", (e) => {
-          this.closeLiveWindow()
-        });
-        // note we call `require` on `remote` here
-        // const remoteMain = remote.require("@electron/remote/main");
-        // remoteMain.enable(win.webContents);
         this.win = win
         this.isShowLiveWindow = true;
         this.isShowLiveWindowLoading = false;
       } else {
         this.closeLiveWindow()
-      }
 
-      this.alwaysOnTop(status)
+        ipcRenderer.send(IPC_LIVE_WINDOW_CLOSE, {
+          windowId: this.liveWindowId,
+        });
+      }
     }
     // onResize: function () {
     //   const liveWrapper = document.getElementById("live-wrapper");

@@ -180,6 +180,7 @@ export const IPC_GET_USER_PATH = 'IPC_GET_USER_PATH'
 export const IPC_GET_VERSION = 'IPC_GET_VERSION'
 export const IPC_GET_EXE_PATH = 'IPC_GET_EXE_PATH'
 export const IPC_ENABLE_WEB_CONTENTS = 'IPC_ENABLE_WEB_CONTENTS'
+export const IPC_LIVE_WINDOW_ON_TOP = 'IPC_LIVE_WINDOW_ON_TOP'
 export const SET_DANMAKU_ON_TOP_LEVEL = OPTION_CONFIG.SET_DANMAKU_ON_TOP_LEVEL || 'floating'
 export const MAX_HISTORY_ROOM = OPTION_CONFIG.MAX_HISTORY_ROOM || 9
 export const PORT = OPTION_CONFIG.PORT || 8081
@@ -283,6 +284,9 @@ export const DEFAULT_CONFIG = {
   liveWindowOpacity: 1,
   liveWindowId: 0,
   danmakuWindowId: 0,
+  liveWindowX: 600,
+  liveWindowY: 600,
+  liveWindowHeight: 480,
   autoReplyRules: [
   ],
   borderImages: [

@@ -422,12 +422,10 @@ export default {
       let isConnected
 
       let win
-      console.log(this.danmakuWindowId)
       if (this.danmakuWindowId) {
         win = BrowserWindow.fromId(this.danmakuWindowId)
       }
 
-      console.log(win)
       if (win) {
         this.win = win
         this.isShowDanmakuWindow = true
