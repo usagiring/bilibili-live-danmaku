@@ -669,10 +669,9 @@ export default {
           throw new Error("roomId required.");
         }
 
-        const defaultRecordPath = (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record";
         const { id } = await record({
           roomId: this.realRoomId,
-          recordDir: this.recordDir || defaultRecordPath,
+          recordDir: this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record",
           quality: "原画",
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });

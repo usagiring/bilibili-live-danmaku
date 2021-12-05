@@ -102,7 +102,7 @@ import {
   setStatus
 } from "../../service/bilibili-recorder";
 import emitter from "../../service/event";
-import { IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from "../../service/const";
+import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from "../../service/const";
 import { parseDownloadRate, parseHexColor } from "../../service/util";
 import {
   sendMessage,
@@ -262,11 +262,9 @@ export default {
   methods: {
     async startRecord() {
       try {
-        const defaultRecordPath = (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record";
-
         const { id } = await record({
           roomId: this.realRoomId,
-          recordDir: this.recordDir || defaultRecordPath,
+          recordDir: this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + "/record",
           quality: this.recordQuality,
           cookie: this.isWithCookie ? this.userCookie : undefined,
         });
