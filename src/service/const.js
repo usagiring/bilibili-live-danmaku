@@ -45,9 +45,9 @@ export const PRICE_PROPERTIES = OPTION_CONFIG.PRICE_PROPERTIES || {
   },
 };
 
-export const GUARD_ICON_1 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png@44w_44h.webp"
-export const GUARD_ICON_2 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png@44w_44h.webp"
-export const GUARD_ICON_3 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp"
+export const GUARD_ICON_1 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png"
+export const GUARD_ICON_2 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png"
+export const GUARD_ICON_3 = "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png"
 
 export const GUARD_ICON_MAP = {
   1: GUARD_ICON_1,
@@ -287,6 +287,7 @@ export const DEFAULT_CONFIG = {
   liveWindowX: 600,
   liveWindowY: 600,
   liveWindowHeight: 480,
+  enableMessageListenMode: false,
   autoReplyRules: [
   ],
   borderImages: [

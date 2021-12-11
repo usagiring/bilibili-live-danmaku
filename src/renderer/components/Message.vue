@@ -3,11 +3,11 @@
     <div class="searcher-wrapper">
       <Input v-model="roomId" placeholder="房间号" clearable style="width: 120px" size="small" />
       <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
-      <Input v-model="userId" placeholder="用户ID" clearable style="width: 100px" size="small" />
-      <Input v-model="userName" placeholder="用户名" clearable style="width: 100px" size="small" />
-      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="searchAll"></Button>
+      <Input v-model="q" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
+      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll"></Button>
       <Checkbox class="setting-checkbox" :value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
       <Checkbox class="setting-checkbox" :value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
+      <Checkbox class="setting-checkbox" :value="enableMessageListenMode" @on-change="changeEnableMessageListenMode">实时更新模式</Checkbox>
     </div>
     <div class="content-wrapper">
       <Split v-model="split1" @on-moving="splitMoving">
@@ -17,14 +17,8 @@
               <Scroll :on-reach-edge="handleReachEdgeComment" :height="scrollHeightLeftTop" :distance-to-edge="[10, 10]">
                 <template v-for="comment in comments">
                   <div :key="comment._id" class="comment-content">
-                    <span class="date-style">{{
-                      dateFormat(comment.sendAt)
-                    }}</span>
-                    <i v-if="comment.role" class="guard-icon" :style="{
-                        'background-image': `url(${getGuardIcon(
-                          comment.role
-                        )})`,
-                      }"></i>
+                    <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
+                    <img v-if="comment.role" class="guard-icon" :src="`${getGuardIcon(comment.role)}`">
                     <FanMedal v-if="comment.medalLevel && comment.medalName" :medalLevel="comment.medalLevel" :medalName="comment.medalName" :medalColorStart="comment.medalColorStart" :medalColorEnd="comment.medalColorEnd" :medalColorBorder="comment.medalColorBorder"></FanMedal>
                     <span>{{ `${comment.uname}` }}</span>
                     <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
@@ -46,11 +40,7 @@
                   <div :key="interact._id">
                     <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
                     <FanMedal v-if="interact.medalLevel && interact.medalName" :medalLevel="interact.medalLevel" :medalName="interact.medalName" :medalColorStart="interact.medalColorStart" :medalColorEnd="interact.medalColorEnd" :medalColorBorder="interact.medalColorBorder"></FanMedal>
-                    <span :style="{
-                        color: interact.unameColor
-                          ? interact.unameColor
-                          : undefined,
-                      }">{{ `${interact.uname}` }}</span>
+                    <span :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
                     <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
                     <span>{{ getInteractType(interact.type) }}了直播间</span>
                   </div>
@@ -63,16 +53,11 @@
           <Scroll :on-reach-edge="handleReachEdgeGift" :height="scrollHeightRight" :distance-to-edge="[10, 10]">
             <template v-for="gift in gifts">
               <div :key="gift._id" :style="{ padding: '0 10px' }">
-                <!-- <p class="date-style" :style="{ padding: '0 8px' }">
-                  {{ dateFormat(gift.sendAt) }}
-                </p> -->
                 <template v-if="gift.type === 3">
                   <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.content}` }}</GiftCardMini>
                 </template>
                 <template v-if="gift.type === 1 || gift.type === 2">
-                  <GiftCardMini v-bind="gift" :showTime="true">{{
-                    `: 赠送了 ${gift.count}个 ${gift.name}`
-                  }}</GiftCardMini>
+                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
                 </template>
               </div>
             </template>
@@ -92,6 +77,10 @@ import { getPriceProperties, dateFormat } from "../../service/util";
 import { queryGifts, queryInteracts, queryComments } from '../../service/api'
 import GiftCardMini from "./GiftCardMini";
 import FanMedal from "./FanMedal";
+import ws from '../../service/ws'
+const COMMENTS_LIMIT = 200
+const GIFTS_LIMIT = 200
+const INTERACTS_LIMIT = 200
 
 export default {
   components: {
@@ -100,6 +89,7 @@ export default {
   },
   data() {
     return {
+      q: '',
       split1: 0.6,
       split2: 0.7,
       roomId: 0,
@@ -116,6 +106,11 @@ export default {
       isShowSilverGift: false,
     };
   },
+  computed: {
+    enableMessageListenMode() {
+      return this.$store.state.Config.enableMessageListenMode;
+    }
+  },
   created() {
     this.roomId = this.$store.state.Config.realRoomId;
     // const startTime =
@@ -124,16 +119,20 @@ export default {
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
     this.searchAll();
     window.on("resize", this.onResize);
+
+    if (this.enableMessageListenMode) {
+      this.listenStart()
+    }
   },
   beforeDestroy() {
     window.removeListener("resize", this.onResize);
+    this.listenStop()
   },
   mounted() {
     setTimeout(() => {
       this.onResize();
     }, 0);
   },
-  computed: {},
   methods: {
     changeDateRange([startTime, endTime]) {
       this.dateRange = [new Date(startTime), new Date(endTime)];
@@ -162,11 +161,18 @@ export default {
           $lte: this.dateRange[1].getTime(),
         };
       }
-      if (this.userId) {
-        query.uid = parseInt(this.userId);
-      }
-      if (this.userName) {
-        query.uname = { $regex: this.userName };
+      if (this.q) {
+        query.$or = [
+          {
+            uid: parseInt(this.q)
+          },
+          {
+            uname: { $regex: this.q }
+          },
+          {
+            content: { $regex: this.q }
+          }
+        ]
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -202,11 +208,15 @@ export default {
           $lte: this.dateRange[1].getTime(),
         };
       }
-      if (this.userId) {
-        query.uid = parseInt(this.userId);
-      }
-      if (this.userName) {
-        query.uname = { $regex: this.userName };
+      if (this.q) {
+        query.$or = [
+          {
+            uid: parseInt(this.q)
+          },
+          {
+            uname: { $regex: this.q }
+          },
+        ]
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -239,11 +249,18 @@ export default {
           $lte: this.dateRange[1].getTime(),
         };
       }
-      if (this.userId) {
-        query.uid = parseInt(this.userId);
-      }
-      if (this.userName) {
-        query.uname = { $regex: this.userName };
+      if (this.q) {
+        query.$or = [
+          {
+            uid: parseInt(this.q)
+          },
+          {
+            uname: { $regex: this.q }
+          },
+          {
+            content: { $regex: this.q }
+          }
+        ]
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(":");
@@ -407,6 +424,72 @@ export default {
     playAudio(url) {
       const audio = new Audio(url)
       audio.play()
+    },
+
+    async changeEnableMessageListenMode(status) {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        enableMessageListenMode: status
+      })
+      if (status) {
+        await this.searchAll()
+        this.listenStart()
+      } else {
+        this.listenStop()
+      }
+    },
+
+    async listenStart() {
+      ws.addEventListener('message', this.onMessage)
+    },
+    listenStop() {
+      ws.removeEventListener('message', this.onMessage)
+    },
+
+    onMessage(msg) {
+      const payload = JSON.parse(msg.data)
+      if (payload.cmd === 'COMMENT') {
+        this.onComment(payload.payload)
+      }
+      if (payload.cmd === 'GIFT') {
+        this.onGift(payload.payload)
+      }
+      if (payload.cmd === 'INTERACT') {
+        this.onInteract(payload.payload)
+      }
+      if (payload.cmd === 'SUPER_CHAT') {
+        this.onSuperChat(payload.payload)
+      }
+    },
+
+    onComment(payload) {
+      if (this.comments.length > COMMENTS_LIMIT) {
+        this.comments.pop()
+      }
+      this.comments = [payload, ...this.comments]
+    },
+    onInteract(payload) {
+      if (this.interacts.length > INTERACTS_LIMIT) {
+        this.interacts.pop()
+      }
+      this.interacts = [payload, ...this.interacts]
+    },
+    onGift(payload) {
+      if (!this.isShowSilverGift && payload.coinType === 2) {
+        return
+      }
+      payload = this.formatGift(payload)
+      // 已存在的礼物覆盖，不存在的新增
+      const existGift = this.gifts.find(gift => gift._id === payload._id)
+      if (existGift) {
+        existGift.count = payload.count
+        existGift.totalPrice = payload.price * (payload.count || 1)
+        existGift.priceProperties = payload.priceProperties
+      } else {
+        if (this.gifts.length > GIFTS_LIMIT) {
+          this.gifts.pop()
+        }
+        this.gifts = [payload, ...this.gifts]
+      }
     }
   },
 };

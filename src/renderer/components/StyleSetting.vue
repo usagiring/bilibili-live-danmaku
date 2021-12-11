@@ -12,16 +12,16 @@
       <div :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
         <Container @drop="onDrop($event)" orientation="horizontal" :style="{'min-height': '0px'}">
           <template v-for="(setting, index) of messageSettings">
-            <Draggable :key="index" v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle">
-              <i class="guard-icon" :style="{'background-image': `url(${getGuardIcon('3')})`}"></i>
+            <Draggable :key="index" v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+              <img class="guard-icon" :src="`${getGuardIcon('3')}`">
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle">
+            <Draggable :key="index" v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <FanMedal v-if="example.ML && example.MN" :medalLevel="example.ML" :medalName="example.MN" :medalColorStart="example.MCS" :medalColorEnd="example.MCE" :medalColorBorder="example.MCB"></FanMedal>
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle">
+            <Draggable :key="index" v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
+            <Draggable :key="index" v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle padding-lr-1px">
               <span>{{ `${example.uname}` }}</span>
             </Draggable>
             <Draggable :key="index" v-if="setting.type==='colon' && setting.isShow" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
@@ -199,7 +199,7 @@
 
     <div class="divider line one-line">
       <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(2)">
-        角色：舰长及以上
+        角色：舰长
         <Icon v-if="collapse[2]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
@@ -231,18 +231,77 @@
         <Divider type="vertical" />
       </div>
     </div>
-    <!-- </i-col> -->
-    <!-- <i-col span="16">
-      <div class="setting-right">
-        <div class="setting-right-header">
-          <Button @click="sendTestMessage">发送测试弹幕</Button>
-          <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button>
-          <Button @click="clearDanmaku">清空弹幕池</Button>
-        </div>
-        <iframe class="setting-right-content" id="preview-container" src="http://localhost:8081?example=true&port=8081" />
+
+    <div class="divider line one-line">
+      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(3)">
+        角色：提督
+        <Icon v-if="collapse[3]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </div>
+    <div class="disable-user-select" v-show="collapse[3]">
+      <div class="setting-group">
+        名称：
+        <StyleEditor v-bind="editors[18]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[19]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[20]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[21]" />
       </div>
-    </i-col> -->
-    <!-- </Row> -->
+      <div class="setting-group">
+        内容：
+        <StyleEditor v-bind="editors[22]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[23]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[24]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[25]" />
+      </div>
+      <div class="setting-group">
+        整体：
+        <StyleEditor v-bind="editors[26]" />
+        <Divider type="vertical" />
+      </div>
+    </div>
+
+    <div class="divider line one-line">
+      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(4)">
+        角色：总督
+        <Icon v-if="collapse[4]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </div>
+    <div class="disable-user-select" v-show="collapse[4]">
+      <div class="setting-group">
+        名称：
+        <StyleEditor v-bind="editors[27]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[28]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[29]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[30]" />
+      </div>
+      <div class="setting-group">
+        内容：
+        <StyleEditor v-bind="editors[31]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[32]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[33]" />
+        <Divider type="vertical" />
+        <StyleEditor v-bind="editors[34]" />
+      </div>
+      <div class="setting-group">
+        整体：
+        <StyleEditor v-bind="editors[35]" />
+        <Divider type="vertical" />
+      </div>
+    </div>
+
     <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
       <div :style="{ padding: '20px'}">
         <span :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
@@ -395,163 +454,6 @@ export default {
           value: 'bolder',
         },
       ],
-
-      // editors: [
-      //   // ***** normal *****
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "名称大小",
-      //     role: 0,
-      //     prop: "name",
-      //     styleName: "font-size",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "名称前景色",
-      //     role: 0,
-      //     prop: "name",
-      //     styleName: "color",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "名称描边大小",
-      //     role: 0,
-      //     prop: "name",
-      //     numberStep: 0.1,
-      //     styleName: "-webkit-text-stroke-width",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "名称描边颜色",
-      //     role: 0,
-      //     prop: "name",
-      //     styleName: "-webkit-text-stroke-color",
-      //   },
-
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "评论大小",
-      //     role: 0,
-      //     prop: "comment",
-      //     styleName: "font-size",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "评论前景色",
-      //     role: 0,
-      //     prop: "comment",
-      //     styleName: "color",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "评论描边大小",
-      //     role: 0,
-      //     prop: "comment",
-      //     numberStep: 0.1,
-      //     styleName: "-webkit-text-stroke-width",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "评论描边颜色",
-      //     role: 0,
-      //     prop: "comment",
-      //     styleName: "-webkit-text-stroke-color",
-      //   },
-
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "消息背景色",
-      //     role: 0,
-      //     prop: "message",
-      //     styleName: "background",
-      //   },
-      //   // ***** captain *****
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "名称大小",
-      //     role: 3,
-      //     prop: "name",
-      //     styleName: "font-size",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "名称前景色",
-      //     role: 3,
-      //     prop: "name",
-      //     styleName: "color",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "名称描边大小",
-      //     role: 3,
-      //     prop: "name",
-      //     numberStep: 0.1,
-      //     styleName: "-webkit-text-stroke-width",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "名称描边颜色",
-      //     role: 3,
-      //     prop: "name",
-      //     styleName: "-webkit-text-stroke-color",
-      //   },
-
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "评论大小",
-      //     role: 3,
-      //     prop: "comment",
-      //     styleName: "font-size",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "评论前景色",
-      //     role: 3,
-      //     prop: "comment",
-      //     styleName: "color",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "InputNumber",
-      //     name: "评论描边大小",
-      //     role: 3,
-      //     prop: "comment",
-      //     numberStep: 0.1,
-      //     styleName: "-webkit-text-stroke-width",
-      //   },
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "评论描边颜色",
-      //     role: 3,
-      //     prop: "comment",
-      //     styleName: "-webkit-text-stroke-color",
-      //   },
-
-      //   {
-      //     id: Math.random(),
-      //     type: "ColorPicker",
-      //     name: "消息背景色",
-      //     role: 3,
-      //     prop: "message",
-      //     styleName: "background",
-      //   },
-      // ],
 
       editors: [
         // ***** normal *****
@@ -724,6 +626,160 @@ export default {
           type: "ColorPicker",
           name: "背景色",
           role: 3,
+          prop: "message",
+          styleName: "background",
+        },
+
+        // ***** 提督 *****
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "大小",
+          role: 2,
+          prop: "name",
+          styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "颜色",
+          role: 2,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "描边粗细",
+          role: 2,
+          prop: "name",
+          numberStep: 0.1,
+          styleName: "-webkit-text-stroke-width",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "描边颜色",
+          role: 2,
+          prop: "name",
+          styleName: "-webkit-text-stroke-color",
+        },
+
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "大小",
+          role: 2,
+          prop: "comment",
+          styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "颜色",
+          role: 2,
+          prop: "comment",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "描边粗细",
+          role: 2,
+          prop: "comment",
+          numberStep: 0.1,
+          styleName: "-webkit-text-stroke-width",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "描边颜色",
+          role: 2,
+          prop: "comment",
+          styleName: "-webkit-text-stroke-color",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "背景色",
+          role: 2,
+          prop: "message",
+          styleName: "background",
+        },
+
+        // ***** 总督 *****
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "大小",
+          role: 1,
+          prop: "name",
+          styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "颜色",
+          role: 1,
+          prop: "name",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "描边粗细",
+          role: 1,
+          prop: "name",
+          numberStep: 0.1,
+          styleName: "-webkit-text-stroke-width",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "描边颜色",
+          role: 1,
+          prop: "name",
+          styleName: "-webkit-text-stroke-color",
+        },
+
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "大小",
+          role: 1,
+          prop: "comment",
+          styleName: "font-size",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "颜色",
+          role: 1,
+          prop: "comment",
+          styleName: "color",
+        },
+        {
+          id: Math.random(),
+          type: "InputNumber",
+          name: "描边粗细",
+          role: 1,
+          prop: "comment",
+          numberStep: 0.1,
+          styleName: "-webkit-text-stroke-width",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "描边颜色",
+          role: 1,
+          prop: "comment",
+          styleName: "-webkit-text-stroke-color",
+        },
+        {
+          id: Math.random(),
+          type: "ColorPicker",
+          name: "背景色",
+          role: 1,
           prop: "message",
           styleName: "background",
         },
@@ -1044,7 +1100,7 @@ export default {
           sendAt: Date.now(),
         };
         if (Math.random() * 2 < 1) {
-          superChat.commentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
+          superChat.contentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
         }
         superChat.role = randomRole;
         return superChat;
@@ -1325,8 +1381,8 @@ export default {
   vertical-align: top;
 }
 .guard-icon {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   display: inline-block;
   vertical-align: middle;
   background-size: contain;
@@ -1447,6 +1503,10 @@ export default {
 
 .description-text {
   white-space: normal;
+}
+
+.padding-lr-1px {
+  padding: 0 1px;
 }
 
 .max-width {
