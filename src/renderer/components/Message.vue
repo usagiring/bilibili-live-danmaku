@@ -482,7 +482,7 @@ export default {
       const existGift = this.gifts.find(gift => gift._id === payload._id)
       if (existGift) {
         existGift.count = payload.count
-        existGift.totalPrice = payload.price * (payload.count || 1)
+        existGift.totalPrice = payload.totalPrice
         existGift.priceProperties = payload.priceProperties
       } else {
         if (this.gifts.length > GIFTS_LIMIT) {

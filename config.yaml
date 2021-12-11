@@ -4,6 +4,7 @@ PORT: 8081
 MAX_HISTORY_ROOM: 15
 # 弹幕窗渲染页面地址
 DANMAKU_RENDER_PATH: ''
+SAVE_ALL_BILI_MESSAGE: false
 # 礼物色彩区分, 1～6 分别对应B站 6档SC价格
 PRICE_PROPERTIES:
   1:

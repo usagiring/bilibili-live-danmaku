@@ -175,5 +175,6 @@ export default {
   background: rgba(0, 0, 0, 0);
   -webkit-app-region: drag;
   overflow: hidden;
+  cursor: move;
 }
 </style>
