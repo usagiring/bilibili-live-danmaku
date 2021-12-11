@@ -24,10 +24,6 @@ https://github.com/usagiring/bilibili-live-danmaku/releases
 - 本应用数据基于本地收集到的数据，未被应用统计到的数据不进行统计。
 - 十分内互动人数，由进入直播间、发送弹幕、送礼组成。
 
-### TODO
-- 直播间里已有sc展示
-- 显示直播间信息，封禁词，多少级限制发言等等
-
 ### developer
 
 ``` bash
