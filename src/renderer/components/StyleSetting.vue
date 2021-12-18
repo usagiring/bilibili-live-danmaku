@@ -159,6 +159,13 @@
       <div class="setting-group">
         <!-- <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
         <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
+        <Divider type="vertical" />
+        <Checkbox :value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
+      </div>
+      <div class="setting-group">
+        <Checkbox :value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
       </div>
     </div>
 
@@ -789,7 +796,7 @@ export default {
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
   },
-  async mounted() {
+  mounted() {
     // this.initExamleMessages()
 
     if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
@@ -849,6 +856,15 @@ export default {
     },
     isShowHeadline() {
       return this.$store.state.Config.isShowHeadline;
+    },
+    isShowType1() {
+      return this.$store.state.Config.isShowType1;
+    },
+    isShowType2() {
+      return this.$store.state.Config.isShowType2;
+    },
+    isShowSuperChatJPN() {
+      return this.$store.state.Config.isShowSuperChatJPN;
     },
     fontWeight() {
       return this.$store.state.Config.fontWeight;
@@ -1344,6 +1360,30 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", {
         borderImages: borderImages
       })
+    },
+
+    async showType1(status) {
+      const data = {
+        isShowType1: status
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async showType2(status) {
+      const data = {
+        isShowType2: status
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async showSuperChatJPN(status) {
+      const data = {
+        isShowSuperChatJPN: status
+      }
+      await mergeSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     }
   },
 };

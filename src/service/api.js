@@ -135,3 +135,13 @@ export async function speak(body) {
   const res = await axios.post(`${BASE_URL}/api/speak`, body)
   return res.data
 }
+
+export async function statistic(body) {
+  const res = await axios.post(`${BASE_URL}/api/statistic`, body)
+  return res.data
+}
+
+export async function commentWordExtract(body) {
+  const res = await axios.post(`${BASE_URL}/api/comments/word-extract`, body)
+  return res.data
+}

@@ -5,23 +5,33 @@
       <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
       <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic"></Button>
     </div>
-    <div class="statistic-content">
-      <p>获得金瓜子: {{ goldTotal }}</p>
-      <p>弹幕数: {{ commentCount }}</p>
-      <p>互动人数: {{ interactUserCount }}</p>
-      <p>送礼人数: {{ giftUserCount }}</p>
-      <p>发送弹幕最多的人: {{ maxCommentUser }}</p>
-      <p>赠送礼物最多的人: {{ maxGiftUser }}</p>
+    <div class="main-container">
+      <div class="text-container">
+        <p>获得金瓜子: {{ totalGold }}</p>
+        <p>弹幕数: {{ totalComment }}</p>
+        <p>送礼人数: {{ totalSendGiftUser }}</p>
+        <p>赠送礼物最多的人: {{ topSendGiftUser.uname }}</p>
+        <p>发送弹幕最多的人: {{ topCommentUser.uname }}</p>
+      </div>
+      <div id="wordcloud-chart">
+        <Button type="primary" class="workclound-button" @click="generateWordCloud">生成词云</Button>
+      </div>
+
       <div id="chart"></div>
     </div>
   </div>
 </template>
 
-<script>
+<script type="module">
 import moment from "moment";
-import { queryComments, queryInteracts, queryGifts, countComments } from '../../service/api'
-import { countBy } from "lodash";
+import {
+  statistic as statisticAPI,
+  commentWordExtract
+} from '../../service/api'
 import * as echarts from "echarts";
+import 'echarts-wordcloud/dist/echarts-wordcloud.min.js';
+// import 'echarts-wordcloud';
+
 // import * as echarts from "echarts/core";
 // import { LineChart } from "echarts/charts";
 // import {
@@ -48,12 +58,15 @@ export default {
       roomId: 0,
       dateRange: [],
       isDateRangeChanged: true,
-      commentCount: 0, // 弹幕总数
-      goldTotal: 0,
-      giftUserCount: 0, // 送礼人数
-      interactUserCount: 0, // 互动人数
-      maxCommentUser: "",
-      maxGiftUser: "",
+
+      totalGold: 0,
+      totalComment: 0, // 弹幕总数
+      totalSendGiftUser: 0, // 送礼人数
+
+      topSendGiftUser: {}, // 发送礼物最多的人
+      topCommentUser: {}, // 发送弹幕最多的人
+
+      chart: null,
     };
   },
   created() {
@@ -63,104 +76,25 @@ export default {
     this.dateRange = [start, end];
   },
   mounted() {
-    this.statistic();
+    this.statistic()
   },
   methods: {
     async statistic() {
       const [start, end] = this.dateRange;
-      const query = {
-        roomId: Number(this.roomId),
-      };
-      if (start) {
-        query.sendAt = query.sendAt || {};
-        query.sendAt.$gte = start - 0;
-      }
-      if (end) {
-        query.sendAt = query.sendAt || {};
-        query.sendAt.$lte = end - 0;
-      }
-      const { data: commentCount } = await countComments({ query })
-      this.commentCount = commentCount;
-      const giftQuery = {
-        ...query,
-        coinType: 1,
-      };
-
-      // --- gift ---
-      let { data: gifts } = await queryGifts({
-        query: giftQuery,
-      })
-      // let gifts = await giftDB.find(giftQuery);
-      const giftUids = gifts.map((gift) => gift.uid);
-      gifts = gifts.map((gift) => {
-        gift.totalPrice = gift.count * gift.price;
-        return gift;
+      const { data } = await statisticAPI({
+        roomId: this.roomId,
+        start: start,
+        end: end
       });
-      const giftUserMap = gifts.reduce((map, gift) => {
-        if (map[gift.uid]) {
-          map[gift.uid] = map[gift.uid] + gift.totalPrice;
-        } else {
-          map[gift.uid] = gift.totalPrice;
-        }
-        return map;
-      }, {});
-      let goldTotal = 0;
-      let maxGold = 0;
-      let maxGiftUid;
-      for (const key in giftUserMap) {
-        if (giftUserMap[key] > maxGold) {
-          maxGold = giftUserMap[key];
-          maxGiftUid = key;
-        }
-        goldTotal = goldTotal + giftUserMap[key];
-      }
-      this.goldTotal = goldTotal.toFixed(1) * 1000;
-      const maxGiftUser =
-        gifts.find((gift) => Number(gift.uid) === Number(maxGiftUid)) || {};
-      this.maxGiftUser = maxGiftUser.uname;
-      this.giftUserCount = Object.keys(giftUserMap).length;
+      this.topSendGiftUser = data.topSendGiftUser
+      this.topCommentUser = data.topCommentUser
 
-      // --- comment ---
-      const { data: comments } = await queryComments({
-        query,
-        projection: { uid: 1, uname: 1, sendAt: 1 },
-      })
-      // const comments = await commentDB.find(query, {
-      //   projection: { uid: 1, name: 1, sendAt: 1 },
-      // });
-      const commentUids = comments.map((c) => c.uid);
-      const commentCountMap = countBy(commentUids);
-      let maxCommentCount = 0;
-      let maxCommentUid;
-      for (const uid in commentCountMap) {
-        if (commentCountMap[uid] > maxCommentCount) {
-          maxCommentCount = commentCountMap[uid];
-          maxCommentUid = uid;
-        }
-      }
-      const maxCommentUser =
-        comments.find((c) => c.uid === Number(maxCommentUid)) || {};
-      this.maxCommentUser = maxCommentUser.uname;
-      this.generateChart(comments);
+      this.totalGold = data.totalGold
+      this.totalSendGiftUser = data.totalSendGiftUser
+      this.totalComment = data.totalComment
 
-      // --- interact ---
-      const { data: interacts } = await queryInteracts({
-        query,
-        projection: { uid: 1 },
-      })
-      // const interacts = await interactDB.find(query, {
-      //   projection: { uid: 1 },
-      // });
-      const interactUids = interacts.map((interact) => interact.uid);
-
-      const countMap = commentUids
-        .concat(giftUids)
-        .concat(interactUids)
-        .reduce((map, i) => {
-          map[i] = 1;
-          return map;
-        }, {});
-      this.interactUserCount = Object.keys(countMap).length;
+      this.generateChart(data.chart)
+      // this.wordCloudChart.dispose()
     },
 
     changeDateRange([startTime, endTime]) {
@@ -173,19 +107,15 @@ export default {
       }, 0);
     },
 
-    generateChart(comments) {
-      this.initChartAndXAxis();
-
-      const [start] = this.dateRange;
-      const startDate = new Date(start);
-
-      const data = new Array(this.times.length).fill(0);
-      for (const comment of comments) {
-        // 计算出与开始时间差，除以间隔时间，即index
-        const delta = comment.sendAt - startDate.getTime();
-        const index = Math.floor(delta / (60 * 1000));
-        data[index]++;
+    generateChart(chartOption) {
+      if (!this.chart) {
+        const chartDOM = document.getElementById("chart");
+        this.chart = echarts.init(chartDOM);
       }
+
+      if (!this.isDateRangeChanged && chartOption.times && chartOption.times.length) return;
+
+      this.isDateRangeChanged = false;
 
       const option = {
         tooltip: {
@@ -194,20 +124,25 @@ export default {
             return [pt[0], "10%"];
           },
         },
-        title: {
-          left: "center",
-          text: "弹幕密度图",
+        grid: {
+          left: "5%",
+          right: "5%",
+          top: "10%",
         },
-        toolbox: {
-          feature: {
-            restore: {},
-            saveAsImage: {},
-          },
-        },
+        // title: {
+        //   left: "center",
+        //   text: "弹幕密度图",
+        // },
+        // toolbox: {
+        //   feature: {
+        //     restore: {},
+        //     saveAsImage: {},
+        //   },
+        // },
         xAxis: {
           type: "category",
           boundaryGap: false,
-          data: this.times,
+          data: chartOption.times,
         },
         yAxis: {
           type: "value",
@@ -248,7 +183,7 @@ export default {
                 },
               ]),
             },
-            data: data,
+            data: chartOption.data,
           },
         ],
       };
@@ -256,33 +191,117 @@ export default {
       this.chart.setOption(option);
     },
 
-    // 抽离x轴逻辑
-    // 选择时间范围变化触发x轴变化
-    initChartAndXAxis() {
-      if (!this.chart) {
-        const chartDOM = document.getElementById("chart");
-        this.chart = echarts.init(chartDOM);
+    async generateWordCloud() {
+      if (!this.wordCloudChart) {
+        const chartDOM = document.getElementById("wordcloud-chart");
+        this.wordCloudChart = echarts.init(chartDOM);
       }
-
-      if (!this.isDateRangeChanged && this.times && this.times.length) return;
 
       const [start, end] = this.dateRange;
-      const startDate = new Date(start);
-      const endDate = new Date(end);
-      const dateDelta = endDate - startDate;
+      const { data } = await commentWordExtract({
+        roomId: this.roomId,
+        start,
+        end,
+      })
 
-      const tick = Math.ceil(dateDelta / (60 * 1000));
-
-      const times = [];
-      for (let i = 0; i < tick; i++) {
-        const date = new Date(startDate.getTime() + i * 60 * 1000);
-        const MM = date.getHours().toString().padStart(2, "0");
-        const SS = date.getMinutes().toString().padStart(2, "0");
-        times.push(`${MM}:${SS}`);
+      const chartData = []
+      for (const key in data) {
+        chartData.push({
+          name: key,
+          value: data[key]
+        })
       }
-      this.times = times;
-      this.isDateRangeChanged = false;
-    },
+
+      this.wordCloudChart.setOption({
+        grid: {
+          left: "0%",
+          right: "0%",
+          top: "0%",
+          bottom: "0%",
+        },
+        series: [{
+          type: 'wordCloud',
+
+          // The shape of the "cloud" to draw. Can be any polar equation represented as a
+          // callback function, or a keyword present. Available presents are circle (default),
+          // cardioid (apple or heart shape curve, the most known polar equation), diamond (
+          // alias of square), triangle-forward, triangle, (alias of triangle-upright, pentagon, and star.
+
+          shape: 'heart',
+
+          // A silhouette image which the white area will be excluded from drawing texts.
+          // The shape option will continue to apply as the shape of the cloud to grow.
+
+          // maskImage: maskImage,
+
+          // Folllowing left/top/width/height/right/bottom are used for positioning the word cloud
+          // Default to be put in the center and has 75% x 80% size.
+
+          // left: 'center',
+          // top: 'center',
+          width: '100%',
+          height: '100%',
+          // right: null,
+          // bottom: null,
+
+          // Text size range which the value in data will be mapped to.
+          // Default to have minimum 12px and maximum 60px size.
+
+          sizeRange: [12, 60],
+
+          // Text rotation range and step in degree. Text will be rotated randomly in range [-90, 90] by rotationStep 45
+
+          rotationRange: [-90, 90],
+          rotationStep: 45,
+
+          // size of the grid in pixels for marking the availability of the canvas
+          // the larger the grid size, the bigger the gap between words.
+
+          gridSize: 8,
+
+          // set to true to allow word being draw partly outside of the canvas.
+          // Allow word bigger than the size of the canvas to be drawn
+          drawOutOfBound: true,
+
+          // If perform layout animation.
+          // NOTE disable it will lead to UI blocking when there is lots of words.
+          layoutAnimation: true,
+
+          // Global text style
+          textStyle: {
+            fontFamily: 'sans-serif',
+            fontWeight: 'bold',
+            // Color can be a callback function or a color string
+            color: function () {
+              // Random color
+              return 'rgb(' + [
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160)
+              ].join(',') + ')';
+            }
+          },
+          // emphasis: {
+          //   focus: 'self',
+
+          //   textStyle: {
+          //     textShadowBlur: 10,
+          //     textShadowColor: '#333'
+          //   }
+          // },
+
+          // Data is an array. Each array item must have name and value property.
+          // data: [{
+          //   name: 'Farrah Abraham',
+          //   value: 366,
+          //   // Style of single text
+          //   textStyle: {
+          //   }
+          // }]
+          data: chartData
+        }]
+      });
+    }
   },
 };
 </script>
@@ -294,14 +313,36 @@ export default {
   padding: 1px 30px;
   border-bottom: 1px solid silver;
 }
-.statistic-content {
-  padding: 20px 40px;
+.main-container {
+  position: relative;
+  padding: 10px 40px 0 40px;
 }
-.statistic-content > p {
-  padding: 5px;
+.text-container {
+  display: inline-block;
+  vertical-align: middle;
+}
+.text-container > p {
+  padding: 10px;
 }
 #chart {
   width: 100%;
   height: 300px;
+}
+
+#wordcloud-chart {
+  position: relative;
+  vertical-align: middle;
+  right: 0px;
+  top: 0px;
+  display: inline-block;
+  height: 330px;
+  width: 700px;
+}
+
+.workclound-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>
