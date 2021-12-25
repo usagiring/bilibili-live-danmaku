@@ -85,7 +85,7 @@
     "@tokine/bilibili-bridge": "^0.0.24",
     "@tokine/bilibili-danmaku-page": "^0.1.9",
     "@tokine/bilibili-recorder": "^0.0.9",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "cookie": "^0.4.1",
     "echarts": "^5.1.1",
     "echarts-wordcloud": "^2.0.0",
