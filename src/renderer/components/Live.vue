@@ -437,7 +437,11 @@ export default {
       const { data } = await getInfoByUser(this.realRoomId, this.userCookie);
       const { medal } = data || {};
       const { curr_weared, is_weared } = medal || {};
-      if (!is_weared) return;
+      if (!is_weared) {
+        this.$Message.info("当前未佩戴粉丝牌")
+        this.getMedalDataLoading = false
+        return
+      };
       const {
         medal_color_start,
         medal_color_end,

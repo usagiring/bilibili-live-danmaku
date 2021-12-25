@@ -1,6 +1,5 @@
-const axios = require('axios')
+import axios from 'axios'
 import cookie from "cookie";
-import querystring from "querystring";
 import httpAdapter from './http'
 
 const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'https://api.bilibili.com'
@@ -95,7 +94,7 @@ async function sendMessage(data, userCookie) {
   const { message, roomId, color, fontsize, mode, rnd, bubble } = data
   const cookies = cookie.parse(userCookie);
   const csrf = cookies.bili_jct;
-  const params = querystring.stringify({
+  const params = new URLSearchParams({
     color: color || 16777215,
     fontsize: fontsize || 25,
     mode: mode || 1,
@@ -105,7 +104,7 @@ async function sendMessage(data, userCookie) {
     bubble: bubble || 0,
     csrf_token: csrf,
     csrf: csrf,
-  });
+  }).toString()
 
   const res = await axios.post(`https://api.live.bilibili.com/msg/send`, params, {
     headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),
@@ -118,11 +117,11 @@ async function wearMedal(medalId, userCookie) {
   if (!medalId) throw new Error('medalId is required')
   const cookies = cookie.parse(userCookie);
   const csrf = cookies.bili_jct;
-  const params = querystring.stringify({
+  const params = new URLSearchParams({
     medal_id: medalId,
     csrf_token: csrf,
     csrf: csrf,
-  });
+  }).toString()
 
   const res = await axios.post(`https://api.live.bilibili.com/xlive/web-room/v1/fansMedal/wear`, params, {
     headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),
@@ -143,7 +142,7 @@ async function sendBagGift(data, userCookie) {
   const { uid, gift_id, ruid, bag_id, rnd, biz_id, price } = data
   const cookies = cookie.parse(userCookie);
   const csrf = cookies.bili_jct;
-  const params = querystring.stringify({
+  const params = new URLSearchParams({
     uid,
     gift_id,
     ruid,
@@ -158,7 +157,7 @@ async function sendBagGift(data, userCookie) {
     price: price || 0,
     csrf_token: csrf,
     csrf: csrf,
-  });
+  }).toString()
 
   const res = await axios.post(`https://api.live.bilibili.com/gift/v2/live/bag_send`, params, {
     headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),

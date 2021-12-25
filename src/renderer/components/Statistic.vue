@@ -4,9 +4,11 @@
       <Input v-model="roomId" placeholder="房间号" clearable style="width: 150px" size="small" />
       <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
       <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic"></Button>
+      <Button shape="circle" icon="md-download" :disabled="!roomId" @click="download"></Button>
     </div>
     <div class="main-container">
       <div class="text-container">
+        <p :style="{'max-width': '300px'}">数据仅供参考，实际数据请以官方数据为准。请注意舰长未区分续费与原价，统一以原价计算。</p>
         <p>获得金瓜子: {{ totalGold }}</p>
         <p>弹幕数: {{ totalComment }}</p>
         <p>送礼人数: {{ totalSendGiftUser }}</p>
@@ -24,10 +26,15 @@
 
 <script type="module">
 import moment from "moment";
+import fs from 'fs'
+import * as remote from "@electron/remote";
+const { dialog } = remote
 import {
   statistic as statisticAPI,
-  commentWordExtract
+  commentWordExtract,
+  exportFile,
 } from '../../service/api'
+import { dateFormat } from '../../service/util'
 import * as echarts from "echarts";
 import 'echarts-wordcloud/dist/echarts-wordcloud.min.js';
 // import 'echarts-wordcloud';
@@ -301,7 +308,33 @@ export default {
           data: chartData
         }]
       });
-    }
+    },
+
+    async download() {
+      const filePath = await this.choosePath()
+      console.log(filePath)
+      if (!filePath) return
+      const [start, end] = this.dateRange
+      const data = await exportFile({
+        roomId: this.roomId,
+        start,
+        end,
+      })
+      const ws = fs.createWriteStream(`${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
+      // data.pipe(ws)
+      ws.write(data)
+      ws.end()
+    },
+
+    async choosePath() {
+      const result = await dialog.showOpenDialog({
+        properties: ["openDirectory"],
+      });
+      if (!result.canceled) {
+        const path = result.filePaths[0]
+        return path
+      }
+    },
   },
 };
 </script>

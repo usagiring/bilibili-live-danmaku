@@ -145,3 +145,14 @@ export async function commentWordExtract(body) {
   const res = await axios.post(`${BASE_URL}/api/comments/word-extract`, body)
   return res.data
 }
+
+export async function exportFile(body) {
+  const res = await axios.post(`${BASE_URL}/api/export`, body, {
+    // responseType: 'stream', // ?????
+    // decompress: false,
+    transitional: {
+      forcedJSONParsing: false
+    }
+  })
+  return res.data
+}

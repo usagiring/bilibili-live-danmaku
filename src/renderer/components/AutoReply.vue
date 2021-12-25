@@ -16,28 +16,29 @@
             <Icon type="md-help" class="info-icon" />
             <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
               <p>
-                每一条回复规则由「消息类型」+「模版文本」+「规则」组成。
+                ● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。
               </p>
               <p>
-                <span :style="{color: 'pink'}">拖拽</span>上面「标签」到规则栏。
+                ● 每一条规则应该要有至少一条<span :style="{color: 'aquamarine'}">执行规则</span>，可以有若干条<span :style="{color: 'violet'}">限制规则</span>。 <span :style="{color: 'pink'}">拖拽</span>上面「标签」到规则栏！
               </p>
               <p>
-                目前可用<span :style="{color: 'pink'}">模版字段</span>有 {user.name} {gift.name} {comment.content} {superchat.content}
+                ● 目前可用<span :style="{color: 'pink'}">模版占位符</span>有 {user.name} {gift.name} {comment.content} {superchat.content}。 模版占位符将被替换为实际内容！
               </p>
               <p>
+                ● 例如：触发类型：弹幕，回复文字模版：{user.name}说 {comment.content}，规则：佩戴粉丝牌，语音播放。
+                表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)
+              </p>
+              <!-- <p>
                 例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
+              </p> -->
+              <p>
+                ● 匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
               </p>
               <p>
-                每一条规则应该要有至少一条<span :style="{color: 'green'}">执行规则</span>，可以有若干条<span :style="{color: 'violet'}">限制规则</span>。
+                ● 部分标签可<span :style="{color: 'pink'}">点击</span>打开下拉窗口，进一步设置。
               </p>
               <p>
-                匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
-              </p>
-              <p>
-                部分标签可<span :style="{color: 'pink'}">点击</span>打开下拉窗口，进一步设置。
-              </p>
-              <p>
-                部分不合逻辑，暂未支持的组合将无法拖拽。
+                ● 部分不合逻辑，暂未支持的组合将无法拖拽。
               </p>
             </div>
           </Tooltip>
@@ -48,10 +49,10 @@
         <div class="col-header">启用</div>
       </i-col>
       <i-col span="2">
-        <div class="col-header">类型</div>
+        <div class="col-header">触发类型</div>
       </i-col>
       <i-col span="6">
-        <div class="col-header">文字模版</div>
+        <div class="col-header">回复文字模版</div>
       </i-col>
       <i-col span="13">
         <div class="col-header">规则</div>

@@ -46,97 +46,105 @@
         </Menu>
       </Sider>
       <Layout>
-        <div class="layout-header">
-          <div class="avatar-wrapper">
-            <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />&nbsp;&nbsp;
-            <span :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : "未连接" }}</span>
-            &nbsp;
-            <Tag v-if="username" type="border" :color="liveStatus === 1 ? 'green' : 'silver'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</Tag>
-          </div>
+        <div class="disable-user-select" :style="{ position: 'relative' }">
+          <img class="header-background-img" :src="topPhoto">
 
-          <div class="status-wrapper">
-            <div class="bar">
-              <Icon type="md-flame" />
-              <span class="header-icon-text">人气值</span>
-              {{ ninkiNumber }}
+          <div class="layout-header" :style="!topPhoto && {background: 'white'}">
+            <div class="avatar-wrapper">
+              <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
+              <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : "未连接" }}</span>
+              <span :class="liveStatus === 1 ? 'live-tag-on': 'live-tag-off'" v-if="username">{{ liveStatus === 1 ? "直播中" : "未开播" }}</span>
             </div>
-            <div>
-              <Icon type="md-star" />
-              <span class="header-icon-text">关注数</span>
-              {{ fansNumber }}
-            </div>
-            <div>
-              <Icon type="md-heart" />
-              <span class="header-icon-text">粉丝团</span>
-              {{ fansClubNumber }}
-            </div>
-          </div>
-          <div class="status-wrapper">
-            <div class="bar">
-              <Tooltip content="舰队">
-                <Icon type="md-cog" />
-              </Tooltip>
-              <span class="header-icon-text"></span>
-              {{ guardNumber }}
-            </div>
-            <div class="bar">
-              <Tooltip content="十分钟内互动人数">
-                <Icon type="md-person" />
-              </Tooltip>
-              <span class="header-icon-text"></span>
-              {{ peopleNumber }}
-            </div>
-          </div>
-          <!-- <div> -->
 
-          <!-- </div> -->
-          <div class="updater-wrapper" v-if="hasNewVersion">
-            <template v-if="!isAppUpdating">
-              <Button shape="circle" type="dashed" @click="updateApp" :loading="isAppUpdateStarting">
-                <Icon type="md-arrow-round-up" color="green" />
-                <span :style="{ color: 'green' }">更新</span>
-              </Button>
-            </template>
-            <template v-else>
-              <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
-                <span class="demo-Circle-inner" style="font-size: 12px">{{
+            <div class="status-wrapper">
+              <div>
+                <Icon type="md-flame" />
+                <span class="header-icon-text">
+                  人气值
+                </span>
+                {{ ninkiNumber }}
+              </div>
+              <div>
+                <Icon type="md-star" />
+                <span class="header-icon-text">
+                  关注数
+                </span>
+                {{ fansNumber }}
+              </div>
+              <div>
+                <Icon type="md-heart" />
+                <span class="header-icon-text">
+                  粉丝团
+                </span>
+                {{ fansClubNumber }}
+              </div>
+            </div>
+            <div class="status-wrapper">
+              <div>
+                <Tooltip content="舰队">
+                  <Icon type="md-cog" />
+                </Tooltip>
+                {{ guardNumber }}
+              </div>
+              <div>
+                <Tooltip content="十分钟内互动人数">
+                  <Icon type="md-person" />
+                </Tooltip>
+                {{ peopleNumber }}
+              </div>
+            </div>
+            <!-- <div> -->
+
+            <!-- </div> -->
+            <div class="updater-wrapper" v-if="hasNewVersion">
+              <template v-if="!isAppUpdating">
+                <Button shape="circle" type="dashed" @click="updateApp" :loading="isAppUpdateStarting">
+                  <Icon type="md-arrow-round-up" color="green" />
+                  <span :style="{ color: 'green' }">更新</span>
+                </Button>
+              </template>
+              <template v-else>
+                <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
+                  <span class="demo-Circle-inner" style="font-size: 12px">{{
                   downloadRate
                 }}</span>
-              </i-circle>
-            </template>
+                </i-circle>
+              </template>
+            </div>
           </div>
-        </div>
-        <div class="layout-header2 disable-user-select">
-          <div>
-            <span>连接直播间</span>
-            <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
-              <Option v-for="room in selfHistoryRooms" :value="room.roomId" :key="room.roomId">
-                <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
-                {{ `${room.uname} (${room.roomId})` }}
-                <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green'} : { 'font-size': '12px', color: 'silver'}">{{ room.liveStatus === 1 ? "直播中" : "未开播" }}</span>
-                <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
-              </Option>
-            </AutoComplete>
-            <i-switch :value="isConnected" :loading="isConnecting" @on-change="connect" :disabled="!displayRoomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <span>弹幕窗</span>
-            <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
-            <template v-if="isShowDanmakuWindow">
-              <span>窗口置顶</span>
-              <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
-            </template>
-            <Tooltip placement="right" content="录制中">
-              <span v-if="isRecording" class="record-icon">
-                <Icon :style="{position: 'absolute'}" type="ios-radio-button-on" />
-              </span>
-            </Tooltip>
-            <Tooltip placement="right" content="天选时刻中">
-              <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
-            </Tooltip>
-            <!-- <Tooltip placement="right" content="天选时刻获奖">
+          <div class="layout-header2 transparent-mask">
+            <div>
+              <span>连接直播间</span>
+              <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
+                <Option v-for="room in selfHistoryRooms" :value="room.roomId" :key="room.roomId">
+                  <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
+                  {{ `${room.uname} (${room.roomId})` }}
+                  <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green'} : { 'font-size': '12px', color: 'silver'}">{{ room.liveStatus === 1 ? "直播中" : "未开播" }}</span>
+                  <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
+                </Option>
+              </AutoComplete>
+              <i-switch :value="isConnected" :loading="isConnecting" @on-change="connect" :disabled="!displayRoomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <span>弹幕窗</span>
+              <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
+              <template v-if="isShowDanmakuWindow">
+                <span>窗口置顶</span>
+                <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+              </template>
+              <Tooltip placement="right" content="录制中">
+                <span v-if="isRecording" class="record-icon">
+                  <Icon :style="{position: 'absolute'}" type="ios-radio-button-on" />
+                </span>
+              </Tooltip>
+              <Tooltip placement="right" content="天选时刻中">
+                <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
+              </Tooltip>
+              <!-- <Tooltip placement="right" content="天选时刻获奖">
               <Icon v-if="!isLottering && lotteryAwardUsers" type="md-cube" />
             </Tooltip> -->
+            </div>
           </div>
         </div>
+
         <div class="layout-content">
           <router-view :style="{ height: '100%' }"></router-view>
         </div>
@@ -154,7 +162,7 @@ import { parseDownloadRate, getGiftConfig } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from "../../service/event";
 import { record, cancelRecord, getStatus, setStatus } from "../../service/bilibili-recorder";
-import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds } from "../../service/bilibili-api";
+import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfo } from "../../service/bilibili-api";
 import {
   IPC_CHECK_FOR_UPDATE,
   IPC_UPDATE_AVAILABLE,
@@ -188,6 +196,7 @@ export default {
       isAppUpdateStarting: false,
       isRecording: false,
       isLottering: false,
+      topPhoto: '',
       downloadRate: "0 KB/s",
       percent: 0,
       selfHistoryRooms: [],
@@ -469,6 +478,16 @@ export default {
         this.liveStatus = liveStatus;
         this.roomUserId = uid
 
+        const { data: userInfo } = await getUserInfo(uid)
+        console.log(userInfo)
+        const {
+          // face,
+          pendant, // 头像框 { image, image_enhance }
+          top_photo,
+        } = userInfo
+
+        this.topPhoto = top_photo
+
         // 传递 当前主播userId
         await updateSetting({
           roomUserId: uid
@@ -497,6 +516,7 @@ export default {
         this.liveStatus = 0;
         this.peopleNumber = 0;
         this.guardNumber = 0
+        this.topPhoto = ''
 
         this.$store.dispatch("UPDATE_CONFIG", {
           isConnected: false
@@ -753,10 +773,15 @@ export default {
 .status-wrapper {
   vertical-align: top;
   display: inline-block;
-  line-height: 21px;
-  padding-left: 40px;
-  height: 64px;
+  line-height: 0px;
+  padding: 6px 0 0 40px;
 }
+
+.status-wrapper > div {
+  padding: 5px 25px 5px 10px;
+  background: radial-gradient(farthest-side, white 20%, rgba(0, 0, 0, 0) 100%);
+}
+
 .updater-wrapper {
   height: 64px;
   position: absolute;
@@ -764,14 +789,15 @@ export default {
   right: 10px;
 }
 .layout-header {
-  height: 64px;
-  line-height: 64px;
-  background: white;
+  height: 84px;
+  line-height: 84px;
+  /* background: white; */
   position: relative;
   -webkit-user-select: none;
   user-select: none;
 }
 .layout-header2 {
+  position: relative;
   height: 48px;
   line-height: 48px;
   padding: 0 50px;
@@ -894,5 +920,39 @@ export default {
 .disable-user-select {
   -webkit-user-select: none;
   user-select: none;
+}
+.header-background-img {
+  position: absolute;
+  width: 100%;
+  min-width: 950px;
+}
+.live-tag-on {
+  border: 1px solid mediumseagreen;
+  border-radius: 8px;
+  height: 22px;
+  padding: 3px 5px;
+  margin-left: 5px;
+  background: rgba(255, 255, 255, 0.2);
+}
+.live-tag-off {
+  border: 1px solid gray;
+  border-radius: 8px;
+  height: 22px;
+  padding: 3px 5px;
+  margin-left: 5px;
+}
+.transparent-mask {
+  background: linear-gradient(to top, white, rgba(0, 0, 0, 0));
+}
+.obvious-label-mask {
+  background: radial-gradient(closest-side, white 30%, rgba(0, 0, 0, 0) 100%);
+}
+.username-label {
+  padding: 5px 15px;
+  background: radial-gradient(
+    farthest-side,
+    rgba(255, 255, 255, 0.8) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 </style>

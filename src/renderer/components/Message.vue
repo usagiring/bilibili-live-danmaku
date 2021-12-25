@@ -457,7 +457,7 @@ export default {
         this.onInteract(payload.payload)
       }
       if (payload.cmd === 'SUPER_CHAT') {
-        this.onSuperChat(payload.payload)
+        this.onGift(payload.payload)
       }
     },
 
@@ -490,7 +490,7 @@ export default {
         }
         this.gifts = [payload, ...this.gifts]
       }
-    }
+    },
   },
 };
 </script>
