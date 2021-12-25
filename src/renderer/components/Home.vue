@@ -478,15 +478,19 @@ export default {
         this.liveStatus = liveStatus;
         this.roomUserId = uid
 
-        const { data: userInfo } = await getUserInfo(uid)
-        console.log(userInfo)
-        const {
-          // face,
-          pendant, // 头像框 { image, image_enhance }
-          top_photo,
-        } = userInfo
+        try {
+          const { data: userInfo } = await getUserInfo(uid)
+          console.log(userInfo)
+          const {
+            // face,
+            pendant, // 头像框 { image, image_enhance }
+            top_photo,
+          } = userInfo
 
-        this.topPhoto = top_photo
+          this.topPhoto = top_photo
+        } catch (e) {
+          console.log(e)
+        }
 
         // 传递 当前主播userId
         await updateSetting({
