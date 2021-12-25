@@ -27,6 +27,8 @@
 <script type="module">
 import moment from "moment";
 import fs from 'fs'
+import path from 'path'
+import { strict as assert } from 'assert'
 import * as remote from "@electron/remote";
 const { dialog } = remote
 import {
@@ -320,7 +322,15 @@ export default {
         start,
         end,
       })
-      const ws = fs.createWriteStream(`${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
+      try {
+        const stat = fs.statSync(filePath)
+        assert.ok(stat.isDirectory())
+      } catch (e) {
+        console.log(e)
+        fs.mkdirSync(filePath)
+      }
+      const output = path.join(filePath, `./${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
+      const ws = fs.createWriteStream(output)
       // data.pipe(ws)
       ws.write(data)
       ws.end()
