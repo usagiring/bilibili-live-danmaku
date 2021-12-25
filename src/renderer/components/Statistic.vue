@@ -313,27 +313,32 @@ export default {
     },
 
     async download() {
-      const filePath = await this.choosePath()
-      console.log(filePath)
-      if (!filePath) return
-      const [start, end] = this.dateRange
-      const data = await exportFile({
-        roomId: this.roomId,
-        start,
-        end,
-      })
       try {
-        const stat = fs.statSync(filePath)
-        assert.ok(stat.isDirectory())
+        const filePath = await this.choosePath()
+        console.log(filePath)
+        if (!filePath) return
+        const [start, end] = this.dateRange
+        const data = await exportFile({
+          roomId: this.roomId,
+          start,
+          end,
+        })
+        try {
+          const stat = fs.statSync(filePath)
+          assert.ok(stat.isDirectory())
+        } catch (e) {
+          console.log(e)
+          fs.mkdirSync(filePath)
+        }
+        const output = path.join(filePath, `./${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
+        const ws = fs.createWriteStream(output)
+        // data.pipe(ws)
+        ws.write(data)
+        ws.end()
+        this.$Message.success('导出成功')
       } catch (e) {
-        console.log(e)
-        fs.mkdirSync(filePath)
+        this.$Message.error('导出失败')
       }
-      const output = path.join(filePath, `./${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
-      const ws = fs.createWriteStream(output)
-      // data.pipe(ws)
-      ws.write(data)
-      ws.end()
     },
 
     async choosePath() {
