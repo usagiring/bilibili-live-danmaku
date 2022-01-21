@@ -290,6 +290,13 @@ export const DEFAULT_CONFIG = {
   liveWindowY: 600,
   liveWindowHeight: 480,
   enableMessageListenMode: false,
+  muteCommandSetting: {
+    enable: false,
+    roles: [],
+    keyword: '',
+    hintText: '',
+    useHintText: false,
+  },
   autoReplyRules: [
   ],
   borderImages: [

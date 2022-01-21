@@ -43,6 +43,10 @@ export default new Router({
           component: () => import('@/components/AutoReply.vue')
         },
         {
+          path: 'command',
+          component: () => import('@/components/Command.vue')
+        },
+        {
           path: 'config',
           component: () => import('@/components/Config.vue')
         },

@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <Layout :style="{ minHeight: '100vh' }">
-      <Sider collapsible :collapsed-width="78" v-model="isCollapsed">
+      <Sider collapsible :collapsed-width="78" :width="140" v-model="isCollapsed">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
           <MenuItem name="1-1" to="/style">
           <Icon type="md-color-palette" />
@@ -28,18 +28,22 @@
           <span>统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/auto-reply">
-          <!-- <div :style="{position: 'relative', 'display': 'inline-block'}">
-            <Icon type="md-repeat" />
-            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
-          </div> -->
           <Icon type="md-repeat" />
           <span>回复</span>
           </MenuItem>
-          <MenuItem name="1-8" to="/config">
+          <MenuItem name="1-8" to="/command">
+          <div :style="{position: 'relative', 'display': 'inline-block'}">
+            <!-- <Icon type="md-code" /> -->
+            <Icon type="md-color-wand" />
+            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+          </div>
+          <span>咒语</span>
+          </MenuItem>
+          <MenuItem name="1-9" to="/config">
           <Icon type="md-settings" />
           <span>设置</span>
           </MenuItem>
-          <MenuItem name="1-9" to="/help">
+          <MenuItem name="1-10" to="/help">
           <Icon type="md-help" />
           <span>帮助</span>
           </MenuItem>
@@ -270,6 +274,16 @@ export default {
 
       if (payload.cmd === 'GIFT_CONFIG') {
         getGiftConfig()
+      }
+
+      if (payload.cmd === 'DANMAKU_COMMAND_RESULT') {
+        const { status, message, user } = payload.payload
+        // if (status === 'success') {
+        //   this.$Message.success(`禁言成功：${user.uname}`)
+        // } else {
+        //   this.$Message.error(`禁言失败`)
+        // }
+        console.log(status, message, user)
       }
     }
 
@@ -815,6 +829,13 @@ export default {
 /* .ivu-btn-dashed {
   border-color: green;
 } */
+.ivu-layout-sider {
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
+  flex: 0 0 150px;
+}
+
 .menu-item span {
   display: inline-block;
   overflow: hidden;
