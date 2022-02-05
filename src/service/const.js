@@ -279,6 +279,8 @@ export const DEFAULT_CONFIG = {
   historyRooms: [],
   isAutoReply: false,
   fontWeight: 'normal',
+  signInMessage: '',
+  onlyTodayZeroIntimacy: true,
   isLiveWindowAlwaysOnTop: false,
   liveWindowOpacity: 1,
   liveWindowId: null,

@@ -184,6 +184,19 @@
         </span>
       </Tooltip>
     </div>
+
+    <div class="config-item-container">
+      <Input :value="signInMessage" @on-change="onChangeSignInMessage" placeholder="打卡" :style="{display: 'inline-block', width: '200px'}" />
+      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
+        <Button type="primary" :disabled="!userCookie">一键签到</Button>
+      </Poptip>
+      <Checkbox :value="onlyTodayZeroIntimacy" @on-change="changeOnlyTodayZeroIntimacy">
+        仅今日0亲密度直播间
+      </Checkbox>
+      <span v-if="signInTotalCount" :style="{color: 'green'}">
+        {{ signInCount }} / {{ signInTotalCount }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -199,7 +212,12 @@ import {
 } from "../../service/const";
 
 import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
-import { getGiftConfig } from '../../service/util'
+import { getGiftConfig, wait } from '../../service/util'
+import {
+  sendMessage,
+  getMedalList,
+  getRoomInfoV2,
+} from "../../service/bilibili-api";
 
 export default {
   data() {
@@ -213,7 +231,9 @@ export default {
       currentVoice: '',
       text: '',
       voiceSpeed: 1.0,
-      opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver']
+      opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver'],
+      signInCount: 0,
+      signInTotalCount: 0,
     };
   },
   async mounted() {
@@ -293,7 +313,13 @@ export default {
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
-    }
+    },
+    signInMessage() {
+      return this.$store.state.Config.signInMessage
+    },
+    onlyTodayZeroIntimacy() {
+      return this.$store.state.Config.onlyTodayZeroIntimacy
+    },
   },
   methods: {
     async restoreDefaultStyleSetting() {
@@ -482,6 +508,93 @@ export default {
         isOnTopForce: value
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    onChangeSignInMessage(e) {
+      const data = {
+        signInMessage: e.target.value
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    changeOnlyTodayZeroIntimacy(status) {
+      const data = {
+        onlyTodayZeroIntimacy: status
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async signIn() {
+      const userCookie = this.userCookie
+      if (!userCookie) return
+      const signInMessage = this.signInMessage || '打卡'
+
+      const pageSize = 10
+      let total = 0
+      let page = 1
+
+      do {
+        try {
+          const { data } = await getMedalList({ page, pageSize }, userCookie)
+          const { count, items } = data
+          total = count
+          this.signInTotalCount = total
+
+          for (const medal of items) {
+            const {
+              roomid: roomId,
+              medal_name: medalName,
+              uname,
+              level,
+              today_feed: todayFeed,
+            } = medal
+
+            // 20级以上牌子不需要签到
+            if (level > 20) {
+              this.signInCount++
+              continue
+            }
+
+            if (this.onlyTodayZeroIntimacy && Number(todayFeed)) {
+              this.signInCount++
+              continue
+            }
+
+            const { data } = await getRoomInfoV2(roomId);
+            const {
+              room_id: realRoomId,
+            } = data.room_info;
+            const result = await sendMessage(
+              {
+                message: signInMessage,
+                roomId: realRoomId,
+              },
+              userCookie
+            );
+            if (result.data.message) {
+              this.$Message.error({
+                content: `签到未成功: ${result.data.message}, 用户名: ${uname}, 粉丝牌: ${medalName}`,
+                duration: 10
+              })
+
+            } else {
+              this.signInCount++
+              this.$Message.success({
+                content: `签到成功, 用户名: ${uname}, 粉丝牌: ${medalName}`,
+                duration: 1
+              })
+            }
+            await wait(1000)
+          }
+        } catch (e) {
+          this.$Message.error(`${e.message}`)
+          console.log(e)
+        }
+
+        page++
+      } while (page <= Math.ceil(total / pageSize))
+
+      this.$Message.success('签到完成！')
     }
   }
 };

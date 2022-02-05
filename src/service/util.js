@@ -47,6 +47,10 @@ export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
   return moment(date).format(formatter);
 }
 
+export async function wait(ms = 1000) {
+  await new Promise(resolve => setTimeout(resolve, ms))
+}
+
 // export function setGiftConfigMap(gifts) {
 //   const giftConfigMap = gifts.reduce((map, gift) => {
 //     return Object.assign(map, {
