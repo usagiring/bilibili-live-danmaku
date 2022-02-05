@@ -21,6 +21,7 @@ export {
   getBagList,
   sendBagGift,
   getRoomInfoByIds,
+  getMedalList,
 }
 
 const defaultHeaders = {
@@ -172,5 +173,17 @@ async function getRoomInfoByIds(ids) {
     headers: Object.assign({}, defaultHeaders),
     adapter: httpAdapter
   })
+  return res.data
+}
+
+async function getMedalList(data = {}, userCookie) {
+  const { page = 1, pageSize = 10 } = data
+  const res = await axios.get(
+    `https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals?page=${page}&page_size=${pageSize}`,
+    {
+      headers: Object.assign({}, defaultHeaders, { cookie: userCookie }),
+      adapter: httpAdapter
+    }
+  )
   return res.data
 }
