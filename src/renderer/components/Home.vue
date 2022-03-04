@@ -96,6 +96,12 @@
                 </Tooltip>
                 {{ peopleNumber }}
               </div>
+              <div>
+                <Tooltip :content="`${watchedNumber}人看过`">
+                  <Icon type="md-eye" />
+                </Tooltip>
+                {{ watchedNumber }}
+              </div>
             </div>
             <!-- <div> -->
 
@@ -214,6 +220,7 @@ export default {
       peopleNumber: 0,
       guardNumber: 0,
       roomUserId: 0,
+      watchedNumber: 0
     };
   },
   created() {
@@ -283,7 +290,12 @@ export default {
         // } else {
         //   this.$Message.error(`禁言失败`)
         // }
-        console.log(status, message, user)
+        // console.log(status, message, user)
+      }
+
+      if (payload.cmd === 'WATCHED_CHANGE') {
+        const { watchedNumber } = payload.payload
+        this.watchedNumber = watchedNumber
       }
     }
 
@@ -482,8 +494,8 @@ export default {
         const { uname, face, gender } = data.anchor_info.base_info;
         const { level, level_color } = data.anchor_info.live_info;
         const { attention } = data.anchor_info.relation_info;
-        const { medal_name, medal_id, fansclub } =
-          data.anchor_info.medal_info || {};
+        const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info || {};
+        const { num: watchedNumber } = data.watched_show || {}
         this.username = uname;
         this.avatar = face;
         this.ninkiNumber = online;
@@ -491,6 +503,7 @@ export default {
         this.fansClubNumber = fansclub || 0;
         this.liveStatus = liveStatus;
         this.roomUserId = uid
+        this.watchedNumber = watchedNumber
 
         try {
           const { data: userInfo } = await getUserInfo(uid)
@@ -535,6 +548,7 @@ export default {
         this.peopleNumber = 0;
         this.guardNumber = 0
         this.topPhoto = ''
+        this.watchedNumber = 0
 
         this.$store.dispatch("UPDATE_CONFIG", {
           isConnected: false
