@@ -39,11 +39,19 @@
           </div>
           <span>咒语</span>
           </MenuItem>
-          <MenuItem name="1-9" to="/config">
+          <MenuItem name="1-9" to="/danmaku-scroll">
+          <div :style="{position: 'relative', 'display': 'inline-block'}">
+            <!-- <Icon type="md-code" /> -->
+            <Icon type="ios-water" />
+            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+          </div>
+          <span>弹幕2</span>
+          </MenuItem>
+          <MenuItem name="1-10" to="/config">
           <Icon type="md-settings" />
           <span>设置</span>
           </MenuItem>
-          <MenuItem name="1-10" to="/help">
+          <MenuItem name="1-11" to="/help">
           <Icon type="md-help" />
           <span>帮助</span>
           </MenuItem>
@@ -905,7 +913,7 @@ export default {
 }
 .record-icon::before,
 .record-icon::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 1.5px;
   bottom: 1.5px;
@@ -988,10 +996,6 @@ export default {
 }
 .username-label {
   padding: 5px 15px;
-  background: radial-gradient(
-    farthest-side,
-    rgba(255, 255, 255, 0.8) 60%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: radial-gradient(farthest-side, rgba(255, 255, 255, 0.8) 60%, rgba(0, 0, 0, 0) 100%);
 }
 </style>

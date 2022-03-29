@@ -51,6 +51,10 @@ export default new Router({
           component: () => import('@/components/Config.vue')
         },
         {
+          path: 'danmaku-scroll',
+          component: () => import('@/components/Danmaku-Scroll.vue')
+        },
+        {
           path: '',
           component: () => import('@/components/Introduction.vue')
         }

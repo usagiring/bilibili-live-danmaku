@@ -17,7 +17,8 @@
     "postinstall": "",
     "ui": "vue ui",
     "release": "npm run build -- -p always",
-    "cnpmi": "npm --registry https://registry.npm.taobao.org install"
+    "cnpmi": "npm --registry https://registry.npm.taobao.org install",
+    "build:danmaku-scroll": "cd danmaku-scroll && npm run build && rm -rf ../node_modules/@tokine/bilibili-danmaku-page/danmaku-scroll && cp -r dist ../node_modules/@tokine/bilibili-danmaku-page/danmaku-scroll"
   },
   "repository": {
     "type": "git",

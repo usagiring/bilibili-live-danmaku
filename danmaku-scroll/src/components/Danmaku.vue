@@ -1,31 +1,49 @@
 <template>
-  <div id="danmaku-scroll" class="danmaku-scroll">
+  <div id="danmaku-scroll" :style="{ backgroundColor, opacity, fontSize }">
     <div id="main"> </div>
-    <div id="measurer" class="measurer"></div>
+    <div id="measurer"></div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { getSetting, init as initAPI } from '../service/api'
-import { debounce } from 'lodash'
+import { merge, pick } from 'lodash'
 
-const MAX_COMMENT_COUNT = 200
-const CHANNEL_HEIGHT = 22
-const COMMENT_QUEUE_LIMIT = 50
+// const MAX_COMMENT_COUNT = 200
+// const COMMENT_QUEUE_LIMIT = 50
 
-let ws
+const STYLE_FIELDS = [
+  'font-size',
+  '-webkit-text-stroke-width',
+  '-webkit-text-stroke-color',
+  'color',
+]
+
+let ws: any
 
 export default defineComponent({
   name: 'Danmaku',
   props: {},
   data() {
     return {
-      port: 8081,
+      port: '8081',
+      channelHeight: 22,
       duration: 10000, // ms
       comments: [],
-      commentQueue: [],
-      channels: [],
+      commentQueue: [] as any,
+      channels: [] as any,
+      isShowType1: false,
+      isShowType2: false,
+      fontSize: '22px',
+      direction: 'RL',
+      backgroundColor: 'rgb(0,0,0,0)',
+      opacity: 1,
+
+      comment_lv1: {},
+      comment_lv2: {},
+      comment_lv3: {},
+      comment_lv0: {},
     }
   },
   //   setup() {
@@ -46,13 +64,13 @@ export default defineComponent({
 
   async mounted() {
     const params = new URLSearchParams(window.location.search)
-    this.port = params.get('port') || 8081
+    this.port = params.get('port') || '8081'
     initAPI({ port: this.port })
     await this.getSetting()
-    this.initChannel()
+    // this.initChannel()
 
     this.ws()
-    window.addEventListener('resize', debounce(this.onResize, 500))
+    // window.addEventListener('resize', debounce(this.onResize, 500))
   },
 
   methods: {
@@ -72,11 +90,11 @@ export default defineComponent({
         console.log('onopen, connected...')
       }
 
-      ws.onmessage = (msg) => {
+      ws.onmessage = (msg: any) => {
         const payload = JSON.parse(msg.data)
-        // if (payload.cmd === 'SETTING') {
-        //   this.onSetting(payload.payload)
-        // }
+        if (payload.cmd === 'SETTING') {
+          this.updateSetting(payload.payload)
+        }
         if (payload.cmd === 'COMMENT') {
           this.onComment(payload)
         }
@@ -99,7 +117,7 @@ export default defineComponent({
         }
       }
 
-      ws.onclose = (code) => {
+      ws.onclose = (code: number) => {
         ws = null
         console.log('ws close: ', code)
         console.log('onclose, reconnect...')
@@ -108,7 +126,7 @@ export default defineComponent({
         }, 2000)
       }
 
-      ws.onerror = (err) => {
+      ws.onerror = (err: any) => {
         ws = null
         console.error(err)
         console.log('onerror, reconnect...')
@@ -120,20 +138,72 @@ export default defineComponent({
 
     async getSetting() {
       const { data } = await getSetting()
-      for (const key in data) {
-        this[key] = data[key]
+      this.updateSetting(data)
+    },
+
+    updateSetting(data) {
+      const {
+        scrollDanmakuDuration: duration,
+        scrollDanmakuFontSize: fontSize,
+        scrollDanmakuDirection: direction,
+        scrollDanmakuBackground: backgroundColor,
+        scrollDanmakuOpacity: opacity,
+        isShowType1,
+        isShowType2,
+        comment_lv0,
+        comment_lv3,
+        comment_lv2,
+        comment_lv1,
+      } = data
+      if (duration) {
+        this.duration = duration
+      }
+      if (fontSize) {
+        this.fontSize = `${fontSize}px`
+        // setTimeout(() => {
+        //   this.initChannel()
+        // }, 100)
+      }
+      if (direction) {
+        this.direction = direction
+      }
+      if (backgroundColor) {
+        this.backgroundColor = backgroundColor
+      }
+      if (opacity) {
+        this.opacity = Number(opacity) / 100
+      }
+      if (isShowType1) {
+        this.isShowType1 = isShowType1
+      }
+      if (isShowType2) {
+        this.isShowType2 = isShowType2
+      }
+
+      if (comment_lv1) {
+        this.comment_lv1 = merge(this.comment_lv1, pick(comment_lv1, STYLE_FIELDS))
+      }
+      if (comment_lv2) {
+        this.comment_lv2 = merge(this.comment_lv2, pick(comment_lv2, STYLE_FIELDS))
+      }
+      if (comment_lv3) {
+        this.comment_lv3 = merge(this.comment_lv3, pick(comment_lv3, STYLE_FIELDS))
+      }
+      if (comment_lv0) {
+        this.comment_lv0 = merge(this.comment_lv0, pick(comment_lv0, STYLE_FIELDS))
       }
     },
 
     onResize() {
-      this.initChannel()
+      // this.initChannel()
     },
 
-    onComment({ payload: comment }) {
+    onComment({ payload: comment }: { payload: any }) {
       //   comment.category = 'comment'
       //   comment.avatar = comment.avatar ? `${comment.avatar}@48w_48h` : DEFAULT_AVATAR
       comment.role = comment.guard || comment.role
       comment.sendAt = comment.sendAt || Date.now()
+      console.log(comment)
       if (comment.type === 1 && !this.isShowType1) {
         return
       }
@@ -157,15 +227,16 @@ export default defineComponent({
       //     this.comments.shift()
       //   }
       //   this.comments = [...this.comments, comment]
-      if (this.commentQueue.length > COMMENT_QUEUE_LIMIT) {
-        this.commentQueue.shift()
-      }
-      this.commentQueue = [...this.commentQueue, comment]
-      this.dispatchComments(comment)
+      // if (this.commentQueue.length > COMMENT_QUEUE_LIMIT) {
+      //   this.commentQueue.shift()
+      // }
+      // this.commentQueue = [...this.commentQueue, comment]
+      // this.dispatchComments(comment)
+      this.dispatchCommentsV2(comment)
     },
 
     // 分配弹幕轨道，篇幅不够分配轨道的弹幕将被丢弃
-    dispatchComments(comment) {
+    dispatchComments(comment: any) {
       const { width } = this.getTextSize({ text: comment.content })
       const { width: windowWidth } = this.getWindowSize()
       // 弹幕速度 = （弹幕长度 + window宽度）/ DURATION
@@ -196,7 +267,43 @@ export default defineComponent({
         setTimeout(() => {
           div.remove()
           resolve(null)
-        }, this.duration)
+        }, this.duration + 500)
+      })
+    },
+
+    dispatchCommentsV2(comment: any) {
+      const { width, height } = this.getTextSize({ text: comment.content })
+      const { width: windowWidth, height: windowHeight } = this.getWindowSize()
+      // 弹幕速度 = （弹幕长度 + window宽度）/ DURATION
+      const v = (width + windowWidth) / this.duration
+      const { top, index } = this.getDanmakuTop({ v, height, windowHeight })
+      if (!~index) {
+        console.log('not enable channel')
+        return
+      } // 无可用通道
+      const div = this.createDanmakuDOMV2({ text: comment.content, role: comment.role, top })
+
+      this.channels[index] = {
+        textWidth: width,
+        height: height,
+        startTime: Date.now(),
+        v,
+      }
+      // 解除通道占用需要行过一个弹幕长度
+      //   const t = width / v
+      // 解除通道占用
+      //   new Promise((resolve, reject) => {
+      //     setTimeout(() => {
+      //       this.channels[enableChannel] = 0
+      //       resolve(null)
+      //     }, t)
+      //   })
+      // 弹幕消失
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          div.remove()
+          resolve(null)
+        }, this.duration + 500)
       })
     },
 
@@ -204,10 +311,10 @@ export default defineComponent({
       this.comments = []
     },
 
-    getTextSize({ text }) {
-      const fontSize = '14'
+    getTextSize({ text }: { text: string }) {
       const measurer = document.getElementById('measurer')
-      measurer.style.fontSize = fontSize
+      if (!measurer) return { width: 0, height: 0 }
+      measurer.style.fontSize = this.fontSize
       measurer.innerHTML = text
       const height = measurer.clientHeight
       const width = measurer.clientWidth
@@ -215,7 +322,7 @@ export default defineComponent({
       return { height, width }
     },
 
-    isChannelEnable({ channelIndex, v2 }) {
+    isChannelEnable({ channelIndex, v2 }: { channelIndex: number; v2: number }) {
       const payload = this.channels[channelIndex]
       const { startTime, textWidth, v } = payload
       const s1 = v * (Date.now() - startTime) - textWidth
@@ -226,8 +333,8 @@ export default defineComponent({
       return false
     },
 
-    getEnableChannel({ v }) {
-      return this.channels.findIndex((payload, index) => {
+    getEnableChannel({ v }: { v: number }) {
+      return this.channels.findIndex((payload: any, index: number) => {
         if (!payload) return true
         if (this.isChannelEnable({ channelIndex: index, v2: v })) {
           return true
@@ -236,21 +343,76 @@ export default defineComponent({
       })
     },
 
-    initChannel() {
-      const { height } = this.getWindowSize()
-      const channelCount = Math.floor(height / CHANNEL_HEIGHT) || 1
-      this.channels = [...new Array(channelCount)].map((_) => null)
+    // 获取新弹幕应设置的Top值
+    getDanmakuTop({ v, height, windowHeight }) {
+      if (!this.channels.length) return { top: 0, index: 0 }
+      let top = 0
+
+      for (let index = 0; index < this.channels.length; index++) {
+        const payload = this.channels[index]
+        // 如果当前轨道没有数据
+        // if (!payload) return true
+
+        // 如果当前高度大于窗口高度，计算当前轨道是否可用
+        if (top + height > windowHeight) {
+          if (this.isChannelEnableV2({ payload, v })) return { top, index }
+          else return { top: 0, index: -1 }
+        }
+
+        // 如果待分配弹幕高度大于当前轨道弹幕高度
+        if (height > payload.height) {
+          // 没有下一条轨道，仅需计算当前轨道
+          if (index + 1 >= this.channels.length) {
+            if (this.isChannelEnableV2({ payload, v })) return { top, index }
+          } else {
+            // 同时计算当前轨道与下一条轨道，需同时满足条件
+            if (
+              this.isChannelEnableV2({ payload, v }) &&
+              this.isChannelEnableV2({ payload: this.channels[index + 1], v })
+            ) {
+              return { top, index }
+            }
+          }
+        } else {
+          // 计算当前轨道追及
+          if (this.isChannelEnableV2({ payload, v })) return { top, index }
+        }
+
+        top += payload.height
+      }
+
+      // 如果已存数据轨道遍历完之后高度依然小于窗口高度，则新建一条轨道
+      return { top, index: this.channels.length }
     },
+
+    isChannelEnableV2({ payload, v: v2 }) {
+      const { startTime, textWidth, v: v1 } = payload
+      const s1 = v1 * (Date.now() - startTime) - textWidth
+      if (s1 < 0) return false
+      if (v1 - v2 === 0) return false
+      const t = s1 / (v2 - v1)
+      if (t < 0 || t > this.duration) return true
+      return false
+    },
+
+    // initChannel() {
+    //   const { height: windowHeight } = this.getWindowSize()
+    //   const { height } = this.getTextSize({ text: '中文测试' })
+    //   this.channelHeight = height + 1
+    //   const channelCount = Math.floor(windowHeight / this.channelHeight) || 1
+    //   this.channels = [...new Array(channelCount)].map((_) => null)
+    // },
 
     getWindowSize() {
       const viewer = document.getElementById('danmaku-scroll') //
+      if (!viewer) return { height: 0, width: 0 }
       return {
         height: viewer.clientHeight,
         width: viewer.clientWidth,
       }
     },
 
-    createDanmakuDOM({ text, channelIndex }) {
+    createDanmakuDOM({ text, channelIndex }: { text: string; channelIndex: number }) {
       const div = document.createElement('div')
       //   div.style.width = '100px'
       //   div.style.height = '100px'
@@ -260,15 +422,60 @@ export default defineComponent({
       div.style.color = 'black'
       div.style.position = 'absolute'
       div.style.left = windowWidth + 'px'
-      div.style.top = `${CHANNEL_HEIGHT * channelIndex}px`
+      div.style.top = `${this.channelHeight * channelIndex}px`
+      console.log(
+        this.channelHeight,
+        channelIndex,
+        `${this.channelHeight * channelIndex}px`,
+        this.channels.length
+      )
       div.innerHTML = text
       div.style.transition = `left ${this.duration / 1000}s linear 0s`
       div.style.whiteSpace = 'nowrap'
       //   div.style.transform = `translateX(-${windowWidth}px)`
-      document.getElementById('danmaku-scroll').appendChild(div)
+      const mainDOM = document.getElementById('danmaku-scroll')
+      if (!mainDOM) return div
+      mainDOM.appendChild(div)
       setTimeout(() => {
         div.style.left = `-${width}px`
         //    div.style.left = `0px`
+      }, 100)
+      return div
+    },
+
+    createDanmakuDOMV2({ text, top, role }: { text: string; top: number; role: number }) {
+      const div = document.createElement('div')
+      //   div.style.width = '100px'
+      //   div.style.height = '100px'
+      const { width: windowWidth, height } = this.getWindowSize()
+      const { width } = this.getTextSize({ text })
+      //   div.style.background = 'red'
+      div.style.color = 'black'
+      const roleStyle = this[`comment_lv${role}`]
+      div.style.color = roleStyle?.color || 'black'
+      // div.style.fontSize = roleStyle?.['font-size'] || this.fontSize
+      div.style.webkitTextStrokeWidth = roleStyle?.['-webkit-text-stroke-width'] || '0px'
+      div.style.webkitTextStrokeColor = roleStyle?.['-webkit-text-stroke-color'] || 'black'
+
+      div.style.position = 'absolute'
+      if (this.direction === 'RL') {
+        div.style.left = `${windowWidth}px`
+      } else {
+        div.style.left = `-${width}px`
+      }
+      div.style.top = `${top}px`
+      div.innerHTML = text
+      div.style.transition = `left ${this.duration / 1000}s linear 0s`
+      div.style.whiteSpace = 'nowrap'
+      const mainDOM = document.getElementById('danmaku-scroll')
+      if (!mainDOM) return div
+      mainDOM.appendChild(div)
+      setTimeout(() => {
+        if (this.direction === 'RL') {
+          div.style.left = `-${width}px`
+        } else {
+          div.style.left = `${windowWidth}px`
+        }
       }, 100)
       return div
     },
@@ -278,26 +485,19 @@ export default defineComponent({
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.danmaku-scroll {
-  position: 'absolute';
-  top: '0px';
-  bottom: '0px';
-  left: '0px';
-  right: '0px';
-  height: 100%;
-  overflow: hidden;
+#danmaku-scroll {
+  position: absolute;
+  inset: 0px;
+  user-select: none;
 }
 
-.main-container {
-  position: 'absolute';
-  top: '4px';
-  bottom: '4px';
-  left: '4px';
-  right: '4px';
-  user-select: 'none';
+#main {
+  position: absolute;
+  inset: 4px;
+  -webkit-app-region: drag;
 }
 
-.measurer {
+#measurer {
   position: absolute;
   visibility: hidden;
   height: auto;

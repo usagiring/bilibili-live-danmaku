@@ -292,6 +292,16 @@ export const DEFAULT_CONFIG = {
   liveWindowY: 600,
   liveWindowHeight: 480,
   enableMessageListenMode: false,
+  scrollDanmakuFontSize: 22,
+  scrollDanmakuDuration: 10000,
+  scrollDanmakuDirection: 'RL',
+  scrollDanmakuWindowId: null,
+  scrollDanmakuWidth: 600,
+  scrollDanmakuHeight: 600,
+  scrollDanmakuX: 600,
+  scrollDanmakuY: 600,
+  scrollDanmakuBackground: "rgba(0, 0, 0, 0.3)",
+  scrollDanmakuOpacity: 100,
   muteCommandSetting: {
     enable: false,
     roles: [],
@@ -361,4 +371,5 @@ export const DEFAULT_SERVER_CONFIG = {
   SAVE_ALL_BILI_MESSAGE,
   HTML_PATH: OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
+  SCROLL_DANMAKU_RENDER_PATH: OPTION_CONFIG.SCROLL_DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
 }

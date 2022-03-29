@@ -467,7 +467,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 0,
           prop: "name",
           styleName: "font-size",
@@ -501,7 +501,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 0,
           prop: "comment",
           styleName: "font-size",
@@ -563,7 +563,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 3,
           prop: "name",
           styleName: "font-size",
@@ -597,7 +597,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 3,
           prop: "comment",
           styleName: "font-size",
@@ -641,7 +641,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 2,
           prop: "name",
           styleName: "font-size",
@@ -675,7 +675,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 2,
           prop: "comment",
           styleName: "font-size",
@@ -718,7 +718,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 1,
           prop: "name",
           styleName: "font-size",
@@ -752,7 +752,7 @@ export default {
         {
           id: Math.random(),
           type: "InputNumber",
-          name: "大小",
+          name: "字号",
           role: 1,
           prop: "comment",
           styleName: "font-size",
@@ -981,6 +981,7 @@ export default {
     async updateBackground(color) {
       const data = {
         background: color,
+        // scrollDanmakuBackground: color,
       }
       await mergeSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
