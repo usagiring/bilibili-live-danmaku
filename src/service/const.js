@@ -371,5 +371,4 @@ export const DEFAULT_SERVER_CONFIG = {
   SAVE_ALL_BILI_MESSAGE,
   HTML_PATH: OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
-  SCROLL_DANMAKU_RENDER_PATH: OPTION_CONFIG.SCROLL_DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
 }

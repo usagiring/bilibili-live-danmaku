@@ -203,7 +203,6 @@ export default defineComponent({
       //   comment.avatar = comment.avatar ? `${comment.avatar}@48w_48h` : DEFAULT_AVATAR
       comment.role = comment.guard || comment.role
       comment.sendAt = comment.sendAt || Date.now()
-      console.log(comment)
       if (comment.type === 1 && !this.isShowType1) {
         return
       }
@@ -420,12 +419,6 @@ export default defineComponent({
       div.style.position = 'absolute'
       div.style.left = windowWidth + 'px'
       div.style.top = `${this.channelHeight * channelIndex}px`
-      console.log(
-        this.channelHeight,
-        channelIndex,
-        `${this.channelHeight * channelIndex}px`,
-        this.channels.length
-      )
       div.innerHTML = text
       div.style.transition = `left ${this.duration / 1000}s linear 0s`
       div.style.whiteSpace = 'nowrap'
