@@ -1,29 +1,40 @@
 <template>
   <div class="main">
     <div class="item-container">
-      <span>显示滚动弹幕窗</span>
+      <span class="setting-text">显示滚动弹幕窗</span>
       <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>
       <Checkbox :style="{'padding-left': '10px'}" :value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
     </div>
 
     <div class="item-container">
-      <span>背景色</span>
+      <span class="setting-text">背景色</span>
       <ColorPicker transfer :value="scrollDanmakuBackground" @on-active-change="debouncedUpdateBackground" size="small" alpha />
     </div>
     <div class="item-container">
-      <span>透明度</span>
+      <span class="setting-text">透明度</span>
       <InputNumber :value="scrollDanmakuOpacity" @on-change="changeScrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" />
     </div>
     <div class="item-container">
-      整体字号
+      <span class="setting-text">弹幕颜色继承自普通弹幕的「内容」样式设置</span>
+    </div>
+    <div class="item-container">
+      <span class="setting-text">整体字号</span>
       <InputNumber :value="scrollDanmakuFontSize" @on-change="changeScrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" />
     </div>
     <div class="item-container">
-      弹幕显示时间
-      <InputNumber :value="scrollDanmakuDuration" @on-change="changeScrollDanmakuDuration" :min="0" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" />
+      <span class="setting-text">弹幕显示时间</span>
+      <InputNumber :value="scrollDanmakuDuration" @on-change="changeScrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" />
     </div>
     <div class="item-container">
-      方向： 从右到左 从左到右
+      <span class="setting-text">方向</span>
+      <RadioGroup :value="scrollDanmakuDirection" @on-change="changeScrollDanmakuDirection">
+        <Radio label="RL">
+          <span>从右到左</span>
+        </Radio>
+        <Radio label="LR">
+          <span>从左到右</span>
+        </Radio>
+      </RadioGroup>
     </div>
   </div>
 </template>
@@ -82,6 +93,16 @@ export default {
 
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
+
+    let win
+    if (this.scrollDanmakuWindowId) {
+      win = BrowserWindow.fromId(this.scrollDanmakuWindowId)
+    }
+
+    if (win) {
+      this.win = win
+      this.isShowDanmakuWindow = true
+    }
   },
 
   methods: {
@@ -166,6 +187,7 @@ export default {
       this.win = null;
       this.isShowDanmakuWindow = false
       this.isShowDanmakuWindowLoading = false;
+      this.isScrollDanmakuWindowAlwaysOnTop = false
     },
 
     changeAlwaysOnTop(status) {
@@ -202,6 +224,14 @@ export default {
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeScrollDanmakuDirection(value) {
+      const data = {
+        scrollDanmakuDirection: value
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
     }
   }
 };
@@ -210,5 +240,9 @@ export default {
 <style scoped>
 .item-container {
   padding: 20px 0 0 40px;
+}
+.setting-text {
+  vertical-align: middle;
+  padding-right: 10px;
 }
 </style>

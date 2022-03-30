@@ -414,11 +414,8 @@ export default defineComponent({
 
     createDanmakuDOM({ text, channelIndex }: { text: string; channelIndex: number }) {
       const div = document.createElement('div')
-      //   div.style.width = '100px'
-      //   div.style.height = '100px'
       const { width: windowWidth, height } = this.getWindowSize()
       const { width } = this.getTextSize({ text })
-      //   div.style.background = 'red'
       div.style.color = 'black'
       div.style.position = 'absolute'
       div.style.left = windowWidth + 'px'
@@ -432,24 +429,19 @@ export default defineComponent({
       div.innerHTML = text
       div.style.transition = `left ${this.duration / 1000}s linear 0s`
       div.style.whiteSpace = 'nowrap'
-      //   div.style.transform = `translateX(-${windowWidth}px)`
       const mainDOM = document.getElementById('danmaku-scroll')
       if (!mainDOM) return div
       mainDOM.appendChild(div)
       setTimeout(() => {
         div.style.left = `-${width}px`
-        //    div.style.left = `0px`
       }, 100)
       return div
     },
 
     createDanmakuDOMV2({ text, top, role }: { text: string; top: number; role: number }) {
       const div = document.createElement('div')
-      //   div.style.width = '100px'
-      //   div.style.height = '100px'
       const { width: windowWidth, height } = this.getWindowSize()
       const { width } = this.getTextSize({ text })
-      //   div.style.background = 'red'
       div.style.color = 'black'
       const roleStyle = this[`comment_lv${role}`]
       div.style.color = roleStyle?.color || 'black'
@@ -495,6 +487,7 @@ export default defineComponent({
   position: absolute;
   inset: 4px;
   -webkit-app-region: drag;
+  cursor: pointer;
 }
 
 #measurer {
@@ -504,13 +497,4 @@ export default defineComponent({
   width: auto;
   white-space: nowrap;
 }
-
-/* @keyframes moveToLeft {
-  0% {
-    transform: translateX(0px);
-  }
-  100% {
-    transform: translateX(-${windowWidth}px);
-  }
-} */
 </style>

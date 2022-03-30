@@ -50,7 +50,7 @@
       <Checkbox :value="isAutoRecord" @on-change="changeAutoRecord" :style="{ height: '30px','line-height': '30px'}">
         自动录制
       </Checkbox>
-      <Tooltip placement="top">
+      <Tooltip transfer placement="top">
         <Icon type="md-help" />
         <div slot="content" :style="{ 'white-space': 'normal' }">
           <div>
