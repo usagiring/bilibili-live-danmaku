@@ -292,6 +292,7 @@ export default defineComponent({
           resolve({ width: img.width, height: img.height })
         }
         img.onerror = reject
+        img.referrerPolicy = 'no-referrer'
         img.src = src
       })
     },
@@ -572,6 +573,7 @@ export default defineComponent({
         dom = document.createElement('img')
         dom.style.width = `${width}px`
         dom.src = emojiUrl
+        dom.referrerPolicy = 'no-referrer'
       } else {
         const textSize = this.getTextSize({ text })
         width = textSize.width
