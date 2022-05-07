@@ -302,6 +302,8 @@ export const DEFAULT_CONFIG = {
   scrollDanmakuY: 600,
   scrollDanmakuBackground: "rgba(0, 0, 0, 0.3)",
   scrollDanmakuOpacity: 100,
+  scrollDanmakuStyleExtend: 'self',
+  scrollDanmakuEmojiSize: 60,
   muteCommandSetting: {
     enable: false,
     roles: [],

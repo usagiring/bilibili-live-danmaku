@@ -1134,6 +1134,8 @@ export default {
           content: `一条弹幕哟～`,
           role: 3,
           sendAt: Date.now(),
+          color: 'white',
+          // emojiUrl: 'http://i0.hdslb.com/bfs/live/d23f33fb86a1154fc99d1521a742394e5d94a09b.png'
         };
         comment.role = randomRole;
         return comment;

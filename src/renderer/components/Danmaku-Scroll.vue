@@ -15,11 +15,23 @@
       <InputNumber :value="scrollDanmakuOpacity" @on-change="changeScrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" />
     </div>
     <div class="item-container">
-      <span class="setting-text">弹幕颜色继承自普通弹幕的「内容」样式设置</span>
+      <span class="setting-text">弹幕样式选择</span>
+      <RadioGroup :value="scrollDanmakuStyleExtend" @on-change="changeScrollDanmakuStyleExtend">
+        <Radio label="bilibili">
+          <span>保持与B站弹幕一致</span>
+        </Radio>
+        <Radio label="self">
+          <span>继承普通弹幕的「内容」样式设置</span>
+        </Radio>
+      </RadioGroup>
     </div>
     <div class="item-container">
       <span class="setting-text">整体字号</span>
       <InputNumber :value="scrollDanmakuFontSize" @on-change="changeScrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" />
+    </div>
+    <div class="item-container">
+      <span class="setting-text">表情大小</span>
+      <InputNumber :value="scrollDanmakuEmojiSize" @on-change="changeScrollDanmakuEmojiSize" :min="1" size="small" :style="{ width: '55px' }" />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕显示时间</span>
@@ -88,6 +100,12 @@ export default {
     },
     scrollDanmakuOpacity() {
       return this.$store.state.Config.scrollDanmakuOpacity
+    },
+    scrollDanmakuStyleExtend() {
+      return this.$store.state.Config.scrollDanmakuStyleExtend
+    },
+    scrollDanmakuEmojiSize() {
+      return this.$store.state.Config.scrollDanmakuEmojiSize
     }
   },
 
@@ -229,6 +247,22 @@ export default {
     async changeScrollDanmakuDirection(value) {
       const data = {
         scrollDanmakuDirection: value
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeScrollDanmakuStyleExtend(value) {
+      const data = {
+        scrollDanmakuStyleExtend: value
+      }
+      await updateSetting(data)
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    },
+
+    async changeScrollDanmakuEmojiSize(value) {
+      const data = {
+        scrollDanmakuEmojiSize: value
       }
       await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
