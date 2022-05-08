@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeImage, session } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../service/const'
@@ -57,6 +57,19 @@ function createWindow() {
 }
 
 app.on('ready', () => {
+
+  // 视频流需要加上referer
+  // Modify the user agent for all requests to the following urls.
+  const filter = {
+    urls: ['https://*.bilivideo.com/*']
+  }
+
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'
+    details.requestHeaders['Referer'] = 'https://api.live.bilibili.com/'
+    callback({ requestHeaders: details.requestHeaders })
+  })
+
   createWindow()
 
   ipcMain.handle(IPC_GET_USER_PATH, async () => {
@@ -149,6 +162,8 @@ app.on('ready', () => {
     })
   }
 })
+
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

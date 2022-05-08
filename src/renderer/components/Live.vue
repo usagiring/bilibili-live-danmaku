@@ -347,6 +347,8 @@ export default {
             type: "flv",
             isLive: true,
             url: playUrl,
+            // cors: true,
+            // withCredentials: this.isWithCookie && this.userCookie,
           },
           {
             headers,
