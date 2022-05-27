@@ -3,10 +3,8 @@
   <!-- <i-col span="8"> -->
   <div>
     <div class="setting-group images-container" :style="{'padding-top': '10px'}">
-      <!-- <Button @click="restoreExampleDanmaku">打开预览弹幕窗</Button> -->
       <Button @click="sendTestMessage" size="small">发送测试弹幕</Button>
       <Button @click="clearDanmaku" size="small">清空弹幕</Button>
-      <!-- <Button @click="restoreExampleDanmaku">恢复默认测试弹幕</Button> -->
     </div>
     <div class="setting-group ">
       <div :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
@@ -393,7 +391,7 @@ import {
 } from "../../service/const";
 import { getRandomItem } from "../../service/util";
 import { cloneDeep, debounce } from 'lodash'
-import { mergeSetting, updateSetting, clearMessage, sendMessages, restoreExampleMessage } from '../../service/api'
+import { mergeSetting, updateSetting, clearMessage, sendMessages } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -1140,11 +1138,6 @@ export default {
         comment.role = randomRole;
         return comment;
       }
-    },
-
-    async restoreExampleDanmaku() {
-      await restoreExampleMessage()
-      // this.$store.dispatch("RESTORE_EXAMPLE_MESSAGE");
     },
 
     async clearDanmaku() {

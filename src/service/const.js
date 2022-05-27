@@ -75,84 +75,6 @@ export const ENTER_ROOM_TYPE = {
 
 export const GET_USER_INFO_FREQUENCY_LIMIT = OPTION_CONFIG.GET_USER_INFO_FREQUENCY_LIMIT || 1000
 
-export const EXAMPLE_MESSAGES = [
-  {
-    cmd: 'EXAMPLE_COMMENT',
-    payload: {
-      _id: 1,
-      id: 1,
-      category: "comment",
-      uid: "123456",
-      uname: "bli_123456",
-      content: "这是一条测试弹幕哟～",
-      role: 3,
-      similar: 1,
-      medalName: '测试者',
-      "medalLevel": 6,
-      "medalColorBorder": "#5d7b9e",
-      "medalColorStart": "#5d7b9e",
-      "medalColorEnd": "#5d7b9e"
-    }
-  },
-  {
-    cmd: 'EXAMPLE_COMMENT',
-    payload: {
-      _id: 2,
-      id: 2,
-      role: 0,
-      uid: "654321",
-      uname: "bli_654321",
-      category: "comment",
-      content: "～哟幕弹试测条一是这",
-    }
-  },
-  {
-    cmd: 'EXAMPLE_SUPER_CHAT',
-    payload: {
-      _id: 6,
-      id: 6,
-      uid: "12345",
-      uname: "bli_12345",
-      category: "superChat",
-      content: "这是一条测试SuperChat哟～",
-      contentJPN: "これはテスト用のスパチャだよ〜",
-      price: 50,
-      totalPrice: 50,
-      role: 0,
-      type: 3,
-      coinType: 1
-    }
-  },
-  // {
-  //   id: 7,
-  //   type: "gift",
-  //   uid: 12345,
-  //   name: 'bli_12345',
-  //   avatar: DEFAULT_AVATAR,
-  //   price: 2,
-  //   giftNumber: 50,
-  //   totalPrice: 100,
-  //   giftName: '测试礼物'
-  // },
-  {
-    cmd: 'EXAMPLE_GIFT',
-    payload: {
-      _id: 8,
-      id: 999999,
-      category: "gift",
-      uid: 777777,
-      uname: 'bli_777777',
-      type: 2,
-      price: 198,
-      count: 1,
-      totalPrice: 198,
-      name: '舰长',
-      role: 1,
-      coinType: 1
-    }
-  }
-]
-
 export const COLORS = OPTION_CONFIG.COLORS || ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
 
 export const DEFAULT_FONTS = [
@@ -276,6 +198,20 @@ export const DEFAULT_CONFIG = {
   isWatchLottery: false,
   isShowHeadline: true,
   optionstring: "{A}\n{B}\n{C}",
+  voteOptions: [
+    {
+      keyword: 'A',
+      value: ''
+    },
+    {
+      keyword: 'B',
+      value: ''
+    },
+    {
+      keyword: 'C',
+      value: ''
+    }
+  ],
   historyRooms: [],
   isAutoReply: false,
   fontWeight: 'normal',
@@ -362,14 +298,7 @@ export const DEFAULT_SERVER_CONFIG = {
   ...DEFAULT_STYLE,
   roomId: 1,
   isConnected: false,
-  // autoReplyRules: [{
-  //   priority: 0,
-  //   text: '',
-  //   onlyGold: true
-  // }],
-  // USER_DATA_PATH,
   PORT: PORT,
-  EXAMPLE_MESSAGES: EXAMPLE_MESSAGES,
   SAVE_ALL_BILI_MESSAGE,
   HTML_PATH: OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, '../../node_modules/@tokine/bilibili-danmaku-page'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),

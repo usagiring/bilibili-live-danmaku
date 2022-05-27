@@ -471,6 +471,7 @@ export default {
 
       if (win) {
         this.win = win
+        this.danmakuWindowBindEvent()
         this.isShowDanmakuWindow = true
       }
 
@@ -598,44 +599,56 @@ export default {
             ? `http://localhost:${PORT}?port=${PORT}`
             : `http://localhost:${PORT}?port=${PORT}`;
         win.loadURL(winURL);
-        win.on("close", (e) => {
-          this.closeDanmakuWindow()
-        });
-        win.on(
-          "resize",
-          debounce(() => {
-            const [width, height] = win.getSize();
-            this.$store.dispatch("UPDATE_CONFIG", {
-              windowWidth: width,
-              windowHeight: height,
-            });
-          }, 200)
-        );
-        win.on(
-          "move",
-          debounce(() => {
-            const [x, y] = win.getPosition();
-            this.$store.dispatch("UPDATE_CONFIG", {
-              windowX: x,
-              windowY: y,
-            });
-          }, 200)
-        );
         this.win = win
-        // this.win.on('always-on-top-changed', (e, isAlwaysOnTop) => {
-
-        // })
-        // 初始化时清空弹幕池
-        this.$store.dispatch("CLEAR_MESSAGE");
+        this.danmakuWindowBindEvent()
         this.isShowDanmakuWindow = true;
         this.isShowDanmakuWindowLoading = false;
       } else {
-        this.closeDanmakuWindow()
+        if (!this.win) return
+        try {
+          this.win.close()
+        } catch (e) {
+          console.log('Close danmaku window error', e)
+        }
+        this.clearDanmakuWindowInfo()
       }
     },
 
-    closeDanmakuWindow() {
-      if (!this.win) return;
+    danmakuWindowBindEvent() {
+      if (!this.win) return
+      this.win.on("close", (e) => {
+        if (!this.win) return;
+        this.$store.dispatch("UPDATE_CONFIG", {
+          danmakuWindowId: null
+        });
+        // clear
+        if (this.checkOnTopInterval) {
+          clearInterval(this.checkOnTopInterval)
+          this.checkOnTopInterval = null
+        }
+        this.win = null;
+        this.isShowDanmakuWindow = false
+        this.isShowDanmakuWindowLoading = false;
+      })
+
+      this.win.on("resize", debounce(() => {
+        const [width, height] = this.win.getSize();
+        this.$store.dispatch("UPDATE_CONFIG", {
+          windowWidth: width,
+          windowHeight: height,
+        });
+      }, 200))
+
+      this.win.on("move", debounce(() => {
+        const [x, y] = this.win.getPosition();
+        this.$store.dispatch("UPDATE_CONFIG", {
+          windowX: x,
+          windowY: y,
+        })
+      }, 200))
+    },
+
+    clearDanmakuWindowInfo() {
       this.$store.dispatch("UPDATE_CONFIG", {
         danmakuWindowId: null
       });
@@ -644,8 +657,7 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.close();
-      this.win = null;
+      this.win = null
       this.isShowDanmakuWindow = false
       this.isShowDanmakuWindowLoading = false;
     },

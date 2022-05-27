@@ -1,42 +1,66 @@
 <template>
-  <div>
-    <Row>
-      <i-col span="6">
-        <Input class="option-input" :value="optionstring" @on-change="changeInput" type="textarea" :rows="7" placeholder="输入备选项，使用换行分隔" :disabled="isWatching" :style="{ padding: '5px' }" />
-      </i-col>
-      <i-col span="2">
-        <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
-        <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
-        <Button class="vote-button" @click="showVoteRecord">记录</Button>
-      </i-col>
-      <i-col span="16">
-        <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-          <Button @click="barChart" :disabled="!isWatching">
-            <Icon type="md-podium" />
-          </Button>
-          <Button @click="pieChart" :disabled="!isWatching">
-            <Icon type="md-pie" />
-          </Button>
-        </ButtonGroup>
-        <Tooltip placement="top">
-          <Icon type="md-help" class="info-icon" :style="{'font-size': '16px', 'vertical-align': 'middle'}" />
-          <div slot="content">
-            <div class="description-text">
-              <p>
-                使用方法: 输入 "{关键字} + 备注" 其中 {}
-                内会被匹配，其他作为文字展示。多个选项使用换行分隔。
-              </p>
-              <p>例如:</p>
-              <p>{A} 选项A</p>
-              <p>{B} 选项B</p>
-              <p>{这是一个选项所有文本都会参与匹配}</p>
-            </div>
+  <div :style="{ 'user-select': 'none' }">
+    <div>
+      <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
+      <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
+      <Button class="vote-button" @click="showVoteRecord">投票记录</Button>
+    </div>
+
+    <div class="left-container">
+      <div>
+        <div class="keyword-container">关键字</div>
+        <div class="content-container">内容</div>
+      </div>
+      <template>
+        <div v-for="(item, index) in options" :key="index">
+          <div class="keyword-container">
+            <Input :value="item.keyword" @on-change="changeOptionKeyword(index, $event)" :disabled="isWatching" :style="{ padding: '5px' }" />
           </div>
-        </Tooltip>
-        <div id="chart"></div>
-      </i-col>
-    </Row>
-    <Modal v-model="modal1" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
+          <div class="content-container">
+            <Input :value="item.value" @on-change="changeOptionContent(index, $event)" :disabled="isWatching" :style="{ padding: '5px' }" />
+            <span>
+            </span>
+          </div>
+          <div class="remove-icon-container">
+            <Icon type="md-remove" @click="removeOption(index)" />
+          </div>
+        </div>
+      </template>
+
+      <div :style="{ padding: '5px'}">
+        <Button @click="addOption" type="primary" long :disabled="isWatching">
+          <Icon :style="{'font-weight': 'bold'}" type="md-add" />
+        </Button>
+      </div>
+    </div>
+    <div class="right-container">
+      <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
+        <Button @click="makeBarChart" :disabled="!isWatching">
+          <Icon type="md-podium" />
+        </Button>
+        <Button @click="makePieChart" :disabled="!isWatching">
+          <Icon type="md-pie" />
+        </Button>
+      </ButtonGroup>
+      <!-- <Tooltip placement="top">
+        <Icon type="md-help" class="info-icon" :style="{'font-size': '16px', 'vertical-align': 'middle'}" />
+        <div slot="content">
+          <div class="description-text">
+            <p>
+              使用方法: 输入 "{关键字} + 备注" 其中 {}
+              内会被匹配，其他作为文字展示。多个选项使用换行分隔。
+            </p>
+            <p>例如:</p>
+            <p>{A} 选项A</p>
+            <p>{B} 选项B</p>
+            <p>{这是一个选项所有文本都会参与匹配}</p>
+          </div>
+        </div>
+      </Tooltip> -->
+      <div id="chart"></div>
+    </div>
+
+    <Modal v-model="isShowVoteRecord" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(value, uid) in userMap">
         <p :key="uid">
           {{ value }}
@@ -69,15 +93,10 @@ import * as echarts from "echarts";
 //   CanvasRenderer,
 // ]);
 
-import { shuffle } from "lodash";
+import { shuffle, cloneDeep } from "lodash";
 import ws from '../../service/ws'
 import { COLORS } from "../../service/const";
 let colorPool = shuffle(COLORS);
-
-// example: {} 内会被匹配，其他作为文字展示
-// {A}: 选项A
-// {B}: 选项B
-// {这是一个选项所有文本都会参与匹配}
 
 export default {
   data() {
@@ -85,79 +104,63 @@ export default {
       chart: null,
       isWatching: false,
       type: "bar",
-      modal1: false,
+      isShowVoteRecord: false,
       userMap: {},
+      keywords: [],
+      optionRegexps: []
     };
   },
   computed: {
     isConnected() {
       return this.$store.state.Config.isConnected;
     },
-    optionstring() {
-      return this.$store.state.Config.optionstring;
-    },
     options() {
-      const optionArray = this.optionstring.split(/\n/g);
-      return optionArray.reduce((map, optionString) => {
-        const left = optionString.indexOf("{");
-        const right = optionString.lastIndexOf("}");
-        // 如果没找到直接返回map
-        if (!~left || !~right) return map;
-        if (right < left) return map;
-        const keyword = optionString.substring(left + 1, right);
-        map[keyword] = optionString.substring(right + 1);
-        return map;
-      }, {});
-    },
-
-    keywords() {
-      return Object.keys(this.options);
-    },
-    descriptions() {
-      return Object.values(this.options);
-    },
-    regexps() {
-      return this.keywords.map((keyword) => new RegExp(keyword, "i"));
+      return this.$store.state.Config.voteOptions;
     },
   },
   beforeDestroy() {
     this.stop();
   },
   methods: {
-    init() {
-      this.userMap = {};
-      const chartDOM = document.getElementById("chart");
+    initChart() {
+      this.userMap = {}
+      const chartDOM = document.getElementById("chart")
       if (!this.chart) {
-        this.chart = echarts.init(chartDOM);
+        this.chart = echarts.init(chartDOM)
       }
-      const data = this.descriptions.map((description, index) => {
+      this.type === "bar" ? this.makeBarChart() : this.pieChart();
+    },
+
+    start() {
+      this.isWatching = true
+      this.keywords = this.options.map(option => option.keyword).filter(Boolean)
+      this.optionRegexps = this.keywords.map((keyword) => new RegExp(keyword, "i"))
+      this.data = this.keywords.map((keyword, index) => {
         return {
-          name: this.keywords[index],
+          name: keyword,
           value: 0,
           itemStyle: {
             color: this.randomPickColor(),
           },
-        };
-      });
-      this.data = data;
-      this.type === "bar" ? this.barChart() : this.pieChart();
-    },
+        }
+      })
 
-    start() {
-      this.init();
-
-      this.isWatching = true
+      this.initChart()
 
       ws.addEventListener('message', this.onVoteMessage)
       // emitter.on("message", this.onVoteMessage);
+
+
+      // setInterval(() => {
+      //   for (let i = 0; i < this.data.length; i++) {
+      //     this.data[i].value = this.data[i].value + Math.floor(Math.random() * 10)
+      //   }
+      //   this.updateChartData()
+      // }, 3000)
     },
     stop() {
-      // const listenerCount = emitter.listenerCount("message");
-      // 如果只有1个监听者，即主监听器，不处理
-      // if (listenerCount <= 1) return;
+      this.isWatching = false
       ws.removeEventListener('message', this.onVoteMessage)
-      // emitter.removeListener("message", this.onVoteMessage);
-      this.isWatching = false;
     },
 
     makeChart(options = {}) {
@@ -237,22 +240,112 @@ export default {
       this.chart.setOption(chartOptions);
     },
 
-    barChart() {
-      this.type = "bar";
+    makePieChart() {
+      this.type = "pie"
       this.chart.clear();
-      this.chart.resize({
-        height: 160 + this.keywords.length * 30,
-      });
-      this.makeChart();
+
+      const option = {
+        tooltip: {
+          trigger: 'item'
+        },
+        // legend: {
+        //   top: '5%',
+        //   left: 'center'
+        // },
+        legend: {
+          orient: "vertical",
+          left: "left",
+        },
+        series: [
+          {
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: '30',
+                fontWeight: 'bold',
+                formatter: "{b}: {d}%",
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: this.data
+          }
+        ]
+      }
+
+      this.chart.setOption(option);
     },
-    pieChart() {
-      this.type = "pie";
-      this.chart.clear();
-      this.makeChart();
+
+    makeBarChart() {
+      this.type = "bar"
+      this.chart.clear()
+      // this.chart.resize({
+      //   height: 160 + this.keywords.length * 30,
+      // })
+
+      const option = {
+        xAxis: {
+          max: 'dataMax'
+        },
+        yAxis: {
+          type: 'category',
+          data: this.keywords,
+          // data: ['A', 'B', 'C', 'D', 'E'],
+          inverse: true,
+          animationDuration: 300,
+          animationDurationUpdate: 300,
+          // max: 2 // only the largest 3 bars will be displayed
+        },
+        series: [
+          {
+            realtimeSort: true,
+            // name: 'X',
+            type: 'bar',
+            data: this.data,
+            label: {
+              show: true,
+              position: 'right',
+              valueAnimation: true
+            }
+          }
+        ],
+        legend: {
+          show: false
+        },
+        animationDuration: 0,
+        animationDurationUpdate: 3000,
+        animationEasing: 'linear',
+        animationEasingUpdate: 'linear'
+      };
+
+      this.chart.setOption(option);
+    },
+
+    updateChartData() {
+      this.chart.setOption({
+        series: [
+          {
+            data: this.data
+          }
+        ]
+      });
     },
 
     showVoteRecord() {
-      this.modal1 = true;
+      this.isShowVoteRecord = true;
     },
     randomPickColor() {
       const color = colorPool.shift();
@@ -260,27 +353,59 @@ export default {
       return color;
     },
     onVoteMessage: async function (msg) {
-      const data = JSON.parse(msg.data)
-      if (data.cmd !== 'COMMENT') return
-      const comment = data.payload
+      const message = JSON.parse(msg.data)
+      if (message.cmd !== 'COMMENT') return
+      const comment = message.payload
       // 已经记录过的用户不再重复统计
       if (this.userMap[comment.uid]) return;
-      const index = this.regexps.findIndex((regexp) => {
+      const index = this.optionRegexps.findIndex((regexp) => {
         return regexp.test(comment.content);
       });
       if (!~index) return;
       // 记录统计
       this.userMap[comment.uid] = `${comment.uname}(${comment.uid}): ${comment.content} -> ${this.keywords[index]}`
       // 输入图表
-      this.data[index].value++;
-      this.makeChart();
+      this.data[index].value++
+      this.updateChartData()
     },
 
-    changeInput(e) {
+    addOption() {
+      const options = [
+        ...this.options,
+        {
+          keyword: '',
+          value: '',
+        }
+      ]
       this.$store.dispatch("UPDATE_CONFIG", {
-        optionstring: e.target.value,
-      });
+        voteOptions: options
+      })
     },
+
+    removeOption(index) {
+      if (this.isWatching) return
+      const options = [...this.options]
+      options.splice(index, 1)
+      this.$store.dispatch("UPDATE_CONFIG", {
+        voteOptions: options
+      })
+    },
+
+    changeOptionKeyword(index, e) {
+      const options = cloneDeep(this.options)
+      options[index].keyword = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        voteOptions: options
+      })
+    },
+
+    changeOptionContent(index, e) {
+      const options = cloneDeep(this.options)
+      options[index].keyword = e.target.value
+      this.$store.dispatch("UPDATE_CONFIG", {
+        voteOptions: options
+      })
+    }
   },
 };
 </script>
@@ -292,7 +417,7 @@ export default {
 
 #chart {
   width: 600px;
-  /* height: 250px; */
+  height: 600px;
 }
 
 .vote-button {
@@ -302,5 +427,35 @@ export default {
 .option-input {
   vertical-align: top;
   display: inline-block;
+}
+.left-container {
+  margin-top: 15px;
+  width: 325px;
+  margin-left: 10px;
+  display: inline-block;
+  vertical-align: top;
+}
+.keyword-container {
+  width: 80px;
+  display: inline-block;
+  text-align: center;
+}
+.content-container {
+  width: 220px;
+  display: inline-block;
+  text-align: center;
+}
+.remove-icon-container {
+  color: crimson;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.right-container {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 10px;
 }
 </style>

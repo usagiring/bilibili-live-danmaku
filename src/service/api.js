@@ -56,11 +56,6 @@ export async function updateSetting(settings) {
   return res.data
 }
 
-export async function restoreExampleMessage() {
-  const res = await axios.post(`${BASE_URL}/api/messages/examples/restore`)
-  return res.data
-}
-
 export async function clearMessage() {
   const res = await axios.post(`${BASE_URL}/api/messages/clear`)
   return res.data

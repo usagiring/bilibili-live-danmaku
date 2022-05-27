@@ -15,8 +15,3 @@ export async function getGiftConfig() {
   const res = await axios.get(`${BASE_URL}/api/gifts/config`)
   return res.data
 }
-
-export async function getExampleMessages() {
-  const res = await axios.get(`${BASE_URL}/api/messages/examples`)
-  return res.data
-}
