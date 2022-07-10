@@ -64,46 +64,6 @@
         </span>
       </Tooltip>
     </div>
-    <!-- <div class="config-item-container">
-      <Checkbox :value="isWatchLottery" @on-change="changeWatchLottery" :style="{ height: '30px','line-height': '30px'}">自动记录天选时刻</Checkbox>
-      <Tooltip placement="top">
-        <Icon type="md-help" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
-            <p>当直播间开启天选时刻，会开始统计相关信息</p>
-          </div>
-        </div>
-      </Tooltip>
-      <Tooltip placement="top" content="该功能仍在beta阶段，可能不稳定">
-        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
-          <Icon type="ios-flask" />
-        </span>
-      </Tooltip>
-    </div> -->
-    <!-- <div class="config-item-container">
-      <Checkbox :value="isAutoReply" @on-change="changeAutoReply">礼物自动回复</Checkbox>
-      <span>礼物自动回复</span> 
-      <Input class="config-item" :value="autoReplyText" @on-change="changeAutoReplyText" placeholder="回复内容..." />
-      <Checkbox :value="isTextReply" @on-change="changeTextReply" :disabled="!userCookie">文字</Checkbox>
-      <Checkbox :value="isSpeakReply" @on-change="changeSpeakReply">语音</Checkbox>
-      <Checkbox :value="!onlyGold" @on-change="changeOnlyGold" :style="{ height: '30px','line-height': '30px'}">银瓜子</Checkbox>
-      <Icon class="settings-icon" type="md-settings" @click="showAdvancedAutoReplyRule" />
-      <Tooltip placement="top">
-        <Icon type="md-help" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <p>支持占位符替换语法: {keywords}</p>
-          <p>目前支持 user.name, gift.name</p>
-          <p>例如: 感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 xxx 赠送的 xx礼物 </p>
-          <p :style="{color: 'pink'}">注意：同一用户一分钟内不会重复回复</p>
-          <p :style="{color: 'pink'}">由于B站弹幕限制，不保证回复每次都成功发出</p>
-        </div>
-      </Tooltip>
-      <Tooltip placement="top" content="实验性功能，可能不稳定">
-        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
-          <Icon type="ios-flask" />
-        </span>
-      </Tooltip>
-    </div> -->
 
     <div class="config-item-container">
       <Input v-model="text" placeholder="让系统说..." @on-keyup.enter="speak" :style="{display: 'inline-block', width: '300px'}" />

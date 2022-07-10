@@ -5,15 +5,16 @@ import { getAudioStream } from './src/ffmpeg'
 interface SpeechTranscriptionOption {
     // service?: 'alicloud'
     serviceUrl: string
-    appkey: string
+    appKey: string
     accessKeyId: string
     accessKeySecret: string
 }
 
 type Event = 'change' | 'begin' | 'end'
 
-export default class SpeechTranscription {
-    st: any
+// Automatic Speech Recognition
+export default class ASR {
+    asr: any
     handlers: { [x: string]: Function }
 
     constructor() {
@@ -22,15 +23,15 @@ export default class SpeechTranscription {
 
     async init({
         serviceUrl,
-        appkey,
+        appKey,
         accessKeyId,
         accessKeySecret,
     }: SpeechTranscriptionOption) {
         const aliClient = new AliClient({ accessKeyId, accessKeySecret })
-        this.st = new AliSpeechTranscription({
+        this.asr = new AliSpeechTranscription({
             url: serviceUrl, // wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1
             token: await aliClient.getToken(),
-            appkey: appkey,
+            appkey: appKey,
         })
 
         // {
@@ -40,7 +41,7 @@ export default class SpeechTranscription {
         //     "enable_punctuation_predition": true,
         //     "enable_inverse_text_normalization": true
         // }
-        const defaultParams = this.st.defaultStartParams()
+        const defaultParams = this.asr.defaultStartParams()
         const params = {
             ...defaultParams
         }
@@ -51,44 +52,44 @@ export default class SpeechTranscription {
         // failed
         // begin 提示句子开始。
         // end 提示句子结束。
-        this.st.on("started", (msg) => {
+        this.asr.on("started", (msg) => {
             console.log("Client recv started:", msg)
         })
 
-        this.st.on("changed", (msg) => {
+        this.asr.on("changed", (msg) => {
             // console.log("Client recv changed:", msg)
             if (this.handlers?.change) {
                 this.handlers.change(msg)
             }
         })
 
-        this.st.on("completed", (msg) => {
+        this.asr.on("completed", (msg) => {
             console.log("Client recv completed:", msg)
         })
 
-        this.st.on("closed", () => {
+        this.asr.on("closed", () => {
             console.log("Client recv closed")
         })
 
-        this.st.on("failed", (msg) => {
+        this.asr.on("failed", (msg) => {
             console.log("Client recv failed:", msg)
         })
 
-        this.st.on("begin", (msg) => {
+        this.asr.on("begin", (msg) => {
             // console.log("Client recv begin:", msg)
             if (this.handlers?.begin) {
                 this.handlers.begin(msg)
             }
         })
 
-        this.st.on("end", (msg) => {
+        this.asr.on("end", (msg) => {
             // console.log("Client recv end:", msg)
             if (this.handlers?.end) {
                 this.handlers.end(msg)
             }
         })
 
-        await this.st.start(
+        await this.asr.start(
             params,
             true, // 是否自动向云端发送ping请求，默认false。
             6000, // 发ping请求间隔时间，默认6000，单位为毫秒。
@@ -100,18 +101,18 @@ export default class SpeechTranscription {
         const stream = getAudioStream({ url })
         stream.on('data', (chunk) => {
             const data = Buffer.from(chunk, "binary")
-            if (!self.st.sendAudio(data)) {
+            if (!self.asr.sendAudio(data)) {
                 throw new Error("send audio failed")
             }
         })
         stream.on('close', () => {
-            self.st.close()
+            self.asr.close()
         })
         stream.on('end', () => {
-            self.st.close()
+            self.asr.close()
         })
         stream.on('error', () => {
-            self.st.close()
+            self.asr.close()
         })
     }
 
