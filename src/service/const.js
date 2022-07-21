@@ -188,6 +188,7 @@ export const DEFAULT_STYLE = {
 }
 export const DEFAULT_CONFIG = {
   roomId: 1,
+  realRoomId: 1,
   displayRoomId: 1,
   isConnected: false,
   guardNumber: 0,
@@ -227,6 +228,8 @@ export const DEFAULT_CONFIG = {
   scrollDanmakuOpacity: 100,
   scrollDanmakuStyleExtend: 'self',
   scrollDanmakuEmojiSize: 60,
+  ASRWindowId: null,
+  ffmpegExe: '',
   muteCommandSetting: {
     enable: false,
     roles: [],
