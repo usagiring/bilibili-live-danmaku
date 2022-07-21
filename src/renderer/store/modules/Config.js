@@ -1,7 +1,8 @@
 import { DEFAULT_CONFIG } from '../../../service/const'
-import { cloneDeep } from 'lodash'
 // const state = DEFAULT_CONFIG
-const state = cloneDeep(DEFAULT_CONFIG)
+const state = () => ({
+  ...DEFAULT_CONFIG
+})
 
 const mutations = {
   UPDATE_STYLE(state, payload) {

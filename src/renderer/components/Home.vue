@@ -40,18 +40,18 @@
           <span>咒语</span>
           </MenuItem>
           <MenuItem name="1-9" to="/danmaku-scroll">
-          <div :style="{position: 'relative', 'display': 'inline-block'}">
-            <!-- <Icon type="md-code" /> -->
-            <Icon type="ios-water" />
-            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
-          </div>
+          <Icon type="ios-water" />
           <span>弹幕2</span>
           </MenuItem>
-          <MenuItem name="1-10" to="/config">
+          <MenuItem name="1-10" to="/asr">
+          <Icon type="md-ionitron" />
+          <span>语音识别</span>
+          </MenuItem>
+          <MenuItem name="1-11" to="/config">
           <Icon type="md-settings" />
           <span>设置</span>
           </MenuItem>
-          <MenuItem name="1-11" to="/help">
+          <MenuItem name="1-12" to="/help">
           <Icon type="md-help" />
           <span>帮助</span>
           </MenuItem>

@@ -6,6 +6,9 @@ import router from './router'
 import store from './store'
 import ViewUI from 'view-design';
 import 'view-design/dist/styles/iview.css';
+import global from './global'
+
+Vue.prototype.$global = global
 
 // import animate from 'animate.css'
 

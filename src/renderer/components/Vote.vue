@@ -115,6 +115,7 @@ export default {
       return this.$store.state.Config.isConnected;
     },
     options() {
+      console.log(this.$store.state.Config.voteOptions)
       return this.$store.state.Config.voteOptions;
     },
   },
@@ -386,6 +387,7 @@ export default {
       if (this.isWatching) return
       const options = [...this.options]
       options.splice(index, 1)
+      console.log(options)
       this.$store.dispatch("UPDATE_CONFIG", {
         voteOptions: options
       })
@@ -401,7 +403,7 @@ export default {
 
     changeOptionContent(index, e) {
       const options = cloneDeep(this.options)
-      options[index].keyword = e.target.value
+      options[index].content = e.target.value
       this.$store.dispatch("UPDATE_CONFIG", {
         voteOptions: options
       })

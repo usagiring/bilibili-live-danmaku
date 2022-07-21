@@ -198,20 +198,7 @@ export const DEFAULT_CONFIG = {
   isWatchLottery: false,
   isShowHeadline: true,
   optionstring: "{A}\n{B}\n{C}",
-  voteOptions: [
-    {
-      keyword: 'A',
-      value: ''
-    },
-    {
-      keyword: 'B',
-      value: ''
-    },
-    {
-      keyword: 'C',
-      value: ''
-    }
-  ],
+  voteOptions: [],
   historyRooms: [],
   isAutoReply: false,
   fontWeight: 'normal',
@@ -292,6 +279,9 @@ export const DEFAULT_CONFIG = {
       isShow: true,
     }
   ],
+  aliAccessKeyId: '',
+  aliAccessKeySecret: '',
+  aliAppKey: '',
 }
 
 export const DEFAULT_SERVER_CONFIG = {

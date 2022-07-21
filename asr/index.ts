@@ -15,7 +15,8 @@ type Event = 'change' | 'begin' | 'end'
 // Automatic Speech Recognition
 export default class ASR {
     asr: any
-    handlers: { [x: string]: Function }
+    stream: any
+    handlers: { [x: string]: Function[] }
 
     constructor() {
         this.handlers = {}
@@ -28,6 +29,7 @@ export default class ASR {
         accessKeySecret,
     }: SpeechTranscriptionOption) {
         const aliClient = new AliClient({ accessKeyId, accessKeySecret })
+        console.log(appKey, serviceUrl)
         this.asr = new AliSpeechTranscription({
             url: serviceUrl, // wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1
             token: await aliClient.getToken(),
@@ -58,8 +60,14 @@ export default class ASR {
 
         this.asr.on("changed", (msg) => {
             // console.log("Client recv changed:", msg)
-            if (this.handlers?.change) {
-                this.handlers.change(msg)
+            if (this.handlers?.change?.length) {
+                try {
+                    this.handlers.change.forEach(func => {
+                        func(JSON.parse(msg))
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
             }
         })
 
@@ -77,15 +85,27 @@ export default class ASR {
 
         this.asr.on("begin", (msg) => {
             // console.log("Client recv begin:", msg)
-            if (this.handlers?.begin) {
-                this.handlers.begin(msg)
+            if (this.handlers?.begin?.length) {
+                try {
+                    this.handlers.begin.forEach(func => {
+                        func(JSON.parse(msg))
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
             }
         })
 
         this.asr.on("end", (msg) => {
             // console.log("Client recv end:", msg)
-            if (this.handlers?.end) {
-                this.handlers.end(msg)
+            if (this.handlers?.end?.length) {
+                try {
+                    this.handlers.end.forEach(func => {
+                        func(JSON.parse(msg))
+                    })
+                } catch (e) {
+                    console.error(e)
+                }
             }
         })
 
@@ -114,9 +134,20 @@ export default class ASR {
         stream.on('error', () => {
             self.asr.close()
         })
+        this.stream = stream
+    }
+
+    async close() {
+        this.stream.destroy()
+        // await this.asr.close({})
     }
 
     on(event: Event, handler) {
-        this.handlers[event] = handler
+        this.handlers[event] = this.handlers[event] || []
+        this.handlers[event].push(handler)
+    }
+
+    removeAllListeners() {
+        this.handlers = {}
     }
 }

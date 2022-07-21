@@ -80,6 +80,9 @@ export default {
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
     },
+    onTopLevel() {
+      return this.$store.state.Config.onTopLevel
+    },
     scrollDanmakuWindowId() {
       return this.$store.state.Config.scrollDanmakuWindowId
     },

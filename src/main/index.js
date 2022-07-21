@@ -4,7 +4,8 @@ import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../service/const'
 import '../renderer/store'
 import * as bilibiliBridge from '../service/bilibili-bridge'
-import { initialize, enable } from '@electron/remote/main';
+import { initialize, enable } from '@electron/remote/main'
+
 initialize()
 
 bilibiliBridge.init({
