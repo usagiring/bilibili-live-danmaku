@@ -231,6 +231,7 @@ export const DEFAULT_CONFIG = {
   ASRWindowId: null,
   ASRLineCount: 5,
   ffmpegExe: '',
+  aliAppKeys: [],
   muteCommandSetting: {
     enable: false,
     roles: [],

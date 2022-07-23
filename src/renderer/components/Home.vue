@@ -44,7 +44,10 @@
           <span>弹幕2</span>
           </MenuItem>
           <MenuItem name="1-10" to="/asr">
-          <Icon type="md-ionitron" />
+          <div :style="{position: 'relative', 'display': 'inline-block'}">
+            <Icon type="md-ionitron" />
+            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+          </div>
           <span>语音识别</span>
           </MenuItem>
           <MenuItem name="1-11" to="/config">

@@ -2,7 +2,14 @@
   <div class="asr-window">
     <div id="main">
       <template v-for="(text, index) in texts">
-        <div class="text" :key="index">{{ text }}</div>
+        <div :key="index" class="text">
+          <div>
+            {{ text.text }}
+          </div>
+          <div v-if="text.translate" :style="{color: 'aliceblue', 'font-size': '16px'}">
+            {{ text.translate }}
+          </div>
+        </div>
       </template>
     </div>
   </div>
@@ -48,7 +55,7 @@ export default {
 
       if (payload.cmd === 'ASR_SENTENCE_BEGIN') {
         if (this.texts.length >= this.ASRLineCount) {
-          this.texts = this.texts.slice(this.texts.length - this.ASRLineCount + 1)
+          this.texts = this.texts.slice(-(this.ASRLineCount - 1))
           this.currentTextIndex = this.ASRLineCount - 1
         } else {
           this.currentTextIndex = this.texts.length
@@ -57,14 +64,27 @@ export default {
 
       if (payload.cmd === 'ASR_SENTENCE_END') {
         const texts = [...this.texts]
-        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        texts[this.currentTextIndex] = {
+          id: payload.payload?.header?.message_id,
+          text: payload.payload?.payload?.result
+        }
         this.texts = texts
       }
 
       if (payload.cmd === 'ASR_SENTENCE_CHANGE') {
         const texts = [...this.texts]
-        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        texts[this.currentTextIndex] = {
+          id: payload.payload?.header?.message_id,
+          text: payload.payload?.payload?.result
+        }
         this.texts = texts
+      }
+
+      if (payload.cmd === 'MECHINE_TRANSLATE') {
+        const index = this.texts.findIndex(({ id }) => payload.payload?.id === id)
+        const text = this.texts[index]
+        text.translate = payload.payload?.message
+        this.$set(this.texts, index, text)
       }
     },
   }
@@ -91,6 +111,7 @@ export default {
 }
 
 .text {
+  padding: 2px 0;
   text-align: center;
   color: white;
   font-size: 18px;

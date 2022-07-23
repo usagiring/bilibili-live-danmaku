@@ -166,3 +166,8 @@ export async function getASRStatus() {
   const res = await axios.get(`${BASE_URL}/api/asr/status`)
   return res.data
 }
+
+export async function translate(body) {
+  const res = await axios.post(`${BASE_URL}/api/translate`, body)
+  return res.data
+}

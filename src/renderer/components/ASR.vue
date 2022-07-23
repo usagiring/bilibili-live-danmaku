@@ -3,6 +3,29 @@
     <div class="left-container">
       <div class="config-container">
         自动语音识别技术
+        <span>
+          <Tooltip max-width="600" transfer placement="right">
+            <span class="help">?</span>
+            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+              <p>
+                ● 本功能依赖阿里云服务实现直播语音识别。
+              </p>
+              <p>
+                ● 您需要先在阿里云官网开通账户，并且开通实时语音识别功能，具体操作可参考网上教程。
+              </p>
+              <p>
+                ● 本功能依赖ffmpeg。
+              </p>
+              <p>
+                ● 您可以自行下载ffmpeg，我在度盘也会提供一个镜像。
+              </p>
+              <p>
+                ● 您需要把ffmpeg放入环境变量，或者手动指定ffmpeg文件路径。
+              </p>
+            </div>
+          </Tooltip>
+        </span>
+
       </div>
       <div class="config-container">
         独立窗口
@@ -11,10 +34,25 @@
       </div>
       <!-- <div class="divider"></div> -->
       <div class="config-container">
-        <Button @click="openFFmpegSelector" size="small">
-          选择ffmpeg.exe文件
-        </Button>
-        {{ ffmpegExe }}
+        <span>
+          <Tooltip max-width="600" transfer placement="right">
+            <Button @click="openFFmpegSelector" size="small">
+              选择 ffmpeg 文件
+            </Button>
+            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+              <p>
+                ● 您可以手动指定ffmpeg文件路径。
+              </p>
+              <p>
+                ● 不选择则从环境变量中寻找ffmpeg文件。
+              </p>
+            </div>
+          </Tooltip>
+        </span>
+        <span v-if="ffmpegExe">
+          {{ ffmpegExe }}
+          <Icon type="md-close" :style="{color: 'crimson', cursor: 'pointer'}" @click="clearFFmpegPath()" />
+        </span>
       </div>
       <div class="config-container">
         <span>
@@ -23,7 +61,19 @@
         </span>
       </div>
       <div class="config-container">
-        <Button @click="start" :disabled="isStarted" size="small" :loading="isStarting">开始</Button>
+        <span>
+          <Checkbox v-model="enableTranslate">开启翻译：</Checkbox>
+          <Select v-model="fromLang" size="small" style="width:80px">
+            <Option v-for="item in fromLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+          =>
+          <Select v-model="toLang" size="small" style="width:80px">
+            <Option v-for="item in toLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+        </span>
+      </div>
+      <div class="config-container">
+        <Button @click="start" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" size="small" :loading="isStarting">开始</Button>
         <Button @click="stop" :disabled="!isStarted" size="small">停止</Button>
       </div>
       <div class="config-container" :style="{width: '400px'}">
@@ -40,7 +90,13 @@
         </div>
         <div>
           <div class="key-item">AppKey: </div>
-          <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" />
+          <!-- <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
+          <AutoComplete :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}">
+            <Option v-for="appKey in aliAppKeys" :value="appKey" :key="appKey">
+              {{ appKey }}
+              <Icon type="md-close" class="remove-history-appkey" @click="removeHistoryAppkey(appKey)" />
+            </Option>
+          </AutoComplete>
         </div>
         <div>
           <div class="key-item">服务器: </div>
@@ -52,7 +108,14 @@
     </div>
     <div class="right-container">
       <template v-for="(text, index) in texts">
-        <div :key="index">{{ text }}</div>
+        <div :key="index">
+          <div>
+            {{ text.text }}
+          </div>
+          <div v-if="text.translate" :style="{color: 'gray'}">
+            {{ text.translate }}
+          </div>
+        </div>
       </template>
     </div>
 
@@ -70,8 +133,9 @@
 // 3 聊天机器人
 import { ipcRenderer } from "electron";
 import * as remote from "@electron/remote";
+import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import { initialASR, closeASR, getASRStatus } from '../../service/api'
+import { initialASR, closeASR, getASRStatus, translate } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
 import { getRandomPlayUrl } from "../../service/bilibili-recorder"
 const { BrowserWindow, dialog } = remote
@@ -86,6 +150,37 @@ export default {
       isShowASRWindowLoading: false,
       isShowASRWindow: false,
       isASRWindowAlwaysOnTop: false,
+      enableTranslate: false,
+      fromLang: 'ja',
+      toLang: 'zh',
+      fromLangs: [
+        {
+          value: 'ja',
+          label: '日语',
+        },
+        {
+          value: 'en',
+          label: '英语',
+        },
+        {
+          value: 'zh',
+          label: '中文',
+        },
+      ],
+      toLangs: [
+        {
+          value: 'zh',
+          label: '中文',
+        },
+        {
+          value: 'ja',
+          label: '日语',
+        },
+        {
+          value: 'en',
+          label: '英语',
+        }
+      ],
       aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
       aliServers: [{
         value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
@@ -135,6 +230,9 @@ export default {
     },
     ASRLineCount() {
       return this.$store.state.Config.ASRLineCount
+    },
+    aliAppKeys() {
+      return this.$store.state.Config.aliAppKeys
     }
   },
 
@@ -150,7 +248,6 @@ export default {
   },
 
   mounted() {
-    console.log(this.ASRWindowId)
     if (this.ASRWindowId) {
       const win = BrowserWindow.fromId(this.ASRWindowId);
       if (win) {
@@ -170,7 +267,7 @@ export default {
 
       if (payload.cmd === 'ASR_SENTENCE_BEGIN') {
         if (this.texts.length >= this.ASRLineCount) {
-          this.texts = this.texts.slice(this.texts.length - this.ASRLineCount + 1)
+          this.texts = this.texts.slice(-(this.ASRLineCount - 1))
           this.currentTextIndex = this.ASRLineCount - 1
         } else {
           this.currentTextIndex = this.texts.length
@@ -179,14 +276,41 @@ export default {
 
       if (payload.cmd === 'ASR_SENTENCE_END') {
         const texts = [...this.texts]
-        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        texts[this.currentTextIndex] = {
+          id: payload.payload?.header?.message_id,
+          text: payload.payload?.payload?.result
+        }
         this.texts = texts
+        if (this.enableTranslate) {
+          if (this.fromLangs !== this.toLangs) {
+            translate({
+              accessKeyId: this.aliAccessKeyId,
+              accessKeySecret: this.aliAccessKeySecret,
+              from: this.fromLang,
+              to: this.toLang,
+              text: payload.payload?.payload?.result,
+              payload: {
+                id: payload.payload?.header?.message_id,
+              }
+            })
+          }
+        }
       }
 
       if (payload.cmd === 'ASR_SENTENCE_CHANGE') {
         const texts = [...this.texts]
-        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        texts[this.currentTextIndex] = {
+          id: payload.payload?.header?.message_id,
+          text: payload.payload?.payload?.result
+        }
         this.texts = texts
+      }
+
+      if (payload.cmd === 'MECHINE_TRANSLATE') {
+        const index = this.texts.findIndex(({ id }) => payload.payload?.id === id)
+        const text = this.texts[index]
+        text.translate = payload.payload?.message
+        this.$set(this.texts, index, text)
       }
     },
 
@@ -205,10 +329,22 @@ export default {
         serviceUrl: this.aliServer,
         appKey: this.aliAppKey,
         playUrl: playUrl,
-        ffmpegPath: '',
+        ffmpegPath: this.ffmpegExe,
       })
       this.isStarted = true
       this.isStarting = false
+
+      let aliAppKeys = []
+      if (this.aliAppKeys.length >= 9) {
+        aliAppKeys = this.aliAppKeys.slice(-this.aliAppKeys.length)
+        aliAppKeys = [...aliAppKeys, this.aliAppKey]
+      }
+      else {
+        aliAppKeys = [...this.aliAppKeys, this.aliAppKey]
+      }
+      this.$store.dispatch("UPDATE_CONFIG", {
+        aliAppKeys: uniq(aliAppKeys)
+      })
     },
 
     async stop() {
@@ -230,16 +366,16 @@ export default {
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
-    changeAliAppKey(e) {
+    changeAliAppKey(value) {
       const data = {
-        aliAppKey: e.target.value,
+        aliAppKey: value
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
     async openFFmpegSelector() {
       const result = await dialog.showOpenDialog({
-        properties: ["openDirectory"],
+        properties: ["openFile"],
       });
       if (!result.canceled) {
         const ffmpegExe = result.filePaths[0];
@@ -342,7 +478,20 @@ export default {
         ASRLineCount: number
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
-    }
+    },
+
+    clearFFmpegPath() {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        ffmpegExe: null,
+      });
+    },
+
+    removeHistoryAppkey(appKey) {
+      const aliAppKeys = this.aliAppKeys.filter(__appKey => __appKey !== appKey)
+      this.$store.dispatch("UPDATE_CONFIG", {
+        aliAppKeys,
+      });
+    },
   }
 };
 </script>
@@ -375,5 +524,21 @@ export default {
   padding-top: 5px;
   font-size: 18px;
   font-weight: bold;
+}
+
+.help {
+  padding-left: 10px;
+  font-weight: bold;
+  color: blue;
+}
+.remove-history-appkey {
+  vertical-align: middle;
+  font-size: 15px;
+  margin-left: 2px;
+  font-weight: bold;
+}
+
+.remove-history-appkey:hover {
+  color: crimson;
 }
 </style>
