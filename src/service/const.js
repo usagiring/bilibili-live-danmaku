@@ -229,6 +229,7 @@ export const DEFAULT_CONFIG = {
   scrollDanmakuStyleExtend: 'self',
   scrollDanmakuEmojiSize: 60,
   ASRWindowId: null,
+  ASRLineCount: 5,
   ffmpegExe: '',
   muteCommandSetting: {
     enable: false,

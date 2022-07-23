@@ -151,3 +151,18 @@ export async function exportFile(body) {
   })
   return res.data
 }
+
+export async function initialASR(body) {
+  const res = await axios.post(`${BASE_URL}/api/asr/initial`, body)
+  return res.data
+}
+
+export async function closeASR(body) {
+  const res = await axios.post(`${BASE_URL}/api/asr/close`, body)
+  return res.data
+}
+
+export async function getASRStatus() {
+  const res = await axios.get(`${BASE_URL}/api/asr/status`)
+  return res.data
+}

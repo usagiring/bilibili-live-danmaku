@@ -65,6 +65,10 @@ export default new Router({
       ]
     },
     {
+      path: '/asr-window',
+      component: () => import('@/components/ASRWindow.vue')
+    },
+    {
       path: '/live-window',
       component: () => import('@/components/LiveWindow.vue')
     },

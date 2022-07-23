@@ -1,51 +1,59 @@
 <template>
   <div>
-    <div class="config-container">
-      自动语音识别技术
-    </div>
-    <div class="config-container">
-      独立窗口
-      <i-switch :value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow"></i-switch>
-      <Checkbox :style="{'padding-left': '10px'}" :value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
-    </div>
-    <!-- <div class="divider"></div> -->
-    <div class="config-container">
-      <Button @click="openFFmpegSelector" size="small">
-        选择ffmpeg.exe文件
-      </Button>
-      {{ ffmpegExe }}
-    </div>
-    <div class="config-container">
-      <Button @click="start" :disabled="isStarted" size="small" :loading="isStarting">开始</Button>
-      <Button @click="stop" :disabled="!isStarted" size="small">停止</Button>
-    </div>
-    <div class="config-container" :style="{width: '400px'}">
-      <div :style="{'text-align': 'center'}">
-        阿里云
+    <div class="left-container">
+      <div class="config-container">
+        自动语音识别技术
       </div>
-      <div>
-        <div class="key-item">AccessKeyId: </div>
-        <Input :value="aliAccessKeyId" :disabled="isStarted" @on-change="changeAliAccessKeyId" size="small" placeholder="AccessKeyId..." :style="{display: 'inline-block', width: '220px'}" />
+      <div class="config-container">
+        独立窗口
+        <i-switch :value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow"></i-switch>
+        <Checkbox :style="{'padding-left': '10px'}" :value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
       </div>
-      <div>
-        <div class="key-item">AccessKeySecret: </div>
-        <Input :value="aliAccessKeySecret" :disabled="isStarted" @on-change="changeAliAccessKeySecret" size="small" placeholder="AccessKeySecret..." type="password" :style="{display: 'inline-block', width: '220px'}" />
+      <!-- <div class="divider"></div> -->
+      <div class="config-container">
+        <Button @click="openFFmpegSelector" size="small">
+          选择ffmpeg.exe文件
+        </Button>
+        {{ ffmpegExe }}
       </div>
-      <div>
-        <div class="key-item">AppKey: </div>
-        <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" />
+      <div class="config-container">
+        <span>
+          显示行数：
+          <InputNumber :value="ASRLineCount" size="small" @on-change="changeASRLineCount" :min="1" :step="1" :style="{ width: '50px' }" />
+        </span>
       </div>
-      <div>
-        <div class="key-item">服务器: </div>
-        <Select class="server-selector" v-model="aliServer" :disabled="isStarted" style="width:200px" size="small">
-          <Option v-for="item in aliServers" :value="item.value" :key="item.value">{{ item.label }}</Option>
-        </Select>
+      <div class="config-container">
+        <Button @click="start" :disabled="isStarted" size="small" :loading="isStarting">开始</Button>
+        <Button @click="stop" :disabled="!isStarted" size="small">停止</Button>
+      </div>
+      <div class="config-container" :style="{width: '400px'}">
+        <div :style="{'text-align': 'center'}">
+          阿里云
+        </div>
+        <div>
+          <div class="key-item">AccessKeyId: </div>
+          <Input :value="aliAccessKeyId" :disabled="isStarted" @on-change="changeAliAccessKeyId" size="small" placeholder="AccessKeyId..." :style="{display: 'inline-block', width: '220px'}" />
+        </div>
+        <div>
+          <div class="key-item">AccessKeySecret: </div>
+          <Input :value="aliAccessKeySecret" :disabled="isStarted" @on-change="changeAliAccessKeySecret" size="small" placeholder="AccessKeySecret..." type="password" :style="{display: 'inline-block', width: '220px'}" />
+        </div>
+        <div>
+          <div class="key-item">AppKey: </div>
+          <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" />
+        </div>
+        <div>
+          <div class="key-item">服务器: </div>
+          <Select class="server-selector" v-model="aliServer" :disabled="isStarted" style="width:200px" size="small">
+            <Option v-for="item in aliServers" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+        </div>
       </div>
     </div>
-    <div class="result-container">
-      <div>{{ text1 }}</div>
-      <div>{{ text2 }}</div>
-      <div>{{ text3 }}</div>
+    <div class="right-container">
+      <template v-for="(text, index) in texts">
+        <div :key="index">{{ text }}</div>
+      </template>
     </div>
 
   </div>
@@ -60,9 +68,11 @@
 // 1 输出文件
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
-import ASR from '@tokine/asr'
 import { ipcRenderer } from "electron";
 import * as remote from "@electron/remote";
+import ws from '../../service/ws'
+import { initialASR, closeASR, getASRStatus } from '../../service/api'
+import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
 import { getRandomPlayUrl } from "../../service/bilibili-recorder"
 const { BrowserWindow, dialog } = remote
 
@@ -70,7 +80,7 @@ export default {
   data() {
     return {
       playQuality: "高清",
-      configChanged: false,
+      checkOnTopInterval: null,
       isStarting: false,
       isStarted: false,
       isShowASRWindowLoading: false,
@@ -87,11 +97,8 @@ export default {
         value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
         label: '深圳'
       }],
-      text: '',
-      text1: '',
-      text2: '',
-      text3: '',
-      currentTextChannel: 'text1',
+      texts: [],
+      currentTextIndex: 0,
     };
   },
 
@@ -126,118 +133,87 @@ export default {
     onTopLevel() {
       return this.$store.state.Config.onTopLevel
     },
-  },
-
-  created() {
-    if (this.$global.asrInstance) {
-      this.createListeners()
-      this.isStarted = true
+    ASRLineCount() {
+      return this.$store.state.Config.ASRLineCount
     }
   },
 
+  created() {
+    getASRStatus()
+      .then(({ message }) => {
+        if (message === '1') {
+          this.isStarted = true
+        }
+      })
+
+    ws.addEventListener('message', this.onMessage)
+  },
+
   mounted() {
+    console.log(this.ASRWindowId)
     if (this.ASRWindowId) {
       const win = BrowserWindow.fromId(this.ASRWindowId);
       if (win) {
-        this.isShowLiveWindow = true
+        this.isShowASRWindow = true
         this.win = win
       }
     }
   },
 
   beforeDestroy() {
-    if (this.$global.asrInstance) {
-      this.$global.asrInstance.removeAllListeners()
-    }
+    ws.removeEventListener("message", this.onMessage);
   },
 
   methods: {
+    onMessage(msg) {
+      const payload = JSON.parse(msg.data)
+
+      if (payload.cmd === 'ASR_SENTENCE_BEGIN') {
+        if (this.texts.length >= this.ASRLineCount) {
+          this.texts = this.texts.slice(this.texts.length - this.ASRLineCount + 1)
+          this.currentTextIndex = this.ASRLineCount - 1
+        } else {
+          this.currentTextIndex = this.texts.length
+        }
+      }
+
+      if (payload.cmd === 'ASR_SENTENCE_END') {
+        const texts = [...this.texts]
+        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        this.texts = texts
+      }
+
+      if (payload.cmd === 'ASR_SENTENCE_CHANGE') {
+        const texts = [...this.texts]
+        texts[this.currentTextIndex] = payload.payload?.payload?.result
+        this.texts = texts
+      }
+    },
+
     async start() {
       this.isStarting = true
-      // let asr = this.$global.asrInstance
-      // 如果没有初始化asr 或者 配置变化，重新初始化asr实例
-      // if (!asr || this.configChanged) {
-      const asr = new ASR()
-      await asr.init({
-        accessKeyId: this.aliAccessKeyId,
-        accessKeySecret: this.aliAccessKeySecret,
-        serviceUrl: this.aliServer,
-        appKey: this.aliAppKey,
-      })
-
-      // asr = __asr
-      // this.$store.dispatch("UPDATE_CONFIG", {
-      //   asrInstance: __asr
-      // })
-      this.$global.asrInstance = asr
-      // }
 
       const playUrl = await getRandomPlayUrl({
         roomId: this.realRoomId,
         quality: this.playQuality,
         cookie: this.isWithCookie ? this.userCookie : undefined,
       });
-      console.log(playUrl);
 
-      asr.start({
-        url: playUrl
+      await initialASR({
+        accessKeyId: this.aliAccessKeyId,
+        accessKeySecret: this.aliAccessKeySecret,
+        serviceUrl: this.aliServer,
+        appKey: this.aliAppKey,
+        playUrl: playUrl,
+        ffmpegPath: '',
       })
-
-      this.createListeners()
-      this.configChanged = false
       this.isStarted = true
       this.isStarting = false
     },
 
-    createListeners() {
-      this.$global.asrInstance.on('begin', (msg) => {
-        if (this.text3) {
-          this.text1 = this.text2
-          this.text2 = this.text3
-          this.text3 = ''
-        }
-
-        if (!this.text1) {
-          this.currentTextChannel = 'text1'
-        }
-        if (!this.text2) {
-          this.currentTextChannel = 'text2'
-        }
-        if (!this.text3) {
-          this.currentTextChannel = 'text3'
-        }
-      })
-      this.$global.asrInstance.on('end', (msg) => {
-        this[this.currentTextChannel] = msg.payload?.result
-      })
-
-      // {
-      //     "header": {
-      //         "namespace": "SpeechTranscriber",
-      //         "name": "TranscriptionResultChanged",
-      //         "status": 20000000,
-      //         "message_id": "053e0932f3b541898073268e2bdf5c1b",
-      //         "task_id": "0af33d971fc24020966e2acef8d2f5d7",
-      //         "status_text": "Gateway:SUCCESS:Success."
-      //     },
-      //     "payload": {
-      //         "index": 15,
-      //         "time": 77940,
-      //         "result": "有你等他收拾一下等他",
-      //         "confidence": 0.87,
-      //         "words": [],
-      //         "status": 0
-      //     }
-      // }
-      this.$global.asrInstance.on('change', (msg) => {
-        this[this.currentTextChannel] = msg.payload?.result
-      })
-    },
-
     async stop() {
-      if (!this.$global.asrInstance) return
-      await this.$global.asrInstance.close()
-      this.isStarting = false
+      await closeASR({})
+      this.isStarted = false
     },
 
     changeAliAccessKeyId(e) {
@@ -245,7 +221,6 @@ export default {
         aliAccessKeyId: e.target.value,
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
-      this.configChanged = true
     },
 
     changeAliAccessKeySecret(e) {
@@ -253,7 +228,6 @@ export default {
         aliAccessKeySecret: e.target.value,
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
-      this.configChanged = true
     },
 
     changeAliAppKey(e) {
@@ -261,7 +235,6 @@ export default {
         aliAppKey: e.target.value,
       }
       this.$store.dispatch("UPDATE_CONFIG", data)
-      this.configChanged = true
     },
 
     async openFFmpegSelector() {
@@ -312,25 +285,35 @@ export default {
 
         const winURL =
           process.env.NODE_ENV === "development"
-            ? `http://localhost:9080/#/live-window`
-            : `file://${__dirname}/index.html#live-window`;
+            ? `http://localhost:9080/#/asr-window`
+            : `file://${__dirname}/index.html#asr-window`;
 
         win.loadURL(winURL);
         this.win = win
         this.isShowASRWindow = true;
         this.isShowASRWindowLoading = false;
       } else {
-        this.closeLiveWindow()
-
-        ipcRenderer.send(IPC_LIVE_WINDOW_CLOSE, {
-          windowId: this.ASRWindowId,
-        });
+        if (!this.win) return
+        try {
+          this.win.close()
+        } catch (e) {
+          console.log('Close window error', e)
+        }
+        this.clearDanmakuWindowInfo()
       }
     },
 
-    async closeLiveWindow() {
-      this.win = null;
-      this.isShowASRWindow = false;
+    async clearDanmakuWindowInfo() {
+      this.$store.dispatch("UPDATE_CONFIG", {
+        ASRWindowId: null
+      });
+      // clear
+      if (this.checkOnTopInterval) {
+        clearInterval(this.checkOnTopInterval)
+        this.checkOnTopInterval = null
+      }
+      this.win = null
+      this.isShowASRWindow = false
       this.isShowASRWindowLoading = false;
     },
 
@@ -353,6 +336,13 @@ export default {
       //   });
       this.isASRWindowAlwaysOnTop = status
     },
+
+    changeASRLineCount(number) {
+      const data = {
+        ASRLineCount: number
+      }
+      this.$store.dispatch("UPDATE_CONFIG", data)
+    }
   }
 };
 </script>
@@ -369,12 +359,21 @@ export default {
 .config-container > div {
   padding: 5px;
 }
-.result-container {
-  text-align: center;
-  font-weight: bold;
-  padding: 10px;
+.left-container {
+  width: 450px;
+  display: inline-block;
+  vertical-align: top;
 }
-.result-container > div {
+.right-container {
+  text-align: center;
+  display: inline-block;
+  padding: 10px;
+  width: calc(100% - 500px);
+  padding-top: 40px;
+}
+.right-container > div {
   padding-top: 5px;
+  font-size: 18px;
+  font-weight: bold;
 }
 </style>

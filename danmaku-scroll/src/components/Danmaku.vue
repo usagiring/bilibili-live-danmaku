@@ -632,7 +632,7 @@ export default defineComponent({
   position: absolute;
   inset: 4px;
   -webkit-app-region: drag;
-  cursor: pointer;
+  cursor: move;
 }
 
 #measurer {

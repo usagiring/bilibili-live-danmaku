@@ -237,7 +237,8 @@ export default {
     this.displayRoomId = this.realRoomId;
 
     await this.initRoomInfo();
-    ws.onmessage = (msg) => {
+
+    ws.addEventListener('message', (msg) => {
       const payload = JSON.parse(msg.data)
 
       if (payload.cmd === 'ROOM_REAL_TIME_MESSAGE_UPDATE') {
@@ -305,7 +306,7 @@ export default {
         const { watchedNumber } = payload.payload
         this.watchedNumber = watchedNumber
       }
-    }
+    })
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
       this.hasNewVersion = true;
