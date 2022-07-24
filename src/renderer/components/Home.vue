@@ -835,7 +835,8 @@ export default {
 
 .status-wrapper > div {
   padding: 5px 25px 5px 10px;
-  background: radial-gradient(farthest-side, white 20%, rgba(0, 0, 0, 0) 100%);
+  /* background: radial-gradient(farthest-side, white 20%, rgba(0, 0, 0, 0) 100%); */
+  text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
 }
 
 .updater-wrapper {
@@ -1007,11 +1008,9 @@ export default {
 .transparent-mask {
   background: linear-gradient(to top, white, rgba(0, 0, 0, 0));
 }
-.obvious-label-mask {
-  background: radial-gradient(closest-side, white 30%, rgba(0, 0, 0, 0) 100%);
-}
 .username-label {
   padding: 5px 15px;
-  background: radial-gradient(farthest-side, rgba(255, 255, 255, 0.8) 60%, rgba(0, 0, 0, 0) 100%);
+  /* background: radial-gradient(farthest-side, rgba(255, 255, 255, 0.8) 60%, rgba(0, 0, 0, 0) 100%); */
+  text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
 }
 </style>
