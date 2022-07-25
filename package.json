@@ -83,7 +83,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.1",
-    "@tokine/bilibili-bridge": "^0.1.4",
+    "@tokine/bilibili-bridge": "^0.1.5",
     "@tokine/bilibili-danmaku-page": "^0.1.9",
     "@tokine/bilibili-recorder": "^0.0.9",
     "axios": "^0.21.2",
