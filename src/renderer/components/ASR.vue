@@ -62,12 +62,12 @@
       </div>
       <div class="config-container">
         <span>
-          <Checkbox v-model="enableTranslate">开启翻译：</Checkbox>
-          <Select v-model="fromLang" size="small" style="width:80px">
+          <Checkbox :value="enableTranslate" @on-change="changeEnableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang ||!toLang">开启翻译：</Checkbox>
+          <Select v-model="fromLang" :disabled="enableTranslate" size="small" style="width:80px">
             <Option v-for="item in fromLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
           =>
-          <Select v-model="toLang" size="small" style="width:80px">
+          <Select v-model="toLang" :disabled="enableTranslate" size="small" style="width:80px">
             <Option v-for="item in toLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
         </span>
@@ -135,7 +135,7 @@ import { ipcRenderer } from "electron";
 import * as remote from "@electron/remote";
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import { initialASR, closeASR, getASRStatus, translate } from '../../service/api'
+import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
 import { getRandomPlayUrl } from "../../service/bilibili-recorder"
 const { BrowserWindow, dialog } = remote
@@ -241,6 +241,15 @@ export default {
       .then(({ message }) => {
         if (message === '1') {
           this.isStarted = true
+        }
+      })
+
+    getTranslateStatus()
+      .then(({ message, data }) => {
+        if (message === '1') {
+          this.enableTranslate = true
+          this.fromLang = data?.fromLang
+          this.toLang = data?.toLang
         }
       })
 
@@ -492,6 +501,19 @@ export default {
         aliAppKeys,
       });
     },
+
+    async changeEnableTranslate(status) {
+      if (status) {
+        await translateOpen({
+          fromLang: this.fromLang,
+          toLang: this.toLang,
+        })
+        this.enableTranslate = true
+      } else {
+        await translateClose()
+        this.enableTranslate = false
+      }
+    }
   }
 };
 </script>

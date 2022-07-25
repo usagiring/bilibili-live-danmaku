@@ -167,7 +167,22 @@ export async function getASRStatus() {
   return res.data
 }
 
-export async function translate(body) {
-  const res = await axios.post(`${BASE_URL}/api/translate`, body)
+export async function translateSentence(body) {
+  const res = await axios.post(`${BASE_URL}/api/translate/sentence`, body)
+  return res.data
+}
+
+export async function translateOpen(body) {
+  const res = await axios.post(`${BASE_URL}/api/translate/open`, body)
+  return res.data
+}
+
+export async function translateClose(body) {
+  const res = await axios.post(`${BASE_URL}/api/translate/close`, body)
+  return res.data
+}
+
+export async function getTranslateStatus() {
+  const res = await axios.get(`${BASE_URL}/api/translate/status`)
   return res.data
 }
