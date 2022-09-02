@@ -1,25 +1,25 @@
 'use strict'
 
-const chalk = require('chalk')
+// import chalk from 'chalk'
 const electron = require('electron')
 const path = require('path')
 const { say } = require('cfonts')
 const { spawn } = require('child_process')
 const webpack = require('webpack')
 const WebpackDevServer = require('webpack-dev-server')
-const webpackHotMiddleware = require('webpack-hot-middleware')
+// const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 
 let electronProcess = null
 let manualRestart = false
-let hotMiddleware
+// let hotMiddleware
 
 function logStats(proc, data) {
   let log = ''
 
-  log += chalk.yellow.bold(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join('-')}`)
+  // log += chalk.yellow.bold(`┏ ${proc} Process ${new Array((19 - proc.length) + 1).join('-')}`)
   log += '\n\n'
 
   if (typeof data === 'object') {
@@ -33,26 +33,29 @@ function logStats(proc, data) {
     log += `  ${data}\n`
   }
 
-  log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n'
+  // log += '\n' + chalk.yellow.bold(`┗ ${new Array(28 + 1).join('-')}`) + '\n'
 
   console.log(log)
 }
 
 function startRenderer() {
   return new Promise((resolve, reject) => {
-    rendererConfig.entry.renderer = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry.renderer)
+    rendererConfig.entry.renderer = [
+      // path.join(__dirname, 'dev-client')
+    ].concat(rendererConfig.entry.renderer)
     rendererConfig.mode = 'development'
+    console.log(rendererConfig.module.rules)
     const compiler = webpack(rendererConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, {
-      log: false,
-      heartbeat: 2500
-    })
+    // hotMiddleware = webpackHotMiddleware(compiler, {
+    //   log: false,
+    //   heartbeat: 2500
+    // })
 
     compiler.hooks.compilation.tap('compilation', compilation => {
-      compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-        hotMiddleware.publish({ action: 'reload' })
-        cb()
-      })
+      // compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
+      //   // hotMiddleware.publish({ action: 'reload' })
+      //   cb()
+      // })
     })
 
     compiler.hooks.done.tap('done', stats => {
@@ -62,9 +65,12 @@ function startRenderer() {
     const server = new WebpackDevServer(
       compiler,
       {
-        contentBase: path.join(__dirname, '../'),
-        quiet: true,
-        hot: true, 
+        static: {
+          directory: path.resolve(__dirname, "static"),
+        },
+        // contentBase: path.join(__dirname, '../'),
+        // quiet: true,
+        hot: true,
         // liveReload: false,
         // hotOnly: true,
         proxy: {
@@ -81,12 +87,17 @@ function startRenderer() {
             changeOrigin: true
           }
         },
-        before(app, ctx) {
-          app.use(hotMiddleware)
-          ctx.middleware.waitUntilValid(() => {
+        // before(app, ctx) {
+        //   // app.use(hotMiddleware)
+        //   ctx.middleware.waitUntilValid(() => {
+        //     resolve()
+        //   })
+        // },
+        onBeforeSetupMiddleware: function (devServer) {
+          devServer.middleware.waitUntilValid(() => {
             resolve()
           })
-        }
+        },
       }
     )
 
@@ -101,8 +112,8 @@ function startMain() {
     const compiler = webpack(mainConfig)
 
     compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
-      logStats('Main', chalk.white.bold('compiling...'))
-      hotMiddleware.publish({ action: 'compiling' })
+      // logStats('Main', chalk.white.bold('compiling...'))
+      // hotMiddleware.publish({ action: 'compiling' })
       done()
     })
 
@@ -165,10 +176,10 @@ function electronLog(data, color) {
   })
   if (/[0-9A-z]+/.test(log)) {
     console.log(
-      chalk[color].bold('┏ Electron -------------------') +
+      // chalk[color].bold('┏ Electron -------------------') +
       '\n\n' +
       log +
-      chalk[color].bold('┗ ----------------------------') +
+      // chalk[color].bold('┗ ----------------------------') +
       '\n'
     )
   }
@@ -188,8 +199,10 @@ function greeting() {
       font: 'simple3d',
       space: false
     })
-  } else console.log(chalk.yellow.bold('\n  electron-vue'))
-  console.log(chalk.blue('  getting ready...') + '\n')
+  } else {
+    // console.log(chalk.yellow.bold('\n  electron-vue'))
+  }
+  // console.log(chalk.blue('  getting ready...') + '\n')
 }
 
 function init() {

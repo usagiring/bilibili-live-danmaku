@@ -22,12 +22,16 @@ const { VueLoaderPlugin } = require('vue-loader')
 let whiteListedModules = ['vue']
 
 let rendererConfig = {
-  devtool: '#cheap-module-eval-source-map',
+  devtool: 'source-map',
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({
-      sourceMap: true,
-    })],
+    minimizer: [(compiler) => {
+      new TerserPlugin({
+        terserOptions: {
+          compress: {},
+        }
+      }).apply(compiler);
+    }],
   },
 
   entry: {
@@ -55,19 +59,6 @@ let rendererConfig = {
         use: ['vue-style-loader', 'css-loader']
       },
       {
-        test: /\.html$/,
-        use: 'vue-html-loader'
-      },
-      {
-        test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/
-      },
-      {
-        test: /\.node$/,
-        use: 'node-loader'
-      },
-      {
         test: /\.vue$/,
         use: {
           loader: 'vue-loader',
@@ -82,10 +73,23 @@ let rendererConfig = {
         }
       },
       {
+        test: /\.html$/,
+        use: 'vue-html-loader'
+      },
+      {
+        test: /\.js$/,
+        use: 'babel-loader',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.node$/,
+        use: 'node-loader'
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
             limit: 10000,
             name: 'imgs/[name]--[folder].[ext]'
           }
@@ -103,7 +107,7 @@ let rendererConfig = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
             limit: 10000,
             name: 'fonts/[name]--[folder].[ext]'
           }

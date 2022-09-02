@@ -14,9 +14,13 @@ let mainConfig = {
   },
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({
-      sourceMap: true,
-    })],
+    minimizer: [(compiler) => {
+      new TerserPlugin({
+        terserOptions: {
+          compress: {},
+        }
+      }).apply(compiler);
+    }],
   },
   externals: [
     ...Object.keys(dependencies || {})
