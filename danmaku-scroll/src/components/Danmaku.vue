@@ -1,6 +1,6 @@
 <template>
   <div id="danmaku-scroll" :style="{ backgroundColor, opacity, fontSize }">
-    <div id="main"> </div>
+    <div id="main"></div>
     <div id="measurer"></div>
   </div>
 </template>
@@ -8,8 +8,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { getSetting, init as initAPI } from '../service/api'
+import { wait } from '../service/util'
+import PromiseQueue from '../service/promise-queue'
 import { merge, pick } from 'lodash'
 
+const promiseQueue = new PromiseQueue({ limit: 1 })
 interface Size {
   width: number
   height: number
@@ -103,7 +106,10 @@ export default defineComponent({
           this.updateSetting(payload.payload)
         }
         if (payload.cmd === 'COMMENT') {
-          this.onComment(payload)
+          promiseQueue.push(async () => {
+            this.onComment(payload)
+            await wait(50)
+          })
         }
         // if (payload.cmd === (this.isExample ? 'EXAMPLE_GIFT' : 'GIFT')) {
         //   this.onGift(payload.payload)
@@ -428,7 +434,12 @@ export default defineComponent({
         return { top }
       }
       count++
-      return this.getDanmakuTopV3({ top: touchedBlock.top + touchedBlock.height, height, v: v2, count })
+      return this.getDanmakuTopV3({
+        top: touchedBlock.top + touchedBlock.height,
+        height,
+        v: v2,
+        count,
+      })
     },
 
     clearMessage() {
