@@ -12,7 +12,7 @@
     "link": "npm run build && cp package.json dist && cd dist && npm link"
   },
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "core-js": "^2.6.5",
     "moment": "^2.29.1",
     "view-design": "^4.5.0",
