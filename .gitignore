@@ -10,3 +10,5 @@ thumbs.db
 record/
 data/
 tmp/
+*.log
+electron-vite-vue/

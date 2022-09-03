@@ -51,7 +51,11 @@ let mainConfig = {
     new webpack.NoEmitOnErrorsPlugin()
   ],
   resolve: {
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node', '.vue', '.tsx', '.ts'],
+    alias: {
+      'vue': '@vue/runtime-dom',
+      'Vue': 'vue/dist/vue.esm-bundler.js',
+    }
   },
   target: 'electron-main'
 }

@@ -177,7 +177,7 @@
 <script>
 import { debounce } from "lodash";
 import { ipcRenderer, shell } from "electron";
-const { BrowserWindow } = require('@electron/remote')
+import { BrowserWindow } from '@electron/remote'
 
 import { parseDownloadRate, getGiftConfig } from "../../service/util";
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'

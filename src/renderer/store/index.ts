@@ -1,14 +1,13 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore  } from 'vuex'
+const { createPersistedState, createSharedMutations } = require('vuex-electron')
+import Config from './modules/Config'
 
-import { createPersistedState, createSharedMutations } from 'vuex-electron'
+// const { context, modules } = loadModules()
 
-Vue.use(Vuex)
-
-const { context, modules } = loadModules()
-
-const store = new Vuex.Store({
-  modules,
+const store = createStore({
+  modules: {
+    Config: Config
+  },
   plugins: [
     createPersistedState({
       whitelist: [
@@ -33,21 +32,3 @@ export default store
 //     })
 //   })
 // }
-
-// 加载所有模块。
-function loadModules() {
-  const context = require.context("./modules", false, /([a-z_]+)\.js$/i)
-
-  const modules = context
-    .keys()
-    .map((key) => ({ key, name: key.match(/([a-z_]+)\.js$/i)[1] }))
-    .reduce(
-      (modules, { key, name }) => ({
-        ...modules,
-        [name]: context(key).default
-      }),
-      {}
-    )
-
-  return { context, modules }
-}
