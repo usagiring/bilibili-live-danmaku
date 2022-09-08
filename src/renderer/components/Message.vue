@@ -2,67 +2,75 @@
   <div class="query-component">
     <div class="searcher-wrapper">
       <Input v-model="roomId" placeholder="房间号" clearable style="width: 120px" size="small" />
-      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
+      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange" />
       <Input v-model="q" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
-      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll"></Button>
+      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll" />
       <Checkbox class="setting-checkbox" :value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
       <Checkbox class="setting-checkbox" :value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
       <Checkbox class="setting-checkbox" :value="enableMessageListenMode" @on-change="changeEnableMessageListenMode">实时更新模式</Checkbox>
     </div>
     <div class="content-wrapper">
       <Split v-model="split1" @on-moving="splitMoving">
-        <div slot="left" class="split-pane">
-          <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
-            <div slot="top" class="split-pane" id="split-left-top">
-              <Scroll :on-reach-edge="handleReachEdgeComment" :height="scrollHeightLeftTop" :distance-to-edge="[10, 10]">
-                <template v-for="comment in comments">
-                  <div :key="comment._id" class="comment-content">
-                    <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
-                    <img v-if="comment.role" class="guard-icon" :src="`${getGuardIcon(comment.role)}`">
-                    <FanMedal v-if="comment.medalLevel && comment.medalName" :medalLevel="comment.medalLevel" :medalName="comment.medalName" :medalColorStart="comment.medalColorStart" :medalColorEnd="comment.medalColorEnd" :medalColorBorder="comment.medalColorBorder"></FanMedal>
-                    <span>{{ `${comment.uname}` }}</span>
-                    <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
-                    <!-- <span>{{ `: ${comment.comment}` }}</span> -->
-                    <span>: </span>
-                    <span v-if="comment.voiceUrl" @click="playAudio(comment.voiceUrl)" class="voice-container">
-                      <Icon type="md-play" />
-                      <span>{{ `${comment.fileDuration}"` }}</span>
-                    </span>
-                    <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl" />
-                    <span v-else>{{ comment.content }}</span>
-                  </div>
-                </template>
-              </Scroll>
-            </div>
-            <div slot="bottom" class="split-pane" id="split-left-bottom">
-              <Scroll :on-reach-edge="handleReachEdgeInteract" :height="scrollHeightLeftBottom" :distance-to-edge="[10, 10]">
-                <template v-for="interact in interacts">
-                  <div :key="interact._id">
-                    <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
-                    <FanMedal v-if="interact.medalLevel && interact.medalName" :medalLevel="interact.medalLevel" :medalName="interact.medalName" :medalColorStart="interact.medalColorStart" :medalColorEnd="interact.medalColorEnd" :medalColorBorder="interact.medalColorBorder"></FanMedal>
-                    <span :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
-                    <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
-                    <span>{{ getInteractType(interact.type) }}了直播间</span>
-                  </div>
-                </template>
-              </Scroll>
-            </div>
-          </Split>
-        </div>
-        <div slot="right" class="split-pane" id="split-right">
-          <Scroll :on-reach-edge="handleReachEdgeGift" :height="scrollHeightRight" :distance-to-edge="[10, 10]">
-            <template v-for="gift in gifts">
-              <div :key="gift._id" :style="{ padding: '0 10px' }">
-                <template v-if="gift.type === 3">
-                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: ${gift.content}` }}</GiftCardMini>
-                </template>
-                <template v-if="gift.type === 1 || gift.type === 2">
-                  <GiftCardMini v-bind="gift" :showTime="true">{{ `: 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
-                </template>
-              </div>
-            </template>
-          </Scroll>
-        </div>
+        <template #left>  
+          <div class="split-pane">
+            <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
+              <template #top>
+                <div id="split-left-top" class="split-pane">
+                  <Scroll :on-reach-edge="handleReachEdgeComment" :height="scrollHeightLeftTop" :distance-to-edge="[10, 10]">
+                    <template v-for="(comment, i) in comments" :key="i">
+                      <div class="comment-content">
+                        <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
+                        <img v-if="comment.role" class="guard-icon" :src="`${getGuardIcon(comment.role)}`">
+                        <FanMedal v-if="comment.medalLevel && comment.medalName" :medal-level="comment.medalLevel" :medal-name="comment.medalName" :medal-color-start="comment.medalColorStart" :medal-color-end="comment.medalColorEnd" :medal-color-border="comment.medalColorBorder" />
+                        <span>{{ `${comment.uname}` }}</span>
+                        <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
+                        <!-- <span>{{ `: ${comment.comment}` }}</span> -->
+                        <span>: </span>
+                        <span v-if="comment.voiceUrl" class="voice-container" @click="playAudio(comment.voiceUrl)">
+                          <Icon type="md-play" />
+                          <span>{{ `${comment.fileDuration}"` }}</span>
+                        </span>
+                        <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl">
+                        <span v-else>{{ comment.content }}</span>
+                      </div>
+                    </template>
+                  </Scroll>
+                </div>
+              </template>
+              <template #bottom>
+                <div id="split-left-bottom" class="split-pane">
+                  <Scroll :on-reach-edge="handleReachEdgeInteract" :height="scrollHeightLeftBottom" :distance-to-edge="[10, 10]">
+                    <template v-for="(interact, i) in interacts" :key="i">
+                      <div>
+                        <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
+                        <FanMedal v-if="interact.medalLevel && interact.medalName" :medal-level="interact.medalLevel" :medal-name="interact.medalName" :medal-color-start="interact.medalColorStart" :medal-color-end="interact.medalColorEnd" :medal-color-border="interact.medalColorBorder" />
+                        <span :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
+                        <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
+                        <span>{{ getInteractType(interact.type) }}了直播间</span>
+                      </div>
+                    </template>
+                  </Scroll>
+                </div>
+              </template>
+            </Split>
+          </div>
+        </template>
+        <template #right>
+          <div id="split-right" class="split-pane">
+            <Scroll :on-reach-edge="handleReachEdgeGift" :height="scrollHeightRight" :distance-to-edge="[10, 10]">
+              <template v-for="(gift, i) in gifts" :key="i">
+                <div :style="{ padding: '0 10px' }">
+                  <template v-if="gift.type === 3">
+                    <GiftCardMini v-bind="gift" :show-time="true">{{ `: ${gift.content}` }}</GiftCardMini>
+                  </template>
+                  <template v-if="gift.type === 1 || gift.type === 2">
+                    <GiftCardMini v-bind="gift" :show-time="true">{{ `: 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
+                  </template>
+                </div>
+              </template>
+            </Scroll>
+          </div>
+        </template>
       </Split>
     </div>
   </div>
@@ -124,7 +132,7 @@ export default {
       this.listenStart()
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeListener("resize", this.onResize);
     this.listenStop()
   },

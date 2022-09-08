@@ -3,40 +3,51 @@
   <!-- <i-col span="8"> -->
   <div>
     <div class="setting-group images-container" :style="{'padding-top': '10px'}">
-      <Button @click="sendTestMessage" size="small">发送测试弹幕</Button>
-      <Button @click="clearDanmaku" size="small">清空弹幕</Button>
+      <Button size="small" @click="sendTestMessage">发送测试弹幕</Button>
+      <Button size="small" @click="clearDanmaku">清空弹幕</Button>
     </div>
-    <div class="setting-group ">
-      <div :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default operatable-preview-text" :style="{...borderImageStyle, ...message_lv3}">
-        <Container @drop="onDrop($event)" orientation="horizontal" :style="{'min-height': '0px'}">
-          <template v-for="(setting, index) of messageSettings">
-            <Draggable :key="index" v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+    <div class="setting-group">
+      <div
+        :class="!isBorderAdaptContent ? 'max-width': ''"
+        class="border-image-default operatable-preview-text"
+        :style="{...borderImageStyle, ...message_lv3}"
+      >
+        <!-- <Container orientation="horizontal" :style="{'min-height': '0px'}" @drop="onDrop($event)">
+          <template v-for="(setting, index) of messageSettings" :key="index">
+            <Draggable v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <img class="guard-icon" :src="`${getGuardIcon('3')}`">
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
-              <FanMedal v-if="example.ML && example.MN" :medalLevel="example.ML" :medalName="example.MN" :medalColorStart="example.MCS" :medalColorEnd="example.MCE" :medalColorBorder="example.MCB"></FanMedal>
+            <Draggable v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+              <FanMedal
+                v-if="example.ML && example.MN"
+                :medal-level="example.ML"
+                :medal-name="example.MN"
+                :medal-color-start="example.MCS"
+                :medal-color-end="example.MCE"
+                :medal-color-border="example.MCB"
+              />
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle padding-lr-1px">
               <span>{{ `${example.uname}` }}</span>
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='colon' && setting.isShow" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
+            <Draggable v-if="setting.type==='colon' && setting.isShow" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
               <span>：</span>
             </Draggable>
-            <Draggable :key="index" v-if="setting.type==='comment'" class="vertical-align-middle">
-              <img v-if="example.emojiUrl" :style="{  height: '20px' }" :src="example.emojiUrl" />
+            <Draggable v-if="setting.type==='comment'" class="vertical-align-middle">
+              <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl">
               <span v-else :style="{...comment_lv3, ...fontStyle}">{{ example.content }}</span>
             </Draggable>
           </template>
-        </Container>
+        </Container> -->
       </div>
       <!-- <span>{{ `: ${comment.comment}` }}</span> -->
       <!-- <span v-if="example.voiceUrl" @click="playAudio(example.voiceUrl)" class="voice-container">
         <Icon type="md-play" />
         <span>{{ `${example.fileDuration}"` }}</span>
-      </span> -->
+      </span>-->
     </div>
 
     <div class="divider line one-line">
@@ -46,17 +57,17 @@
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div class="disable-user-select" v-show="collapse[0]">
+    <div v-show="collapse[0]" class="disable-user-select">
       <div class="setting-group">
         <div :style="{display: 'inline-block'}">
           <span>窗体背景色</span>
-          <ColorPicker transfer :value="background" @on-active-change="debouncedUpdateBackground" size="small" alpha />
+          <ColorPicker transfer :value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
         </div>
         <Divider type="vertical" />
         <div :style="{display: 'inline-block'}">
           <span :style="{'padding-right': '10px'}">整体透明度</span>
           <div class="avatar-controller-slider">
-            <Slider :value="opacity" @on-change="changeOpacity"></Slider>
+            <Slider :value="opacity" @on-change="changeOpacity" />
           </div>
         </div>
       </div>
@@ -64,30 +75,36 @@
         <div :style="{display: 'inline-block'}">
           <span :style="{'padding-right': '10px'}">头像大小</span>
           <div class="avatar-controller-slider">
-            <Slider :value="avatarSize" @on-change="changeAvatarSize"></Slider>
+            <Slider :value="avatarSize" @on-change="changeAvatarSize" />
           </div>
         </div>
       </div>
       <div class="setting-group">
         <div :style="{display: 'inline-block'}">
           <span>字体</span>
-          <Select :style="{ width: '100px', display: 'inline-block' }" :value="danmakuFont" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange" size="small">
+          <Select
+            :style="{ width: '100px', display: 'inline-block' }"
+            :value="danmakuFont"
+            size="small"
+            @on-change="changeDanmakuFont"
+            @on-open-change="onOpenFontSelectChange"
+          >
             <OptionGroup label="全局值">
-              <Option v-for="item in fonts.filter((font) => font.type === 'default')" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
             </OptionGroup>
             <OptionGroup label="通用字体族">
-              <Option v-for="item in fonts.filter((font) => font.type === 'common')" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key" :value="item.value">{{ item.value }}</Option>
             </OptionGroup>
             <OptionGroup label="系统">
-              <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :value="item.value" :key="item.key">{{ item.value }}</Option>
+              <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key" :value="item.value">{{ item.value }}</Option>
             </OptionGroup>
           </Select>
         </div>
         <Divider type="vertical" />
         <div :style="{display: 'inline-block'}">
           <span>粗细</span>
-          <Select :style="{ width: '100px', display: 'inline-block' }" :value="fontWeight" @on-change="changeFontWeight" size="small">
-            <Option v-for="(option, index) in fontWeightOptions" :value="option.key" :key="index" :label="option.label">
+          <Select :style="{ width: '100px', display: 'inline-block' }" :value="fontWeight" size="small" @on-change="changeFontWeight">
+            <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
@@ -98,14 +115,14 @@
           <span>
             <Tooltip placement="top" transfer>
               重复弹幕合并
-              <div slot="content">
+              <template #content> 
                 <div class="description-text">
                   <p>多少毫秒内重复的弹幕将被合并</p>
                 </div>
-              </div>
+              </template>
             </Tooltip>
           </span>
-          <InputNumber :value="combineSimilarTime" @on-change="changeCombineSimilarTime" :min="0" size="small" />
+          <InputNumber :value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
           {{ " ms" }}
         </div>
         <Divider type="vertical" />
@@ -113,32 +130,32 @@
           <span>
             <Tooltip placement="top" transfer>
               弹幕超时消失
-              <div slot="content">
+              <template #content>
                 <div class="description-text">
                   <p>为 0 表示不消失，请至少设置2000以上</p>
                 </div>
-              </div>
+              </template>
             </Tooltip>
           </span>
-          <InputNumber :value="hiddenExpiredTime" @on-change="changeHiddenExpiredTime" :min="0" size="small" />
+          <InputNumber :value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
           {{ " ms" }}
         </div>
       </div>
       <div class="setting-group">
         <div :style="{display: 'inline-block'}">
           <span>礼物栏展示大于</span>
-          <InputNumber :value="showHeadlineThreshold" @on-change="changeShowHeadlineThreshold" :min="0" size="small" />
+          <InputNumber :value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
           {{ " 元" }}
         </div>
         <Divider type="vertical" />
         <div :style="{display: 'inline-block'}">
           <span>弹幕礼物展示大于</span>
-          <InputNumber :value="showGiftCardThreshold" @on-change="changeShowGiftCardThreshold" :min="0" size="small" />
+          <InputNumber :value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
           {{ " 元" }}
         </div>
       </div>
       <div class="setting-group">
-        <Button size='small' @click="openImageBorderModal">设置图片边框</Button>
+        <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
       </div>
       <div class="setting-group">
         <Checkbox :value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
@@ -174,7 +191,7 @@
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div class="disable-user-select" v-show="collapse[1]">
+    <div v-show="collapse[1]" class="disable-user-select">
       <div class="setting-group">
         名称：
         <StyleEditor v-bind="editors[0]" />
@@ -209,7 +226,7 @@
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div class="disable-user-select" v-show="collapse[2]">
+    <div v-show="collapse[2]" class="disable-user-select">
       <div class="setting-group">
         名称：
         <StyleEditor v-bind="editors[9]" />
@@ -244,7 +261,7 @@
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div class="disable-user-select" v-show="collapse[3]">
+    <div v-show="collapse[3]" class="disable-user-select">
       <div class="setting-group">
         名称：
         <StyleEditor v-bind="editors[18]" />
@@ -279,7 +296,7 @@
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div class="disable-user-select" v-show="collapse[4]">
+    <div v-show="collapse[4]" class="disable-user-select">
       <div class="setting-group">
         名称：
         <StyleEditor v-bind="editors[27]" />
@@ -307,19 +324,28 @@
       </div>
     </div>
 
-    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
+    <Modal
+      v-model="isShowBorderModal"
+      title="图片边框设置"
+      width="650"
+      scrollable
+      lock-scroll
+      transfer
+      :styles="{ overflow: 'auto' }"
+      @on-ok="applyBorderImageSetting"
+    >
       <div :style="{ padding: '20px'}">
         <span :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
       </div>
       <div class="images-container">
-        <template v-for="(item, index) in borderImages">
-          <div class="image-container" :key="index">
+        <template v-for="(item, index) in borderImages" :key="index">
+          <div class="image-container">
             <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
-            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)" />
+            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)">
           </div>
         </template>
         <label v-if="borderImages.length< 4" class="upload-file-container">
-          <input :style="{display: 'none'}" type="file" accept="image/*" @change="encodeImageFileAsURL" />
+          <input :style="{display: 'none'}" type="file" accept="image/*" @change="encodeImageFileAsURL">
           <Icon class="upload-file-icon" type="md-add" />
         </label>
       </div>
@@ -328,86 +354,92 @@
       </div>
       <div :style="{ padding: '5px 10px'}">
         <span class="border-image-setting-text">边框宽度</span>
-        <InputNumber :value="borderWidthValue" :style="{width: '55px'}" @on-change="setBorderWidthValue"></InputNumber>
+        <InputNumber :value="borderWidthValue" :style="{width: '55px'}" @on-change="setBorderWidthValue" />
       </div>
       <div :style="{ padding: '5px 10px'}">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             图片分割线
-            <div slot="content" :style="{ 'white-space': 'normal' }">
-              <p>border-image-slice属性会将图片分割为9个区域：四个角，四个边以及中心区域。四条切片线，从它们各自的侧面设置给定距离，控制区域的大小。</p>
-              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-slice</p>
-            </div>
+            <template #content>
+              <div :style="{ 'white-space': 'normal' }">
+                <p>border-image-slice属性会将图片分割为9个区域：四个角，四个边以及中心区域。四条切片线，从它们各自的侧面设置给定距离，控制区域的大小。</p>
+                <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-slice</p>
+              </div>
+            </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageSliceValue" :style="{width: '180px'}" @on-change="setBorderImageSliceValue"></Input>
+        <Input :value="borderImageSliceValue" :style="{width: '180px'}" @on-change="setBorderImageSliceValue" />
       </div>
       <div :style="{ padding: '5px 10px'}">
         <!-- https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-width -->
         <span class="border-image-setting-text">图片边框宽度</span>
-        <Input :value="borderImageWidthValue" :style="{width: '180px'}" @on-change="setBorderImageWidthValue"></Input>
+        <Input :value="borderImageWidthValue" :style="{width: '180px'}" @on-change="setBorderImageWidthValue" />
       </div>
       <div :style="{ padding: '5px 10px'}">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             填充方式
-            <div slot="content" :style="{ 'white-space': 'normal' }">
-              <p>border-image-repeat定义图片如何填充边框。</p>
-              <p>可填值：stretch, repeat, round, space。</p>
-              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-repeat</p>
-            </div>
+            <template #content>
+              <div :style="{ 'white-space': 'normal' }">
+                <p>border-image-repeat定义图片如何填充边框。</p>
+                <p>可填值：stretch, repeat, round, space。</p>
+                <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-repeat</p>
+              </div>
+            </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageRepeatValue" :style="{width: '180px'}" @on-change="setBorderImageRepeatValue"></Input>
+        <Input :value="borderImageRepeatValue" :style="{width: '180px'}" @on-change="setBorderImageRepeatValue" />
       </div>
       <div :style="{ padding: '5px 10px'}">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             outset
-            <div slot="content" :style="{ 'white-space': 'normal' }">
-              <p>border-image-outset属性定义边框图像可超出边框盒的大小。</p>
-              <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-outset</p>
-            </div>
+            <template #content>
+              <div :style="{ 'white-space': 'normal' }">
+                <p>border-image-outset属性定义边框图像可超出边框盒的大小。</p>
+                <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-outset</p>
+              </div>
+            </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageOutsetValue" :style="{width: '180px'}" @on-change="setBorderImageOutsetValue"></Input>
+        <Input :value="borderImageOutsetValue" :style="{width: '180px'}" @on-change="setBorderImageOutsetValue" />
       </div>
     </Modal>
   </div>
 </template>
 
 <script>
-import { Container, Draggable } from "vue-smooth-dnd";
-import FontList from "font-list";
+// import { Container, Draggable } from 'vue-smooth-dnd'
+import FontList from 'font-list'
 
-import SettingEditor from "./SettingEditor";
+import SettingEditor from './SettingEditor'
 import StyleEditor from './StyleEditor'
-import FanMedal from "./FanMedal";
+import FanMedal from './FanMedal'
 import {
   DEFAULT_FONTS,
   DEFAULT_COMMON_FONT_FAMILIES,
   GUARD_ICON_MAP,
   DEFAULT_AVATAR,
-} from "../../service/const";
-import { getRandomItem } from "../../service/util";
+} from '../../service/const'
+import { getRandomItem } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
 import { mergeSetting, updateSetting, clearMessage, sendMessages } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
     value: font,
-    type: "default",
+    type: 'default',
   })),
   ...DEFAULT_COMMON_FONT_FAMILIES.map((font) => ({
     key: font,
     value: font,
-    type: "common",
+    type: 'common',
   })),
-];
+]
 
 export default {
   components: {
-    SettingEditor,
+    // SettingEditor,
     StyleEditor,
     FanMedal,
     Container,
@@ -418,20 +450,20 @@ export default {
       fonts: defaultFonts,
       example: {
         avatar: DEFAULT_AVATAR,
-        "roomId": 0,
-        "sendAt": 1628534054678,
-        "uid": 1,
-        "uname": "测试账号",
-        "isAdmin": 0,
-        "role": 0,
-        "content": "这是一条舰长的测试弹幕，可拖拽改变字段顺序~",
-        "ML": 21,
-        "MN": "测试者",
-        "medalRoomId": 21452505,
-        "MCB": "#5c968e",
-        "MCS": "#5c968e",
-        "MCE": "#5c968e",
-        "_id": "020wdKl7EYV9c8cD"
+        roomId: 0,
+        sendAt: 1628534054678,
+        uid: 1,
+        uname: '测试账号',
+        isAdmin: 0,
+        role: 0,
+        content: '这是一条舰长的测试弹幕，可拖拽改变字段顺序~',
+        ML: 21,
+        MN: '测试者',
+        medalRoomId: 21452505,
+        MCB: '#5c968e',
+        MCS: '#5c968e',
+        MCE: '#5c968e',
+        _id: '020wdKl7EYV9c8cD',
       },
       isShowBorderModal: false,
       images: [],
@@ -464,79 +496,79 @@ export default {
         // ***** normal *****
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 0,
-          prop: "name",
-          styleName: "font-size",
+          prop: 'name',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 0,
-          prop: "name",
-          styleName: "color",
+          prop: 'name',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 0,
-          prop: "name",
+          prop: 'name',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 0,
-          prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'name',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 0,
-          prop: "comment",
-          styleName: "font-size",
+          prop: 'comment',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 0,
-          prop: "comment",
-          styleName: "color",
+          prop: 'comment',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 0,
-          prop: "comment",
+          prop: 'comment',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 0,
-          prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'comment',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "背景色",
+          type: 'ColorPicker',
+          name: '背景色',
           role: 0,
-          prop: "message",
-          styleName: "background",
+          prop: 'message',
+          styleName: 'background',
         },
 
         // {
@@ -560,334 +592,321 @@ export default {
         // ***** captain *****
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 3,
-          prop: "name",
-          styleName: "font-size",
+          prop: 'name',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 3,
-          prop: "name",
-          styleName: "color",
+          prop: 'name',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 3,
-          prop: "name",
+          prop: 'name',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 3,
-          prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'name',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 3,
-          prop: "comment",
-          styleName: "font-size",
+          prop: 'comment',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 3,
-          prop: "comment",
-          styleName: "color",
+          prop: 'comment',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 3,
-          prop: "comment",
+          prop: 'comment',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 3,
-          prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'comment',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "背景色",
+          type: 'ColorPicker',
+          name: '背景色',
           role: 3,
-          prop: "message",
-          styleName: "background",
+          prop: 'message',
+          styleName: 'background',
         },
 
         // ***** 提督 *****
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 2,
-          prop: "name",
-          styleName: "font-size",
+          prop: 'name',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 2,
-          prop: "name",
-          styleName: "color",
+          prop: 'name',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 2,
-          prop: "name",
+          prop: 'name',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 2,
-          prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'name',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 2,
-          prop: "comment",
-          styleName: "font-size",
+          prop: 'comment',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 2,
-          prop: "comment",
-          styleName: "color",
+          prop: 'comment',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 2,
-          prop: "comment",
+          prop: 'comment',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 2,
-          prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'comment',
+          styleName: '-webkit-text-stroke-color',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "背景色",
+          type: 'ColorPicker',
+          name: '背景色',
           role: 2,
-          prop: "message",
-          styleName: "background",
+          prop: 'message',
+          styleName: 'background',
         },
 
         // ***** 总督 *****
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 1,
-          prop: "name",
-          styleName: "font-size",
+          prop: 'name',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 1,
-          prop: "name",
-          styleName: "color",
+          prop: 'name',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 1,
-          prop: "name",
+          prop: 'name',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 1,
-          prop: "name",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'name',
+          styleName: '-webkit-text-stroke-color',
         },
 
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "字号",
+          type: 'InputNumber',
+          name: '字号',
           role: 1,
-          prop: "comment",
-          styleName: "font-size",
+          prop: 'comment',
+          styleName: 'font-size',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "颜色",
+          type: 'ColorPicker',
+          name: '颜色',
           role: 1,
-          prop: "comment",
-          styleName: "color",
+          prop: 'comment',
+          styleName: 'color',
         },
         {
           id: Math.random(),
-          type: "InputNumber",
-          name: "描边粗细",
+          type: 'InputNumber',
+          name: '描边粗细',
           role: 1,
-          prop: "comment",
+          prop: 'comment',
           numberStep: 0.1,
-          styleName: "-webkit-text-stroke-width",
+          styleName: '-webkit-text-stroke-width',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "描边颜色",
+          type: 'ColorPicker',
+          name: '描边颜色',
           role: 1,
-          prop: "comment",
-          styleName: "-webkit-text-stroke-color",
+          prop: 'comment',
+          styleName: '-webkit-text-stroke-color',
         },
         {
           id: Math.random(),
-          type: "ColorPicker",
-          name: "背景色",
+          type: 'ColorPicker',
+          name: '背景色',
           role: 1,
-          prop: "message",
-          styleName: "background",
+          prop: 'message',
+          styleName: 'background',
         },
       ],
-    };
-  },
-  created() {
-    this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
-  },
-  mounted() {
-    // this.initExamleMessages()
-
-    if (defaultFonts.find((font) => font.key === this.danmakuFont)) return;
-    this.fonts.push({
-      key: this.danmakuFont,
-      value: this.danmakuFont,
-      type: "custom",
-    });
+    }
   },
   computed: {
     background() {
-      return this.$store.state.Config.background;
+      return this.$store.state.Config.background
     },
     danmakuFont() {
-      return this.$store.state.Config.danmakuFont;
+      return this.$store.state.Config.danmakuFont
     },
     isShowAvatar() {
       const settings = this.$store.state.Config.messageSettings
-      return settings.find(setting => setting.type === 'avatar').isShow
+      return settings.find((setting) => setting.type === 'avatar').isShow
     },
     isShowMemberShipIcon() {
       const settings = this.$store.state.Config.messageSettings
-      return settings.find(setting => setting.type === 'guard').isShow
+      return settings.find((setting) => setting.type === 'guard').isShow
     },
     isShowInteractInfo() {
-      return this.$store.state.Config.isShowInteractInfo;
+      return this.$store.state.Config.isShowInteractInfo
     },
     isShowFanMedal() {
       const settings = this.$store.state.Config.messageSettings
-      return settings.find(setting => setting.type === 'medal').isShow
+      return settings.find((setting) => setting.type === 'medal').isShow
     },
     avatarSize() {
       const settings = this.$store.state.Config.messageSettings
-      return settings.find(setting => setting.type === 'avatar').size
+      return settings.find((setting) => setting.type === 'avatar').size
     },
     combineSimilarTime() {
-      return this.$store.state.Config.combineSimilarTime;
+      return this.$store.state.Config.combineSimilarTime
     },
     hiddenExpiredTime() {
-      return this.$store.state.Config.hiddenExpiredTime;
+      return this.$store.state.Config.hiddenExpiredTime
     },
     showHeadlineThreshold() {
-      return this.$store.state.Config.showHeadlineThreshold;
+      return this.$store.state.Config.showHeadlineThreshold
     },
     showGiftCardThreshold() {
-      return this.$store.state.Config.showGiftCardThreshold;
+      return this.$store.state.Config.showGiftCardThreshold
     },
     isShowSilverGift() {
-      return this.$store.state.Config.isShowSilverGift;
+      return this.$store.state.Config.isShowSilverGift
     },
     isUseMiniGiftCard() {
-      return this.$store.state.Config.isUseMiniGiftCard;
+      return this.$store.state.Config.isUseMiniGiftCard
     },
     isShowColon() {
       const settings = this.$store.state.Config.messageSettings
-      return settings.find(setting => setting.type === 'colon').isShow
+      return settings.find((setting) => setting.type === 'colon').isShow
     },
     isShowHeadline() {
-      return this.$store.state.Config.isShowHeadline;
+      return this.$store.state.Config.isShowHeadline
     },
     isShowType1() {
-      return this.$store.state.Config.isShowType1;
+      return this.$store.state.Config.isShowType1
     },
     isShowType2() {
-      return this.$store.state.Config.isShowType2;
+      return this.$store.state.Config.isShowType2
     },
     isShowSuperChatJPN() {
-      return this.$store.state.Config.isShowSuperChatJPN;
+      return this.$store.state.Config.isShowSuperChatJPN
     },
     fontWeight() {
-      return this.$store.state.Config.fontWeight;
+      return this.$store.state.Config.fontWeight
     },
     opacity() {
-      return this.$store.state.Config.opacity * 100;
+      return this.$store.state.Config.opacity * 100
     },
     messageSettings() {
       return this.$store.state.Config.messageSettings
     },
     userCookie() {
-      return this.$store.state.Config.userCookie;
+      return this.$store.state.Config.userCookie
     },
     avatarSizeStyle() {
       return {
         width: `${this.avatarSize}px`,
         height: `${this.avatarSize}px`,
-        "line-height": `${this.avatarSize}px`,
-      };
+        'line-height': `${this.avatarSize}px`,
+      }
     },
     borderImages() {
-      return this.$store.state.Config.borderImages;
+      return this.$store.state.Config.borderImages
     },
     borderImageStyle() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return {}
       return {
         'border-width': `${image['border-width']}px`,
@@ -895,84 +914,97 @@ export default {
         'border-image-repeat': image['border-image-repeat'],
         'border-image-slice': image['border-image-slice'],
         'border-image-outset': image['border-image-outset'],
-        'border-image-source': `url(${image.dataUrl})`
+        'border-image-source': `url(${image.dataUrl})`,
       }
     },
     isBorderAdaptContent() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return false
       return image.isAdaptContent
     },
     borderImageSliceValue() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return ''
       return image['border-image-slice']
     },
     borderWidthValue() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return 0
       return image['border-width']
     },
     borderImageWidthValue() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return ''
       return image['border-image-width']
     },
     borderImageRepeatValue() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return ''
       return image['border-image-repeat']
     },
     borderImageOutsetValue() {
-      const image = this.borderImages.find(image => image.isSelected)
+      const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return ''
       return image['border-image-outset']
     },
     message_lv3() {
-      return this.$store.state.Config.message_lv3;
+      return this.$store.state.Config.message_lv3
     },
     name_lv3() {
-      return this.$store.state.Config.name_lv3;
+      return this.$store.state.Config.name_lv3
     },
     comment_lv3() {
-      return this.$store.state.Config.comment_lv3;
+      return this.$store.state.Config.comment_lv3
     },
     fontStyle() {
       return {
         'font-family': this.danmakuFont,
         'font-weight': this.fontWeight,
       }
-    }
+    },
+  },
+  created() {
+    this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
+  },
+  mounted() {
+    // this.initExamleMessages()
+
+    if (defaultFonts.find((font) => font.key === this.danmakuFont)) return
+    this.fonts.push({
+      key: this.danmakuFont,
+      value: this.danmakuFont,
+      type: 'custom',
+    })
   },
   methods: {
     async showMemberShipIcon(status) {
       const settings = cloneDeep(this.messageSettings)
-      const setting = settings.find(setting => setting.type === 'guard')
+      const setting = settings.find((setting) => setting.type === 'guard')
       setting.isShow = status
 
       const data = { messageSettings: settings }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async showFanMedal(status) {
       const settings = cloneDeep(this.messageSettings)
-      const setting = settings.find(setting => setting.type === 'medal')
+      const setting = settings.find((setting) => setting.type === 'medal')
       setting.isShow = status
 
       const data = { messageSettings: settings }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
       await sendMessages({
         category: randomMessage.category,
-        data: randomMessage
+        data: randomMessage,
       })
     },
 
@@ -982,14 +1014,14 @@ export default {
         // scrollDanmakuBackground: color,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async changeAvatarSize(size) {
       // const data = {
       //   avatarSize: size,
       // }
       const settings = cloneDeep(this.messageSettings)
-      const setting = settings.find(setting => setting.type === 'avatar')
+      const setting = settings.find((setting) => setting.type === 'avatar')
       setting.size = size
       const data = {}
       if (size === 0) {
@@ -1003,13 +1035,13 @@ export default {
       data.messageSettings = settings
 
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async changeOpacity(number) {
       const data = {
         opacity: Number((number / 100).toFixed(2)),
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
       await mergeSetting(data)
     },
 
@@ -1018,7 +1050,7 @@ export default {
         combineSimilarTime: number,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeHiddenExpiredTime(number) {
@@ -1026,7 +1058,7 @@ export default {
         hiddenExpiredTime: number,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeShowHeadlineThreshold(number) {
@@ -1034,14 +1066,14 @@ export default {
         showHeadlineThreshold: number,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async showSilverGift(status) {
@@ -1049,30 +1081,30 @@ export default {
         isShowSilverGift: status,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     randomMessageGenerator() {
-      const randomNumber = Math.floor(Math.random() * 100000000);
-      const randomRole = Math.floor(Math.random() * 4);
+      const randomNumber = Math.floor(Math.random() * 100000000)
+      const randomRole = Math.floor(Math.random() * 4)
       const types = [
         {
-          name: "gift",
+          name: 'gift',
           probability: 10,
         },
         {
-          name: "comment",
+          name: 'comment',
           probability: 80,
         },
         {
-          name: "superChat",
+          name: 'superChat',
           probability: 10,
         },
-      ];
+      ]
 
       const randomType = getRandomItem(types).name
 
-      if (randomType === "gift") {
+      if (randomType === 'gift') {
         const gift = {
           _id: randomNumber,
           id: randomNumber,
@@ -1083,22 +1115,22 @@ export default {
           type: 1,
           price: Math.floor(Math.random() * 100),
           count: 1,
-          name: "随机礼物",
+          name: '随机礼物',
           role: 3,
           sendAt: Date.now(),
           batchComboId: randomNumber,
           // batchComboId: 1,
-        };
-        gift.role = randomRole;
+        }
+        gift.role = randomRole
         if (Math.random() * 2 < 1) {
-          gift.name = "舰长";
-          gift.isGuardGift = true;
-          gift.price = 198;
+          gift.name = '舰长'
+          gift.isGuardGift = true
+          gift.price = 198
           gift.type = 2
         }
-        return gift;
+        return gift
       }
-      if (randomType === "superChat") {
+      if (randomType === 'superChat') {
         const superChat = {
           _id: randomNumber,
           id: randomNumber,
@@ -1113,30 +1145,30 @@ export default {
           price: Math.floor(Math.random() * 100),
           role: 3,
           sendAt: Date.now(),
-        };
-        if (Math.random() * 2 < 1) {
-          superChat.contentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`;
         }
-        superChat.role = randomRole;
-        return superChat;
+        if (Math.random() * 2 < 1) {
+          superChat.contentJPN = `これはテスト用のスパチャだよ〜 | ${new Date().toLocaleString()}`
+        }
+        superChat.role = randomRole
+        return superChat
       }
 
-      if (randomType === "comment") {
+      if (randomType === 'comment') {
         const comment = {
           _id: randomNumber,
           id: randomNumber,
           uid: randomNumber,
           category: 'comment',
           uname: `bli_${randomNumber}`,
-          type: "comment",
+          type: 'comment',
           content: `一条弹幕哟～`,
           role: 3,
           sendAt: Date.now(),
           color: 'white',
           // emojiUrl: 'http://i0.hdslb.com/bfs/live/d23f33fb86a1154fc99d1521a742394e5d94a09b.png'
-        };
-        comment.role = randomRole;
-        return comment;
+        }
+        comment.role = randomRole
+        return comment
       }
     },
 
@@ -1146,16 +1178,16 @@ export default {
     },
 
     async getFonts() {
-      const fonts = await FontList.getFonts({ disableQuoting: true });
+      const fonts = await FontList.getFonts({ disableQuoting: true })
       this.fonts = [
         ...defaultFonts,
-        ...fonts.map((font) => ({ key: font, value: font, type: "custom" })),
-      ];
+        ...fonts.map((font) => ({ key: font, value: font, type: 'custom' })),
+      ]
     },
 
     async onOpenFontSelectChange(value) {
       if (value) {
-        await this.getFonts();
+        await this.getFonts()
       }
     },
 
@@ -1164,7 +1196,7 @@ export default {
         danmakuFont: value,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async useMiniGiftCard(value) {
@@ -1172,11 +1204,11 @@ export default {
         isUseMiniGiftCard: value,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     getGuardIcon(level) {
-      return GUARD_ICON_MAP[level];
+      return GUARD_ICON_MAP[level]
     },
 
     openImageBorderModal() {
@@ -1189,17 +1221,20 @@ export default {
       const reader = new FileReader()
       reader.onloadend = function () {
         const dataUrl = reader.result
-        self.$store.dispatch("UPDATE_CONFIG", {
-          borderImages: [...self.borderImages, {
-            isAdaptContent: false,
-            dataUrl: dataUrl,
-            isSelected: self.borderImages.length ? false : true,
-            'border-width': 30,
-            'border-image-width': '1',
-            'border-image-slice': '30',
-            'border-image-repeat': 'stretch',
-            'border-image-outset': '0',
-          }]
+        self.$store.dispatch('UPDATE_CONFIG', {
+          borderImages: [
+            ...self.borderImages,
+            {
+              isAdaptContent: false,
+              dataUrl: dataUrl,
+              isSelected: self.borderImages.length ? false : true,
+              'border-width': 30,
+              'border-image-width': '1',
+              'border-image-slice': '30',
+              'border-image-repeat': 'stretch',
+              'border-image-outset': '0',
+            },
+          ],
         })
       }
       reader.readAsDataURL(file)
@@ -1208,12 +1243,12 @@ export default {
     selectImageBorder(index) {
       const borderImages = cloneDeep(this.borderImages)
       const preStatus = borderImages[index].isSelected
-      borderImages.forEach(item => {
+      borderImages.forEach((item) => {
         item.isSelected = false
       })
       borderImages[index].isSelected = !preStatus
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
@@ -1221,64 +1256,64 @@ export default {
       const borderImages = this.borderImages.filter((_, i) => {
         return i !== index
       })
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     setBorderImageSliceValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-slice'] = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     setBorderWidthValue(number) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-width'] = number
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     setBorderImageWidthValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-width'] = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     setBorderImageRepeatValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-repeat'] = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     setBorderImageOutsetValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-outset'] = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     async applyBorderImageSetting() {
       const data = {
-        borderImages: this.borderImages
+        borderImages: this.borderImages,
       }
       await updateSetting(data)
     },
@@ -1294,15 +1329,17 @@ export default {
       if (removedIndex === null && addedIndex === null) return
 
       const messageSettings = cloneDeep(this.messageSettings)
-      const hiddenItems = messageSettings.map((setting, index) => {
-        if (!setting.isShow) {
-          return {
-            index,
-            data: setting
+      const hiddenItems = messageSettings
+        .map((setting, index) => {
+          if (!setting.isShow) {
+            return {
+              index,
+              data: setting,
+            }
           }
-        }
-      }).filter(Boolean)
-      const displayItems = messageSettings.filter(setting => setting.isShow)
+        })
+        .filter(Boolean)
+      const displayItems = messageSettings.filter((setting) => setting.isShow)
 
       let itemToAdd
       if (removedIndex !== null) {
@@ -1312,14 +1349,14 @@ export default {
         displayItems.splice(addedIndex, 0, itemToAdd)
       }
 
-      hiddenItems.forEach(item => {
+      hiddenItems.forEach((item) => {
         displayItems.splice(item.index, 0, item.data)
       })
       const data = {
         messageSettings: displayItems,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeFontWeight(value) {
@@ -1327,62 +1364,62 @@ export default {
         fontWeight: value,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async showHeadLine(value) {
       const data = {
-        isShowHeadline: value
+        isShowHeadline: value,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async showColon(status) {
       const settings = cloneDeep(this.messageSettings)
-      const setting = settings.find(setting => setting.type === 'colon')
+      const setting = settings.find((setting) => setting.type === 'colon')
       setting.isShow = status
 
       const data = { messageSettings: settings }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeBorderAdaptContent(status) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find(image => image.isSelected)
+      const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image.isAdaptContent = status
-      this.$store.dispatch("UPDATE_CONFIG", {
-        borderImages: borderImages
+      this.$store.dispatch('UPDATE_CONFIG', {
+        borderImages: borderImages,
       })
     },
 
     async showType1(status) {
       const data = {
-        isShowType1: status
+        isShowType1: status,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async showType2(status) {
       const data = {
-        isShowType2: status
+        isShowType2: status,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async showSuperChatJPN(status) {
       const data = {
-        isShowSuperChatJPN: status
+        isShowSuperChatJPN: status,
       }
       await mergeSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
-    }
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
   },
-};
+}
 </script>
 
 <style scoped lang="scss">
@@ -1433,7 +1470,7 @@ export default {
 
   &:before,
   &:after {
-    content: "";
+    content: '';
     flex: 1;
   }
 }

@@ -1,49 +1,50 @@
 <template>
   <div>
-    <div class="tag-container">
-      <Container :getChildPayload="getTagPayload" @drop="onDrop" orientation="horizontal" behaviour="copy">
+    <!-- <div class="tag-container">
+      <Container :get-child-payload="getTagPayload" orientation="horizontal" behaviour="copy" @drop="onDrop">
         <Draggable v-for="tag in tags" :key="tag.id">
           <div :class="tag.class ? `draggable-tag ${tag.class}`: 'draggable-tag'">
-            {{tag.name}}
+            {{ tag.name }}
           </div>
         </Draggable>
       </Container>
-    </div>
+    </div> -->
     <Row :style="{padding: '6px'}">
       <i-col span="1">
         <div class="col-header">
           <Tooltip max-width="600" transfer placement="right">
             <Icon type="md-help" class="info-icon" />
-            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
-              <p>
-                ● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。
-              </p>
-              <p>
-                ● 每一条规则应该要有至少一条<span :style="{color: 'aquamarine'}">执行规则</span>，可以有若干条<span :style="{color: 'violet'}">限制规则</span>。 <span :style="{color: 'pink'}">拖拽</span>上面「标签」到规则栏！
-              </p>
-              <p>
-                ● 目前可用<span :style="{color: 'pink'}">模版占位符</span>有 {user.name} {gift.name} {comment.content} {superchat.content}。 模版占位符将被替换为实际内容！
-              </p>
-              <p>
-                ● 例如：触发类型：弹幕，回复文字模版：{user.name}说 {comment.content}，规则：佩戴粉丝牌，语音播放。
-                表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)
-              </p>
-              <!-- <p>
+            <template #content>
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+                <p>
+                  ● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。
+                </p>
+                <p>
+                  ● 每一条规则应该要有至少一条<span :style="{color: 'aquamarine'}">执行规则</span>，可以有若干条<span :style="{color: 'violet'}">限制规则</span>。 <span :style="{color: 'pink'}">拖拽</span>上面「标签」到规则栏！
+                </p>
+                <p>
+                  ● 目前可用<span :style="{color: 'pink'}">模版占位符</span>有 {user.name} {gift.name} {comment.content} {superchat.content}。 模版占位符将被替换为实际内容！
+                </p>
+                <p>
+                  ● 例如：触发类型：弹幕，回复文字模版：{user.name}说 {comment.content}，规则：佩戴粉丝牌，语音播放。
+                  表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)
+                </p>
+                <!-- <p>
                 例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
               </p> -->
-              <p>
-                ● 匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
-              </p>
-              <p>
-                ● 部分标签可<span :style="{color: 'pink'}">点击</span>打开下拉窗口，进一步设置。
-              </p>
-              <p>
-                ● 部分不合逻辑，暂未支持的组合将无法拖拽。
-              </p>
-            </div>
+                <p>
+                  ● 匹配<span :style="{color: 'pink'}">优先级</span>从上到下逐渐增高，当高优先级规则匹配通过，低优先级不再触发。
+                </p>
+                <p>
+                  ● 部分标签可<span :style="{color: 'pink'}">点击</span>打开下拉窗口，进一步设置。
+                </p>
+                <p>
+                  ● 部分不合逻辑，暂未支持的组合将无法拖拽。
+                </p>
+              </div>
+            </template>
           </Tooltip>
         </div>
-
       </i-col>
       <i-col span="1">
         <div class="col-header">启用</div>
@@ -57,12 +58,11 @@
       <i-col span="13">
         <div class="col-header">规则</div>
       </i-col>
-      <i-col span="1">
-      </i-col>
+      <i-col span="1" />
     </Row>
-    <Container @drop="onDropRule" :getChildPayload="getRulePayload" drag-handle-selector=".column-drag-handle">
-      <template v-for="(rule, index) in rules">
-        <Draggable :key="index">
+    <!-- <Container :get-child-payload="getRulePayload" drag-handle-selector=".column-drag-handle" @drop="onDropRule">
+      <template v-for="(rule, index) in rules" :key="index">
+        <Draggable>
           <Row :style="{padding: '6px'}">
             <i-col span="1">
               <div>
@@ -70,28 +70,30 @@
               </div>
             </i-col>
             <i-col span="1" :style="{'text-align':'center'}">
-              <Checkbox :value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)"></Checkbox>
+              <Checkbox :value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)" />
             </i-col>
             <i-col span="2">
               <Select :value="rule.type" :style="{padding: '0 7px'}" transfer size="small" @on-change="onChangeRuleType(index, $event)">
-                <Option v-for="(option, index) in types" :value="option.key" :key="index" :label="option.label">
+                <Option v-for="(option, index1) in types" :key="index1" :value="option.key" :label="option.label">
                   <span>{{ option.value }}</span>
                 </Option>
               </Select>
             </i-col>
             <i-col span="6">
-              <Input :value="rule.text" @on-change="debouncedChangeText(index, $event)" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" />
+              <Input :value="rule.text" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" @on-change="debouncedChangeText(index, $event)" />
             </i-col>
             <i-col span="13">
-              <Container :style="{width: '100%'}" @drop="onDrop(index, $event)" :drop-placeholder="dropPlaceholderOptions" :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)" orientation="horizontal">
-                <template v-for="(tag, tagIndex) in rule.tags">
-                  <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'" :key="tag.id">
+              <Container :style="{width: '100%'}" :drop-placeholder="dropPlaceholderOptions" :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)" orientation="horizontal" @drop="onDrop(index, $event)">
+                <template v-for="(tag, tagIndex) in rule.tags" :key="tag.id">
+                  <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'">
                     <template v-if="tag.template">
                       <Poptip placement="bottom" transfer>
                         <span>{{ fillDisplay(tag) }} </span>
-                        <div class="" slot="content">
-                          <TagContent :template="tag.template" :data="tag.data" v-on:value-change="onDataChange(index,tagIndex, $event)" />
-                        </div>
+                        <template #content>
+                          <div>
+                            <TagContent :template="tag.template" :data="tag.data" @value-change="onDataChange(index,tagIndex, $event)" />
+                          </div>
+                        </template>
                       </Poptip>
                     </template>
                     <template v-else>
@@ -108,9 +110,9 @@
           </Row>
         </Draggable>
       </template>
-    </Container>
+    </Container> -->
     <div :style="{ padding: '5px 20px'}">
-      <Button @click="addRule" type="primary" long>
+      <Button type="primary" long @click="addRule">
         <Icon :style="{'font-weight': 'bold'}" type="md-add" />
       </Button>
     </div>
@@ -118,7 +120,7 @@
 </template>
 
 <script>
-import { Container, Draggable } from "vue-smooth-dnd";
+// import { Container, Draggable } from "vue-smooth-dnd";
 import TagContent from './TagContent.vue'
 import { getVoices, updateSetting } from '../../service/api'
 import { getGiftConfig } from '../../service/util'

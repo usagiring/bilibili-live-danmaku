@@ -2,14 +2,14 @@
   <div id="live-wrapper">
     <div id="live-config-wrapper">
       <div :style="{ display: 'inline-block' }">
-        <template v-if="!this.isRecording">
-          <Button @click="startRecord" shape="circle">
+        <template v-if="!isRecording">
+          <Button shape="circle" @click="startRecord">
             <Icon type="ios-radio-button-on" color="crimson" />
             录制
           </Button>
         </template>
         <template v-else>
-          <Button @click="cancelRecord" shape="circle">
+          <Button shape="circle" @click="cancelRecord">
             <Icon type="ios-square" color="crimson" />
             停止
           </Button>
@@ -19,16 +19,16 @@
           {{ downloadRate }}
         </div>
         <Select :value="recordQuality" style="width: 70px" @on-change="changeRecordQuality">
-          <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
+          <Option v-for="quality in qualities" :key="quality.key" :value="quality.value">{{ quality.value }}</Option>
         </Select>
-        <Button @click="openRecordSaveFolderSelector" shape="circle">
+        <Button shape="circle" @click="openRecordSaveFolderSelector">
           选择文件夹
         </Button>
         {{ recordDir }}
       </div>
       <div :style="{ 'padding-top': '3px' }">
         <div :style="{'display': 'inline-block', width: '80px', height: '60px', 'vertical-align': 'top'}">
-          <Button @click="play" shape="circle" :style="{width: '100%', height: '100%'}">
+          <Button shape="circle" :style="{width: '100%', height: '100%'}" @click="play">
             <Icon type="md-play" color="green" />
             播放
           </Button>
@@ -36,55 +36,55 @@
         <div :style="{'display': 'inline-block', 'padding-left': '10px'}">
           <div>
             <Select :value="playQuality" style="width: 70px" @on-change="changePlayQuality">
-              <Option v-for="quality in qualities" :value="quality.value" :key="quality.key">{{ quality.value }}</Option>
+              <Option v-for="quality in qualities" :key="quality.key" :value="quality.value">{{ quality.value }}</Option>
             </Select>
             <Select :value="resolution" style="width: 70px" @on-change="changeResolutions">
-              <Option v-for="resolution in resolutions" :value="resolution.value" :key="resolution.key">{{ resolution.value }}</Option>
+              <Option v-for="__resolution in resolutions" :key="__resolution.key" :value="__resolution.value">{{ __resolution.value }}</Option>
             </Select>
             <Checkbox class="setting-checkbox" :value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
           </div>
           <div>
-            独立播放窗 <i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow"></i-switch>
+            独立播放窗 <i-switch :value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow" />
             <Checkbox :style="{'padding-left': '10px'}" :value="isLiveWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
             <span :style="{'padding-right': '10px'}">透明度</span>
             <div class="avatar-controller-slider">
-              <Slider :value="liveWindowOpacity" @on-change="changeLiveWindowOpacity"></Slider>
+              <Slider :value="liveWindowOpacity" @on-change="changeLiveWindowOpacity" />
             </div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <video id="live-player" controls :style="{ height: `${this.resolution}px` }"></video>
+    <video id="live-player" controls :style="{ height: `${resolution}px` }" />
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
-        <FanMedal v-bind="medalData"></FanMedal>
+        <FanMedal v-bind="medalData" />
       </template>
       <template v-else>
         <Tooltip transfer placement="top">
-          <Button @click="getMedalData" :disabled="!this.userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px' }">
-            获取当前佩戴粉丝牌</Button>
-          <div slot="content" :style="{ 'white-space': 'normal' }">
-            <div>
+          <Button :disabled="!userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px' }" @click="getMedalData">
+            获取当前佩戴粉丝牌
+          </Button>
+          <template #content>
+            <div :style="{ 'white-space': 'normal' }">
               <p>会同时触发进入房间消息</p>
             </div>
-          </div>
+          </template>
         </Tooltip>
       </template>
-      <Input v-model="message" placeholder="弹幕..." @on-keyup.ctrl.enter="sendMessage" clearable :style="{ width: '360px' }" />
+      <Input v-model="message" placeholder="弹幕..." clearable :style="{ width: '360px' }" @on-keyup.ctrl.enter="sendMessage" />
 
       <Tooltip placement="top">
-        <Button @click="sendMessage" :disabled="!this.message || !this.userCookie || !this.realRoomId" :loading="isSending">发送</Button>
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div :style="{ color: 'pink' }">
+        <Button :disabled="!message || !userCookie || !realRoomId" :loading="isSending" @click="sendMessage">发送</Button>
+        <template #content>
+          <div :style="{ color: 'pink', 'white-space': 'normal' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
             <p>请谨慎使用此功能！</p>
             <p>快捷键: ctrl + enter</p>
           </div>
-        </div>
+        </template>
       </Tooltip>
-      <Button @click="wearCurrentMedal" :disabled="!this.userCookie || !this.medalId" :loading="isWearing">佩戴当前直播间牌子</Button>
+      <Button :disabled="!userCookie || !medalId" :loading="isWearing" @click="wearCurrentMedal">佩戴当前直播间牌子</Button>
     </div>
   </div>
 </template>
@@ -253,7 +253,7 @@ export default {
       this.closeLiveWindow()
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     const { recordId } = getStatus()
     if (recordId) {
       emitter.removeAllListeners(`${recordId}-download-rate`);

@@ -9,24 +9,24 @@
       </div>
       <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
         <Radio :value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
-        <Select :style="{ width: '400px', display: 'inline-block' }" v-model="selectedGiftIds" filterable multiple size="small">
-          <Option v-for="gift in giftSelectors" :value="gift.key" :key="gift.key" :label="gift.label">
-            <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp" />
+        <Select v-model="selectedGiftIds" :style="{ width: '400px', display: 'inline-block' }" filterable multiple size="small">
+          <Option v-for="gift in giftSelectors" :key="gift.key" :value="gift.key" :label="gift.label">
+            <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp">
             <span>{{ gift.value }}</span>
             <span :style="{color: 'silver'}">{{ `id: ${gift.key}` }}</span>
           </Option>
         </Select>
       </div>
       <div class="selector-content">
-        <Input placeholder="一些描述..." v-model="description"></Input>
+        <Input v-model="description" placeholder="一些描述..." />
       </div>
     </div>
     <div class="button-cotainer">
       <template v-if="isRunning">
-        <Button @click="iNoRu" type="primary">少女祈愿中</Button>
+        <Button type="primary" @click="iNoRu">少女祈愿中</Button>
       </template>
       <template v-else>
-        <Button @click="start" type="primary">祈愿</Button>
+        <Button type="primary" @click="start">祈愿</Button>
       </template>
       <div :style="{ float: 'right' }">
         <Checkbox :value="isShowProbability" @on-change="showProbability">显示概率</Checkbox>
@@ -34,44 +34,44 @@
       </div>
       <span v-if="isDanmaku && isShowProbability" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>
       <span v-if="isGift && isShowProbability" :style="{ 'margin': '0px 10px' }">总价值: {{ totalPrice.toFixed(1) }}</span>
-      <span :style="{ 'margin-left': '30px' }" v-if="aTaRi.uname">
+      <span v-if="aTaRi.uname" :style="{ 'margin-left': '30px' }">
         恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.uname }} </span>
       </span>
     </div>
 
     <div class="candidate-container">
       <template v-if="isDanmaku">
-        <div v-for="info of userComments" class="candidate" :key="`${info.uid}`">
+        <div v-for="info of userComments" :key="`${info.uid}`" class="candidate">
           <Avatar :src="info.avatar" size="small" />
-          {{`${info.uname}: ${info.content}`}}
-          <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
-            {{`( ${count ? (1 / count * 100).toFixed(2) : 0}% )`}}
+          {{ `${info.uname}: ${info.content}` }}
+          <span v-if="isShowProbability" :style="{'margin-left': '5px'}">
+            {{ `( ${count ? (1 / count * 100).toFixed(2) : 0}% )` }}
           </span>
         </div>
       </template>
       <template v-else>
-        <div v-for="info of userGifts" class="candidate" :key="`${info.uid}:${info.giftId}`">
+        <div v-for="info of userGifts" :key="`${info.uid}:${info.giftId}`" class="candidate">
           <Avatar :src="info.avatar" size="small" />
-          {{`${info.uname}: 赠送了 ${info.count} 个 ${info.name}`}}
-          <span :style="{'margin-left': '5px'}" v-if="isShowProbability">
-            {{`( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2): 0}% )`}}
+          {{ `${info.uname}: 赠送了 ${info.count} 个 ${info.name}` }}
+          <span v-if="isShowProbability" :style="{'margin-left': '5px'}">
+            {{ `( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2): 0}% )` }}
           </span>
         </div>
       </template>
     </div>
 
     <Modal v-model="historyModal" title="中奖记录" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
-      <template v-for="history in histories">
-        <p :key="history._id">
+      <template v-for="(history, index) in histories" :key="index">
+        <p>
           {{ `${history.uname}(${history.uid}) ${history.awardedAt}` }}
           <span :style="{color: 'gray'}">
             {{ history.description }}
           </span>
         </p>
       </template>
-      <div slot="footer">
+      <template #footer>
         <Button type="error" @click="removeAllHistory">清空</Button>
-      </div>
+      </template>
     </Modal>
   </div>
 </template>
@@ -138,7 +138,7 @@ export default {
       });
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stop();
   },
   methods: {

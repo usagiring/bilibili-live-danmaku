@@ -1,14 +1,10 @@
 <template>
   <div class="asr-window">
     <div id="main">
-      <template v-for="(text, index) in texts">
-        <div :key="index" class="text">
-          <div>
-            {{ text.text }}
-          </div>
-          <div v-if="text.translate" :style="{color: 'aliceblue', 'font-size': '16px'}">
-            {{ text.translate }}
-          </div>
+      <template v-for="(text, index) in texts" :key="index">
+        <div class="text">
+          <div>{{ text.text }}</div>
+          <div v-if="text.translate" :style="{color: 'aliceblue', 'font-size': '16px'}">{{ text.translate }}</div>
         </div>
       </template>
     </div>
@@ -23,16 +19,16 @@ export default {
     return {
       texts: [],
       currentTextIndex: 0,
-    };
+    }
   },
 
   computed: {
     ASRWindowId() {
-      return this.$store.state.Config.ASRWindowId;
+      return this.$store.state.Config.ASRWindowId
     },
     ASRLineCount() {
       return this.$store.state.Config.ASRLineCount
-    }
+    },
   },
 
   beforeCreate() {
@@ -45,8 +41,8 @@ export default {
     ws.addEventListener('message', this.onMessage)
   },
 
-  beforeDestroy() {
-    ws.removeEventListener("message", this.onMessage);
+  beforeUnmount() {
+    ws.removeEventListener('message', this.onMessage)
   },
 
   methods: {
@@ -66,7 +62,7 @@ export default {
         const texts = [...this.texts]
         texts[this.currentTextIndex] = {
           id: payload.payload?.header?.message_id,
-          text: payload.payload?.payload?.result
+          text: payload.payload?.payload?.result,
         }
         this.texts = texts
       }
@@ -75,7 +71,7 @@ export default {
         const texts = [...this.texts]
         texts[this.currentTextIndex] = {
           id: payload.payload?.header?.message_id,
-          text: payload.payload?.payload?.result
+          text: payload.payload?.payload?.result,
         }
         this.texts = texts
       }
@@ -87,8 +83,8 @@ export default {
         this.$set(this.texts, index, text)
       }
     },
-  }
-};
+  },
+}
 </script>
 
 <style scoped>

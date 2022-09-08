@@ -12,6 +12,3 @@ createApp(App)
   .use(store)
   .use(ViewUIPlus)
   .mount('#app')
-  .$nextTick(() => {
-    postMessage({ payload: 'removeLoading' }, '*')
-  })

@@ -1,6 +1,6 @@
 <template>
   <div class="container" :style="{opacity: liveWindowOpacity}">
-    <video id="live-player" controls :style="{ height: `${videoHeight}px` }"></video>
+    <video id="live-player" controls :style="{ height: `${videoHeight}px` }" />
   </div>
 </template>
 

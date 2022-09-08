@@ -1,29 +1,37 @@
-import Vue from 'vue'
-import axios from 'axios'
-
-import App from './App'
+// import Vue from 'vue'
+import { createApp } from 'vue'
+// import axios from 'axios'
+import App from './App.vue'
 import router from './router'
 import store from './store'
-import ViewUI from 'view-design';
-import 'view-design/dist/styles/iview.css';
-import global from './global'
+import ViewUIPlus from 'view-ui-plus'
+import 'view-ui-plus/dist/styles/viewuiplus.css'
+// import global from './global'
 
-Vue.prototype.$global = global
+// Vue.prototype.$global = global
 
 // import animate from 'animate.css'
 
 // Vue.use(animate)
 
-Vue.use(ViewUI);
 
-if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
-Vue.http = Vue.prototype.$http = axios
-Vue.config.productionTip = false
+createApp(App)
+  // .use(require('vue-electron'))
+  .use(router)
+  .use(store)
+  .use(ViewUIPlus)
+  .mount('#app')
+
+// Vue.use(ViewUI);
+
+// if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
+// Vue.http = Vue.prototype.$http = axios
+// Vue.config.productionTip = false
 
 /* eslint-disable no-new */
-new Vue({
-  components: { App },
-  router,
-  store,
-  template: '<App/>'
-}).$mount('#app')
+// new Vue({
+//   components: { App },
+//   router,
+//   store,
+//   template: '<App/>'
+// }).$mount('#app')

@@ -2,10 +2,10 @@
   <div :style="{display: 'inline-block'}">
     <span>{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" @on-change="debouncedUpdateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
+      <InputNumber :value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="debouncedUpdateStyle" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker :value="value" @on-active-change="debouncedUpdateStyle" size="small" alpha />
+      <ColorPicker :value="value" size="small" alpha @on-active-change="debouncedUpdateStyle" />
     </template>
   </div>
 </template>
@@ -18,9 +18,6 @@ export default {
   props: ["type", "name", "role", "prop", "styleName", "numberStep"],
   data() {
     return {};
-  },
-  created() {
-    this.debouncedUpdateStyle = debounce(this.updateStyle, 100)
   },
   computed: {
     value() {
@@ -39,6 +36,9 @@ export default {
       }
       return "";
     },
+  },
+  created() {
+    this.debouncedUpdateStyle = debounce(this.updateStyle, 100)
   },
   methods: {
     async updateStyle(value) {

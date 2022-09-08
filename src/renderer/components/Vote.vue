@@ -1,8 +1,8 @@
 <template>
   <div :style="{ 'user-select': 'none' }">
     <div>
-      <Button class="vote-button" @click="start" :disabled="isWatching || !isConnected">开始</Button>
-      <Button class="vote-button" @click="stop" :disabled="!isWatching">停止</Button>
+      <Button class="vote-button" :disabled="isWatching || !isConnected" @click="start">开始</Button>
+      <Button class="vote-button" :disabled="!isWatching" @click="stop">停止</Button>
       <Button class="vote-button" @click="showVoteRecord">投票记录</Button>
     </div>
 
@@ -11,15 +11,14 @@
         <div class="keyword-container">关键字</div>
         <div class="content-container">内容</div>
       </div>
-      <template>
-        <div v-for="(item, index) in options" :key="index">
+      <template v-for="(item, index) in options" :key="index">
+        <div>
           <div class="keyword-container">
-            <Input :value="item.keyword" @on-change="changeOptionKeyword(index, $event)" :disabled="isWatching" :style="{ padding: '5px' }" />
+            <Input :value="item.keyword" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionKeyword(index, $event)" />
           </div>
           <div class="content-container">
-            <Input :value="item.value" @on-change="changeOptionContent(index, $event)" :disabled="isWatching" :style="{ padding: '5px' }" />
-            <span>
-            </span>
+            <Input :value="item.value" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionContent(index, $event)" />
+            <span />
           </div>
           <div class="remove-icon-container">
             <Icon type="md-remove" @click="removeOption(index)" />
@@ -28,17 +27,17 @@
       </template>
 
       <div :style="{ padding: '5px'}">
-        <Button @click="addOption" type="primary" long :disabled="isWatching">
+        <Button type="primary" long :disabled="isWatching" @click="addOption">
           <Icon :style="{'font-weight': 'bold'}" type="md-add" />
         </Button>
       </div>
     </div>
     <div class="right-container">
       <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-        <Button @click="makeBarChart" :disabled="!isWatching">
+        <Button :disabled="!isWatching" @click="makeBarChart">
           <Icon type="md-podium" />
         </Button>
-        <Button @click="makePieChart" :disabled="!isWatching">
+        <Button :disabled="!isWatching" @click="makePieChart">
           <Icon type="md-pie" />
         </Button>
       </ButtonGroup>
@@ -56,22 +55,20 @@
             <p>{这是一个选项所有文本都会参与匹配}</p>
           </div>
         </div>
-      </Tooltip> -->
-      <div id="chart"></div>
+      </Tooltip>-->
+      <div id="chart" />
     </div>
 
     <Modal v-model="isShowVoteRecord" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
-      <template v-for="(value, uid) in userMap">
-        <p :key="uid">
-          {{ value }}
-        </p>
+      <template v-for="(value, uid) in userMap" :key="uid">
+        <p>{{ value }}</p>
       </template>
     </Modal>
   </div>
 </template>
 
 <script>
-import * as echarts from "echarts";
+import * as echarts from 'echarts'
 
 // ISSUE: echart 5.0.2 按需引入 electron 打包报错
 // https://github.com/apache/echarts/issues/14321
@@ -93,49 +90,49 @@ import * as echarts from "echarts";
 //   CanvasRenderer,
 // ]);
 
-import { shuffle, cloneDeep } from "lodash";
+import { shuffle, cloneDeep } from 'lodash'
 import ws from '../../service/ws'
-import { COLORS } from "../../service/const";
-let colorPool = shuffle(COLORS);
+import { COLORS } from '../../service/const'
+let colorPool = shuffle(COLORS)
 
 export default {
   data() {
     return {
       chart: null,
       isWatching: false,
-      type: "bar",
+      type: 'bar',
       isShowVoteRecord: false,
       userMap: {},
       keywords: [],
-      optionRegexps: []
-    };
+      optionRegexps: [],
+    }
   },
   computed: {
     isConnected() {
-      return this.$store.state.Config.isConnected;
+      return this.$store.state.Config.isConnected
     },
     options() {
       console.log(this.$store.state.Config.voteOptions)
-      return this.$store.state.Config.voteOptions;
+      return this.$store.state.Config.voteOptions
     },
   },
-  beforeDestroy() {
-    this.stop();
+  beforeUnmount() {
+    this.stop()
   },
   methods: {
     initChart() {
       this.userMap = {}
-      const chartDOM = document.getElementById("chart")
+      const chartDOM = document.getElementById('chart')
       if (!this.chart) {
         this.chart = echarts.init(chartDOM)
       }
-      this.type === "bar" ? this.makeBarChart() : this.pieChart();
+      this.type === 'bar' ? this.makeBarChart() : this.pieChart()
     },
 
     start() {
       this.isWatching = true
-      this.keywords = this.options.map(option => option.keyword).filter(Boolean)
-      this.optionRegexps = this.keywords.map((keyword) => new RegExp(keyword, "i"))
+      this.keywords = this.options.map((option) => option.keyword).filter(Boolean)
+      this.optionRegexps = this.keywords.map((keyword) => new RegExp(keyword, 'i'))
       this.data = this.keywords.map((keyword, index) => {
         return {
           name: keyword,
@@ -151,7 +148,6 @@ export default {
       ws.addEventListener('message', this.onVoteMessage)
       // emitter.on("message", this.onVoteMessage);
 
-
       // setInterval(() => {
       //   for (let i = 0; i < this.data.length; i++) {
       //     this.data[i].value = this.data[i].value + Math.floor(Math.random() * 10)
@@ -165,36 +161,36 @@ export default {
     },
 
     makeChart(options = {}) {
-      const chartOptions = {};
+      const chartOptions = {}
 
-      if (this.type === "pie") {
+      if (this.type === 'pie') {
         Object.assign(chartOptions, {
           series: [
             {
-              name: "计数",
-              type: "pie",
+              name: '计数',
+              type: 'pie',
               minShowLabelAngle: 1,
               label: {
                 show: true,
-                position: "outside",
-                formatter: "{b}: {d}%",
+                position: 'outside',
+                formatter: '{b}: {d}%',
               },
               data: this.data,
             },
           ],
           legend: {
-            orient: "vertical",
-            left: "left",
+            orient: 'vertical',
+            left: 'left',
           },
           grid: {
             top: 0,
             left: 0,
             rigth: 0,
           },
-        });
+        })
       }
 
-      if (this.type === "bar") {
+      if (this.type === 'bar') {
         Object.assign(chartOptions, {
           tooltip: {
             show: true,
@@ -202,11 +198,11 @@ export default {
           },
           series: [
             {
-              name: "计数",
-              type: "bar",
+              name: '计数',
+              type: 'bar',
               barWidth: 30,
               itemStyle: {
-                borderType: "solid",
+                borderType: 'solid',
                 // borderColor: "silver",
                 // borderWidth: 1,
                 barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
@@ -215,7 +211,7 @@ export default {
             },
           ],
           xAxis: {
-            type: "value",
+            type: 'value',
             splitLine: {
               // show: false,
             },
@@ -224,7 +220,7 @@ export default {
             },
           },
           yAxis: {
-            type: "category",
+            type: 'category',
             data: this.keywords,
             axisTick: {
               show: false,
@@ -235,27 +231,27 @@ export default {
             left: 5,
             rigth: 20,
           },
-        });
+        })
       }
 
-      this.chart.setOption(chartOptions);
+      this.chart.setOption(chartOptions)
     },
 
     makePieChart() {
-      this.type = "pie"
-      this.chart.clear();
+      this.type = 'pie'
+      this.chart.clear()
 
       const option = {
         tooltip: {
-          trigger: 'item'
+          trigger: 'item',
         },
         // legend: {
         //   top: '5%',
         //   left: 'center'
         // },
         legend: {
-          orient: "vertical",
-          left: "left",
+          orient: 'vertical',
+          left: 'left',
         },
         series: [
           {
@@ -265,33 +261,33 @@ export default {
             itemStyle: {
               borderRadius: 10,
               borderColor: '#fff',
-              borderWidth: 2
+              borderWidth: 2,
             },
             label: {
               show: false,
-              position: 'center'
+              position: 'center',
             },
             emphasis: {
               label: {
                 show: true,
                 fontSize: '30',
                 fontWeight: 'bold',
-                formatter: "{b}: {d}%",
-              }
+                formatter: '{b}: {d}%',
+              },
             },
             labelLine: {
-              show: false
+              show: false,
             },
-            data: this.data
-          }
-        ]
+            data: this.data,
+          },
+        ],
       }
 
-      this.chart.setOption(option);
+      this.chart.setOption(option)
     },
 
     makeBarChart() {
-      this.type = "bar"
+      this.type = 'bar'
       this.chart.clear()
       // this.chart.resize({
       //   height: 160 + this.keywords.length * 30,
@@ -299,7 +295,7 @@ export default {
 
       const option = {
         xAxis: {
-          max: 'dataMax'
+          max: 'dataMax',
         },
         yAxis: {
           type: 'category',
@@ -319,52 +315,54 @@ export default {
             label: {
               show: true,
               position: 'right',
-              valueAnimation: true
-            }
-          }
+              valueAnimation: true,
+            },
+          },
         ],
         legend: {
-          show: false
+          show: false,
         },
         animationDuration: 0,
         animationDurationUpdate: 3000,
         animationEasing: 'linear',
-        animationEasingUpdate: 'linear'
-      };
+        animationEasingUpdate: 'linear',
+      }
 
-      this.chart.setOption(option);
+      this.chart.setOption(option)
     },
 
     updateChartData() {
       this.chart.setOption({
         series: [
           {
-            data: this.data
-          }
-        ]
-      });
+            data: this.data,
+          },
+        ],
+      })
     },
 
     showVoteRecord() {
-      this.isShowVoteRecord = true;
+      this.isShowVoteRecord = true
     },
     randomPickColor() {
-      const color = colorPool.shift();
-      colorPool.push(color);
-      return color;
+      const color = colorPool.shift()
+      colorPool.push(color)
+      return color
     },
     onVoteMessage: async function (msg) {
       const message = JSON.parse(msg.data)
       if (message.cmd !== 'COMMENT') return
       const comment = message.payload
       // 已经记录过的用户不再重复统计
-      if (this.userMap[comment.uid]) return;
+      if (this.userMap[comment.uid]) return
       const index = this.optionRegexps.findIndex((regexp) => {
-        return regexp.test(comment.content);
-      });
-      if (!~index) return;
+        return regexp.test(comment.content)
+      })
+      if (!~index) return
       // 记录统计
-      this.userMap[comment.uid] = `${comment.uname}(${comment.uid}): ${comment.content} -> ${this.keywords[index]}`
+      this.userMap[
+        comment.uid
+      ] = `${comment.uname}(${comment.uid}): ${comment.content} -> ${this.keywords[index]}`
       // 输入图表
       this.data[index].value++
       this.updateChartData()
@@ -376,10 +374,10 @@ export default {
         {
           keyword: '',
           value: '',
-        }
+        },
       ]
-      this.$store.dispatch("UPDATE_CONFIG", {
-        voteOptions: options
+      this.$store.dispatch('UPDATE_CONFIG', {
+        voteOptions: options,
       })
     },
 
@@ -388,28 +386,28 @@ export default {
       const options = [...this.options]
       options.splice(index, 1)
       console.log(options)
-      this.$store.dispatch("UPDATE_CONFIG", {
-        voteOptions: options
+      this.$store.dispatch('UPDATE_CONFIG', {
+        voteOptions: options,
       })
     },
 
     changeOptionKeyword(index, e) {
       const options = cloneDeep(this.options)
       options[index].keyword = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        voteOptions: options
+      this.$store.dispatch('UPDATE_CONFIG', {
+        voteOptions: options,
       })
     },
 
     changeOptionContent(index, e) {
       const options = cloneDeep(this.options)
       options[index].content = e.target.value
-      this.$store.dispatch("UPDATE_CONFIG", {
-        voteOptions: options
+      this.$store.dispatch('UPDATE_CONFIG', {
+        voteOptions: options,
       })
-    }
+    },
   },
-};
+}
 </script>
 
 <style scoped>

@@ -1,9 +1,11 @@
 <template>
   <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
-    <div :style="{
+    <div
+      :style="{
         background: `${priceProperties.backgroundColor}`,
         padding: '10px',
-      }">
+      }"
+    >
       <span v-if="showTime" class="date-style">
         {{ dateFormat(sendAt) }}
       </span>
@@ -18,7 +20,7 @@
       <template v-else-if="totalPrice">
         <span class="price-style">{{ `¥${totalPrice}` }}</span>
       </template>
-      <slot></slot>
+      <slot />
     </div>
   </div>
 </template>

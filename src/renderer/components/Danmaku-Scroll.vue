@@ -2,17 +2,17 @@
   <div class="main">
     <div class="item-container">
       <span class="setting-text">显示滚动弹幕窗</span>
-      <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>
+      <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
       <Checkbox :style="{'padding-left': '10px'}" :value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
     </div>
 
     <div class="item-container">
       <span class="setting-text">背景色</span>
-      <ColorPicker transfer :value="scrollDanmakuBackground" @on-active-change="debouncedUpdateBackground" size="small" alpha />
+      <ColorPicker transfer :value="scrollDanmakuBackground" size="small" alpha @on-active-change="debouncedUpdateBackground" />
     </div>
     <div class="item-container">
       <span class="setting-text">透明度</span>
-      <InputNumber :value="scrollDanmakuOpacity" @on-change="changeScrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" />
+      <InputNumber :value="scrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" @on-change="changeScrollDanmakuOpacity" />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕样式选择</span>
@@ -27,15 +27,15 @@
     </div>
     <div class="item-container">
       <span class="setting-text">整体字号</span>
-      <InputNumber :value="scrollDanmakuFontSize" @on-change="changeScrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" />
+      <InputNumber :value="scrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuFontSize" />
     </div>
     <div class="item-container">
       <span class="setting-text">表情大小</span>
-      <InputNumber :value="scrollDanmakuEmojiSize" @on-change="changeScrollDanmakuEmojiSize" :min="1" size="small" :style="{ width: '55px' }" />
+      <InputNumber :value="scrollDanmakuEmojiSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuEmojiSize" />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕显示时间</span>
-      <InputNumber :value="scrollDanmakuDuration" @on-change="changeScrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" />
+      <InputNumber :value="scrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" @on-change="changeScrollDanmakuDuration" />
     </div>
     <div class="item-container">
       <span class="setting-text">方向</span>

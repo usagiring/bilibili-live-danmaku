@@ -8,6 +8,7 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
     "types": [
       "vite-plugin-electron/electron-env"
     ]

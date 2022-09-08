@@ -1,62 +1,62 @@
 <template>
   <div class="layout">
     <Layout :style="{ minHeight: '100vh' }">
-      <Sider collapsible :collapsed-width="78" :width="140" v-model="isCollapsed">
+      <Sider v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
         <Menu theme="dark" width="auto" :class="menuitemClasses">
           <MenuItem name="1-1" to="/style">
-          <Icon type="md-color-palette" />
-          <span>样式</span>
+            <Icon type="md-color-palette" />
+            <span>样式</span>
           </MenuItem>
           <MenuItem name="1-2" to="/message">
-          <Icon type="md-chatboxes" />
-          <span>消息</span>
+            <Icon type="md-chatboxes" />
+            <span>消息</span>
           </MenuItem>
           <MenuItem name="1-3" to="/live">
-          <Icon type="md-play" />
-          <span>直播</span>
+            <Icon type="md-play" />
+            <span>直播</span>
           </MenuItem>
           <MenuItem name="1-4" to="/vote">
-          <Icon type="md-pie" />
-          <span>投票</span>
+            <Icon type="md-pie" />
+            <span>投票</span>
           </MenuItem>
           <MenuItem name="1-5" to="/lottery">
-          <Icon type="md-bonfire" />
-          <span>祈愿</span>
+            <Icon type="md-bonfire" />
+            <span>祈愿</span>
           </MenuItem>
           <MenuItem name="1-6" to="/statistic">
-          <Icon type="md-stats" />
-          <span>统计</span>
+            <Icon type="md-stats" />
+            <span>统计</span>
           </MenuItem>
           <MenuItem name="1-7" to="/auto-reply">
-          <Icon type="md-repeat" />
-          <span>回复</span>
+            <Icon type="md-repeat" />
+            <span>回复</span>
           </MenuItem>
           <MenuItem name="1-8" to="/command">
-          <div :style="{position: 'relative', 'display': 'inline-block'}">
-            <!-- <Icon type="md-code" /> -->
-            <Icon type="md-color-wand" />
-            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
-          </div>
-          <span>咒语</span>
+            <div :style="{position: 'relative', 'display': 'inline-block'}">
+              <!-- <Icon type="md-code" /> -->
+              <Icon type="md-color-wand" />
+              <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+            </div>
+            <span>咒语</span>
           </MenuItem>
           <MenuItem name="1-9" to="/danmaku-scroll">
-          <Icon type="ios-water" />
-          <span>弹幕2</span>
+            <Icon type="ios-water" />
+            <span>弹幕2</span>
           </MenuItem>
           <MenuItem name="1-10" to="/asr">
-          <div :style="{position: 'relative', 'display': 'inline-block'}">
-            <Icon type="md-ionitron" />
-            <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
-          </div>
-          <span>语音识别</span>
+            <div :style="{position: 'relative', 'display': 'inline-block'}">
+              <Icon type="md-ionitron" />
+              <div :style="{position:'absolute', right: '-25px', top: '-10px', 'font-size': '10px'}">beta</div>
+            </div>
+            <span>语音识别</span>
           </MenuItem>
           <MenuItem name="1-11" to="/config">
-          <Icon type="md-settings" />
-          <span>设置</span>
+            <Icon type="md-settings" />
+            <span>设置</span>
           </MenuItem>
           <MenuItem name="1-12" to="/help">
-          <Icon type="md-help" />
-          <span>帮助</span>
+            <Icon type="md-help" />
+            <span>帮助</span>
           </MenuItem>
         </Menu>
       </Sider>
@@ -68,7 +68,7 @@
             <div class="avatar-wrapper">
               <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
               <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : "未连接" }}</span>
-              <span :class="liveStatus === 1 ? 'live-tag-on': 'live-tag-off'" v-if="username">{{ liveStatus === 1 ? "直播中" : "未开播" }}</span>
+              <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on': 'live-tag-off'">{{ liveStatus === 1 ? "直播中" : "未开播" }}</span>
             </div>
 
             <div class="status-wrapper">
@@ -117,9 +117,9 @@
             <!-- <div> -->
 
             <!-- </div> -->
-            <div class="updater-wrapper" v-if="hasNewVersion">
+            <div v-if="hasNewVersion" class="updater-wrapper">
               <template v-if="!isAppUpdating">
-                <Button shape="circle" type="dashed" @click="updateApp" :loading="isAppUpdateStarting">
+                <Button shape="circle" type="dashed" :loading="isAppUpdateStarting" @click="updateApp">
                   <Icon type="md-arrow-round-up" color="green" />
                   <span :style="{ color: 'green' }">更新</span>
                 </Button>
@@ -127,8 +127,8 @@
               <template v-else>
                 <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
                   <span class="demo-Circle-inner" style="font-size: 12px">{{
-                  downloadRate
-                }}</span>
+                    downloadRate
+                  }}</span>
                 </i-circle>
               </template>
             </div>
@@ -136,20 +136,20 @@
           <div class="layout-header2 transparent-mask">
             <div>
               <span>连接直播间</span>
-              <AutoComplete :value="displayRoomId" @on-change="changeRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px">
-                <Option v-for="room in selfHistoryRooms" :value="room.roomId" :key="room.roomId">
+              <AutoComplete :value="displayRoomId" placeholder="请输入房间号" size="small" :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
+                <Option v-for="room in selfHistoryRooms" :key="room.roomId" :value="room.roomId">
                   <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
                   {{ `${room.uname} (${room.roomId})` }}
                   <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green'} : { 'font-size': '12px', color: 'silver'}">{{ room.liveStatus === 1 ? "直播中" : "未开播" }}</span>
                   <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
                 </Option>
               </AutoComplete>
-              <i-switch :value="isConnected" :loading="isConnecting" @on-change="connect" :disabled="!displayRoomId" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <i-switch :value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <span>弹幕窗</span>
-              <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow"></i-switch>&nbsp;&nbsp;&nbsp;
+              <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />&nbsp;&nbsp;&nbsp;
               <template v-if="isShowDanmakuWindow">
                 <span>窗口置顶</span>
-                <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop"></i-switch>
+                <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
               </template>
               <Tooltip placement="right" content="录制中">
                 <span v-if="isRecording" class="record-icon">
@@ -167,7 +167,7 @@
         </div>
 
         <div class="layout-content">
-          <router-view :style="{ height: '100%' }"></router-view>
+          <router-view :style="{ height: '100%' }" />
         </div>
       </Layout>
     </Layout>
@@ -233,6 +233,71 @@ export default {
       roomUserId: 0,
       watchedNumber: 0
     };
+  },
+  computed: {
+    menuitemClasses: function () {
+      return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
+    },
+    isConnected() {
+      return this.$store.state.Config.isConnected || false;
+    },
+    windowWidth() {
+      return this.$store.state.Config.windowWidth;
+    },
+    windowHeight() {
+      return this.$store.state.Config.windowHeight;
+    },
+    windowX() {
+      return this.$store.state.Config.windowX;
+    },
+    windowY() {
+      return this.$store.state.Config.windowY;
+    },
+    realRoomId() {
+      return this.$store.state.Config.realRoomId;
+    },
+    recordDir() {
+      return this.$store.state.Config.recordDir;
+    },
+    userCookie() {
+      return this.$store.state.Config.userCookie;
+    },
+    isWithCookie() {
+      return this.$store.state.Config.isWithCookie;
+    },
+    isAutoRecord() {
+      return this.$store.state.Config.isAutoRecord;
+    },
+    historyRooms() {
+      return this.$store.state.Config.historyRooms;
+    },
+    // filteredRooms() {
+    //   return this.historyRooms.filter(room => {
+    //     const index = `${room.roomId}`.indexOf(`${this.displayRoomId}`)
+    //     if (!~index) return false
+    //     // room.highLightIndex = index
+    //     return true
+    //   })
+    // }
+    isWatchLottery() {
+      return this.$store.state.Config.isWatchLottery;
+    },
+    onTopLevel() {
+      return this.$store.state.Config.onTopLevel
+    },
+    isOnTopForce() {
+      return this.$store.state.Config.isOnTopForce
+    },
+    danmakuWindowId() {
+      return this.$store.state.Config.danmakuWindowId
+    },
+  },
+  watch: {
+    async historyRooms(newValue, oldValue) {
+      this.selfHistoryRooms = newValue
+      if (newValue.length < oldValue.length) return
+      await this.fillRoomLiveStatus(newValue)
+    }
   },
   created() {
   },
@@ -340,70 +405,13 @@ export default {
 
     await this.fillRoomLiveStatus(this.historyRooms)
   },
-  watch: {
-    async historyRooms(newValue, oldValue) {
-      this.selfHistoryRooms = newValue
-      if (newValue.length < oldValue.length) return
-      await this.fillRoomLiveStatus(newValue)
+  beforeUnmount() {
+    if (this.giftTimer) {
+      clearInterval(this.giftTimer);
     }
-  },
-  computed: {
-    menuitemClasses: function () {
-      return ["menu-item", this.isCollapsed ? "collapsed-menu" : ""];
-    },
-    isConnected() {
-      return this.$store.state.Config.isConnected || false;
-    },
-    windowWidth() {
-      return this.$store.state.Config.windowWidth;
-    },
-    windowHeight() {
-      return this.$store.state.Config.windowHeight;
-    },
-    windowX() {
-      return this.$store.state.Config.windowX;
-    },
-    windowY() {
-      return this.$store.state.Config.windowY;
-    },
-    realRoomId() {
-      return this.$store.state.Config.realRoomId;
-    },
-    recordDir() {
-      return this.$store.state.Config.recordDir;
-    },
-    userCookie() {
-      return this.$store.state.Config.userCookie;
-    },
-    isWithCookie() {
-      return this.$store.state.Config.isWithCookie;
-    },
-    isAutoRecord() {
-      return this.$store.state.Config.isAutoRecord;
-    },
-    historyRooms() {
-      return this.$store.state.Config.historyRooms;
-    },
-    // filteredRooms() {
-    //   return this.historyRooms.filter(room => {
-    //     const index = `${room.roomId}`.indexOf(`${this.displayRoomId}`)
-    //     if (!~index) return false
-    //     // room.highLightIndex = index
-    //     return true
-    //   })
-    // }
-    isWatchLottery() {
-      return this.$store.state.Config.isWatchLottery;
-    },
-    onTopLevel() {
-      return this.$store.state.Config.onTopLevel
-    },
-    isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
-    },
-    danmakuWindowId() {
-      return this.$store.state.Config.danmakuWindowId
-    },
+    if (this.peopleTimer) {
+      clearInterval(this.peopleTimer);
+    }
   },
   methods: {
     async connect(status) {
@@ -804,14 +812,6 @@ export default {
     openBiliLiveRoom() {
       if (!this.isConnected || !this.realRoomId) return
       shell.openExternal(`https://live.bilibili.com/${this.realRoomId}`)
-    }
-  },
-  beforeDestroy() {
-    if (this.giftTimer) {
-      clearInterval(this.giftTimer);
-    }
-    if (this.peopleTimer) {
-      clearInterval(this.peopleTimer);
     }
   },
 };

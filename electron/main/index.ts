@@ -1,5 +1,5 @@
 import { app, BrowserWindow, shell, ipcMain, nativeImage, session } from 'electron'
-// import { release } from 'os'
+import { release } from 'os'
 import { join } from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../../src/service/const'
@@ -15,7 +15,7 @@ bilibiliBridge.init({
 
 
 // Disable GPU Acceleration for Windows 7
-// if (release().startsWith('6.1')) app.disableHardwareAcceleration()
+if (release().startsWith('6.1')) app.disableHardwareAcceleration()
 
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
@@ -66,7 +66,7 @@ async function createWindow() {
   })
 
   win.setIcon(nativeImage.createFromPath(join(__dirname, '../../build/icons/icon.ico')))
-  win.setMenuBarVisibility(false)
+  // win.setMenuBarVisibility(false)
 
 
   if (app.isPackaged) {
@@ -74,6 +74,7 @@ async function createWindow() {
   } else {
     win.loadURL(url)
     // Open devTool if the app is not packaged
+    console.log('12313213')
     win.webContents.openDevTools()
   }
 

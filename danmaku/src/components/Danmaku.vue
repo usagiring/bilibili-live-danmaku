@@ -35,10 +35,9 @@
           <transition-group name="fade">
             <template v-for="gift of headlines">
               <!-- eslint-disable-next-line -->
-              <div :key="gift._id" @mouseenter="hoverGift(gift._id)" @mouseleave="unhoverGift(gift._id)" class="gift-show-wrapper">
+              <div @mouseenter="hoverGift(gift._id)" @mouseleave="unhoverGift(gift._id)" class="gift-show-wrapper">
                 <!-- <transition name="fade"> -->
                 <div
-                  :key="`${gift._id}_normal`"
                   v-if="!giftHover.includes(gift._id)"
                   class="gift-show-content"
                   :style="{ background: gift.priceProperties.backgroundColor }"
@@ -151,23 +150,20 @@
                 class="border-image-default"
                 :style="{ ...borderImageStyle, ...getMessageStyleByRole(message)}"
               >
-                <template v-for="(setting, index) of messageSettings">
+                <template :key="index" v-for="(setting, index) of messageSettings">
                   <Avatar
                     class="margin-lr-1px"
-                    :key="index"
                     v-if="setting.type==='avatar' && setting.isShow"
                     :src="message.avatar"
                     :style="avatarSizeStyle"
                   />
                   <img
                     class="guard-icon margin-lr-1px"
-                    :key="index"
                     v-if="setting.type==='guard' && setting.isShow && message.role"
                     :src="`${getGuardIcon(message.role)}`"
                   />
                   <FanMedal
                     class="margin-lr-1px"
-                    :key="index"
                     v-if="setting.type==='medal' && setting.isShow && message.medalLevel && message.medalName"
                     :medalLevel="message.medalLevel"
                     :medalName="message.medalName"
@@ -176,18 +172,16 @@
                     :medalColorBorder="message.medalColorBorder"
                   ></FanMedal>
                   <span
-                    :key="index"
                     v-if="setting.type==='name'"
                     class="is-vertical-align margin-lr-1px"
                     :style="{...fontStyle, ...getNameStyleByRole(message)}"
                   >{{ message.uname }}</span>
                   <span
-                    :key="index"
                     v-if="setting.type==='colon' && setting.isShow"
                     class="is-vertical-align"
                     :style="{...fontStyle, ...getNameStyleByRole(message)}"
                   >：</span>
-                  <span :key="index" v-if="setting.type==='comment'">
+                  <span v-if="setting.type==='comment'">
                     <img v-if="message.emojiUrl" :style="{ 'vertical-align': 'middle', height: '24px' }" :src="message.emojiUrl" />
                     <span v-else class="is-vertical-align" :style="{...fontStyle, ...getCommentStyleByRole(message)}">{{ message.content }}</span>
                     <span v-if="message.voiceUrl" @click="playAudio(message.voiceUrl)" class="voice-container">

@@ -2,10 +2,10 @@
   <div>
     <span class="setting-key-text">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" @on-change="updateStyle" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" />
+      <InputNumber :value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="updateStyle" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker :value="value" @on-active-change="updateStyle" size="small" alpha />
+      <ColorPicker :value="value" size="small" alpha @on-active-change="updateStyle" />
     </template>
   </div>
 </template>

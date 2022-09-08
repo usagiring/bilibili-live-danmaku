@@ -2,9 +2,9 @@
   <div :style="{ height: '100%' }">
     <div class="searcher-wrapper">
       <Input v-model="roomId" placeholder="房间号" clearable style="width: 150px" size="small" />
-      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange"></DatePicker>
-      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic"></Button>
-      <Button shape="circle" icon="md-download" :disabled="!roomId" @click="download"></Button>
+      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange" />
+      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic" />
+      <Button shape="circle" icon="md-download" :disabled="!roomId" @click="download" />
     </div>
     <div class="main-container">
       <div class="text-container">
@@ -19,7 +19,7 @@
         <Button type="primary" class="workclound-button" @click="generateWordCloud">生成词云</Button>
       </div>
 
-      <div id="chart"></div>
+      <div id="chart" />
     </div>
   </div>
 </template>

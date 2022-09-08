@@ -8,7 +8,7 @@
     <p :style="{'padding-top': '64px'}">
       <Icon :style="{'font-size': '48px', 'cursor': 'pointer'}" type="logo-github" @click="openGithub" />
     </p>
-    <p class="intro-img-container">v{{version}}</p>
+    <p class="intro-img-container">v{{ version }}</p>
   </div>
 </template>
 

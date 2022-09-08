@@ -6,47 +6,34 @@
         <span>
           <Tooltip max-width="600" transfer placement="right">
             <span class="help">?</span>
-            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
-              <p>
-                ● 本功能依赖阿里云服务实现直播语音识别。
-              </p>
-              <p>
-                ● 您需要先在阿里云官网开通账户，并且开通实时语音识别功能，具体操作可参考网上教程。
-              </p>
-              <p>
-                ● 本功能依赖ffmpeg。
-              </p>
-              <p>
-                ● 您可以自行下载ffmpeg，我在度盘也会提供一个镜像。
-              </p>
-              <p>
-                ● 您需要把ffmpeg放入环境变量，或者手动指定ffmpeg文件路径。
-              </p>
-            </div>
+            <template #content>
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+                <p>● 本功能依赖阿里云服务实现直播语音识别。</p>
+                <p>● 您需要先在阿里云官网开通账户，并且开通实时语音识别功能，具体操作可参考网上教程。</p>
+                <p>● 本功能依赖ffmpeg。</p>
+                <p>● 您可以自行下载ffmpeg，我在度盘也会提供一个镜像。</p>
+                <p>● 您需要把ffmpeg放入环境变量，或者手动指定ffmpeg文件路径。</p>
+              </div>
+            </template>
           </Tooltip>
         </span>
-
       </div>
       <div class="config-container">
         独立窗口
-        <i-switch :value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow"></i-switch>
+        <i-switch :value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow" />
         <Checkbox :style="{'padding-left': '10px'}" :value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
       </div>
       <!-- <div class="divider"></div> -->
       <div class="config-container">
         <span>
           <Tooltip max-width="600" transfer placement="right">
-            <Button @click="openFFmpegSelector" size="small">
-              选择 ffmpeg 文件
-            </Button>
-            <div slot="content" :style="{ 'white-space': 'normal', 'line-height': '24px'}">
-              <p>
-                ● 您可以手动指定ffmpeg文件路径。
-              </p>
-              <p>
-                ● 不选择则从环境变量中寻找ffmpeg文件。
-              </p>
-            </div>
+            <Button size="small" @click="openFFmpegSelector">选择 ffmpeg 文件</Button>
+            <template #content>
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+                <p>● 您可以手动指定ffmpeg文件路径。</p>
+                <p>● 不选择则从环境变量中寻找ffmpeg文件。</p>
+              </div>
+            </template>
           </Tooltip>
         </span>
         <span v-if="ffmpegExe">
@@ -57,73 +44,91 @@
       <div class="config-container">
         <span>
           显示行数：
-          <InputNumber :value="ASRLineCount" size="small" @on-change="changeASRLineCount" :min="1" :step="1" :style="{ width: '50px' }" />
+          <InputNumber :value="ASRLineCount" size="small" :min="1" :step="1" :style="{ width: '50px' }" @on-change="changeASRLineCount" />
         </span>
       </div>
       <div class="config-container">
         <span>
-          <Checkbox :value="enableTranslate" @on-change="changeEnableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang ||!toLang">开启翻译：</Checkbox>
-          <Select v-model="fromLang" :disabled="enableTranslate" size="small" style="width:80px">
-            <Option v-for="item in fromLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
-          </Select>
-          =>
-          <Select v-model="toLang" :disabled="enableTranslate" size="small" style="width:80px">
-            <Option v-for="item in toLangs" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          <Checkbox
+            :value="enableTranslate"
+            :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang ||!toLang"
+            @on-change="changeEnableTranslate"
+          >开启翻译：</Checkbox>
+          <Select v-model:fromLang="fromLang" :disabled="enableTranslate" size="small" style="width:80px">
+            <Option v-for="item in fromLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
+          </Select>=>
+          <Select v-model:toLang="toLang" :disabled="enableTranslate" size="small" style="width:80px">
+            <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
         </span>
       </div>
       <div class="config-container">
-        <Button @click="start" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" size="small" :loading="isStarting">开始</Button>
-        <Button @click="stop" :disabled="!isStarted" size="small">停止</Button>
+        <Button :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" size="small" :loading="isStarting" @click="start">开始</Button>
+        <Button :disabled="!isStarted" size="small" @click="stop">停止</Button>
       </div>
       <div class="config-container" :style="{width: '400px'}">
-        <div :style="{'text-align': 'center'}">
-          阿里云
+        <div :style="{'text-align': 'center'}">阿里云</div>
+        <div>
+          <div class="key-item">AccessKeyId:</div>
+          <Input
+            :value="aliAccessKeyId"
+            :disabled="isStarted"
+            :style="{display: 'inline-block', width: '220px'}"
+            size="small"
+            placeholder="AccessKeyId..."
+            @on-change="changeAliAccessKeyId"
+          />
         </div>
         <div>
-          <div class="key-item">AccessKeyId: </div>
-          <Input :value="aliAccessKeyId" :disabled="isStarted" @on-change="changeAliAccessKeyId" size="small" placeholder="AccessKeyId..." :style="{display: 'inline-block', width: '220px'}" />
+          <div class="key-item">AccessKeySecret:</div>
+          <Input
+            :value="aliAccessKeySecret"
+            :disabled="isStarted"
+            size="small"
+            placeholder="AccessKeySecret..."
+            type="password"
+            :style="{display: 'inline-block', width: '220px'}"
+            @on-change="changeAliAccessKeySecret"
+          />
         </div>
         <div>
-          <div class="key-item">AccessKeySecret: </div>
-          <Input :value="aliAccessKeySecret" :disabled="isStarted" @on-change="changeAliAccessKeySecret" size="small" placeholder="AccessKeySecret..." type="password" :style="{display: 'inline-block', width: '220px'}" />
-        </div>
-        <div>
-          <div class="key-item">AppKey: </div>
+          <div class="key-item">AppKey:</div>
           <!-- <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
-          <AutoComplete :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}">
-            <Option v-for="appKey in aliAppKeys" :value="appKey" :key="appKey">
+          <AutoComplete
+            :value="aliAppKey"
+            :disabled="isStarted"
+            size="small"
+            placeholder="AppKey..."
+            :style="{display: 'inline-block', width: '220px'}"
+            @on-change="changeAliAppKey"
+          >
+            <Option v-for="appKey in aliAppKeys" :key="appKey" :value="appKey">
               {{ appKey }}
               <Icon type="md-close" class="remove-history-appkey" @click="removeHistoryAppkey(appKey)" />
             </Option>
           </AutoComplete>
         </div>
         <div>
-          <div class="key-item">服务器: </div>
-          <Select class="server-selector" v-model="aliServer" :disabled="isStarted" style="width:200px" size="small">
-            <Option v-for="item in aliServers" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          <div class="key-item">服务器:</div>
+          <Select v-model="aliServer" class="server-selector" :disabled="isStarted" style="width:200px" size="small">
+            <Option v-for="item in aliServers" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
         </div>
       </div>
     </div>
     <div class="right-container">
-      <template v-for="(text, index) in texts">
-        <div :key="index">
-          <div>
-            {{ text.text }}
-          </div>
-          <div v-if="text.translate" :style="{color: 'gray'}">
-            {{ text.translate }}
-          </div>
+      <template v-for="(text, index) in texts" :key="index">
+        <div>
+          <div>{{ text.text }}</div>
+          <div v-if="text.translate" :style="{color: 'gray'}">{{ text.translate }}</div>
         </div>
       </template>
     </div>
-
   </div>
 </template>
 
 <script>
-// TODO 
+// TODO
 // 设置ffmpeg 路径
 // 实例保存
 
@@ -131,19 +136,27 @@
 // 1 输出文件
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
-import { ipcRenderer } from "electron";
-import * as remote from "@electron/remote";
+import { ipcRenderer } from 'electron'
+import * as remote from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus } from '../../service/api'
-import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from "../../service/const";
-import { getRandomPlayUrl } from "../../service/bilibili-recorder"
+import {
+  initialASR,
+  closeASR,
+  getASRStatus,
+  translateSentence,
+  translateOpen,
+  translateClose,
+  getTranslateStatus,
+} from '../../service/api'
+import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
+import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 const { BrowserWindow, dialog } = remote
 
 export default {
   data() {
     return {
-      playQuality: "高清",
+      playQuality: '高清',
       checkOnTopInterval: null,
       isStarting: false,
       isStarted: false,
@@ -179,48 +192,52 @@ export default {
         {
           value: 'en',
           label: '英语',
-        }
+        },
       ],
       aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-      aliServers: [{
-        value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-        label: '上海'
-      }, {
-        value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
-        label: '北京'
-      }, {
-        value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
-        label: '深圳'
-      }],
+      aliServers: [
+        {
+          value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
+          label: '上海',
+        },
+        {
+          value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
+          label: '北京',
+        },
+        {
+          value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
+          label: '深圳',
+        },
+      ],
       texts: [],
       currentTextIndex: 0,
-    };
+    }
   },
 
   computed: {
     realRoomId() {
-      return this.$store.state.Config.realRoomId;
+      return this.$store.state.Config.realRoomId
     },
     isWithCookie() {
-      return this.$store.state.Config.isWithCookie;
+      return this.$store.state.Config.isWithCookie
     },
     userCookie() {
-      return this.$store.state.Config.userCookie;
+      return this.$store.state.Config.userCookie
     },
     aliAccessKeyId() {
-      return this.$store.state.Config.aliAccessKeyId;
+      return this.$store.state.Config.aliAccessKeyId
     },
     aliAccessKeySecret() {
-      return this.$store.state.Config.aliAccessKeySecret;
+      return this.$store.state.Config.aliAccessKeySecret
     },
     aliAppKey() {
-      return this.$store.state.Config.aliAppKey;
+      return this.$store.state.Config.aliAppKey
     },
     ffmpegExe() {
-      return this.$store.state.Config.ffmpegExe;
+      return this.$store.state.Config.ffmpegExe
     },
     ASRWindowId() {
-      return this.$store.state.Config.ASRWindowId;
+      return this.$store.state.Config.ASRWindowId
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
@@ -233,32 +250,30 @@ export default {
     },
     aliAppKeys() {
       return this.$store.state.Config.aliAppKeys
-    }
+    },
   },
 
   created() {
-    getASRStatus()
-      .then(({ message }) => {
-        if (message === '1') {
-          this.isStarted = true
-        }
-      })
+    getASRStatus().then(({ message }) => {
+      if (message === '1') {
+        this.isStarted = true
+      }
+    })
 
-    getTranslateStatus()
-      .then(({ message, data }) => {
-        if (message === '1') {
-          this.enableTranslate = true
-          this.fromLang = data?.fromLang
-          this.toLang = data?.toLang
-        }
-      })
+    getTranslateStatus().then(({ message, data }) => {
+      if (message === '1') {
+        this.enableTranslate = true
+        this.fromLang = data?.fromLang
+        this.toLang = data?.toLang
+      }
+    })
 
     ws.addEventListener('message', this.onMessage)
   },
 
   mounted() {
     if (this.ASRWindowId) {
-      const win = BrowserWindow.fromId(this.ASRWindowId);
+      const win = BrowserWindow.fromId(this.ASRWindowId)
       if (win) {
         this.isShowASRWindow = true
         this.win = win
@@ -266,8 +281,8 @@ export default {
     }
   },
 
-  beforeDestroy() {
-    ws.removeEventListener("message", this.onMessage);
+  beforeUnmount() {
+    ws.removeEventListener('message', this.onMessage)
   },
 
   methods: {
@@ -287,7 +302,7 @@ export default {
         const texts = [...this.texts]
         texts[this.currentTextIndex] = {
           id: payload.payload?.header?.message_id,
-          text: payload.payload?.payload?.result
+          text: payload.payload?.payload?.result,
         }
         this.texts = texts
         if (this.enableTranslate) {
@@ -300,7 +315,7 @@ export default {
               text: payload.payload?.payload?.result,
               payload: {
                 id: payload.payload?.header?.message_id,
-              }
+              },
             })
           }
         }
@@ -310,7 +325,7 @@ export default {
         const texts = [...this.texts]
         texts[this.currentTextIndex] = {
           id: payload.payload?.header?.message_id,
-          text: payload.payload?.payload?.result
+          text: payload.payload?.payload?.result,
         }
         this.texts = texts
       }
@@ -330,7 +345,7 @@ export default {
         roomId: this.realRoomId,
         quality: this.playQuality,
         cookie: this.isWithCookie ? this.userCookie : undefined,
-      });
+      })
 
       await initialASR({
         accessKeyId: this.aliAccessKeyId,
@@ -347,12 +362,11 @@ export default {
       if (this.aliAppKeys.length >= 9) {
         aliAppKeys = this.aliAppKeys.slice(-this.aliAppKeys.length)
         aliAppKeys = [...aliAppKeys, this.aliAppKey]
-      }
-      else {
+      } else {
         aliAppKeys = [...this.aliAppKeys, this.aliAppKey]
       }
-      this.$store.dispatch("UPDATE_CONFIG", {
-        aliAppKeys: uniq(aliAppKeys)
+      this.$store.dispatch('UPDATE_CONFIG', {
+        aliAppKeys: uniq(aliAppKeys),
       })
     },
 
@@ -365,38 +379,38 @@ export default {
       const data = {
         aliAccessKeyId: e.target.value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     changeAliAccessKeySecret(e) {
       const data = {
         aliAccessKeySecret: e.target.value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     changeAliAppKey(value) {
       const data = {
-        aliAppKey: value
+        aliAppKey: value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async openFFmpegSelector() {
       const result = await dialog.showOpenDialog({
-        properties: ["openFile"],
-      });
+        properties: ['openFile'],
+      })
       if (!result.canceled) {
-        const ffmpegExe = result.filePaths[0];
-        this.$store.dispatch("UPDATE_CONFIG", {
+        const ffmpegExe = result.filePaths[0]
+        this.$store.dispatch('UPDATE_CONFIG', {
           ffmpegExe,
-        });
-        await this.$nextTick();
+        })
+        await this.$nextTick()
       }
     },
 
     async showASRWindow(status) {
-      this.isShowASRWindowLoading = true;
+      this.isShowASRWindowLoading = true
 
       if (status) {
         // window.open(
@@ -418,25 +432,25 @@ export default {
             contextIsolation: false,
           },
           resizable: true,
-        });
-
-        await ipcRenderer.invoke(IPC_ENABLE_WEB_CONTENTS, {
-          windowId: win.id
         })
 
-        this.$store.dispatch("UPDATE_CONFIG", {
-          ASRWindowId: win.id
-        });
+        await ipcRenderer.invoke(IPC_ENABLE_WEB_CONTENTS, {
+          windowId: win.id,
+        })
+
+        this.$store.dispatch('UPDATE_CONFIG', {
+          ASRWindowId: win.id,
+        })
 
         const winURL =
-          process.env.NODE_ENV === "development"
+          process.env.NODE_ENV === 'development'
             ? `http://localhost:9080/#/asr-window`
-            : `file://${__dirname}/index.html#asr-window`;
+            : `file://${__dirname}/index.html#asr-window`
 
-        win.loadURL(winURL);
+        win.loadURL(winURL)
         this.win = win
-        this.isShowASRWindow = true;
-        this.isShowASRWindowLoading = false;
+        this.isShowASRWindow = true
+        this.isShowASRWindowLoading = false
       } else {
         if (!this.win) return
         try {
@@ -449,9 +463,9 @@ export default {
     },
 
     async clearDanmakuWindowInfo() {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        ASRWindowId: null
-      });
+      this.$store.dispatch('UPDATE_CONFIG', {
+        ASRWindowId: null,
+      })
       // clear
       if (this.checkOnTopInterval) {
         clearInterval(this.checkOnTopInterval)
@@ -459,11 +473,11 @@ export default {
       }
       this.win = null
       this.isShowASRWindow = false
-      this.isShowASRWindowLoading = false;
+      this.isShowASRWindowLoading = false
     },
 
     changeAlwaysOnTop(status) {
-      this.win.setFocusable(!status);
+      this.win.setFocusable(!status)
       // this.win.setVisibleOnAllWorkspaces(true)
       if (this.isOnTopForce && status) {
         this.checkOnTopInterval = setInterval(() => {
@@ -474,8 +488,8 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.setAlwaysOnTop(status, this.onTopLevel);
-      this.win.setIgnoreMouseEvents(status, { forward: true });
+      this.win.setAlwaysOnTop(status, this.onTopLevel)
+      this.win.setIgnoreMouseEvents(status, { forward: true })
       //   this.$store.dispatch("UPDATE_CONFIG", {
       //     isScrollDanmakuWindowAlwaysOnTop: status,
       //   });
@@ -484,22 +498,22 @@ export default {
 
     changeASRLineCount(number) {
       const data = {
-        ASRLineCount: number
+        ASRLineCount: number,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     clearFFmpegPath() {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      this.$store.dispatch('UPDATE_CONFIG', {
         ffmpegExe: null,
-      });
+      })
     },
 
     removeHistoryAppkey(appKey) {
-      const aliAppKeys = this.aliAppKeys.filter(__appKey => __appKey !== appKey)
-      this.$store.dispatch("UPDATE_CONFIG", {
+      const aliAppKeys = this.aliAppKeys.filter((__appKey) => __appKey !== appKey)
+      this.$store.dispatch('UPDATE_CONFIG', {
         aliAppKeys,
-      });
+      })
     },
 
     async changeEnableTranslate(status) {
@@ -513,9 +527,9 @@ export default {
         await translateClose()
         this.enableTranslate = false
       }
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style scoped>

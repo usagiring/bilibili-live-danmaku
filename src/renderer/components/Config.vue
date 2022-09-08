@@ -11,11 +11,11 @@
       </Poptip>
       <Tooltip placement="top" max-width="300">
         <Icon type="md-help" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
-            <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{userDataPath}}</p>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
+            <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{ userDataPath }}</p>
           </div>
-        </div>
+        </template>
       </Tooltip>
     </div>
     <div class="config-item-container">
@@ -24,39 +24,39 @@
       </Poptip>
       <Tooltip placement="top" max-width="300">
         <Icon type="md-help" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
             <p>为了防止触发B站限流，用户头像会缓存，可以清理并重新获取最新数据。</p>
           </div>
-        </div>
+        </template>
       </Tooltip>
     </div>
     <div class="config-item-container">
       Cookie
-      <Input class="config-item" :value="userCookie" @on-change="changeCookie" type="password" placeholder="Cookie..." clearable />
+      <Input class="config-item" :value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Tooltip placement="top">
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
             <p>输入Cookie可以使用发送弹幕/更换粉丝牌等功能。</p>
             <p :style="{ color: 'pink' }">
               Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！
             </p>
           </div>
-        </div>
+        </template>
       </Tooltip>
     </div>
     <div class="config-item-container">
-      <Checkbox :value="isAutoRecord" @on-change="changeAutoRecord" :style="{ height: '30px','line-height': '30px'}">
+      <Checkbox :value="isAutoRecord" :style="{ height: '30px','line-height': '30px'}" @on-change="changeAutoRecord">
         自动录制
       </Checkbox>
       <Tooltip transfer placement="top">
         <Icon type="md-help" />
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
             <p>当连接直播间时，如果开播会自动开始录制</p>
           </div>
-        </div>
+        </template>
       </Tooltip>
       <Tooltip placement="top" content="实验性功能，可能不稳定">
         <span :style="{'font-size': '12px', color: 'dodgerblue'}">
@@ -66,30 +66,32 @@
     </div>
 
     <div class="config-item-container">
-      <Input v-model="text" placeholder="让系统说..." @on-keyup.enter="speak" :style="{display: 'inline-block', width: '300px'}" />
-      <Button shape="circle" @click="speak" icon="md-play">
+      <Input v-model="text" placeholder="让系统说..." :style="{display: 'inline-block', width: '300px'}" @on-keyup.enter="speak" />
+      <Button shape="circle" icon="md-play" @click="speak">
         <!-- <Icon type="md-play" /> -->
       </Button>
       声音
       <Select :style="{ width: '100px', display: 'inline-block' }" :value="currentVoice" @on-change="onChangeVoice">
-        <Option v-for="voice in voices" :value="voice.key" :key="voice.key" :label="voice.label">
+        <Option v-for="voice in voices" :key="voice.key" :value="voice.key" :label="voice.label">
           <span>{{ voice.value }}</span>
         </Option>
       </Select>
       语速
-      <InputNumber v-model="voiceSpeed" @on-change="onChangeVoiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
+      <InputNumber v-model="voiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" @on-change="onChangeVoiceSpeed" />
     </div>
 
     <div class="config-item-container">
       <Tooltip placement="top" transfer>
         色彩表
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <p>控制图表可选色</p>
-        </div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
+            <p>控制图表可选色</p>
+          </div>
+        </template>
       </Tooltip>
       <Select class="color-selector" :value="colors" multiple filterable allow-create @on-change="onChangeColor">
-        <Option v-for="option in colorOptions" :value="option.value" :key="option.index" :label="option.label">
-          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px'}"></span>
+        <Option v-for="option in colorOptions" :key="option.index" :value="option.value" :label="option.label">
+          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px'}" />
           <span>{{ option.label }}</span>
         </Option>
       </Select>
@@ -98,44 +100,44 @@
     <div class="config-item-container">
       <Tooltip placement="top" transfer>
         获取头像速率限制
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
             <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值 </p>
             <p>生效需重新启动</p>
           </div>
-        </div>
+        </template>
       </Tooltip>
-      <InputNumber :value="userInfoFrequencyLimit" @on-change="onChangeUserInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" />
+      <InputNumber :value="userInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" @on-change="onChangeUserInfoFrequencyLimit" />
     </div>
 
     <div class="config-item-container">
       <Tooltip placement="top" transfer>
         弹幕窗置顶等级
-        <div slot="content" :style="{ 'white-space': 'normal' }">
-          <div>
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
             <p> 从上到下优先级依次升高 </p>
             <p>
               <span :style="{color: 'pink'}">screen-saver</span>
               为最高置顶等级
             </p>
           </div>
-        </div>
+        </template>
       </Tooltip>
-      <Select class="on-top-level-selector" :value="onTopLevel" @on-change="onChangeOnTopLevel" :style="{ width: '200px' }">
-        <Option v-for="(option, index) in opTopLevelOptions" :value="option" :key="index" :label="option">
+      <Select class="on-top-level-selector" :value="onTopLevel" :style="{ width: '200px' }" @on-change="onChangeOnTopLevel">
+        <Option v-for="(option, index) in opTopLevelOptions" :key="index" :value="option" :label="option">
           <span>{{ option }}</span>
         </Option>
       </Select>
       <Checkbox :value="isOnTopForce" @on-change="onChangeIsOnTopForce">
         <Tooltip placement="top" transfer>
           强制置顶
-          <div slot="content" :style="{ 'white-space': 'normal' }">
-            <div>
+          <template #content>
+            <div :style="{ 'white-space': 'normal' }">
               <p>如遇到全屏场景下无法展示弹幕窗，可尝试勾选该项</p>
               <p>该选项将多次尝试置顶弹幕窗口。</p>
               <p> <span :style="{color: 'pink'}">仅在必要时使用</span> </p>
             </div>
-          </div>
+          </template>
         </Tooltip>
       </Checkbox>
       <Tooltip placement="top" content="实验性功能，可能不稳定">
@@ -146,7 +148,7 @@
     </div>
 
     <div class="config-item-container">
-      <Input :value="signInMessage" @on-change="onChangeSignInMessage" placeholder="打卡" :style="{display: 'inline-block', width: '200px'}" />
+      <Input :value="signInMessage" placeholder="打卡" :style="{display: 'inline-block', width: '200px'}" @on-change="onChangeSignInMessage" />
       <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
         <Button type="primary" :disabled="!userCookie">一键签到</Button>
       </Poptip>
@@ -195,31 +197,6 @@ export default {
       signInCount: 0,
       signInTotalCount: 0,
     };
-  },
-  async mounted() {
-    const giftConfig = await getGiftConfig()
-    for (const key in giftConfig) {
-      const { name, webp } = giftConfig[key]
-      this.giftSelectors.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
-      });
-    }
-
-    this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
-
-    const { data: voices } = await getVoices()
-    this.voices = voices.map(voice => {
-      return {
-        key: voice,
-        value: voice,
-        label: voice,
-      }
-    })
-
-    this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
   },
   computed: {
     userCookie() {
@@ -280,6 +257,31 @@ export default {
     onlyTodayZeroIntimacy() {
       return this.$store.state.Config.onlyTodayZeroIntimacy
     },
+  },
+  async mounted() {
+    const giftConfig = await getGiftConfig()
+    for (const key in giftConfig) {
+      const { name, webp } = giftConfig[key]
+      this.giftSelectors.push({
+        key: key,
+        value: name,
+        label: name,
+        webp: webp,
+      });
+    }
+
+    this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
+
+    const { data: voices } = await getVoices()
+    this.voices = voices.map(voice => {
+      return {
+        key: voice,
+        value: voice,
+        label: voice,
+      }
+    })
+
+    this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
   },
   methods: {
     async restoreDefaultStyleSetting() {
