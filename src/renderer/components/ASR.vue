@@ -20,8 +20,8 @@
       </div>
       <div class="config-container">
         独立窗口
-        <i-switch :value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow" />
-        <Checkbox :style="{'padding-left': '10px'}" :value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+        <i-switch :model-value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow" />
+        <Checkbox :style="{'padding-left': '10px'}" :model-value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
       </div>
       <!-- <div class="divider"></div> -->
       <div class="config-container">
@@ -44,13 +44,13 @@
       <div class="config-container">
         <span>
           显示行数：
-          <InputNumber :value="ASRLineCount" size="small" :min="1" :step="1" :style="{ width: '50px' }" @on-change="changeASRLineCount" />
+          <InputNumber :model-value="ASRLineCount" size="small" :min="1" :step="1" :style="{ width: '50px' }" @on-change="changeASRLineCount" />
         </span>
       </div>
       <div class="config-container">
         <span>
           <Checkbox
-            :value="enableTranslate"
+            :model-value="enableTranslate"
             :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang ||!toLang"
             @on-change="changeEnableTranslate"
           >开启翻译：</Checkbox>
@@ -71,7 +71,7 @@
         <div>
           <div class="key-item">AccessKeyId:</div>
           <Input
-            :value="aliAccessKeyId"
+            :model-value="aliAccessKeyId"
             :disabled="isStarted"
             :style="{display: 'inline-block', width: '220px'}"
             size="small"
@@ -82,7 +82,7 @@
         <div>
           <div class="key-item">AccessKeySecret:</div>
           <Input
-            :value="aliAccessKeySecret"
+            :model-value="aliAccessKeySecret"
             :disabled="isStarted"
             size="small"
             placeholder="AccessKeySecret..."
@@ -93,9 +93,9 @@
         </div>
         <div>
           <div class="key-item">AppKey:</div>
-          <!-- <Input :value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
+          <!-- <Input :model-value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
           <AutoComplete
-            :value="aliAppKey"
+            :model-value="aliAppKey"
             :disabled="isStarted"
             size="small"
             placeholder="AppKey..."

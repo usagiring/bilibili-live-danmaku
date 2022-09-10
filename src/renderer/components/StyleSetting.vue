@@ -1,23 +1,20 @@
 <template>
-  <!-- <Row> -->
-  <!-- <i-col span="8"> -->
-  <div>
-    <div class="setting-group images-container" :style="{'padding-top': '10px'}">
+  <div class="disable-user-select">
+    <div class="setting-group" :style="{ 'padding-top': '10px' }">
       <Button size="small" @click="sendTestMessage">发送测试弹幕</Button>
-      <Button size="small" @click="clearDanmaku">清空弹幕</Button>
+      <Button :style="{ 'margin-left': '10px' }" size="small" @click="clearDanmaku">清空弹幕</Button>
+    </div>
+    <div class="divider line one-line">
+      <span> 样式预览 </span>
     </div>
     <div class="setting-group">
-      <div
-        :class="!isBorderAdaptContent ? 'max-width': ''"
-        class="border-image-default operatable-preview-text"
-        :style="{...borderImageStyle, ...message_lv3}"
-      >
-        <Container orientation="horizontal" :style="{'min-height': '0px'}" @drop="onDrop($event)">
+      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3 }">
+        <Container orientation="horizontal" :style="{ 'min-height': '0px' }" @drop="onDrop($event)">
           <template v-for="(setting, index) of messageSettings" :key="index">
-            <Draggable v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <img class="guard-icon" :src="`${getGuardIcon('3')}`">
             </Draggable>
-            <Draggable v-if="setting.type==='medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type === 'medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <FanMedal
                 v-if="example.ML && example.MN"
                 :medal-level="example.ML"
@@ -27,68 +24,57 @@
                 :medal-color-border="example.MCB"
               />
             </Draggable>
-            <Draggable v-if="setting.type==='avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type === 'avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </Draggable>
-            <Draggable v-if="setting.type==='name'" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px">
               <span>{{ `${example.uname}` }}</span>
             </Draggable>
-            <Draggable v-if="setting.type==='colon' && setting.isShow" :style="{...name_lv3, ...fontStyle}" class="vertical-align-middle">
+            <Draggable v-if="setting.type === 'colon' && setting.isShow" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle">
               <span>：</span>
             </Draggable>
-            <Draggable v-if="setting.type==='comment'" class="vertical-align-middle">
+            <Draggable v-if="setting.type === 'comment'" class="vertical-align-middle">
               <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl">
-              <span v-else :style="{...comment_lv3, ...fontStyle}">{{ example.content }}</span>
+              <span v-else :style="{ ...comment_lv3, ...fontStyle }">{{ example.content }}</span>
             </Draggable>
           </template>
         </Container>
       </div>
-      <!-- <span>{{ `: ${comment.comment}` }}</span> -->
-      <!-- <span v-if="example.voiceUrl" @click="playAudio(example.voiceUrl)" class="voice-container">
-        <Icon type="md-play" />
-        <span>{{ `${example.fileDuration}"` }}</span>
-      </span>-->
     </div>
 
     <div class="divider line one-line">
-      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(0)">
+      <span :style="{ cursor: 'pointer' }" @click="changeCollapse(0)">
         常规设置
         <Icon v-if="collapse[0]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
     </div>
-    <div v-show="collapse[0]" class="disable-user-select">
+    <div v-show="collapse[0]">
       <div class="setting-group">
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>窗体背景色</span>
-          <ColorPicker transfer :value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
+          <ColorPicker transfer :model-value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
         </div>
         <Divider type="vertical" />
-        <div :style="{display: 'inline-block'}">
-          <span :style="{'padding-right': '10px'}">整体透明度</span>
+        <div :style="{ display: 'inline-block' }">
+          <span :style="{ 'padding-right': '10px' }">整体透明度</span>
           <div class="avatar-controller-slider">
-            <Slider :value="opacity" @on-change="changeOpacity" />
+            <Slider :model-value="opacity" @on-change="changeOpacity" />
           </div>
         </div>
       </div>
       <div class="setting-group">
-        <div :style="{display: 'inline-block'}">
-          <span :style="{'padding-right': '10px'}">头像大小</span>
+        <div :style="{ display: 'inline-block' }">
+          <span :style="{ 'padding-right': '10px' }">头像大小</span>
           <div class="avatar-controller-slider">
-            <Slider :value="avatarSize" @on-change="changeAvatarSize" />
+            <Slider :model-value="avatarSize" @on-change="changeAvatarSize" />
           </div>
         </div>
       </div>
       <div class="setting-group">
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>字体</span>
-          <Select
-            :style="{ width: '100px', display: 'inline-block' }"
-            :value="danmakuFont"
-            size="small"
-            @on-change="changeDanmakuFont"
-            @on-open-change="onOpenFontSelectChange"
-          >
+          <Select :style="{ width: '100px', display: 'inline-block' }" :model-value="danmakuFont" size="small" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange">
             <OptionGroup label="全局值">
               <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
             </OptionGroup>
@@ -101,9 +87,9 @@
           </Select>
         </div>
         <Divider type="vertical" />
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>粗细</span>
-          <Select :style="{ width: '100px', display: 'inline-block' }" :value="fontWeight" size="small" @on-change="changeFontWeight">
+          <Select :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
             <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
@@ -111,22 +97,22 @@
         </div>
       </div>
       <div class="setting-group">
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>
             <Tooltip placement="top" transfer>
               重复弹幕合并
-              <template #content> 
+              <template #content>
                 <div class="description-text">
                   <p>多少毫秒内重复的弹幕将被合并</p>
                 </div>
               </template>
             </Tooltip>
           </span>
-          <InputNumber :value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
-          {{ " ms" }}
+          <InputNumber :model-value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
+          {{ ' ms' }}
         </div>
         <Divider type="vertical" />
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>
             <Tooltip placement="top" transfer>
               弹幕超时消失
@@ -137,55 +123,55 @@
               </template>
             </Tooltip>
           </span>
-          <InputNumber :value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
-          {{ " ms" }}
+          <InputNumber :model-value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
+          {{ ' ms' }}
         </div>
       </div>
       <div class="setting-group">
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>礼物栏展示大于</span>
-          <InputNumber :value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
-          {{ " 元" }}
+          <InputNumber :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
+          {{ ' 元' }}
         </div>
         <Divider type="vertical" />
-        <div :style="{display: 'inline-block'}">
+        <div :style="{ display: 'inline-block' }">
           <span>弹幕礼物展示大于</span>
-          <InputNumber :value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
-          {{ " 元" }}
+          <InputNumber :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
+          {{ ' 元' }}
         </div>
       </div>
       <div class="setting-group">
         <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
       </div>
       <div class="setting-group">
-        <Checkbox :value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
+        <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
+        <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
+        <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
       </div>
       <div class="setting-group">
-        <Checkbox :value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
+        <Checkbox :model-value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
+        <Checkbox :model-value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
+        <Checkbox :model-value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
       </div>
       <div class="setting-group">
-        <!-- <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
-        <Checkbox :value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+        <!-- <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
+        <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
+        <Checkbox :model-value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
         <Divider type="vertical" />
-        <Checkbox :value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
+        <Checkbox :model-value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
       </div>
       <div class="setting-group">
-        <Checkbox :value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
+        <Checkbox :model-value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
       </div>
     </div>
 
     <div class="divider line one-line">
-      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(1)">
+      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(1)">
         角色：普通
         <Icon v-if="collapse[1]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
@@ -220,7 +206,7 @@
     </div>
 
     <div class="divider line one-line">
-      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(2)">
+      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(2)">
         角色：舰长
         <Icon v-if="collapse[2]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
@@ -255,7 +241,7 @@
     </div>
 
     <div class="divider line one-line">
-      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(3)">
+      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(3)">
         角色：提督
         <Icon v-if="collapse[3]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
@@ -290,7 +276,7 @@
     </div>
 
     <div class="divider line one-line">
-      <span class="disable-user-select" :style="{cursor: 'pointer'}" @click="changeCollapse(4)">
+      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(4)">
         角色：总督
         <Icon v-if="collapse[4]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
@@ -324,39 +310,30 @@
       </div>
     </div>
 
-    <Modal
-      v-model="isShowBorderModal"
-      title="图片边框设置"
-      width="650"
-      scrollable
-      lock-scroll
-      transfer
-      :styles="{ overflow: 'auto' }"
-      @on-ok="applyBorderImageSetting"
-    >
-      <div :style="{ padding: '20px'}">
-        <span :class="!isBorderAdaptContent ? 'max-width': ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
+    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
+      <div :style="{ padding: '20px' }">
+        <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
       </div>
-      <div class="images-container">
+      <div>
         <template v-for="(item, index) in borderImages" :key="index">
           <div class="image-container">
             <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
             <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)">
           </div>
         </template>
-        <label v-if="borderImages.length< 4" class="upload-file-container">
-          <input :style="{display: 'none'}" type="file" accept="image/*" @change="encodeImageFileAsURL">
+        <label v-if="borderImages.length < 4" class="upload-file-container">
+          <input :style="{ display: 'none' }" type="file" accept="image/*" @change="encodeImageFileAsURL">
           <Icon class="upload-file-icon" type="md-add" />
         </label>
       </div>
-      <div :style="{ padding: '5px 10px'}">
-        <Checkbox :value="isBorderAdaptContent" @on-change="changeBorderAdaptContent">适应文本长度</Checkbox>
+      <div :style="{ padding: '5px 10px' }">
+        <Checkbox :model-value="isBorderAdaptContent" @on-change="changeBorderAdaptContent">适应文本长度</Checkbox>
       </div>
-      <div :style="{ padding: '5px 10px'}">
+      <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">边框宽度</span>
-        <InputNumber :value="borderWidthValue" :style="{width: '55px'}" @on-change="setBorderWidthValue" />
+        <InputNumber :model-value="borderWidthValue" :style="{ width: '55px' }" @on-change="setBorderWidthValue" />
       </div>
-      <div :style="{ padding: '5px 10px'}">
+      <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             图片分割线
@@ -368,14 +345,14 @@
             </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageSliceValue" :style="{width: '180px'}" @on-change="setBorderImageSliceValue" />
+        <Input :model-value="borderImageSliceValue" :style="{ width: '180px' }" @on-change="setBorderImageSliceValue" />
       </div>
-      <div :style="{ padding: '5px 10px'}">
+      <div :style="{ padding: '5px 10px' }">
         <!-- https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-width -->
         <span class="border-image-setting-text">图片边框宽度</span>
-        <Input :value="borderImageWidthValue" :style="{width: '180px'}" @on-change="setBorderImageWidthValue" />
+        <Input :model-value="borderImageWidthValue" :style="{ width: '180px' }" @on-change="setBorderImageWidthValue" />
       </div>
-      <div :style="{ padding: '5px 10px'}">
+      <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             填充方式
@@ -388,9 +365,9 @@
             </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageRepeatValue" :style="{width: '180px'}" @on-change="setBorderImageRepeatValue" />
+        <Input :model-value="borderImageRepeatValue" :style="{ width: '180px' }" @on-change="setBorderImageRepeatValue" />
       </div>
-      <div :style="{ padding: '5px 10px'}">
+      <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
           <Tooltip placement="top" transfer>
             outset
@@ -402,7 +379,7 @@
             </template>
           </Tooltip>
         </span>
-        <Input :value="borderImageOutsetValue" :style="{width: '180px'}" @on-change="setBorderImageOutsetValue" />
+        <Input :model-value="borderImageOutsetValue" :style="{ width: '180px' }" @on-change="setBorderImageOutsetValue" />
       </div>
     </Modal>
   </div>
@@ -412,15 +389,9 @@
 import { Container, Draggable } from 'vue3-smooth-dnd'
 import FontList from 'font-list'
 
-import SettingEditor from './SettingEditor'
 import StyleEditor from './StyleEditor'
 import FanMedal from './FanMedal'
-import {
-  DEFAULT_FONTS,
-  DEFAULT_COMMON_FONT_FAMILIES,
-  GUARD_ICON_MAP,
-  DEFAULT_AVATAR,
-} from '../../service/const'
+import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR } from '../../service/const'
 import { getRandomItem } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
 import { mergeSetting, updateSetting, clearMessage, sendMessages } from '../../service/api'
@@ -439,7 +410,6 @@ const defaultFonts = [
 
 export default {
   components: {
-    // SettingEditor,
     StyleEditor,
     FanMedal,
     Container,
@@ -1179,10 +1149,7 @@ export default {
 
     async getFonts() {
       const fonts = await FontList.getFonts({ disableQuoting: true })
-      this.fonts = [
-        ...defaultFonts,
-        ...fonts.map((font) => ({ key: font, value: font, type: 'custom' })),
-      ]
+      this.fonts = [...defaultFonts, ...fonts.map((font) => ({ key: font, value: font, type: 'custom' }))]
     },
 
     async onOpenFontSelectChange(value) {
@@ -1488,7 +1455,7 @@ export default {
 .one-line {
   &:before,
   &:after {
-    background: silver;
+    background: lightgray;
   }
 }
 
@@ -1508,11 +1475,6 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   left: 50%;
-}
-
-.images-container {
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .disable-user-select {

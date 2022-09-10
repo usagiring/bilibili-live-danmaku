@@ -2,13 +2,13 @@
   <div>
     <div class="selector-wrapper">
       <div class="selector-content" :style="isDanmaku && { border: '2px solid orange' }">
-        <Radio class="" :value="isDanmaku" @on-change="selectDanmakuOrGift">弹幕</Radio>
+        <Radio class="" :model-value="isDanmaku" @on-change="selectDanmakuOrGift">弹幕</Radio>
         <span class="inline-text">牌子等级大于</span>
         <InputNumber v-model="medalLevel" :min="0" size="small" :style="{ width: '55px' }" />
         <Input v-model="danmakuText" size="small" placeholder="弹幕..." style="width: 300px" />
       </div>
       <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
-        <Radio :value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
+        <Radio :model-value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
         <Select v-model="selectedGiftIds" :style="{ width: '400px', display: 'inline-block' }" filterable multiple size="small">
           <Option v-for="gift in giftSelectors" :key="gift.key" :value="gift.key" :label="gift.label">
             <img :style="{ 'vertical-align': 'middle', width: '30px' }" :src="gift.webp">
@@ -29,7 +29,7 @@
         <Button type="primary" @click="start">祈愿</Button>
       </template>
       <div :style="{ float: 'right' }">
-        <Checkbox :value="isShowProbability" @on-change="showProbability">显示概率</Checkbox>
+        <Checkbox :model-value="isShowProbability" @on-change="showProbability">显示概率</Checkbox>
         <Button @click="showHistoryModal">中奖记录</Button>
       </div>
       <span v-if="isDanmaku && isShowProbability" :style="{ 'margin': '0px 10px' }">总数: {{ count }}</span>

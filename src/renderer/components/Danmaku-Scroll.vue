@@ -2,21 +2,21 @@
   <div class="main">
     <div class="item-container">
       <span class="setting-text">显示滚动弹幕窗</span>
-      <i-switch :value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
-      <Checkbox :style="{'padding-left': '10px'}" :value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+      <i-switch :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
+      <Checkbox :style="{'padding-left': '10px'}" :model-value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
     </div>
 
     <div class="item-container">
       <span class="setting-text">背景色</span>
-      <ColorPicker transfer :value="scrollDanmakuBackground" size="small" alpha @on-active-change="debouncedUpdateBackground" />
+      <ColorPicker transfer :model-value="scrollDanmakuBackground" size="small" alpha @on-active-change="debouncedUpdateBackground" />
     </div>
     <div class="item-container">
       <span class="setting-text">透明度</span>
-      <InputNumber :value="scrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" @on-change="changeScrollDanmakuOpacity" />
+      <InputNumber :model-value="scrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" @on-change="changeScrollDanmakuOpacity" />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕样式选择</span>
-      <RadioGroup :value="scrollDanmakuStyleExtend" @on-change="changeScrollDanmakuStyleExtend">
+      <RadioGroup :model-value="scrollDanmakuStyleExtend" @on-change="changeScrollDanmakuStyleExtend">
         <Radio label="bilibili">
           <span>保持与B站弹幕一致</span>
         </Radio>
@@ -27,19 +27,19 @@
     </div>
     <div class="item-container">
       <span class="setting-text">整体字号</span>
-      <InputNumber :value="scrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuFontSize" />
+      <InputNumber :model-value="scrollDanmakuFontSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuFontSize" />
     </div>
     <div class="item-container">
       <span class="setting-text">表情大小</span>
-      <InputNumber :value="scrollDanmakuEmojiSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuEmojiSize" />
+      <InputNumber :model-value="scrollDanmakuEmojiSize" :min="1" size="small" :style="{ width: '55px' }" @on-change="changeScrollDanmakuEmojiSize" />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕显示时间</span>
-      <InputNumber :value="scrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" @on-change="changeScrollDanmakuDuration" />
+      <InputNumber :model-value="scrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" @on-change="changeScrollDanmakuDuration" />
     </div>
     <div class="item-container">
       <span class="setting-text">方向</span>
-      <RadioGroup :value="scrollDanmakuDirection" @on-change="changeScrollDanmakuDirection">
+      <RadioGroup :model-value="scrollDanmakuDirection" @on-change="changeScrollDanmakuDirection">
         <Radio label="RL">
           <span>从右到左</span>
         </Radio>

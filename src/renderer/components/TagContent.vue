@@ -5,25 +5,25 @@
       <div class="col-container">
         <div v-if="row.type==='InputNumber'">
           <span>{{ row.display }}</span>
-          <InputNumber :value="data[row.key]" :min="row.min || 0" :step="row.step || 1" :max="row.max || 100" :style="{ width: '55px' }" @on-change="onChangeValue(row.key, $event)" />
+          <InputNumber :model-value="data[row.key]" :min="row.min || 0" :step="row.step || 1" :max="row.max || 100" :style="{ width: '55px' }" @on-change="onChangeValue(row.key, $event)" />
         </div>
         <div v-if="row.type==='Select'">
           <span>{{ row.display }}</span>
-          <Select :value="data[row.key]" :style="{ display: 'inline-block' }" @on-change="onChangeValue(row.key, $event)">
+          <Select :model-value="data[row.key]" :style="{ display: 'inline-block' }" @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
         </div>
         <div v-if="row.type === 'MultiSelect'">
-          <Select multiple :value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
+          <Select multiple :model-value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
         </div>
         <div v-if="row.type === 'Input'">
-          <Input :value="data[row.key]" :placeholder="row.placeholder" :style="{width: '200px'}" @on-change="onChangeInputValue(row.key, $event)" />
+          <Input :model-value="data[row.key]" :placeholder="row.placeholder" :style="{width: '200px'}" @on-change="onChangeInputValue(row.key, $event)" />
         </div>
         <div v-if="row.type === 'Text'">
           <p>{{ row.value }}</p>

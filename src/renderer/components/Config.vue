@@ -33,23 +33,19 @@
     </div>
     <div class="config-item-container">
       Cookie
-      <Input class="config-item" :value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
+      <Input size="small" class="config-item" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Tooltip placement="top">
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
             <p>输入Cookie可以使用发送弹幕/更换粉丝牌等功能。</p>
-            <p :style="{ color: 'pink' }">
-              Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！
-            </p>
+            <p :style="{ color: 'pink' }">Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！</p>
           </div>
         </template>
       </Tooltip>
     </div>
     <div class="config-item-container">
-      <Checkbox :value="isAutoRecord" :style="{ height: '30px','line-height': '30px'}" @on-change="changeAutoRecord">
-        自动录制
-      </Checkbox>
+      <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }" @on-change="changeAutoRecord"> 自动录制 </Checkbox>
       <Tooltip transfer placement="top">
         <Icon type="md-help" />
         <template #content>
@@ -59,25 +55,23 @@
         </template>
       </Tooltip>
       <Tooltip placement="top" content="实验性功能，可能不稳定">
-        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+        <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
           <Icon type="ios-flask" />
         </span>
       </Tooltip>
     </div>
 
     <div class="config-item-container">
-      <Input v-model="text" placeholder="让系统说..." :style="{display: 'inline-block', width: '300px'}" @on-keyup.enter="speak" />
-      <Button shape="circle" icon="md-play" @click="speak">
-        <!-- <Icon type="md-play" /> -->
-      </Button>
+      <Input v-model="text" size="small" placeholder="让系统说..." :style="{ display: 'inline-block', width: '300px' }" @on-keyup.enter="speak" />
+      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-play" />
       声音
-      <Select :style="{ width: '100px', display: 'inline-block' }" :value="currentVoice" @on-change="onChangeVoice">
+      <Select size="small" :style="{ width: '100px', display: 'inline-block' }" :model-value="currentVoice" @on-change="onChangeVoice">
         <Option v-for="voice in voices" :key="voice.key" :value="voice.key" :label="voice.label">
           <span>{{ voice.value }}</span>
         </Option>
       </Select>
-      语速
-      <InputNumber v-model="voiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" @on-change="onChangeVoiceSpeed" />
+      <span class="space-left-5px">语速</span>
+      <InputNumber v-model="voiceSpeed" size="small" :min="0" :step="0.1" :style="{ width: '55px' }" @on-change="onChangeVoiceSpeed" />
     </div>
 
     <div class="config-item-container">
@@ -89,9 +83,9 @@
           </div>
         </template>
       </Tooltip>
-      <Select class="color-selector" :value="colors" multiple filterable allow-create @on-change="onChangeColor">
+      <Select class="color-selector space-left-5px" :model-value="colors" multiple filterable allow-create @on-change="onChangeColor">
         <Option v-for="option in colorOptions" :key="option.index" :value="option.value" :label="option.label">
-          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px'}" />
+          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px' }" />
           <span>{{ option.label }}</span>
         </Option>
       </Select>
@@ -102,12 +96,12 @@
         获取头像速率限制
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
-            <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值 </p>
+            <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值</p>
             <p>生效需重新启动</p>
           </div>
         </template>
       </Tooltip>
-      <InputNumber :value="userInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" @on-change="onChangeUserInfoFrequencyLimit" />
+      <InputNumber class="space-left-5px" :model-value="userInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" @on-change="onChangeUserInfoFrequencyLimit" />
     </div>
 
     <div class="config-item-container">
@@ -115,49 +109,45 @@
         弹幕窗置顶等级
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
-            <p> 从上到下优先级依次升高 </p>
+            <p>从上到下优先级依次升高</p>
             <p>
-              <span :style="{color: 'pink'}">screen-saver</span>
+              <span :style="{ color: 'pink' }">screen-saver</span>
               为最高置顶等级
             </p>
           </div>
         </template>
       </Tooltip>
-      <Select class="on-top-level-selector" :value="onTopLevel" :style="{ width: '200px' }" @on-change="onChangeOnTopLevel">
+      <Select class="on-top-level-selector space-left-5px" :model-value="onTopLevel" :style="{ width: '200px' }" @on-change="onChangeOnTopLevel">
         <Option v-for="(option, index) in opTopLevelOptions" :key="index" :value="option" :label="option">
           <span>{{ option }}</span>
         </Option>
       </Select>
-      <Checkbox :value="isOnTopForce" @on-change="onChangeIsOnTopForce">
+      <Checkbox class="space-left-5px" :model-value="isOnTopForce" @on-change="onChangeIsOnTopForce">
         <Tooltip placement="top" transfer>
           强制置顶
           <template #content>
             <div :style="{ 'white-space': 'normal' }">
               <p>如遇到全屏场景下无法展示弹幕窗，可尝试勾选该项</p>
               <p>该选项将多次尝试置顶弹幕窗口。</p>
-              <p> <span :style="{color: 'pink'}">仅在必要时使用</span> </p>
+              <p><span :style="{ color: 'pink' }">仅在必要时使用</span></p>
             </div>
           </template>
         </Tooltip>
       </Checkbox>
       <Tooltip placement="top" content="实验性功能，可能不稳定">
-        <span :style="{'font-size': '12px', color: 'dodgerblue'}">
+        <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
           <Icon type="ios-flask" />
         </span>
       </Tooltip>
     </div>
 
     <div class="config-item-container">
-      <Input :value="signInMessage" placeholder="打卡" :style="{display: 'inline-block', width: '200px'}" @on-change="onChangeSignInMessage" />
+      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '200px' }" @on-change="onChangeSignInMessage" />
       <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
-        <Button type="primary" :disabled="!userCookie">一键签到</Button>
+        <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
       </Poptip>
-      <Checkbox :value="onlyTodayZeroIntimacy" @on-change="changeOnlyTodayZeroIntimacy">
-        仅今日0亲密度直播间
-      </Checkbox>
-      <span v-if="signInTotalCount" :style="{color: 'green'}">
-        {{ signInCount }} / {{ signInTotalCount }}
-      </span>
+      <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
+      <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
   </div>
 </template>
@@ -166,20 +156,12 @@
 import { uniq } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
-const window = getCurrentWindow();
-import {
-  DEFAULT_STYLE,
-  COLORS,
-  IPC_GET_USER_PATH
-} from "../../service/const";
+const window = getCurrentWindow()
+import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 
 import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
 import { getGiftConfig, wait } from '../../service/util'
-import {
-  sendMessage,
-  getMedalList,
-  getRoomInfoV2,
-} from "../../service/bilibili-api";
+import { sendMessage, getMedalList, getRoomInfoV2 } from '../../service/bilibili-api'
 
 export default {
   data() {
@@ -196,41 +178,42 @@ export default {
       opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver'],
       signInCount: 0,
       signInTotalCount: 0,
-    };
+      isLightMedal: true,
+    }
   },
   computed: {
     userCookie() {
-      return this.$store.state.Config.userCookie;
+      return this.$store.state.Config.userCookie
     },
     isAutoRecord() {
-      return this.$store.state.Config.isAutoRecord;
+      return this.$store.state.Config.isAutoRecord
     },
     isWatchLottery() {
-      return this.$store.state.Config.isWatchLottery;
+      return this.$store.state.Config.isWatchLottery
     },
     autoReplyRules() {
-      return this.$store.state.Config.autoReplyRules;
+      return this.$store.state.Config.autoReplyRules
     },
     autoReplyText() {
-      return this.$store.state.Config.autoReplyRules[0].text;
+      return this.$store.state.Config.autoReplyRules[0].text
     },
     onlyGold() {
-      return this.$store.state.Config.autoReplyRules[0].onlyGold;
+      return this.$store.state.Config.autoReplyRules[0].onlyGold
     },
     onlyMyselfRoom() {
-      return this.$store.state.Config.onlyMyselfRoom;
+      return this.$store.state.Config.onlyMyselfRoom
     },
     isAutoReply() {
-      return this.$store.state.Config.isAutoReply;
+      return this.$store.state.Config.isAutoReply
     },
     isTextReply() {
-      return this.$store.state.Config.autoReplyRules[0].isTextReply;
+      return this.$store.state.Config.autoReplyRules[0].isTextReply
     },
     isSpeakReply() {
-      return this.$store.state.Config.autoReplyRules[0].isSpeakReply;
+      return this.$store.state.Config.autoReplyRules[0].isSpeakReply
     },
     colors() {
-      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS;
+      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS
     },
     colorOptions() {
       const color = uniq(COLORS, this.colors)
@@ -238,7 +221,7 @@ export default {
         return {
           key: index,
           value: color,
-          label: color
+          label: color,
         }
       })
     },
@@ -267,13 +250,13 @@ export default {
         value: name,
         label: name,
         webp: webp,
-      });
+      })
     }
 
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
 
     const { data: voices } = await getVoices()
-    this.voices = voices.map(voice => {
+    this.voices = voices.map((voice) => {
       return {
         key: voice,
         value: voice,
@@ -286,7 +269,7 @@ export default {
   methods: {
     async restoreDefaultStyleSetting() {
       await updateSetting(DEFAULT_STYLE)
-      this.$store.dispatch("UPDATE_CONFIG", DEFAULT_STYLE);
+      this.$store.dispatch('UPDATE_CONFIG', DEFAULT_STYLE)
       window.reload()
     },
 
@@ -294,13 +277,13 @@ export default {
       // 从 ./data 里备份 comment gift interact, 并 removeall
       await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
       await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      window.reload();
+      window.reload()
     },
 
     async clearUserDB() {
       // 清空用户数据缓存
       await clearDB({ names: ['user'] })
-      window.reload();
+      window.reload()
     },
 
     async changeCookie(e) {
@@ -308,19 +291,19 @@ export default {
         userCookie: e.target.value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeAutoRecord(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      this.$store.dispatch('UPDATE_CONFIG', {
         isAutoRecord: status,
-      });
+      })
     },
 
     async changeWatchLottery(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
+      this.$store.dispatch('UPDATE_CONFIG', {
         isWatchLottery: status,
-      });
+      })
     },
 
     async changeAutoReplyText(e) {
@@ -331,7 +314,7 @@ export default {
         autoReplyRules: [__copy, ...rest],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data);
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeOnlyGold(status) {
@@ -342,7 +325,7 @@ export default {
         autoReplyRules: [__copy, ...rest],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data);
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     showAdvancedAutoReplyRule() {
@@ -356,7 +339,7 @@ export default {
         autoReplyRules: [this.autoReplyRules[0]],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
       this.$Message.success('清空成功！')
     },
 
@@ -375,10 +358,10 @@ export default {
 
     async submitAutoReplyRules() {
       const data = {
-        autoReplyRules: [this.autoReplyRules[0], ...this.advancedAutoReplyRules]
+        autoReplyRules: [this.autoReplyRules[0], ...this.advancedAutoReplyRules],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
       this.$Message.success('保存成功！')
     },
 
@@ -388,10 +371,10 @@ export default {
 
     async changeOnlyMyselfRoom(status) {
       const data = {
-        onlyMyselfRoom: status
+        onlyMyselfRoom: status,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeSpeakReply(status) {
@@ -402,7 +385,7 @@ export default {
         autoReplyRules: [__copy, ...rest],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data);
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeTextReply(status) {
@@ -413,7 +396,7 @@ export default {
         autoReplyRules: [__copy, ...rest],
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data);
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async onChangeVoice(voice) {
@@ -435,7 +418,7 @@ export default {
       await speakAPI({
         text: this.text,
         voice: this.currentVoice,
-        speed: this.voiceSpeed
+        speed: this.voiceSpeed,
       })
     },
 
@@ -444,46 +427,46 @@ export default {
         this.$Message.warning('至少需要一个值')
       }
       const data = {
-        colors: value
+        colors: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async onChangeUserInfoFrequencyLimit(value) {
       const data = {
-        userInfoFrequencyLimit: value
+        userInfoFrequencyLimit: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     onChangeOnTopLevel(value) {
       const data = {
-        onTopLevel: value
+        onTopLevel: value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     onChangeIsOnTopForce(value) {
       const data = {
-        isOnTopForce: value
+        isOnTopForce: value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     onChangeSignInMessage(e) {
       const data = {
-        signInMessage: e.target.value
+        signInMessage: e.target.value,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     changeOnlyTodayZeroIntimacy(status) {
       const data = {
-        onlyTodayZeroIntimacy: status
+        onlyTodayZeroIntimacy: status,
       }
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async signIn() {
@@ -494,6 +477,7 @@ export default {
       const pageSize = 10
       let total = 0
       let page = 1
+      this.signInCount = 0
 
       do {
         try {
@@ -503,47 +487,38 @@ export default {
           this.signInTotalCount = total
 
           for (const medal of items) {
-            const {
-              roomid: roomId,
-              medal_name: medalName,
-              uname,
-              level,
-              today_feed: todayFeed,
-            } = medal
+            const { roomid: roomId, medal_name: medalName, uname, level, today_feed: todayFeed, is_lighted: isLighted } = medal
+            // 今天有亲密度不需要签到
+            if (Number(todayFeed)) {
+              this.signInCount++
+              continue
+            }
 
             // 20级以上牌子不需要签到
-            if (level > 20) {
+            if (level > 20 && (isLighted || !this.isLightMedal)) {
               this.signInCount++
               continue
             }
 
-            if (this.onlyTodayZeroIntimacy && Number(todayFeed)) {
-              this.signInCount++
-              continue
-            }
-
-            const { data } = await getRoomInfoV2(roomId);
-            const {
-              room_id: realRoomId,
-            } = data.room_info;
+            const { data } = await getRoomInfoV2(roomId)
+            const { room_id: realRoomId } = data.room_info
             const result = await sendMessage(
               {
                 message: signInMessage,
                 roomId: realRoomId,
               },
               userCookie
-            );
+            )
             if (result.data.message) {
               this.$Message.error({
-                content: `签到未成功: ${result.data.message}, 用户名: ${uname}, 粉丝牌: ${medalName}`,
-                duration: 10
+                content: `签到未成功: ${result.data.message}, 用户名: ${uname}, 粉丝牌: ${medalName}, ${this.signInCount}/${this.signInTotalCount}`,
+                duration: 10,
               })
-
             } else {
               this.signInCount++
               this.$Message.success({
-                content: `签到成功, 用户名: ${uname}, 粉丝牌: ${medalName}`,
-                duration: 1
+                content: `签到成功, 用户名: ${uname}, 粉丝牌: ${medalName}, ${this.signInCount}/${this.signInTotalCount}`,
+                duration: 1,
               })
             }
             await wait(1000)
@@ -557,9 +532,9 @@ export default {
       } while (page <= Math.ceil(total / pageSize))
 
       this.$Message.success('签到完成！')
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style scoped>
@@ -587,5 +562,8 @@ export default {
 
 .color-selector {
   width: 700px;
+}
+.space-left-5px {
+  margin-left: 5px;
 }
 </style>

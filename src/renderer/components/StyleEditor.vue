@@ -2,10 +2,10 @@
   <div :style="{display: 'inline-block'}">
     <span>{{ name }}</span>
     <template v-if="type === 'InputNumber'">
-      <InputNumber :value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="debouncedUpdateStyle" />
+      <InputNumber :model-value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="debouncedUpdateStyle" />
     </template>
     <template v-if="type === 'ColorPicker'">
-      <ColorPicker :value="value" size="small" alpha @on-active-change="debouncedUpdateStyle" />
+      <ColorPicker :model-value="value" size="small" alpha @on-active-change="debouncedUpdateStyle" />
     </template>
   </div>
 </template>

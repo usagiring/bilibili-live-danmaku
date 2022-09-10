@@ -1,17 +1,27 @@
 <template>
-  <div class="query-component">
+  <div>
     <div class="searcher-wrapper">
       <Input v-model="roomId" placeholder="房间号" clearable style="width: 120px" size="small" />
-      <DatePicker type="datetimerange" format="yyyy-MM-dd HH:mm" placeholder="选择时间范围" style="width: 300px" size="small" :value="dateRange" @on-change="changeDateRange" @on-clear="clearDateRange" />
-      <Input v-model="q" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
-      <Button type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll" />
-      <Checkbox class="setting-checkbox" :value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
-      <Checkbox class="setting-checkbox" :value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
-      <Checkbox class="setting-checkbox" :value="enableMessageListenMode" @on-change="changeEnableMessageListenMode">实时更新模式</Checkbox>
+      <DatePicker
+        class="space-left-5px"
+        type="datetimerange"
+        format="yyyy-MM-dd HH:mm"
+        placeholder="选择时间范围"
+        style="width: 280px"
+        size="small"
+        :model-value="dateRange"
+        @on-change="changeDateRange"
+        @on-clear="clearDateRange"
+      />
+      <Input v-model="q" class="space-left" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
+      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll" />
+      <Checkbox class="space-left-5px" :model-value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
+      <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
+      <Checkbox :model-value="enableMessageListenMode" @on-change="changeEnableMessageListenMode">实时更新模式</Checkbox>
     </div>
     <div class="content-wrapper">
       <Split v-model="split1" @on-moving="splitMoving">
-        <template #left>  
+        <template #left>
           <div class="split-pane">
             <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
               <template #top>
@@ -20,9 +30,17 @@
                     <template v-for="(comment, i) in comments" :key="i">
                       <div class="comment-content">
                         <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
-                        <img v-if="comment.role" class="guard-icon" :src="`${getGuardIcon(comment.role)}`">
-                        <FanMedal v-if="comment.medalLevel && comment.medalName" :medal-level="comment.medalLevel" :medal-name="comment.medalName" :medal-color-start="comment.medalColorStart" :medal-color-end="comment.medalColorEnd" :medal-color-border="comment.medalColorBorder" />
-                        <span>{{ `${comment.uname}` }}</span>
+                        <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`">
+                        <FanMedal
+                          v-if="comment.medalLevel && comment.medalName"
+                          class="space-left-2"
+                          :medal-level="comment.medalLevel"
+                          :medal-name="comment.medalName"
+                          :medal-color-start="comment.medalColorStart"
+                          :medal-color-end="comment.medalColorEnd"
+                          :medal-color-border="comment.medalColorBorder"
+                        />
+                        <span class="space-left-2">{{ `${comment.uname}` }}</span>
                         <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
                         <!-- <span>{{ `: ${comment.comment}` }}</span> -->
                         <span>: </span>
@@ -43,8 +61,16 @@
                     <template v-for="(interact, i) in interacts" :key="i">
                       <div>
                         <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
-                        <FanMedal v-if="interact.medalLevel && interact.medalName" :medal-level="interact.medalLevel" :medal-name="interact.medalName" :medal-color-start="interact.medalColorStart" :medal-color-end="interact.medalColorEnd" :medal-color-border="interact.medalColorBorder" />
-                        <span :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
+                        <FanMedal
+                          v-if="interact.medalLevel && interact.medalName"
+                          class="space-left-2"
+                          :medal-level="interact.medalLevel"
+                          :medal-name="interact.medalName"
+                          :medal-color-start="interact.medalColorStart"
+                          :medal-color-end="interact.medalColorEnd"
+                          :medal-color-border="interact.medalColorBorder"
+                        />
+                        <span class="space-left-2" :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
                         <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
                         <span>{{ getInteractType(interact.type) }}了直播间</span>
                       </div>
@@ -64,7 +90,7 @@
                     <GiftCardMini v-bind="gift" :show-time="true">{{ `: ${gift.content}` }}</GiftCardMini>
                   </template>
                   <template v-if="gift.type === 1 || gift.type === 2">
-                    <GiftCardMini v-bind="gift" :show-time="true">{{ `: 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
+                    <GiftCardMini v-bind="gift" :show-time="true">{{ ` 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
                   </template>
                 </div>
               </template>
@@ -77,14 +103,14 @@
 </template>
 
 <script>
-import { shell } from "electron";
-import { getCurrentWindow } from "@electron/remote";
+import { shell } from 'electron'
+import { getCurrentWindow } from '@electron/remote'
 const window = getCurrentWindow()
-import { GUARD_ICON_MAP, INTERACT_TYPE } from "../../service/const";
-import { getPriceProperties, dateFormat } from "../../service/util";
+import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
+import { getPriceProperties, dateFormat } from '../../service/util'
 import { queryGifts, queryInteracts, queryComments } from '../../service/api'
-import GiftCardMini from "./GiftCardMini";
-import FanMedal from "./FanMedal";
+import GiftCardMini from './GiftCardMini'
+import FanMedal from './FanMedal'
 import ws from '../../service/ws'
 const COMMENTS_LIMIT = 200
 const GIFTS_LIMIT = 200
@@ -102,7 +128,7 @@ export default {
       split2: 0.7,
       roomId: 0,
       userId: null,
-      userName: "",
+      userName: '',
       dateRange: [],
       comments: [],
       interacts: [],
@@ -112,80 +138,80 @@ export default {
       scrollHeightLeftBottom: 100,
       scrollHeightRight: 1000,
       isShowSilverGift: false,
-    };
+    }
   },
   computed: {
     enableMessageListenMode() {
-      return this.$store.state.Config.enableMessageListenMode;
-    }
+      return this.$store.state.Config.enableMessageListenMode
+    },
   },
   created() {
-    this.roomId = this.$store.state.Config.realRoomId;
+    this.roomId = this.$store.state.Config.realRoomId
     // const startTime =
     // new Date(this.$store.state.Config.connectedAt) ||
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
-    this.searchAll();
-    window.on("resize", this.onResize);
+    this.searchAll()
+    window.on('resize', this.onResize)
 
     if (this.enableMessageListenMode) {
       this.listenStart()
     }
   },
   beforeUnmount() {
-    window.removeListener("resize", this.onResize);
+    window.removeListener('resize', this.onResize)
     this.listenStop()
   },
   mounted() {
     setTimeout(() => {
-      this.onResize();
-    }, 0);
+      this.onResize()
+    }, 0)
   },
   methods: {
     changeDateRange([startTime, endTime]) {
-      this.dateRange = [new Date(startTime), new Date(endTime)];
+      this.dateRange = [new Date(startTime), new Date(endTime)]
     },
     async searchAll(options) {
-      const comments = await this.searchComment(options);
-      this.comments = comments;
-      const interacts = await this.searchInteract(options);
-      this.interacts = interacts;
-      let gifts = await this.searchGift(options);
+      const comments = await this.searchComment(options)
+      this.comments = comments
+      const interacts = await this.searchInteract(options)
+      this.interacts = interacts
+      let gifts = await this.searchGift(options)
 
-      gifts = gifts.map(this.formatGift);
-      this.gifts = gifts;
+      gifts = gifts.map(this.formatGift)
+      this.gifts = gifts
     },
     async searchComment(options = {}) {
-      const { sort, skip, limit, scrollToken } = options;
+      const { sort, skip, limit, scrollToken } = options
       if (scrollToken) {
       }
-      const query = {};
+      const query = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId);
+        query.roomId = parseInt(this.roomId)
       }
       if (this.dateRange.length) {
         query.sendAt = {
           $gte: this.dateRange[0].getTime(),
           $lte: this.dateRange[1].getTime(),
-        };
+        }
       }
       if (this.q) {
         query.$or = [
           {
-            uid: parseInt(this.q)
+            uid: parseInt(this.q),
           },
           {
-            uname: { $regex: this.q }
+            uname: { $regex: this.q },
           },
           {
-            content: { $regex: this.q }
-          }
+            content: { $regex: this.q },
+          },
         ]
       }
       if (scrollToken) {
-        const [scrollKey, scrollValue] = scrollToken.split(":");
-        query.sendAt = query.sendAt || {};
-        query.sendAt[scrollKey] = Number(scrollValue);
+        const [scrollKey, scrollValue] = scrollToken.split(':')
+        query.sendAt = query.sendAt || {}
+        query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: comments } = await queryComments({
         query,
@@ -200,36 +226,36 @@ export default {
       //   sort: sort || { sendAt: -1 },
       //   limit: 20,
       // });
-      return comments;
+      return comments
     },
     async searchInteract(options = {}) {
-      const { sort, skip, limit, scrollToken } = options;
+      const { sort, skip, limit, scrollToken } = options
       if (scrollToken) {
       }
-      const query = {};
+      const query = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId);
+        query.roomId = parseInt(this.roomId)
       }
       if (this.dateRange.length) {
         query.sendAt = {
           $gte: this.dateRange[0].getTime(),
           $lte: this.dateRange[1].getTime(),
-        };
+        }
       }
       if (this.q) {
         query.$or = [
           {
-            uid: parseInt(this.q)
+            uid: parseInt(this.q),
           },
           {
-            uname: { $regex: this.q }
+            uname: { $regex: this.q },
           },
         ]
       }
       if (scrollToken) {
-        const [scrollKey, scrollValue] = scrollToken.split(":");
-        query.sendAt = query.sendAt || {};
-        query.sendAt[scrollKey] = Number(scrollValue);
+        const [scrollKey, scrollValue] = scrollToken.split(':')
+        query.sendAt = query.sendAt || {}
+        query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: interacts } = await queryInteracts({
         query,
@@ -240,43 +266,43 @@ export default {
       //   sort: sort || { sendAt: -1 },
       //   limit: 20,
       // });
-      return interacts;
+      return interacts
     },
 
     async searchGift(options = {}) {
-      const { sort, skip, limit, scrollToken } = options;
+      const { sort, skip, limit, scrollToken } = options
       if (scrollToken) {
       }
-      const query = {};
+      const query = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId);
+        query.roomId = parseInt(this.roomId)
       }
       if (this.dateRange.length) {
         query.sendAt = {
           $gte: this.dateRange[0].getTime(),
           $lte: this.dateRange[1].getTime(),
-        };
+        }
       }
       if (this.q) {
         query.$or = [
           {
-            uid: parseInt(this.q)
+            uid: parseInt(this.q),
           },
           {
-            uname: { $regex: this.q }
+            uname: { $regex: this.q },
           },
           {
-            content: { $regex: this.q }
-          }
+            content: { $regex: this.q },
+          },
         ]
       }
       if (scrollToken) {
-        const [scrollKey, scrollValue] = scrollToken.split(":");
-        query.sendAt = query.sendAt || {};
-        query.sendAt[scrollKey] = Number(scrollValue);
+        const [scrollKey, scrollValue] = scrollToken.split(':')
+        query.sendAt = query.sendAt || {}
+        query.sendAt[scrollKey] = Number(scrollValue)
       }
       if (!this.isShowSilverGift) {
-        query.coinType = 1;
+        query.coinType = 1
       }
       const { data: gifts } = await queryGifts({
         query,
@@ -287,146 +313,144 @@ export default {
       //   sort: sort || { sendAt: -1 },
       //   limit: 20,
       // });
-      return gifts;
+      return gifts
     },
 
     handleReachEdgeComment(dir) {
       return new Promise(async (resolve, reject) => {
         // 向上
         if (dir > 0) {
-          const firstComment = this.comments[0];
+          const firstComment = this.comments[0]
           const comments = await this.searchComment({
             scrollToken: `$gt:${firstComment.sendAt}`,
             sort: { sendAt: 1 },
-          });
-          comments.reverse();
+          })
+          comments.reverse()
           setTimeout(() => {
-            this.comments = [...comments, ...this.comments];
-          }, 700);
+            this.comments = [...comments, ...this.comments]
+          }, 700)
         }
         // 向下
         if (dir < 0) {
-          const lastComment = this.comments[this.comments.length - 1];
+          const lastComment = this.comments[this.comments.length - 1]
           const comments = await this.searchComment({
             scrollToken: `$lt:${lastComment.sendAt}`,
             sort: { sendAt: -1 },
-          });
+          })
           setTimeout(() => {
-            this.comments = [...this.comments, ...comments];
-          }, 700);
+            this.comments = [...this.comments, ...comments]
+          }, 700)
         }
-        resolve();
-      });
+        resolve()
+      })
     },
     showUserSpaceLink(status) {
-      this.isShowUserSpaceLink = status;
+      this.isShowUserSpaceLink = status
     },
     splitLeftMoving(e) {
-      const leftTop = document.getElementById("split-left-top");
-      this.scrollHeightLeftTop = leftTop.clientHeight;
-      const leftBottom = document.getElementById("split-left-bottom");
-      this.scrollHeightLeftBottom = leftBottom.clientHeight;
+      const leftTop = document.getElementById('split-left-top')
+      this.scrollHeightLeftTop = leftTop.clientHeight
+      const leftBottom = document.getElementById('split-left-bottom')
+      this.scrollHeightLeftBottom = leftBottom.clientHeight
     },
     splitMoving(e) {
-      const right = document.getElementById("split-right");
-      this.scrollHeightRight = right.clientHeight;
+      const right = document.getElementById('split-right')
+      this.scrollHeightRight = right.clientHeight
     },
     clearDateRange() {
       setTimeout(() => {
-        this.dateRange = [];
-      }, 0);
+        this.dateRange = []
+      }, 0)
     },
     handleReachEdgeInteract(dir) {
       return new Promise(async (resolve, reject) => {
         // 向上
         if (dir > 0) {
-          const firstInteract = this.interacts[0];
+          const firstInteract = this.interacts[0]
           const interacts = await this.searchInteract({
             scrollToken: `$gt:${firstInteract.sendAt}`,
             sort: { sendAt: 1 },
-          });
-          interacts.reverse();
+          })
+          interacts.reverse()
           setTimeout(() => {
-            this.interacts = [...interacts, ...this.interacts];
-          }, 700);
+            this.interacts = [...interacts, ...this.interacts]
+          }, 700)
         }
         // 向下
         if (dir < 0) {
-          const lastInteract = this.interacts[this.interacts.length - 1];
+          const lastInteract = this.interacts[this.interacts.length - 1]
           const interacts = await this.searchInteract({
             scrollToken: `$lt:${lastInteract.sendAt}`,
             sort: { sendAt: -1 },
-          });
+          })
           setTimeout(() => {
-            this.interacts = [...this.interacts, ...interacts];
-          }, 700);
+            this.interacts = [...this.interacts, ...interacts]
+          }, 700)
         }
-        resolve();
-      });
+        resolve()
+      })
     },
 
     handleReachEdgeGift(dir) {
       return new Promise(async (resolve, reject) => {
         // 向上
         if (dir > 0) {
-          const firstGift = this.gifts[0];
+          const firstGift = this.gifts[0]
           let gifts = await this.searchGift({
             scrollToken: `$gt:${firstGift.sendAt}`,
             sort: { sendAt: 1 },
-          });
-          gifts.reverse();
-          gifts = gifts.map(this.formatGift);
+          })
+          gifts.reverse()
+          gifts = gifts.map(this.formatGift)
           setTimeout(() => {
-            this.gifts = [...gifts, ...this.gifts];
-          }, 700);
+            this.gifts = [...gifts, ...this.gifts]
+          }, 700)
         }
         // 向下
         if (dir < 0) {
-          const lastGift = this.gifts[this.gifts.length - 1];
+          const lastGift = this.gifts[this.gifts.length - 1]
           let gifts = await this.searchGift({
             scrollToken: `$lt:${lastGift.sendAt}`,
             sort: { sendAt: -1 },
-          });
-          gifts = gifts.map(this.formatGift);
+          })
+          gifts = gifts.map(this.formatGift)
           setTimeout(() => {
-            this.gifts = [...this.gifts, ...gifts];
-          }, 700);
+            this.gifts = [...this.gifts, ...gifts]
+          }, 700)
         }
-        resolve();
-      });
+        resolve()
+      })
     },
     openBiliUserSpace(userId) {
-      shell.openExternal(`https://space.bilibili.com/${userId}`);
+      shell.openExternal(`https://space.bilibili.com/${userId}`)
     },
     dateFormat(date) {
       return dateFormat(date)
     },
     formatGift(gift) {
-      gift.totalPrice = (gift.count || 1) * gift.price;
-      gift.totalPrice = Number.isInteger(gift.totalPrice)
-        ? gift.totalPrice
-        : gift.totalPrice.toFixed(1);
+      gift.totalPrice = (gift.count || 1) * gift.price
+      gift.totalPrice = Number.isInteger(gift.totalPrice) ? gift.totalPrice : gift.totalPrice.toFixed(1)
       return Object.assign({}, gift, {
         priceProperties: getPriceProperties(gift.totalPrice) || {},
-      });
+      })
     },
     async showSilverGift(status) {
-      this.isShowSilverGift = status;
+      this.isShowSilverGift = status
       let gifts = await this.searchGift({
         isShowSilverGift: status,
-      });
-      gifts = gifts.map(this.formatGift);
-      this.gifts = gifts;
+      })
+      gifts = gifts.map(this.formatGift)
+      this.gifts = gifts
     },
     getGuardIcon(level) {
-      return GUARD_ICON_MAP[level];
+      return GUARD_ICON_MAP[level]
     },
     getInteractType(type) {
-      return INTERACT_TYPE[type];
+      return INTERACT_TYPE[type]
     },
     onResize: function () {
-      this.splitLeftMoving();
-      this.splitMoving();
+      this.splitLeftMoving()
+      this.splitMoving()
     },
 
     playAudio(url) {
@@ -435,8 +459,8 @@ export default {
     },
 
     async changeEnableMessageListenMode(status) {
-      this.$store.dispatch("UPDATE_CONFIG", {
-        enableMessageListenMode: status
+      this.$store.dispatch('UPDATE_CONFIG', {
+        enableMessageListenMode: status,
       })
       if (status) {
         await this.searchAll()
@@ -487,7 +511,7 @@ export default {
       }
       payload = this.formatGift(payload)
       // 已存在的礼物覆盖，不存在的新增
-      const existGift = this.gifts.find(gift => gift._id === payload._id)
+      const existGift = this.gifts.find((gift) => gift._id === payload._id)
       if (existGift) {
         existGift.count = payload.count
         existGift.totalPrice = payload.totalPrice
@@ -500,15 +524,10 @@ export default {
       }
     },
   },
-};
+}
 </script>
 
 <style scoped>
-.query-component {
-  height: 100%;
-
-  /* border: 1px solid #dcdee2; */
-}
 .content-wrapper {
   height: calc(100% - 35px);
 }
@@ -535,8 +554,16 @@ export default {
   height: 35px;
   position: relative;
   min-width: 1000px;
-  padding: 1px 30px;
-  border-bottom: 1px solid silver;
+  padding: 0px 30px;
+  border-bottom: 1px solid lightgray;
+}
+
+.space-left-5px {
+  margin-left: 5px;
+}
+
+.space-left-2 {
+  margin-left: 2px;
 }
 
 .guard-icon {

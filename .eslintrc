@@ -11,6 +11,7 @@
     // "vue/multiline-html-element-content-newline": "off",
     "vue/singleline-html-element-content-newline": "off",
     "vue/max-attributes-per-line": "off",
-    "vue/multi-word-component-names": "off"
+    "vue/multi-word-component-names": "off",
+    "vue/require-prop-types": "off"
   }
 }

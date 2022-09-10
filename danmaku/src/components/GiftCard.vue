@@ -1,9 +1,14 @@
 <template>
-  <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
-    <div :style="{
+  <div
+    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
+    class="message-super-chat"
+  >
+    <div
+      :style="{
         background: `${priceProperties.backgroundColor}`,
         padding: '10px',
-      }">
+      }"
+    >
       <div :style="{ display: 'inline-block', 'vertical-align': 'top' }">
         <Avatar :src="avatar" size="large" />
       </div>
@@ -13,23 +18,41 @@
           <p>{{ count === 1 ? `${name}` : `${name}×${count}` }}</p>
         </template>
         <template v-else-if="totalPrice">
-          <p>{{ `￥${Number.isSafeInteger(totalPrice) ? Number(totalPrice).toFixed(0) : Number(totalPrice).toFixed(1)}` }}</p>
+          <p>
+            {{
+              `￥${
+                Number.isSafeInteger(totalPrice)
+                  ? Number(totalPrice).toFixed(0)
+                  : Number(totalPrice).toFixed(1)
+              }`
+            }}
+          </p>
         </template>
       </div>
     </div>
-    <div :style="{
+    <div
+      :style="{
         background: `${priceProperties.backgroundBottomColor}`,
         color: 'white',
-      }">
-      <slot></slot>
+      }"
+    >
+      <slot />
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'],
-}
+  props: [
+    "priceProperties",
+    "avatar",
+    "uname",
+    "name",
+    "totalPrice",
+    "count",
+    "type",
+  ],
+};
 </script>
 
 <style scoped>

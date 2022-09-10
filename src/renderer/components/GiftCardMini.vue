@@ -9,47 +9,36 @@
       <span v-if="showTime" class="date-style">
         {{ dateFormat(sendAt) }}
       </span>
-      <Avatar :src="avatar || DEFAULT_AVATAR" size="small" />
-      <span>{{ uname }}</span>
+      <Avatar class="space-left-2px" :src="avatar || DEFAULT_AVATAR" size="small" />
+      <span class="space-left-2px">{{ uname }}</span>
+
+      <slot />
       <template v-if="type === 2">
         <!-- wired space -->
-        <span class="price-style">{{
-          count === 1 ? `${name}` : `${name}×${count}`
-        }}</span>
+        <span class="price-style space-left-2px">{{ count === 1 ? `${name}` : `${name}×${count}` }}</span>
       </template>
       <template v-else-if="totalPrice">
-        <span class="price-style">{{ `¥${totalPrice}` }}</span>
+        <span class="price-style space-left-2px">{{ `¥${totalPrice}` }}</span>
       </template>
-      <slot />
     </div>
   </div>
 </template>
 
 <script>
 import { DEFAULT_AVATAR } from '../../service/const'
-import { dateFormat } from "../../service/util";
+import { dateFormat } from '../../service/util'
 
 export default {
-  props: [
-    "priceProperties",
-    "avatar",
-    "uname",
-    "name",
-    "totalPrice",
-    "count",
-    "type",
-    "sendAt",
-    "showTime"
-  ],
+  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type', 'sendAt', 'showTime'],
   data() {
     return {
-      DEFAULT_AVATAR
+      DEFAULT_AVATAR,
     }
   },
   methods: {
     dateFormat: dateFormat,
   },
-};
+}
 </script>
 
 <style scoped>
@@ -71,5 +60,8 @@ export default {
   background: LemonChiffon;
   padding: 0 3px;
   margin: 0px;
+}
+.space-left-2px {
+  margin-left: 2px;
 }
 </style>

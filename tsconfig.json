@@ -1,23 +1,12 @@
 {
+  "include": [
+    "./src/**/*"
+  ],
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "module": "es2015",
     "moduleResolution": "node",
-    "importHelpers": true,
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
+    "target": "es5",
     "sourceMap": true,
-    "baseUrl": "./",
-    "strict": true,
-    "paths": {},
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "isolatedModules": true
-  },
-  "include": ["src"],
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+    "allowJs": true
+  }
 }

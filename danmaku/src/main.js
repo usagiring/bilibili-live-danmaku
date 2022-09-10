@@ -1,11 +1,11 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
-import ViewUI from 'view-design';
-import 'view-design/dist/styles/iview.css';
+import ViewUIPlus from 'view-ui-plus'
+import 'view-ui-plus/dist/styles/viewuiplus.css'
 
-Vue.use(ViewUI);
-Vue.config.productionTip = false
+// Vue.use(ViewUI);
+// Vue.config.productionTip = false
 
-new Vue({
-  render: h => h(App),
-}).$mount('#app')
+createApp(App)
+  .use(ViewUIPlus)
+  .mount('#app')

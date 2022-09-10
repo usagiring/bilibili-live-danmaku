@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <div class="tag-container">
+    <div class="tag-container">
       <Container :get-child-payload="getTagPayload" orientation="horizontal" behaviour="copy" @drop="onDrop">
         <Draggable v-for="tag in tags" :key="tag.id">
           <div :class="tag.class ? `draggable-tag ${tag.class}`: 'draggable-tag'">
@@ -8,7 +8,7 @@
           </div>
         </Draggable>
       </Container>
-    </div> -->
+    </div>
     <Row :style="{padding: '6px'}">
       <i-col span="1">
         <div class="col-header">
@@ -70,17 +70,17 @@
               </div>
             </i-col>
             <i-col span="1" :style="{'text-align':'center'}">
-              <Checkbox :value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)" />
+              <Checkbox :model-value="rule.enable" :style="{'vertical-align': 'middle', 'margin-left': '8px'}" @on-change="changeEnable(index, $event)" />
             </i-col>
             <i-col span="2">
-              <Select :value="rule.type" :style="{padding: '0 7px'}" transfer size="small" @on-change="onChangeRuleType(index, $event)">
+              <Select :model-value="rule.type" :style="{padding: '0 7px'}" transfer size="small" @on-change="onChangeRuleType(index, $event)">
                 <Option v-for="(option, index1) in types" :key="index1" :value="option.key" :label="option.label">
                   <span>{{ option.value }}</span>
                 </Option>
               </Select>
             </i-col>
             <i-col span="6">
-              <Input :value="rule.text" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" @on-change="debouncedChangeText(index, $event)" />
+              <Input :model-value="rule.text" placeholder="回复内容..." :style="{padding: '0 7px'}" size="small" @on-change="debouncedChangeText(index, $event)" />
             </i-col>
             <i-col span="13">
               <Container :style="{width: '100%'}" :drop-placeholder="dropPlaceholderOptions" :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)" orientation="horizontal" @drop="onDrop(index, $event)">

@@ -1,24 +1,29 @@
 <template>
-  <div :class="`comment-similar-badge animated ${animateKey}`" :style="{background: `${randomColor}`}">{{ number }}</div>
+  <div
+    :class="`comment-similar-badge animated ${animateKey}`"
+    :style="{ background: `${randomColor}` }"
+  >
+    {{ number }}
+  </div>
 </template>
 
 <script>
-import { shuffle } from 'lodash'
-import { COLORS } from '../service/const'
-const colorPool = shuffle(COLORS)
+import { shuffle } from "lodash";
+import { COLORS } from "../service/const";
+const colorPool = shuffle(COLORS);
 
 export default {
-  props: ['number'],
+  props: ["number"],
   data() {
     return {
-      animateKey: '',
-    }
+      animateKey: "",
+    };
   },
   computed: {
     randomColor() {
-      const color = colorPool.shift()
-      colorPool.push(color)
-      return color
+      const color = colorPool.shift();
+      colorPool.push(color);
+      return color;
     },
   },
   watch: {
@@ -29,7 +34,7 @@ export default {
     //   }, 500);
     // },
   },
-}
+};
 </script>
 
 <style scoped>

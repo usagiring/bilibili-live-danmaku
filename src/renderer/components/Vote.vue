@@ -14,10 +14,10 @@
       <template v-for="(item, index) in options" :key="index">
         <div>
           <div class="keyword-container">
-            <Input :value="item.keyword" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionKeyword(index, $event)" />
+            <Input :model-value="item.keyword" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionKeyword(index, $event)" />
           </div>
           <div class="content-container">
-            <Input :value="item.value" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionContent(index, $event)" />
+            <Input :model-value="item.value" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionContent(index, $event)" />
             <span />
           </div>
           <div class="remove-icon-container">
