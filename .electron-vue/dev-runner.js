@@ -44,7 +44,6 @@ function startRenderer() {
       // path.join(__dirname, 'dev-client')
     ].concat(rendererConfig.entry.renderer)
     rendererConfig.mode = 'development'
-    console.log(rendererConfig.module.rules)
     const compiler = webpack(rendererConfig)
     // hotMiddleware = webpackHotMiddleware(compiler, {
     //   log: false,

@@ -60,7 +60,7 @@
       </i-col>
       <i-col span="1" />
     </Row>
-    <!-- <Container :get-child-payload="getRulePayload" drag-handle-selector=".column-drag-handle" @drop="onDropRule">
+    <Container :get-child-payload="getRulePayload" drag-handle-selector=".column-drag-handle" @drop="onDropRule">
       <template v-for="(rule, index) in rules" :key="index">
         <Draggable>
           <Row :style="{padding: '6px'}">
@@ -110,7 +110,7 @@
           </Row>
         </Draggable>
       </template>
-    </Container> -->
+    </Container>
     <div :style="{ padding: '5px 20px'}">
       <Button type="primary" long @click="addRule">
         <Icon :style="{'font-weight': 'bold'}" type="md-add" />
@@ -120,7 +120,7 @@
 </template>
 
 <script>
-// import { Container, Draggable } from "vue-smooth-dnd";
+import { Container, Draggable } from "vue3-smooth-dnd";
 import TagContent from './TagContent.vue'
 import { getVoices, updateSetting } from '../../service/api'
 import { getGiftConfig } from '../../service/util'

@@ -104,15 +104,20 @@ let rendererConfig = {
         }
       },
       {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        use: {
-          loader: 'url-loader',
-          options: {
-            limit: 10000,
-            name: 'fonts/[name]--[folder].[ext]'
-          }
-        }
-      }
+        test: /\.woff2?$/i,
+        type: 'asset/resource',
+        dependency: { not: ['url'] },
+      },
+      // {
+      //   test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+      //   use: {
+      //     loader: 'url-loader',
+      //     options: {
+      //       limit: 10000,
+      //       name: 'fonts/[name]--[folder].[ext]'
+      //     }
+      //   }
+      // }
     ]
   },
   node: {

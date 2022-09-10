@@ -12,7 +12,7 @@
         class="border-image-default operatable-preview-text"
         :style="{...borderImageStyle, ...message_lv3}"
       >
-        <!-- <Container orientation="horizontal" :style="{'min-height': '0px'}" @drop="onDrop($event)">
+        <Container orientation="horizontal" :style="{'min-height': '0px'}" @drop="onDrop($event)">
           <template v-for="(setting, index) of messageSettings" :key="index">
             <Draggable v-if="setting.type==='guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <img class="guard-icon" :src="`${getGuardIcon('3')}`">
@@ -41,7 +41,7 @@
               <span v-else :style="{...comment_lv3, ...fontStyle}">{{ example.content }}</span>
             </Draggable>
           </template>
-        </Container> -->
+        </Container>
       </div>
       <!-- <span>{{ `: ${comment.comment}` }}</span> -->
       <!-- <span v-if="example.voiceUrl" @click="playAudio(example.voiceUrl)" class="voice-container">
@@ -409,7 +409,7 @@
 </template>
 
 <script>
-// import { Container, Draggable } from 'vue-smooth-dnd'
+import { Container, Draggable } from 'vue3-smooth-dnd'
 import FontList from 'font-list'
 
 import SettingEditor from './SettingEditor'
