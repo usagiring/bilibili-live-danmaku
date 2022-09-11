@@ -72,40 +72,40 @@
             </div>
 
             <div class="status-wrapper">
-              <div>
+              <div class="status-padding status-shadow">
                 <Icon type="md-flame" />
                 <span class="header-icon-text"> 人气值 </span>
                 {{ ninkiNumber }}
               </div>
-              <div>
+              <div class="status-padding status-shadow">
                 <Icon type="md-star" />
                 <span class="header-icon-text"> 关注数 </span>
                 {{ fansNumber }}
               </div>
-              <div>
+              <div class="status-padding status-shadow">
                 <Icon type="md-heart" />
                 <span class="header-icon-text"> 粉丝团 </span>
                 {{ fansClubNumber }}
               </div>
             </div>
             <div class="status-wrapper">
-              <div>
+              <div class="status-padding">
                 <Tooltip content="舰队">
-                  <Icon type="md-cog" />
+                  <Icon class="status-shadow" type="md-cog" />
                 </Tooltip>
-                {{ guardNumber }}
+                <span class="space-left-2px status-shadow">{{ guardNumber }}</span>
               </div>
-              <div>
+              <div class="status-padding">
                 <Tooltip content="十分钟内互动人数">
-                  <Icon type="md-person" />
+                  <Icon class="status-shadow" type="md-person" />
                 </Tooltip>
-                {{ peopleNumber }}
+                <span class="space-left-2px status-shadow">{{ peopleNumber }}</span>
               </div>
-              <div>
+              <div class="status-padding">
                 <Tooltip :content="`${watchedNumber}人看过`">
-                  <Icon type="md-eye" />
+                  <Icon class="status-shadow" type="md-eye" />
                 </Tooltip>
-                {{ watchedNumber }}
+                <span class="space-left-2px status-shadow">{{ watchedNumber }}</span>
               </div>
             </div>
             <!-- <div> -->
@@ -793,7 +793,7 @@ export default {
       const utterThis = new SpeechSynthesisUtterance()
       utterThis.text = text
       if (voice) {
-        const voiceInstance = this.$global.voices.find(v => v.name === voice)
+        const voiceInstance = this.$global.voices.find((v) => v.name === voice)
         utterThis.voice = voiceInstance
       }
       if (speed) {
@@ -821,8 +821,10 @@ export default {
   padding: 6px 0 0 40px;
 }
 
-.status-wrapper > div {
+.status-padding {
   padding: 5px 25px 5px 10px;
+}
+.status-shadow {
   /* background: radial-gradient(farthest-side, white 20%, rgba(0, 0, 0, 0) 100%); */
   text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
 }
