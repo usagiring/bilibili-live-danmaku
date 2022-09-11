@@ -180,6 +180,7 @@ import { record, cancelRecord, getStatus, setStatus } from '../../service/bilibi
 import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfo } from '../../service/bilibili-api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, PORT, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
+const synth = window.speechSynthesis
 
 // 0 未开播
 // 1 准备中（web开推流码）
@@ -358,6 +359,12 @@ export default {
         const { watchedNumber } = payload.payload
         this.watchedNumber = watchedNumber
       }
+
+      if (payload.cmd === 'SPEAK') {
+        const { text, voice, speed } = payload.payload
+        console.log(payload.payload)
+        this.speak({ text, voice, speed })
+      }
     })
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
@@ -388,6 +395,10 @@ export default {
     })
 
     await this.fillRoomLiveStatus(this.historyRooms)
+
+    setTimeout(() => {
+      this.$global.voices = synth.getVoices()
+    }, 500)
   },
   beforeUnmount() {
     if (this.giftTimer) {
@@ -773,6 +784,22 @@ export default {
     openBiliLiveRoom() {
       if (!this.isConnected || !this.realRoomId) return
       shell.openExternal(`https://live.bilibili.com/${this.realRoomId}`)
+    },
+
+    // fix: say.js 使用cp调用shell放声音，导致声音控制器单独出shell通道，无法通过本进程控制音量
+    // auto rule -> backend -> if(speak) -> send ws to client -> this function
+    speak({ text, voice, speed }) {
+      if (synth.speaking) return
+      const utterThis = new SpeechSynthesisUtterance()
+      utterThis.text = text
+      if (voice) {
+        const voiceInstance = this.$global.voices.find(v => v.name === voice)
+        utterThis.voice = voiceInstance
+      }
+      if (speed) {
+        utterThis.rate = speed
+      }
+      synth.speak(utterThis)
     },
   },
 }

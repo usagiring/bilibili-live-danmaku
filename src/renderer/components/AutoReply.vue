@@ -74,7 +74,7 @@
               <Container
                 :style="{ width: '100%' }"
                 :drop-placeholder="dropPlaceholderOptions"
-                :should-accept-drop="(src, payload) => shouldAcceptDrop(rule, src, payload)"
+                :should-accept-drop="(src, payload) => shouldAcceptDrop(index, src, payload)"
                 orientation="horizontal"
                 @drop="onDrop(index, $event)"
               >
@@ -120,7 +120,6 @@ import TagContent from './TagContent.vue'
 import { getVoices, updateSetting } from '../../service/api'
 import { getGiftConfig } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
-// const synth = window.speechSynthesis
 
 const roleOptions = [
   {
@@ -357,34 +356,31 @@ export default {
     this.giftOptions = giftOptions
   },
   async mounted() {
-    const { data: voices } = await getVoices()
-    const options = voices.map((voice) => {
-      return {
-        key: voice,
-        value: voice,
-        label: voice,
-      }
-    })
+    // const { data: voices } = await getVoices()
+    // const options = voices.map((voice) => {
+    //   return {
+    //     key: voice,
+    //     value: voice,
+    //     label: voice,
+    //   }
+    // })
 
-    // setTimeout(() => {
-    //   this.voices = synth.getVoices()
+    setTimeout(() => {
+      const options = this.$global?.voices?.map((voice) => {
+        return {
+          key: voice.name,
+          value: voice.name,
+          label: voice.name,
+        }
+      }) || []
 
-    //   const options = this.voices.map((voice) => {
-    //     return {
-    //       key: voice.name,
-    //       value: voice.name,
-    //       label: voice.name,
-    //     }
-    //   })
+      const voiceTag = this.tags.find((tag) => tag.id === 9)
+      voiceTag.template.rows[0].options = options
+    }, 500)
 
-    //   const voiceTag = this.tags.find((tag) => tag.id === 9)
-    //   // TODO
-    //   voiceTag.template.rows[0].options = options
-    // }, 500)
-
-    const voiceTag = this.tags.find((tag) => tag.id === 9)
-    // TODO
-    voiceTag.template.rows[0].options = options
+    // const voiceTag = this.tags.find((tag) => tag.id === 9)
+    // // TODO
+    // voiceTag.template.rows[0].options = options
     const giftTag = this.tags.find((tag) => tag.id === 4)
     // TODO
     giftTag.template.rows[0].options = this.giftOptions
@@ -542,7 +538,8 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    shouldAcceptDrop(rule, sourceContainerOptions, payload) {
+    shouldAcceptDrop(index, sourceContainerOptions, payload) {
+      const rule = this.rules[index]
       if (!rule.type) {
         // this.$Message.warning('请先设置类型')
         return false

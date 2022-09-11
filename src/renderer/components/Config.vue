@@ -258,7 +258,7 @@ export default {
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
 
     setTimeout(() => {
-      this.voices = synth.getVoices()
+      this.voices = this.$global?.voices || []
 
       this.displayVoices = this.voices.map((voice) => {
         return {
