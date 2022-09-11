@@ -33,7 +33,7 @@
     </div>
     <div class="config-item-container">
       Cookie
-      <Input size="small" class="config-item" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
+      <Input class="config-item" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Tooltip placement="top">
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
@@ -62,16 +62,16 @@
     </div>
 
     <div class="config-item-container">
-      <Input v-model="text" size="small" placeholder="让系统说..." :style="{ display: 'inline-block', width: '300px' }" @on-keyup.enter="speak" />
-      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-play" />
+      <Input v-model="text" placeholder="让系统说..." :style="{ display: 'inline-block', width: '300px' }" />
+      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-play" @click="speak" />
       声音
-      <Select size="small" :style="{ width: '100px', display: 'inline-block' }" :model-value="currentVoice" @on-change="onChangeVoice">
-        <Option v-for="voice in voices" :key="voice.key" :value="voice.key" :label="voice.label">
+      <Select v-model="currentVoice" size="small" :style="{ width: '100px', display: 'inline-block' }">
+        <Option v-for="voice in displayVoices" :key="voice.key" :value="voice.key" :label="voice.label">
           <span>{{ voice.value }}</span>
         </Option>
       </Select>
       <span class="space-left-5px">语速</span>
-      <InputNumber v-model="voiceSpeed" size="small" :min="0" :step="0.1" :style="{ width: '55px' }" @on-change="onChangeVoiceSpeed" />
+      <InputNumber v-model="voiceSpeed" size="small" :min="0" :step="0.1" :style="{ width: '55px' }" />
     </div>
 
     <div class="config-item-container">
@@ -156,12 +156,13 @@
 import { uniq } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
-const window = getCurrentWindow()
+const browserWindow = getCurrentWindow()
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 
-import { clearDB, backupDB, updateSetting, getVoices, speak as speakAPI } from '../../service/api'
+import { clearDB, backupDB, updateSetting } from '../../service/api'
 import { getGiftConfig, wait } from '../../service/util'
 import { sendMessage, getMedalList, getRoomInfoV2 } from '../../service/bilibili-api'
+const synth = window.speechSynthesis
 
 export default {
   data() {
@@ -179,6 +180,7 @@ export default {
       signInCount: 0,
       signInTotalCount: 0,
       isLightMedal: true,
+      displayVoices: [],
     }
   },
   computed: {
@@ -255,14 +257,17 @@ export default {
 
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
 
-    const { data: voices } = await getVoices()
-    this.voices = voices.map((voice) => {
-      return {
-        key: voice,
-        value: voice,
-        label: voice,
-      }
-    })
+    setTimeout(() => {
+      this.voices = synth.getVoices()
+
+      this.displayVoices = this.voices.map((voice) => {
+        return {
+          key: voice.name,
+          value: voice.name,
+          label: voice.name,
+        }
+      })
+    }, 500)
 
     this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
   },
@@ -270,20 +275,20 @@ export default {
     async restoreDefaultStyleSetting() {
       await updateSetting(DEFAULT_STYLE)
       this.$store.dispatch('UPDATE_CONFIG', DEFAULT_STYLE)
-      window.reload()
+      browserWindow.reload()
     },
 
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall
       await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
       await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      window.reload()
+      browserWindow.reload()
     },
 
     async clearUserDB() {
       // 清空用户数据缓存
       await clearDB({ names: ['user'] })
-      window.reload()
+      browserWindow.reload()
     },
 
     async changeCookie(e) {
@@ -399,27 +404,13 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async onChangeVoice(voice) {
-      // await updateSetting({
-      //   voice: voice
-      // })
-      this.currentVoice = voice
-      // this.$store.dispatch("UPDATE_CONFIG", data);
-    },
-
-    async onChangeVoiceSpeed(speed) {
-      // await updateSetting({
-      //   voiceSpeed: speed
-      // })
-      this.voiceSpeed = speed
-    },
-
-    async speak() {
-      await speakAPI({
-        text: this.text,
-        voice: this.currentVoice,
-        speed: this.voiceSpeed,
-      })
+    speak() {
+      const voice = this.voices.find((voice) => voice.name === this.currentVoice)
+      const utterThis = new SpeechSynthesisUtterance()
+      utterThis.text = this.text
+      utterThis.voice = voice
+      utterThis.rate = this.voiceSpeed
+      synth.speak(utterThis)
     },
 
     async onChangeColor(value) {

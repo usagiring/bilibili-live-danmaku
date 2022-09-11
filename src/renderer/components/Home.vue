@@ -62,7 +62,7 @@
       </Sider>
       <Layout>
         <div class="disable-user-select" :style="{ position: 'relative' }">
-          <img class="header-background-img" :src="topPhoto">
+          <img class="header-background-img" :src="topPhoto" />
 
           <div class="layout-header" :style="!topPhoto && { background: 'white' }">
             <div class="avatar-wrapper">
@@ -137,9 +137,9 @@
                 </Option>
               </AutoComplete>
               <span :style="{ 'padding-left': '10px' }">连接</span>
-              <i-switch :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
+              <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
               <span :style="{ 'padding-left': '20px' }">弹幕窗</span>
-              <i-switch :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
+              <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
               <template v-if="isShowDanmakuWindow">
                 <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
                 <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
@@ -973,5 +973,8 @@ export default {
   padding: 5px 15px;
   /* background: radial-gradient(farthest-side, rgba(255, 255, 255, 0.8) 60%, rgba(0, 0, 0, 0) 100%); */
   text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
+}
+.space-left-2px {
+  margin-left: 2px;
 }
 </style>
