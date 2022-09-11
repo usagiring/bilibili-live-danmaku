@@ -172,16 +172,21 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust rendererConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  rendererConfig.devtool = ''
+  rendererConfig.devtool = 'source-map'
 
   rendererConfig.plugins.push(
-    new CopyWebpackPlugin([
-      {
+    new CopyWebpackPlugin({
+      patterns: [{
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/electron/static'),
-        ignore: ['.*']
-      }
-    ]),
+        globOptions: {
+          ignore: ['.*']
+        }
+      }, {
+        from: path.join(__dirname, '../danmaku-dist'),
+        to: path.join(__dirname, '../dist/electron/danmaku'),
+      }]
+    }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"'
     }),

@@ -13,15 +13,9 @@
 
 <script>
 export default {
-  name: "FanMedal",
-  props: [
-    "medalColorStart",
-    "medalColorEnd",
-    "medalColorBorder",
-    "medalName",
-    "medalLevel",
-  ],
-};
+  name: 'FanMedal',
+  props: ['medalColorStart', 'medalColorEnd', 'medalColorBorder', 'medalName', 'medalLevel'],
+}
 </script>
 
 <style scoped></style>

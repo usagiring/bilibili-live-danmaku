@@ -12,12 +12,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 
 let webConfig = {
-  devtool: '#cheap-module-eval-source-map',
+  devtool: 'source-map',
   optimization: {
     minimize: true,
-    minimizer: [new TerserPlugin({
-      sourceMap: true,
-    })],
+    minimizer: [(compiler) => {
+      new TerserPlugin({
+        terserOptions: {
+          compress: {},
+        }
+      }).apply(compiler);
+    }],
   },
   entry: {
     web: path.join(__dirname, '../src/renderer/main.js')
@@ -123,16 +127,18 @@ let webConfig = {
  * Adjust webConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  webConfig.devtool = ''
+  webConfig.devtool = 'source-map'
 
   webConfig.plugins.push(
-    new CopyWebpackPlugin([
-      {
+    new CopyWebpackPlugin({
+      patterns: [{
         from: path.join(__dirname, '../static'),
         to: path.join(__dirname, '../dist/web/static'),
-        ignore: ['.*']
-      }
-    ]),
+        globOptions: {
+          ignore: ['.*']
+        }
+      }]
+    }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"'
     }),

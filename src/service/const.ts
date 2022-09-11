@@ -295,6 +295,6 @@ export const DEFAULT_SERVER_CONFIG = {
   isConnected: false,
   PORT: PORT,
   SAVE_ALL_BILI_MESSAGE,
-  HTML_PATH: OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, '../../danmaku/dist'),
+  HTML_PATH: process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../danmaku-dist') : OPTION_CONFIG.DANMAKU_RENDER_PATH || path.join(__dirname, 'danmaku'),
   // HTML_PATH: path.join(__dirname, '../../node_modules/@tokine/bilibili-bridge/node_modules/@tokine/bilibili-danmaku-page'),
 }

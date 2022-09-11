@@ -3,7 +3,7 @@
 process.env.NODE_ENV = 'production'
 
 const { say } = require('cfonts')
-const chalk = require('chalk')
+// const chalk = require('chalk')
 const del = require('del')
 const { spawn } = require('child_process')
 const webpack = require('webpack')
@@ -14,22 +14,22 @@ const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const webConfig = require('./webpack.web.config')
 
-const doneLog = chalk.bgGreen.white(' DONE ') + ' '
-const errorLog = chalk.bgRed.white(' ERROR ') + ' '
-const okayLog = chalk.bgBlue.white(' OKAY ') + ' '
+// const doneLog = chalk.bgGreen.white(' DONE ') + ' '
+// const errorLog = chalk.bgRed.white(' ERROR ') + ' '
+// const okayLog = chalk.bgBlue.white(' OKAY ') + ' '
 const isCI = process.env.CI || false
 
 if (process.env.BUILD_TARGET === 'clean') clean()
 else if (process.env.BUILD_TARGET === 'web') web()
 else build()
 
-function clean () {
+function clean() {
   del.sync(['build/*', '!build/icons', '!build/icons/icon.*'])
-  console.log(`\n${doneLog}\n`)
+  // console.log(`\n${doneLog}\n`)
   process.exit()
 }
 
-function build () {
+function build() {
   greeting()
 
   del.sync(['dist/electron/*', '!.gitkeep'])
@@ -45,7 +45,7 @@ function build () {
   m.on('success', () => {
     process.stdout.write('\x1B[2J\x1B[0f')
     console.log(`\n\n${results}`)
-    console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`)
+    // console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`)
     process.exit()
   })
 
@@ -54,7 +54,7 @@ function build () {
     m.success('main')
   }).catch(err => {
     m.error('main')
-    console.log(`\n  ${errorLog}failed to build main process`)
+    // console.log(`\n  ${errorLog}failed to build main process`)
     console.error(`\n${err}\n`)
     process.exit(1)
   })
@@ -64,13 +64,13 @@ function build () {
     m.success('renderer')
   }).catch(err => {
     m.error('renderer')
-    console.log(`\n  ${errorLog}failed to build renderer process`)
+    // console.log(`\n  ${errorLog}failed to build renderer process`)
     console.error(`\n${err}\n`)
     process.exit(1)
   })
 }
 
-function pack (config) {
+function pack(config) {
   return new Promise((resolve, reject) => {
     config.mode = 'production'
     webpack(config, (err, stats) => {
@@ -82,10 +82,10 @@ function pack (config) {
           chunks: false,
           colors: true
         })
-        .split(/\r?\n/)
-        .forEach(line => {
-          err += `    ${line}\n`
-        })
+          .split(/\r?\n/)
+          .forEach(line => {
+            err += `    ${line}\n`
+          })
 
         reject(err)
       } else {
@@ -98,7 +98,7 @@ function pack (config) {
   })
 }
 
-function web () {
+function web() {
   del.sync(['dist/web/*', '!.gitkeep'])
   webConfig.mode = 'production'
   webpack(webConfig, (err, stats) => {
@@ -113,7 +113,7 @@ function web () {
   })
 }
 
-function greeting () {
+function greeting() {
   const cols = process.stdout.columns
   let text = ''
 
@@ -127,6 +127,8 @@ function greeting () {
       font: 'simple3d',
       space: false
     })
-  } else console.log(chalk.yellow.bold('\n  lets-build'))
+  } else {
+    // console.log(chalk.yellow.bold('\n  lets-build'))
+  }
   console.log()
 }

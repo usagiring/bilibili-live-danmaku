@@ -309,7 +309,7 @@
                 >
               </GiftCard>
               <GiftCardMini v-else v-bind="message">
-                {{ `: 赠送了 ${message.count}个 ${message.name}` }}
+                {{ ` 赠送了 ${message.count}个 ${message.name}` }}
               </GiftCardMini>
             </template>
           </p>

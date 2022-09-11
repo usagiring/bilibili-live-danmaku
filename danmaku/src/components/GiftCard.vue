@@ -1,8 +1,5 @@
 <template>
-  <div
-    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
-    class="message-super-chat"
-  >
+  <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
     <div
       :style="{
         background: `${priceProperties.backgroundColor}`,
@@ -19,13 +16,7 @@
         </template>
         <template v-else-if="totalPrice">
           <p>
-            {{
-              `￥${
-                Number.isSafeInteger(totalPrice)
-                  ? Number(totalPrice).toFixed(0)
-                  : Number(totalPrice).toFixed(1)
-              }`
-            }}
+            {{ `￥${Number.isSafeInteger(totalPrice) ? Number(totalPrice).toFixed(0) : Number(totalPrice).toFixed(1)}` }}
           </p>
         </template>
       </div>
@@ -43,16 +34,8 @@
 
 <script>
 export default {
-  props: [
-    "priceProperties",
-    "avatar",
-    "uname",
-    "name",
-    "totalPrice",
-    "count",
-    "type",
-  ],
-};
+  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'],
+}
 </script>
 
 <style scoped>

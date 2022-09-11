@@ -7,6 +7,7 @@
     "dev": "npm run serve",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:monorepo": "npm run build && rm -rf ../danmaku-dist &&mv dist ../danmaku-dist",
     "lint": "vue-cli-service lint",
     "prepublish": "npm run build",
     "release": "npm run build && cp package.json dist && cd dist && npm publish",

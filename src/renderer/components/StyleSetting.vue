@@ -74,7 +74,14 @@
       <div class="setting-group">
         <div :style="{ display: 'inline-block' }">
           <span>字体</span>
-          <Select :style="{ width: '100px', display: 'inline-block' }" :model-value="danmakuFont" size="small" @on-change="changeDanmakuFont" @on-open-change="onOpenFontSelectChange">
+          <Select
+            class="space-left-2px"
+            :style="{ width: '100px', display: 'inline-block' }"
+            :model-value="danmakuFont"
+            size="small"
+            @on-change="changeDanmakuFont"
+            @on-open-change="onOpenFontSelectChange"
+          >
             <OptionGroup label="全局值">
               <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
             </OptionGroup>
@@ -89,7 +96,7 @@
         <Divider type="vertical" />
         <div :style="{ display: 'inline-block' }">
           <span>粗细</span>
-          <Select :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
+          <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
             <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
@@ -108,7 +115,7 @@
               </template>
             </Tooltip>
           </span>
-          <InputNumber :model-value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
+          <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
           {{ ' ms' }}
         </div>
         <Divider type="vertical" />
@@ -123,20 +130,20 @@
               </template>
             </Tooltip>
           </span>
-          <InputNumber :model-value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
+          <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
           {{ ' ms' }}
         </div>
       </div>
       <div class="setting-group">
         <div :style="{ display: 'inline-block' }">
           <span>礼物栏展示大于</span>
-          <InputNumber :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
+          <InputNumber class="space-left-2px" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
           {{ ' 元' }}
         </div>
         <Divider type="vertical" />
         <div :style="{ display: 'inline-block' }">
           <span>弹幕礼物展示大于</span>
-          <InputNumber :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
+          <InputNumber class="space-left-2px" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
           {{ ' 元' }}
         </div>
       </div>
@@ -1547,5 +1554,8 @@ export default {
 .max-width {
   // display: inline-block;
   width: 100%;
+}
+.space-left-2px {
+  margin-left: 2px;
 }
 </style>
