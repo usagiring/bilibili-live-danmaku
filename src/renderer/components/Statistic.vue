@@ -67,6 +67,9 @@ import 'echarts-wordcloud/dist/echarts-wordcloud.min.js'
 //   CanvasRenderer,
 // ]);
 
+// 弹幕密度图
+let chart = null
+
 export default {
   data() {
     return {
@@ -125,7 +128,7 @@ export default {
     generateChart(chartOption) {
       if (!this.chart) {
         const chartDOM = document.getElementById('chart')
-        this.chart = echarts.init(chartDOM)
+        chart = echarts.init(chartDOM)
       }
 
       if (!this.isDateRangeChanged && chartOption.times && chartOption.times.length) return
@@ -203,7 +206,7 @@ export default {
         ],
       }
 
-      this.chart.setOption(option)
+      chart.setOption(option)
     },
 
     async generateWordCloud() {

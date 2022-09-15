@@ -3,27 +3,36 @@
     <div class="title">{{ template.title }}</div>
     <template v-for="(row, index) in template.rows" :key="index">
       <div class="col-container">
-        <div v-if="row.type==='InputNumber'">
+        <div v-if="row.type === 'InputNumber'">
           <span>{{ row.display }}</span>
-          <InputNumber :model-value="data[row.key]" :min="row.min || 0" :step="row.step || 1" :max="row.max || 100" :style="{ width: '55px' }" @on-change="onChangeValue(row.key, $event)" />
+          <InputNumber
+            class="space-left-5px"
+            size="small"
+            :model-value="data[row.key]"
+            :min="row.min || 0"
+            :step="row.step || 1"
+            :max="row.max || 100"
+            :style="{ width: '55px' }"
+            @on-change="onChangeValue(row.key, $event)"
+          />
         </div>
-        <div v-if="row.type==='Select'">
+        <div v-if="row.type === 'Select'">
           <span>{{ row.display }}</span>
-          <Select :model-value="data[row.key]" :style="{ display: 'inline-block' }" @on-change="onChangeValue(row.key, $event)">
+          <Select class="space-left-5px" size="small" :model-value="data[row.key]" :style="{ display: 'inline-block', width: '250px' }" @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
         </div>
         <div v-if="row.type === 'MultiSelect'">
-          <Select multiple :model-value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
+          <Select class="space-left-5px" size="small" multiple :model-value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
               <span>{{ option.value }}</span>
             </Option>
           </Select>
         </div>
         <div v-if="row.type === 'Input'">
-          <Input :model-value="data[row.key]" :placeholder="row.placeholder" :style="{width: '200px'}" @on-change="onChangeInputValue(row.key, $event)" />
+          <Input class="space-left-5px" size="small" :model-value="data[row.key]" :placeholder="row.placeholder" :style="{ width: '250px' }" @on-change="onChangeInputValue(row.key, $event)" />
         </div>
         <div v-if="row.type === 'Text'">
           <p>{{ row.value }}</p>
@@ -35,24 +44,21 @@
 
 <script>
 export default {
-  props: [
-    'template',
-    'data'
-  ],
+  props: ['template', 'data'],
   methods: {
     onChangeValue(key, value) {
       this.$emit('value-change', {
-        [key]: value
+        [key]: value,
       })
     },
 
     onChangeInputValue(key, e) {
       this.$emit('value-change', {
-        [key]: e.target.value
+        [key]: e.target.value,
       })
-    }
-  }
-};
+    },
+  },
+}
 </script>
 
 <style scoped>
@@ -68,5 +74,9 @@ export default {
 }
 .col-container {
   margin-bottom: 10px;
+}
+
+.space-left-5px {
+  margin-left: 5px;
 }
 </style>

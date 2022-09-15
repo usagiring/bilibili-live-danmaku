@@ -7,15 +7,16 @@
       }"
     >
       <span v-if="showTime" class="date-style">{{ dateFormat(sendAt) }}</span>
-      <Avatar :src="avatar" size="small" />
-      <span>{{ uname }}</span>
+      <Avatar class="space-left-2px" :src="avatar" size="small" />
+      <span class="space-left-2px">{{ uname }}</span>
+
       <slot />
       <template v-if="type === 2">
         <!-- wired space -->
-        <span class="price-style">{{ count === 1 ? `${name}` : `${name}×${count}` }}</span>
+        <span class="price-style space-left-2px">{{ count === 1 ? `${name}` : `${name}×${count}` }}</span>
       </template>
       <template v-else-if="totalPrice">
-        <span class="price-style">{{ `¥${Number.isSafeInteger(totalPrice) ? Number(totalPrice).toFixed(0) : Number(totalPrice).toFixed(1)}` }}</span>
+        <span class="price-style space-left-2px">{{ `¥${Number.isSafeInteger(totalPrice) ? Number(totalPrice).toFixed(0) : Number(totalPrice).toFixed(1)}` }}</span>
       </template>
     </div>
   </div>
@@ -51,5 +52,8 @@ export default {
   background: LemonChiffon;
   padding: 0 3px;
   margin: 0px;
+}
+.space-left-2px {
+  margin-left: 2px;
 }
 </style>
