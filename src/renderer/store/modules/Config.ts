@@ -1,7 +1,8 @@
-import { DEFAULT_CONFIG } from '../../../service/const'
+import { DEFAULT_CONFIG, DEFAULT_STYLE } from '../../../service/const'
 // const state = DEFAULT_CONFIG
 const state = () => ({
-  ...DEFAULT_CONFIG
+  ...DEFAULT_CONFIG,
+  ...DEFAULT_STYLE,
 })
 
 const mutations = {
