@@ -9,7 +9,7 @@
     <div class="left-container">
       <div>
         <div class="keyword-container">关键字</div>
-        <div class="content-container">内容</div>
+        <div class="content-container">描述</div>
       </div>
       <template v-for="(item, index) in options" :key="index">
         <div>
@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import { toRaw } from 'vue'
 import * as echarts from 'echarts'
 
 // ISSUE: echart 5.0.2 按需引入 electron 打包报错
@@ -94,11 +95,11 @@ import { shuffle, cloneDeep } from 'lodash'
 import ws from '../../service/ws'
 import { COLORS } from '../../service/const'
 let colorPool = shuffle(COLORS)
+let chart = null
 
 export default {
   data() {
     return {
-      chart: null,
       isWatching: false,
       type: 'bar',
       isShowVoteRecord: false,
@@ -112,7 +113,6 @@ export default {
       return this.$store.state.Config.isConnected
     },
     options() {
-      console.log(this.$store.state.Config.voteOptions)
       return this.$store.state.Config.voteOptions
     },
   },
@@ -123,10 +123,10 @@ export default {
     initChart() {
       this.userMap = {}
       const chartDOM = document.getElementById('chart')
-      if (!this.chart) {
-        this.chart = echarts.init(chartDOM)
+      if (!chart) {
+        chart = echarts.init(chartDOM)
       }
-      this.type === 'bar' ? this.makeBarChart() : this.pieChart()
+      this.type === 'bar' ? this.makeBarChart() : this.makePieChart()
     },
 
     start() {
@@ -234,12 +234,12 @@ export default {
         })
       }
 
-      this.chart.setOption(chartOptions)
+      chart.setOption(chartOptions)
     },
 
     makePieChart() {
       this.type = 'pie'
-      this.chart.clear()
+      chart.clear()
 
       const option = {
         tooltip: {
@@ -283,12 +283,12 @@ export default {
         ],
       }
 
-      this.chart.setOption(option)
+      chart.setOption(option)
     },
 
     makeBarChart() {
       this.type = 'bar'
-      this.chart.clear()
+      chart.clear()
       // this.chart.resize({
       //   height: 160 + this.keywords.length * 30,
       // })
@@ -328,11 +328,11 @@ export default {
         animationEasingUpdate: 'linear',
       }
 
-      this.chart.setOption(option)
+      chart.setOption(option)
     },
 
     updateChartData() {
-      this.chart.setOption({
+      chart.setOption({
         series: [
           {
             data: this.data,
@@ -370,7 +370,7 @@ export default {
 
     addOption() {
       const options = [
-        ...this.options,
+        ...this.options.map(toRaw),
         {
           keyword: '',
           value: '',
@@ -383,9 +383,8 @@ export default {
 
     removeOption(index) {
       if (this.isWatching) return
-      const options = [...this.options]
+      const options = [...this.options.map(toRaw)]
       options.splice(index, 1)
-      console.log(options)
       this.$store.dispatch('UPDATE_CONFIG', {
         voteOptions: options,
       })
