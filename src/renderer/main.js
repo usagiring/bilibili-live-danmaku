@@ -7,7 +7,6 @@ import 'view-ui-plus/dist/styles/viewuiplus.css'
 import global from './global'
 
 const app = createApp(App)
-  // .use(require('vue-electron'))
   .use(router)
   .use(store)
   .use(ViewUIPlus)
