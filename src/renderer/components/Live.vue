@@ -32,16 +32,23 @@
         <Select class="space-left-5px" size="small" :model-value="playQuality" style="width: 70px" @on-change="changePlayQuality">
           <Option v-for="quality in qualities" :key="quality.key" :value="quality.value">{{ quality.value }}</Option>
         </Select>
-        <Select class="space-left-5px" size="small" :model-value="resolution" style="width: 70px" @on-change="changeResolutions">
+        <!-- <Select class="space-left-5px" size="small" :model-value="resolution" style="width: 70px" @on-change="changeResolutions">
           <Option v-for="__resolution in resolutions" :key="__resolution.key" :value="__resolution.value">{{ __resolution.value }}</Option>
-        </Select>
+        </Select> -->
+        <Checkbox class="setting-checkbox" :style="{ 'padding-left': '10px' }" :model-value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
+        <div :style="{ display: 'inline-block', position: 'relative' }">
+          <span class="volume-icon"><Icon type="md-volume-up" /></span>
+          <!-- <Icon type="md-volume-off" /> -->
+          <div class="volume-controller-slider">
+            <Slider :model-value="liveVolume" @on-change="changeLiveVolume" />
+          </div>
+        </div>
       </div>
       <div :style="{ 'margin-left': '25px' }">
-        <Checkbox class="setting-checkbox" :model-value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
         独立播放窗 <i-switch :model-value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow" />
         <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isLiveWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
-        <span :style="{ 'padding-right': '10px' }">透明度</span>
-        <div class="avatar-controller-slider">
+        <span :style="{ 'padding-right': '3px' }">透明度</span>
+        <div class="opcity-controller-slider">
           <Slider :model-value="liveWindowOpacity" @on-change="changeLiveWindowOpacity" />
         </div>
       </div>
@@ -54,7 +61,7 @@
       </template>
       <template v-else>
         <Tooltip transfer placement="top">
-          <Button :disabled="!userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px' }" @click="getMedalData"> 获取当前佩戴粉丝牌 </Button>
+          <Button :disabled="!userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px', margin: '0 3px' }" @click="getMedalData"> 获取当前佩戴粉丝牌 </Button>
           <template #content>
             <div :style="{ 'white-space': 'normal' }">
               <p>会同时触发进入房间消息</p>
@@ -65,7 +72,7 @@
       <Input v-model="message" placeholder="弹幕..." clearable :style="{ width: '360px' }" @on-keyup.ctrl.enter="sendMessage" />
 
       <Tooltip placement="top">
-        <Button :disabled="!message || !userCookie || !realRoomId" :loading="isSending" @click="sendMessage">发送</Button>
+        <Button :style="{ margin: '0 3px' }" :disabled="!message || !userCookie || !realRoomId" :loading="isSending" @click="sendMessage">发送</Button>
         <template #content>
           <div :style="{ color: 'pink', 'white-space': 'normal' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
@@ -199,6 +206,9 @@ export default {
     },
     liveWindowHeight() {
       return this.$store.state.Config.liveWindowHeight
+    },
+    liveVolume() {
+      return this.$store.state.Config.liveVolume * 100
     },
   },
   mounted() {
@@ -402,7 +412,9 @@ export default {
         )
         if (result.data.message) {
           this.$Message.warning(`发送未成功: ${result.data.message}`)
+          return
         }
+        this.message = ''
       } catch (e) {
         this.$Message.error(`发送失败: ${e.message}`)
       } finally {
@@ -487,6 +499,17 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
+    changeLiveVolume(number) {
+      const liveVolume = Number((number / 100).toFixed(2))
+      const data = {
+        liveVolume: liveVolume,
+      }
+      this.$store.dispatch('UPDATE_CONFIG', data)
+
+      const videoDOM = document.getElementById('live-player')
+      videoDOM.volume = liveVolume
+    },
+
     async showLiveWindow(status) {
       this.isShowLiveWindowLoading = true
 
@@ -550,11 +573,23 @@ export default {
 #live-config-wrapper {
   height: 105px;
 }
-.avatar-controller-slider {
+.opcity-controller-slider {
   height: 30px;
   display: inline-block;
   vertical-align: bottom;
   width: 100px;
+}
+.volume-controller-slider {
+  height: 35px;
+  display: inline-block;
+  width: 100px;
+  vertical-align: middle;
+}
+.volume-icon {
+  padding-right: 3px;
+  font-size: 18px;
+  vertical-align: middle;
+  cursor: pointer;
 }
 .space-left-5px {
   margin-left: 5px;

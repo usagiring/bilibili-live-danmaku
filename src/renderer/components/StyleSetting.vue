@@ -8,11 +8,11 @@
       <span> 样式预览 </span>
     </div>
     <div class="setting-group">
-      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3 }">
+      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
         <Container orientation="horizontal" :style="{ 'min-height': '0px' }" @drop="onDrop($event)">
           <template v-for="(setting, index) of messageSettings" :key="index">
             <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
-              <img class="guard-icon" :src="`${getGuardIcon('3')}`">
+              <img class="guard-icon" :src="`${getGuardIcon('3')}`" />
             </Draggable>
             <Draggable v-if="setting.type === 'medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <FanMedal
@@ -34,7 +34,7 @@
               <span>：</span>
             </Draggable>
             <Draggable v-if="setting.type === 'comment'" class="vertical-align-middle">
-              <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl">
+              <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl" />
               <span v-else :style="{ ...comment_lv3, ...fontStyle }">{{ example.content }}</span>
             </Draggable>
           </template>
@@ -115,7 +115,7 @@
               </template>
             </Tooltip>
           </span>
-          <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" size="small" @on-change="changeCombineSimilarTime" />
+          <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small" @on-change="changeCombineSimilarTime" />
           {{ ' ms' }}
         </div>
         <Divider type="vertical" />
@@ -130,25 +130,28 @@
               </template>
             </Tooltip>
           </span>
-          <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" size="small" @on-change="changeHiddenExpiredTime" />
+          <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small" @on-change="changeHiddenExpiredTime" />
           {{ ' ms' }}
         </div>
       </div>
       <div class="setting-group">
         <div :style="{ display: 'inline-block' }">
           <span>礼物栏展示大于</span>
-          <InputNumber class="space-left-2px" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
+          <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
           {{ ' 元' }}
         </div>
         <Divider type="vertical" />
         <div :style="{ display: 'inline-block' }">
           <span>弹幕礼物展示大于</span>
-          <InputNumber class="space-left-2px" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
+          <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
           {{ ' 元' }}
         </div>
       </div>
       <div class="setting-group">
         <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
+        <Divider type="vertical" />
+        <span>表情大小</span>
+        <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small" @on-change="changeEmojiSize" />
       </div>
       <div class="setting-group">
         <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
@@ -325,11 +328,11 @@
         <template v-for="(item, index) in borderImages" :key="index">
           <div class="image-container">
             <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
-            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)">
+            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)" />
           </div>
         </template>
         <label v-if="borderImages.length < 4" class="upload-file-container">
-          <input :style="{ display: 'none' }" type="file" accept="image/*" @change="encodeImageFileAsURL">
+          <input :style="{ display: 'none' }" type="file" accept="image/*" @change="encodeImageFileAsURL" />
           <Icon class="upload-file-icon" type="md-add" />
         </label>
       </div>
@@ -939,6 +942,9 @@ export default {
         'font-weight': this.fontWeight,
       }
     },
+    emojiSize() {
+      return this.$store.state.Config.emojiSize
+    },
   },
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
@@ -1233,6 +1239,14 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', {
         borderImages: borderImages,
       })
+    },
+
+    changeEmojiSize(number) {
+      const data = {
+        emojiSize: number,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     setBorderImageSliceValue(e) {
@@ -1557,5 +1571,8 @@ export default {
 }
 .space-left-2px {
   margin-left: 2px;
+}
+.number-input-size {
+  width: 60px;
 }
 </style>

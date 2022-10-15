@@ -108,9 +108,12 @@
                 <span class="space-left-2px status-shadow">{{ watchedNumber }}</span>
               </div>
             </div>
-            <!-- <div> -->
-
-            <!-- </div> -->
+            <div class="status-wrapper">
+              <div class="status-padding status-shadow">
+                <Icon type="md-thumbs-up" />
+                {{ likeNumber }}
+              </div>
+            </div>
             <div v-if="hasNewVersion" class="updater-wrapper">
               <template v-if="!isAppUpdating">
                 <Button shape="circle" type="dashed" :loading="isAppUpdateStarting" @click="updateApp">
@@ -218,6 +221,7 @@ export default {
       guardNumber: 0,
       roomUserId: 0,
       watchedNumber: 0,
+      likeNumber: 0,
     }
   },
   computed: {
@@ -362,8 +366,12 @@ export default {
 
       if (payload.cmd === 'SPEAK') {
         const { text, voice, speed } = payload.payload
-        console.log(payload.payload)
         this.speak({ text, voice, speed })
+      }
+
+      if (payload.cmd === 'LIKE_CHANGE') {
+        const { likeNumber } = payload.payload
+        this.likeNumber = likeNumber
       }
     })
 
@@ -488,6 +496,7 @@ export default {
           live_status: liveStatus,
           live_start_time, // 直播开始时间 unixtime
           online,
+          like_info_v3,
         } = data.room_info
 
         const { uname, face, gender } = data.anchor_info.base_info
@@ -495,6 +504,7 @@ export default {
         const { attention } = data.anchor_info.relation_info
         const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info || {}
         const { num: watchedNumber } = data.watched_show || {}
+        const { total_likes: likeNumber } = data.like_info_v3 || {}
         this.username = uname
         this.avatar = face
         this.ninkiNumber = online
@@ -503,6 +513,7 @@ export default {
         this.liveStatus = liveStatus
         this.roomUserId = uid
         this.watchedNumber = watchedNumber
+        this.likeNumber = likeNumber
 
         try {
           const { data: userInfo } = await getUserInfo(uid)
@@ -547,6 +558,7 @@ export default {
         this.guardNumber = 0
         this.topPhoto = ''
         this.watchedNumber = 0
+        this.likeNumber = 0
 
         this.$store.dispatch('UPDATE_CONFIG', {
           isConnected: false,
@@ -818,7 +830,7 @@ export default {
   vertical-align: top;
   display: inline-block;
   line-height: 0px;
-  padding: 6px 0 0 40px;
+  padding: 6px 0 0 20px;
 }
 
 .status-padding {

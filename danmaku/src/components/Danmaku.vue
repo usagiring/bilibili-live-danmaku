@@ -228,7 +228,7 @@
                   <span v-if="setting.type === 'comment'">
                     <img
                       v-if="message.emojiUrl"
-                      :style="{ 'vertical-align': 'middle', height: '24px' }"
+                      :style="{ 'vertical-align': 'middle', height: `${emojiSize}px` }"
                       :src="message.emojiUrl"
                     >
                     <span
@@ -368,6 +368,7 @@ export default {
       isExample: false,
       background: "rgba(0,0,0,0)",
       opacity: 1,
+      emojiSize: 24,
       messages: [],
       isShowInteractInfo: false,
       isShowSilverGift: false,
@@ -427,7 +428,7 @@ export default {
         "font-family": this.danmakuFont,
         "font-weight": this.fontWeight,
       };
-    },
+    }
   },
   beforeCreate() {
     document
@@ -543,6 +544,7 @@ export default {
       };
     },
     onSetting(payload) {
+      console.log(payload)
       for (const key in payload) {
         this[key] = payload[key];
       }

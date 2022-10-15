@@ -230,6 +230,8 @@ export const DEFAULT_CONFIG = {
   scrollDanmakuEmojiSize: 60,
   ASRWindowId: null,
   ASRLineCount: 5,
+  emojiSize: 24,
+  liveVolume: 1,
   ffmpegExe: '',
   aliAppKeys: [],
   muteCommandSetting: {
