@@ -1,172 +1,174 @@
 <template>
-  <div class="layout">
-    <Layout :style="{ minHeight: '100vh' }">
-      <Sider v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
-        <Menu theme="dark" width="auto" :class="menuitemClasses">
-          <MenuItem name="1-1" to="/style">
-            <Icon type="md-color-palette" />
-            <span>样式</span>
-          </MenuItem>
-          <MenuItem name="1-2" to="/message">
-            <Icon type="md-chatboxes" />
-            <span>消息</span>
-          </MenuItem>
-          <MenuItem name="1-3" to="/live">
-            <Icon type="md-play" />
-            <span>直播</span>
-          </MenuItem>
-          <MenuItem name="1-4" to="/vote">
-            <Icon type="md-pie" />
-            <span>投票</span>
-          </MenuItem>
-          <MenuItem name="1-5" to="/lottery">
-            <Icon type="md-bonfire" />
-            <span>祈愿</span>
-          </MenuItem>
-          <MenuItem name="1-6" to="/statistic">
-            <Icon type="md-stats" />
-            <span>统计</span>
-          </MenuItem>
-          <MenuItem name="1-7" to="/auto-reply">
-            <Icon type="md-repeat" />
-            <span>回复</span>
-          </MenuItem>
-          <MenuItem name="1-8" to="/command">
-            <div :style="{ position: 'relative', display: 'inline-block' }">
-              <!-- <Icon type="md-code" /> -->
-              <Icon type="md-color-wand" />
-              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-            </div>
-            <span>咒语</span>
-          </MenuItem>
-          <MenuItem name="1-9" to="/danmaku-scroll">
-            <Icon type="ios-water" />
-            <span>弹幕2</span>
-          </MenuItem>
-          <MenuItem name="1-10" to="/asr">
-            <div :style="{ position: 'relative', display: 'inline-block' }">
-              <Icon type="md-ionitron" />
-              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-            </div>
-            <span>语音识别</span>
-          </MenuItem>
-          <MenuItem name="1-11" to="/config">
-            <Icon type="md-settings" />
-            <span>设置</span>
-          </MenuItem>
-          <MenuItem name="1-12" to="/help">
-            <Icon type="md-help" />
-            <span>帮助</span>
-          </MenuItem>
-        </Menu>
-      </Sider>
-      <Layout>
-        <div class="disable-user-select" :style="{ position: 'relative' }">
-          <img class="header-background-img" :src="topPhoto" />
+  <div id="home">
+    <div class="header-container disable-user-select">
+      <img class="header-background-img" :src="topPhoto" />
 
-          <div class="layout-header" :style="!topPhoto && { background: 'white' }">
-            <div class="avatar-wrapper">
-              <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
-              <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : '未连接' }}</span>
-              <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on' : 'live-tag-off'">{{ liveStatus === 1 ? '直播中' : '未开播' }}</span>
-            </div>
+      <div class="user-info-container" :style="!topPhoto && { background: 'white' }">
+        <div class="avatar-wrapper">
+          <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
+          <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : '未连接' }}</span>
+          <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on' : 'live-tag-off'">{{ liveStatus === 1 ? '直播中' : '未开播' }}</span>
+        </div>
 
-            <div class="status-wrapper">
-              <div class="status-padding status-shadow">
-                <Icon type="md-flame" />
-                <span class="header-icon-text"> 人气值 </span>
-                {{ ninkiNumber }}
-              </div>
-              <div class="status-padding status-shadow">
-                <Icon type="md-star" />
-                <span class="header-icon-text"> 关注数 </span>
-                {{ fansNumber }}
-              </div>
-              <div class="status-padding status-shadow">
-                <Icon type="md-heart" />
-                <span class="header-icon-text"> 粉丝团 </span>
-                {{ fansClubNumber }}
-              </div>
-            </div>
-            <div class="status-wrapper">
-              <div class="status-padding">
-                <Tooltip content="舰队">
-                  <Icon class="status-shadow" type="md-cog" />
-                </Tooltip>
-                <span class="space-left-2px status-shadow">{{ guardNumber }}</span>
-              </div>
-              <div class="status-padding">
-                <Tooltip content="十分钟内互动人数">
-                  <Icon class="status-shadow" type="md-person" />
-                </Tooltip>
-                <span class="space-left-2px status-shadow">{{ peopleNumber }}</span>
-              </div>
-              <div class="status-padding">
-                <Tooltip :content="`${watchedNumber}人看过`">
-                  <Icon class="status-shadow" type="md-eye" />
-                </Tooltip>
-                <span class="space-left-2px status-shadow">{{ watchedNumber }}</span>
-              </div>
-            </div>
-            <div class="status-wrapper">
-              <div class="status-padding status-shadow">
-                <Icon type="md-thumbs-up" />
-                {{ likeNumber }}
-              </div>
-            </div>
-            <div v-if="hasNewVersion" class="updater-wrapper">
-              <template v-if="!isAppUpdating">
-                <Button shape="circle" type="dashed" :loading="isAppUpdateStarting" @click="updateApp">
-                  <Icon type="md-arrow-round-up" color="green" />
-                  <span :style="{ color: 'green' }">更新</span>
-                </Button>
-              </template>
-              <template v-else>
-                <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
-                  <span class="demo-Circle-inner" style="font-size: 12px">{{ downloadRate }}</span>
-                </i-circle>
-              </template>
-            </div>
+        <div class="status-wrapper">
+          <div class="status-padding status-shadow">
+            <Icon type="md-flame" />
+            <span class="header-icon-text"> 人气值 </span>
+            {{ ninkiNumber }}
           </div>
-          <div class="layout-header2 transparent-mask">
-            <div>
-              <span>直播间号：</span>
-              <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small" :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
-                <Option v-for="room in selfHistoryRooms" :key="room.roomId" :value="room.roomId">
-                  <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
-                  {{ `${room.uname} (${room.roomId})` }}
-                  <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{ room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
-                  <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
-                </Option>
-              </AutoComplete>
-              <span :style="{ 'padding-left': '10px' }">连接</span>
-              <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
-              <span :style="{ 'padding-left': '20px' }">弹幕窗</span>
-              <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
-              <template v-if="isShowDanmakuWindow">
-                <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
-                <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
-              </template>
-              <Tooltip placement="right" content="录制中">
-                <span v-if="isRecording" class="record-icon">
-                  <Icon :style="{ position: 'absolute' }" type="ios-radio-button-on" />
-                </span>
-              </Tooltip>
-              <Tooltip placement="right" content="天选时刻中">
-                <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
-              </Tooltip>
-              <!-- <Tooltip placement="right" content="天选时刻获奖">
+          <div class="status-padding status-shadow">
+            <Icon type="md-star" />
+            <span class="header-icon-text"> 关注数 </span>
+            {{ fansNumber }}
+          </div>
+          <div class="status-padding status-shadow">
+            <Icon type="md-heart" />
+            <span class="header-icon-text"> 粉丝团 </span>
+            {{ fansClubNumber }}
+          </div>
+        </div>
+        <div class="status-wrapper">
+          <div class="status-padding">
+            <Tooltip content="舰队">
+              <Icon class="status-shadow" type="md-cog" />
+            </Tooltip>
+            <span class="space-left-2px status-shadow">{{ guardNumber }}</span>
+          </div>
+          <div class="status-padding">
+            <Tooltip content="十分钟内互动人数">
+              <Icon class="status-shadow" type="md-person" />
+            </Tooltip>
+            <span class="space-left-2px status-shadow">{{ peopleNumber }}</span>
+          </div>
+          <div class="status-padding">
+            <Tooltip :content="`${watchedNumber}人看过`">
+              <Icon class="status-shadow" type="md-eye" />
+            </Tooltip>
+            <span class="space-left-2px status-shadow">{{ watchedNumber }}</span>
+          </div>
+        </div>
+        <div class="status-wrapper">
+          <div class="status-padding status-shadow">
+            <Icon type="md-thumbs-up" />
+            {{ likeNumber }}
+          </div>
+        </div>
+        <div v-if="hasNewVersion" class="updater-wrapper">
+          <template v-if="!isAppUpdating">
+            <Button shape="circle" type="dashed" :loading="isAppUpdateStarting" @click="updateApp">
+              <Icon type="md-arrow-round-up" color="green" />
+              <span :style="{ color: 'green' }">更新</span>
+            </Button>
+          </template>
+          <template v-else>
+            <i-circle :percent="percent" :size="60" :style="{ top: '2px' }">
+              <span class="demo-Circle-inner" style="font-size: 12px">{{ downloadRate }}</span>
+            </i-circle>
+          </template>
+        </div>
+      </div>
+      <div class="room-controller-container transparent-mask">
+        <div>
+          <span>直播间号：</span>
+          <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small" :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
+            <Option v-for="room in selfHistoryRooms" :key="room.roomId" :value="room.roomId">
+              <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
+              {{ `${room.uname} (${room.roomId})` }}
+              <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{ room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
+              <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
+            </Option>
+          </AutoComplete>
+          <span :style="{ 'padding-left': '10px' }">连接</span>
+          <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
+          <span :style="{ 'padding-left': '20px' }">弹幕窗</span>
+          <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
+          <template v-if="isShowDanmakuWindow">
+            <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
+            <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
+          </template>
+          <Tooltip placement="right" content="录制中">
+            <span v-if="isRecording" class="record-icon">
+              <Icon :style="{ position: 'absolute' }" type="ios-radio-button-on" />
+            </span>
+          </Tooltip>
+          <Tooltip placement="right" content="天选时刻中">
+            <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
+          </Tooltip>
+          <!-- <Tooltip placement="right" content="天选时刻获奖">
               <Icon v-if="!isLottering && lotteryAwardUsers" type="md-cube" />
             </Tooltip> -->
-            </div>
-          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="layout-content">
-          <router-view :style="{ height: '100%' }" />
-        </div>
+    <div class="main-container">
+      <Layout :style="{ height: '100%' }">
+        <Sider class="sider-bar" v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
+          <Menu theme="dark" width="auto" :class="menuitemClasses">
+            <MenuItem name="1-1" to="/style">
+              <Icon type="md-color-palette" />
+              <span>样式</span>
+            </MenuItem>
+            <MenuItem name="1-2" to="/message">
+              <Icon type="md-chatboxes" />
+              <span>消息</span>
+            </MenuItem>
+            <MenuItem name="1-3" to="/live">
+              <Icon type="md-play" />
+              <span>直播</span>
+            </MenuItem>
+            <MenuItem name="1-4" to="/vote">
+              <Icon type="md-pie" />
+              <span>投票</span>
+            </MenuItem>
+            <MenuItem name="1-5" to="/lottery">
+              <Icon type="md-bonfire" />
+              <span>祈愿</span>
+            </MenuItem>
+            <MenuItem name="1-6" to="/statistic">
+              <Icon type="md-stats" />
+              <span>统计</span>
+            </MenuItem>
+            <MenuItem name="1-7" to="/auto-reply">
+              <Icon type="md-repeat" />
+              <span>回复</span>
+            </MenuItem>
+            <MenuItem name="1-8" to="/command">
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <!-- <Icon type="md-code" /> -->
+                <Icon type="md-color-wand" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>咒语</span>
+            </MenuItem>
+            <MenuItem name="1-9" to="/danmaku-scroll">
+              <Icon type="ios-water" />
+              <span>弹幕2</span>
+            </MenuItem>
+            <MenuItem name="1-10" to="/asr">
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <Icon type="md-ionitron" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>语音识别</span>
+            </MenuItem>
+            <MenuItem name="1-11" to="/config">
+              <Icon type="md-settings" />
+              <span>设置</span>
+            </MenuItem>
+            <MenuItem name="1-12" to="/help">
+              <Icon type="md-help" />
+              <span>帮助</span>
+            </MenuItem>
+          </Menu>
+        </Sider>
+        <Layout>
+          <div class="layout-content">
+            <router-view :style="{ height: '100%' }" />
+          </div>
+        </Layout>
       </Layout>
-    </Layout>
+    </div>
   </div>
 </template>
 
@@ -818,6 +820,17 @@ export default {
 </script>
 
 <style scoped>
+#home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.header-container {
+  flex: 0 0 auto;
+}
+.main-container {
+  flex: 1 1 auto;
+}
 .avatar-wrapper {
   display: inline-block;
   vertical-align: top;
@@ -847,15 +860,13 @@ export default {
   top: 0px;
   right: 10px;
 }
-.layout-header {
+.user-info-container {
   height: 84px;
   line-height: 84px;
   /* background: white; */
   position: relative;
-  -webkit-user-select: none;
-  user-select: none;
 }
-.layout-header2 {
+.room-controller-container {
   position: relative;
   height: 48px;
   line-height: 48px;
@@ -983,10 +994,6 @@ export default {
   }
 }
 
-.disable-user-select {
-  -webkit-user-select: none;
-  user-select: none;
-}
 .header-background-img {
   position: absolute;
   width: 100%;
@@ -1017,5 +1024,12 @@ export default {
 }
 .space-left-2px {
   margin-left: 2px;
+}
+.sider-bar {
+  overflow-y: auto;
+}
+
+.sider-bar::-webkit-scrollbar {
+  display: none;
 }
 </style>
