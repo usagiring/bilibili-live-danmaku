@@ -1,7 +1,5 @@
 <template>
   <div id="app">
-    <div id="title-bar"></div>
-
     <Spin fix v-if="isLoading">
       <Icon type="ios-loading" size="18" class="demo-spin-icon-load"></Icon>
       <div>Loading</div>
@@ -65,11 +63,6 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-#title-bar {
-  height: 40px;
-  -webkit-app-region: drag;
-  flex: 0 0 auto;
 }
 #main-container {
   flex: 1 1 auto;

@@ -1,9 +1,27 @@
 <template>
   <div id="home">
+    <div id="title-bar">
+      <div id="title-bar-title">
+        <img id="title-bar-logo" src="../assets/logo.png" />
+        <span id="title-bar-text">bilibili-danmaku</span>
+      </div>
+      <div id="title-bar-controller">
+        <div id="tray">
+          <!-- <Icon type="ios-arrow-down" /> -->
+          <Icon type="logo-windows" />
+        </div>
+        <div id="minimize" @click="minimize">
+          <Icon type="md-remove" />
+        </div>
+        <div id="close" @click="close">
+          <Icon type="md-close" />
+        </div>
+      </div>
+    </div>
     <div class="header-container disable-user-select">
       <img class="header-background-img" :src="topPhoto" />
 
-      <div class="user-info-container" :style="!topPhoto && { background: 'white' }">
+      <div class="user-info-container">
         <div class="avatar-wrapper">
           <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
           <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : '未连接' }}</span>
@@ -104,7 +122,7 @@
     <div class="main-container">
       <Layout :style="{ height: '100%' }">
         <Sider class="sider-bar" v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
-          <Menu theme="dark" width="auto" :class="menuitemClasses">
+          <Menu theme="light" width="auto" :class="menuitemClasses">
             <MenuItem name="1-1" to="/style">
               <Icon type="md-color-palette" />
               <span>样式</span>
@@ -161,6 +179,9 @@
               <span>帮助</span>
             </MenuItem>
           </Menu>
+          <!-- <template #trigger>
+            <Icon type="ios-arrow-forward" />
+          </template> -->
         </Sider>
         <Layout>
           <div class="layout-content">
@@ -176,7 +197,7 @@
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer, shell } from 'electron'
-import { BrowserWindow } from '@electron/remote'
+import { BrowserWindow, getCurrentWindow } from '@electron/remote'
 
 import { parseDownloadRate, getGiftConfig } from '../../service/util'
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
@@ -815,26 +836,125 @@ export default {
       }
       synth.speak(utterThis)
     },
+
+    close() {
+      const win = getCurrentWindow()
+      win.close()
+    },
+
+    minimize() {
+      const win = getCurrentWindow()
+      win.minimize()
+    },
   },
 }
 </script>
 
+<style>
+.ivu-layout-sider-trigger {
+  background: white;
+}
+.ivu-layout-sider {
+  background: white;
+}
+.ivu-layout-sider-trigger-icon {
+  color: #515a6e;
+}
+</style>
 <style scoped>
 #home {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
+#title-bar {
+  height: 35px;
+  -webkit-app-region: drag;
+  flex: 0 0 auto;
+  /* background: seashell; */
+}
+
+#title-bar-title {
+  height: 35px;
+  position: relative;
+}
+
+#title-bar-logo {
+  left: 10px;
+  width: 25px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+#title-bar-text {
+  left: 40px;
+  height: 20px;
+  position: absolute;
+  color: gray;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  vertical-align: middle;
+}
+
+#title-bar-controller {
+  top: 0px;
+  right: 0px;
+  height: 35px;
+  position: absolute;
+  line-height: 35px;
+  font-size: 20px;
+  font-weight: light;
+  -webkit-app-region: no-drag;
+}
+
+#close {
+  display: inline-block;
+  width: 45px;
+  text-align: center;
+}
+
+#close:hover {
+  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: crimson;
+  color: aliceblue;
+}
+
+#minimize {
+  display: inline-block;
+  width: 45px;
+  text-align: center;
+}
+
+#minimize:hover {
+  transition: background-color 0.2s ease;
+  background-color: aliceblue;
+}
+
+#tray {
+  display: inline-block;
+  width: 45px;
+  text-align: center;
+}
+
+#tray:hover {
+  transition: background-color 0.2s ease;
+  background-color: aliceblue;
+}
+
 .header-container {
   flex: 0 0 auto;
 }
 .main-container {
   flex: 1 1 auto;
+  overflow: auto;
 }
 .avatar-wrapper {
   display: inline-block;
   vertical-align: top;
-  padding-left: 50px;
 }
 .header-icon-text {
   font-size: 12px;
@@ -865,12 +985,13 @@ export default {
   line-height: 84px;
   /* background: white; */
   position: relative;
+  margin: 0 60px;
 }
 .room-controller-container {
   position: relative;
   height: 48px;
   line-height: 48px;
-  padding: 0 50px;
+  padding: 0 60px;
 }
 .layout-content {
   height: 100%;
