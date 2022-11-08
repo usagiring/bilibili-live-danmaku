@@ -6,7 +6,7 @@
         <span id="title-bar-text">bilibili-danmaku</span>
       </div>
       <div id="title-bar-controller">
-        <div id="tray">
+        <div id="tray" @click="hideToTray">
           <!-- <Icon type="ios-arrow-down" /> -->
           <Icon type="logo-windows" />
         </div>
@@ -197,7 +197,7 @@
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer, shell } from 'electron'
-import { BrowserWindow, getCurrentWindow } from '@electron/remote'
+import { BrowserWindow, getCurrentWindow, Tray, nativeImage, Menu } from '@electron/remote'
 
 import { parseDownloadRate, getGiftConfig } from '../../service/util'
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
@@ -206,6 +206,8 @@ import { record, cancelRecord, getStatus, setStatus } from '../../service/bilibi
 import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfo } from '../../service/bilibili-api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, PORT, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
+import icon from '../assets/logo.png'
+
 const synth = window.speechSynthesis
 
 // 0 未开播
@@ -846,6 +848,27 @@ export default {
       const win = getCurrentWindow()
       win.minimize()
     },
+
+    hideToTray() {
+      const win = getCurrentWindow()
+      win.hide()
+      const tray = new Tray(nativeImage.createFromDataURL(icon))
+      const func = () => {
+        win.show()
+        tray.destroy()
+      }
+      tray.on('click', func)
+      const contextMenu = Menu.buildFromTemplate([
+        {
+          label: '显示',
+          type: 'normal',
+          click: func,
+        },
+        { label: '关闭', role: 'quit', type: 'normal' },
+      ])
+      tray.setToolTip('bilibili-danmaku')
+      tray.setContextMenu(contextMenu)
+    },
   },
 }
 </script>
@@ -861,6 +884,7 @@ export default {
   color: #515a6e;
 }
 </style>
+
 <style scoped>
 #home {
   height: 100%;
@@ -947,10 +971,12 @@ export default {
 
 .header-container {
   flex: 0 0 auto;
+  background: ghostwhite;
 }
 .main-container {
   flex: 1 1 auto;
   overflow: auto;
+  z-index: 1;
 }
 .avatar-wrapper {
   display: inline-block;

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeImage, session } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeImage, session, Menu, Tray } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../service/const'
@@ -73,6 +73,20 @@ app.on('ready', () => {
   })
 
   createWindow()
+
+
+  // const tray = new Tray(path.join(__dirname, '../renderer/assets/logo.png'))
+  // const contextMenu = Menu.buildFromTemplate([
+  //   { label: 'Item1', type: 'radio' },
+  //   { label: 'Item2', type: 'radio' },
+  //   { label: 'Item3', type: 'radio', checked: true },
+  //   { label: 'Item4', type: 'radio' }
+  // ])
+  // tray.setToolTip('bilibili-danmaku')
+  // tray.setContextMenu(contextMenu)
+  // tray.on('click', async () => {
+  //   mainWindow.show()
+  // })
 
   ipcMain.handle(IPC_GET_USER_PATH, async () => {
     return app.getPath('userData');
@@ -164,7 +178,6 @@ app.on('ready', () => {
     })
   }
 })
-
 
 
 app.on('window-all-closed', () => {

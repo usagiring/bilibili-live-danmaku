@@ -13,7 +13,7 @@
         @on-change="changeDateRange"
         @on-clear="clearDateRange"
       />
-      <Input v-model="q" class="space-left" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
+      <Input v-model="q" class="space-left-5px" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
       <Button class="space-left-5px" type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll" />
       <Checkbox class="space-left-5px" :model-value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
       <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
