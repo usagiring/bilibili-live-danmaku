@@ -9,19 +9,19 @@ https://github.com/usagiring/bilibili-live-danmaku/releases
 
 ### 示例
 弹幕窗及设置页面：
-![intro1](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro1.png)
+![intro1](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/intro1.png)
 
 弹幕投票：
-![intro2](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro2.png)
+![intro2](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/intro2.png)
 
 数据统计：
-![intro3](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro3.png)
+![intro3](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/intro3.png)
 
 自动回复：
-![intro4](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro4.png)
+![intro4](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/intro4.png)
 
 观看直播：
-![intro5](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro5.png)
+![intro5](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/intro5.png)
 
 ### 说明
 - 本应用数据基于本地收集到的数据，未被应用统计到的数据不进行统计。
@@ -30,7 +30,7 @@ https://github.com/usagiring/bilibili-live-danmaku/releases
 ### for developer
 
 架构图：
-![er](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/er.png)
+![er](https://github.com/usagiring/bilibili-live-danmaku/blob/master/static/er.png)
 
 ``` bash
 # install dependencies
