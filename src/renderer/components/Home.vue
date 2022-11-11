@@ -5,6 +5,9 @@
         <img id="title-bar-logo" src="../assets/logo.png" />
         <span id="title-bar-text">bilibili-danmaku</span>
       </div>
+      <div id="title-bar-status">
+        <span v-if="isRecording">录制中...</span>
+      </div>
       <div id="title-bar-controller">
         <div id="tray" @click="hideToTray">
           <!-- <Icon type="ios-arrow-down" /> -->
@@ -104,11 +107,6 @@
             <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
             <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
           </template>
-          <Tooltip placement="right" content="录制中">
-            <span v-if="isRecording" class="record-icon">
-              <Icon :style="{ position: 'absolute' }" type="ios-radio-button-on" />
-            </span>
-          </Tooltip>
           <Tooltip placement="right" content="天选时刻中">
             <Icon v-if="isLottering" class="lottery-icon" type="md-cube" />
           </Tooltip>
@@ -139,10 +137,6 @@
               <Icon type="md-pie" />
               <span>投票</span>
             </MenuItem>
-            <MenuItem name="1-5" to="/lottery">
-              <Icon type="md-bonfire" />
-              <span>祈愿</span>
-            </MenuItem>
             <MenuItem name="1-6" to="/statistic">
               <Icon type="md-stats" />
               <span>统计</span>
@@ -151,6 +145,17 @@
               <Icon type="md-repeat" />
               <span>回复</span>
             </MenuItem>
+            <MenuItem name="1-9" to="/danmaku-scroll">
+              <Icon type="ios-water" />
+              <span>弹幕2</span>
+            </MenuItem>
+            <MenuItem name="1-5" to="/lottery">
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <Icon type="md-bonfire" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>祈愿</span>
+            </MenuItem>
             <MenuItem name="1-8" to="/command">
               <div :style="{ position: 'relative', display: 'inline-block' }">
                 <!-- <Icon type="md-code" /> -->
@@ -158,10 +163,6 @@
                 <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
               </div>
               <span>咒语</span>
-            </MenuItem>
-            <MenuItem name="1-9" to="/danmaku-scroll">
-              <Icon type="ios-water" />
-              <span>弹幕2</span>
             </MenuItem>
             <MenuItem name="1-10" to="/asr">
               <div :style="{ position: 'relative', display: 'inline-block' }">
@@ -621,6 +622,7 @@ export default {
         //     : `file://${__dirname}/index.html#danmaku-window`;
 
         const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:${PORT}?port=${PORT}` : `http://localhost:${PORT}?port=${PORT}`
+        win.setIcon(nativeImage.createFromDataURL(icon))
         win.loadURL(winURL)
         this.win = win
         this.danmakuWindowBindEvent()
@@ -902,6 +904,8 @@ export default {
 #title-bar-title {
   height: 35px;
   position: relative;
+  width: 150px;
+  display: inline-block;
 }
 
 #title-bar-logo {
@@ -922,6 +926,25 @@ export default {
   bottom: 0;
   margin: auto;
   vertical-align: middle;
+}
+
+#title-bar-status {
+  height: 35px;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+  width: 150px;
+}
+
+#title-bar-status > span {
+  display: inline-block;
+  height: 16px;
+  position: absolute;
+  font-size: 12px;
+  color: gray;
+  top: 0;
+  bottom: 0;
+  margin: auto;
 }
 
 #title-bar-controller {

@@ -89,8 +89,7 @@
 <script>
 import * as flvjs from 'flv.js'
 import { ipcRenderer } from 'electron'
-import * as remote from '@electron/remote'
-const { BrowserWindow, dialog } = remote
+import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import { record, getRandomPlayUrl, cancelRecord, getStatus, setStatus } from '../../service/bilibili-recorder'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
@@ -546,6 +545,7 @@ export default {
         const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/live-window` : `file://${__dirname}/index.html#live-window`
 
         win.loadURL(winURL)
+        win.setIcon(nativeImage.createFromDataURL(icon))
         this.win = win
         this.isShowLiveWindow = true
         this.isShowLiveWindowLoading = false
