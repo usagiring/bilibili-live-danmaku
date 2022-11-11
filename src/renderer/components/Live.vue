@@ -96,6 +96,7 @@ import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENAB
 import { parseDownloadRate, parseHexColor } from '../../service/util'
 import { sendMessage, getInfoByUser, wearMedal } from '../../service/bilibili-api'
 import FanMedal from './FanMedal'
+import icon from '../assets/logo.png'
 
 export default {
   components: {
