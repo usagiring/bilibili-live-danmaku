@@ -9,22 +9,28 @@ https://github.com/usagiring/bilibili-live-danmaku/releases
 
 ### 示例
 弹幕窗及设置页面：
-![introB](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introB.png)
+![intro1](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro1.png)
 
 弹幕投票：
-![introA](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introA.png)
+![intro2](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro2.png)
 
 数据统计：
-![introC](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introC.png)
+![intro3](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro3.png)
+
+自动回复：
+![intro4](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro4.png)
 
 观看直播：
-![introC](https://raw.githubusercontent.com/hling51325/hling51325.github.io/master/static/img/bili-danmaku-introD.png)
+![intro5](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/intro5.png)
 
 ### 说明
 - 本应用数据基于本地收集到的数据，未被应用统计到的数据不进行统计。
 - 十分内互动人数，由进入直播间、发送弹幕、送礼组成。
 
-### developer
+### for developer
+
+架构图：
+![er](https://raw.githubusercontent.com/hling51325/bilibili-danmaku/master/static/er.png)
 
 ``` bash
 # install dependencies
