@@ -3,7 +3,7 @@
     <div class="item-container">
       <span class="setting-text">显示滚动弹幕窗</span>
       <i-switch :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
-      <Checkbox :style="{'padding-left': '10px'}" :model-value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+      <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isScrollDanmakuWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
     </div>
 
     <div class="item-container">
@@ -12,7 +12,16 @@
     </div>
     <div class="item-container">
       <span class="setting-text">透明度</span>
-      <InputNumber :model-value="scrollDanmakuOpacity" :min="0" :max="100" :formatter="value => `${value}%`" size="small" :parser="value => value.replace('%', '')" :style="{ width: '70px' }" @on-change="changeScrollDanmakuOpacity" />
+      <InputNumber
+        :model-value="scrollDanmakuOpacity"
+        :min="0"
+        :max="100"
+        :formatter="(value) => `${value}%`"
+        size="small"
+        :parser="(value) => value.replace('%', '')"
+        :style="{ width: '70px' }"
+        @on-change="changeScrollDanmakuOpacity"
+      />
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕样式选择</span>
@@ -35,7 +44,16 @@
     </div>
     <div class="item-container">
       <span class="setting-text">弹幕显示时间</span>
-      <InputNumber :model-value="scrollDanmakuDuration" :min="0" :step="500" :formatter="value => `${value}ms`" size="small" :parser="value => value.replace('ms', '')" :style="{ width: '90px' }" @on-change="changeScrollDanmakuDuration" />
+      <InputNumber
+        :model-value="scrollDanmakuDuration"
+        :min="0"
+        :step="500"
+        :formatter="(value) => `${value}ms`"
+        size="small"
+        :parser="(value) => value.replace('ms', '')"
+        :style="{ width: '90px' }"
+        @on-change="changeScrollDanmakuDuration"
+      />
     </div>
     <div class="item-container">
       <span class="setting-text">方向</span>
@@ -52,11 +70,11 @@
 </template>
 
 <script>
-
 import { debounce } from 'lodash'
-import { PORT } from "../../service/const";
+import { PORT } from '../../service/const'
 import { updateSetting } from '../../service/api'
-const { BrowserWindow } = require('@electron/remote')
+import { BrowserWindow, nativeImage } from '@electron/remote'
+import icon from '../assets/logo.png'
 
 export default {
   data() {
@@ -64,18 +82,18 @@ export default {
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
       isScrollDanmakuWindowAlwaysOnTop: false,
-      checkOnTopInterval: null
-    };
+      checkOnTopInterval: null,
+    }
   },
   computed: {
     scrollDanmakuFontSize() {
-      return this.$store.state.Config.scrollDanmakuFontSize;
+      return this.$store.state.Config.scrollDanmakuFontSize
     },
     scrollDanmakuDuration() {
-      return this.$store.state.Config.scrollDanmakuDuration;
+      return this.$store.state.Config.scrollDanmakuDuration
     },
     scrollDanmakuDirection() {
-      return this.$store.state.Config.scrollDanmakuDirection;
+      return this.$store.state.Config.scrollDanmakuDirection
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
@@ -109,7 +127,7 @@ export default {
     },
     scrollDanmakuEmojiSize() {
       return this.$store.state.Config.scrollDanmakuEmojiSize
-    }
+    },
   },
 
   created() {
@@ -129,7 +147,7 @@ export default {
   methods: {
     showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
-      this.isShowDanmakuWindowLoading = true;
+      this.isShowDanmakuWindowLoading = true
 
       if (status) {
         const win = new BrowserWindow({
@@ -145,74 +163,80 @@ export default {
           //   nodeIntegration: true,
           // },
           resizable: true,
-        });
+        })
 
-        this.$store.dispatch("UPDATE_CONFIG", {
-          scrollDanmakuWindowId: win.id
-        });
+        this.$store.dispatch('UPDATE_CONFIG', {
+          scrollDanmakuWindowId: win.id,
+        })
 
         const winURL = `http://localhost:${PORT}/danmaku-scroll?port=${PORT}`
-        win.loadURL(winURL);
-        win.on("close", (e) => {
+        win.setIcon(nativeImage.createFromDataURL(icon))
+        win.loadURL(winURL)
+        win.on('close', (e) => {
           this.closeDanmakuWindow()
-        });
-        win.on("resize", debounce(() => {
-          const [width, height] = win.getSize();
-          this.$store.dispatch("UPDATE_CONFIG", {
-            scrollDanmakuWidth: width,
-            scrollDanmakuHeight: height,
-          });
-        }, 400))
-        win.on("move", debounce(() => {
-          const [x, y] = win.getPosition();
-          this.$store.dispatch("UPDATE_CONFIG", {
-            scrollDanmakuX: x,
-            scrollDanmakuY: y,
-          })
-        }, 400)
-        );
+        })
+        win.on(
+          'resize',
+          debounce(() => {
+            const [width, height] = win.getSize()
+            this.$store.dispatch('UPDATE_CONFIG', {
+              scrollDanmakuWidth: width,
+              scrollDanmakuHeight: height,
+            })
+          }, 400)
+        )
+        win.on(
+          'move',
+          debounce(() => {
+            const [x, y] = win.getPosition()
+            this.$store.dispatch('UPDATE_CONFIG', {
+              scrollDanmakuX: x,
+              scrollDanmakuY: y,
+            })
+          }, 400)
+        )
         this.win = win
-        this.isShowDanmakuWindow = true;
-        this.isShowDanmakuWindowLoading = false;
+        this.isShowDanmakuWindow = true
+        this.isShowDanmakuWindowLoading = false
       } else {
         this.closeDanmakuWindow()
       }
     },
     async changeScrollDanmakuFontSize(value) {
       const data = {
-        scrollDanmakuFontSize: value
+        scrollDanmakuFontSize: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeScrollDanmakuDuration(value) {
       const data = {
-        scrollDanmakuDuration: value
+        scrollDanmakuDuration: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     closeDanmakuWindow() {
-      if (!this.win) return;
-      this.$store.dispatch("UPDATE_CONFIG", {
-        scrollDanmakuWindowId: null
-      });
+      if (!this.win) return
+      this.$store.dispatch('UPDATE_CONFIG', {
+        scrollDanmakuWindowId: null,
+      })
       // clear
       if (this.checkOnTopInterval) {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.close();
-      this.win = null;
+      this.win.close()
+      this.win = null
       this.isShowDanmakuWindow = false
-      this.isShowDanmakuWindowLoading = false;
+      this.isShowDanmakuWindowLoading = false
       this.isScrollDanmakuWindowAlwaysOnTop = false
     },
 
     changeAlwaysOnTop(status) {
-      this.win.setFocusable(!status);
+      this.win.setFocusable(!status)
       // this.win.setVisibleOnAllWorkspaces(true)
       if (this.isOnTopForce && status) {
         this.checkOnTopInterval = setInterval(() => {
@@ -223,8 +247,8 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.setAlwaysOnTop(status, this.onTopLevel);
-      this.win.setIgnoreMouseEvents(status, { forward: true });
+      this.win.setAlwaysOnTop(status, this.onTopLevel)
+      this.win.setIgnoreMouseEvents(status, { forward: true })
       //   this.$store.dispatch("UPDATE_CONFIG", {
       //     isScrollDanmakuWindowAlwaysOnTop: status,
       //   });
@@ -236,42 +260,42 @@ export default {
         scrollDanmakuBackground: color,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeScrollDanmakuOpacity(value) {
       const data = {
-        scrollDanmakuOpacity: value
+        scrollDanmakuOpacity: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeScrollDanmakuDirection(value) {
       const data = {
-        scrollDanmakuDirection: value
+        scrollDanmakuDirection: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeScrollDanmakuStyleExtend(value) {
       const data = {
-        scrollDanmakuStyleExtend: value
+        scrollDanmakuStyleExtend: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
     async changeScrollDanmakuEmojiSize(value) {
       const data = {
-        scrollDanmakuEmojiSize: value
+        scrollDanmakuEmojiSize: value,
       }
       await updateSetting(data)
-      this.$store.dispatch("UPDATE_CONFIG", data)
-    }
-  }
-};
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+  },
+}
 </script>
 
 <style scoped>
