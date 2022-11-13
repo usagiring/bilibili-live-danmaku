@@ -116,7 +116,7 @@
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
 import { ipcRenderer } from 'electron'
-import { BrowserWindow, dialog } from '@electron/remote'
+import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
 import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus } from '../../service/api'
