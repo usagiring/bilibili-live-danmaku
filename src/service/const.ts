@@ -206,6 +206,7 @@ export const DEFAULT_CONFIG = {
   signInMessage: '',
   onlyTodayZeroIntimacy: true,
   isLiveWindowAlwaysOnTop: false,
+  isScrollDanmakuWindowAlwaysOnTop: false,
   liveWindowOpacity: 1,
   liveWindowId: null,
   danmakuWindowId: null,
@@ -259,6 +260,7 @@ export const DEFAULT_CONFIG = {
   userInfoFrequencyLimit: 1000,
   onTopLevel: 'floating',
   isOnTopForce: false,
+  disableIgnoreMouseEvent: false,
   messageSettings: [
     {
       type: 'avatar',

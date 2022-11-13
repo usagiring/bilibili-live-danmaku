@@ -43,6 +43,9 @@ export default {
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
     },
+    disableIgnoreMouseEvent() {
+      return this.$store.state.Config.disableIgnoreMouseEvent
+    },
     onTopLevel() {
       return this.$store.state.Config.onTopLevel
     },
@@ -169,7 +172,10 @@ export default {
       }
       win.setAlwaysOnTop(status, this.onTopLevel)
       // this.win.setFullScreenable(false)
-      win.setIgnoreMouseEvents(status, { forward: true })
+      // 如果鼠标穿透 或者 取消置顶时，设置ignore
+      if (!this.disableIgnoreMouseEvent || !status) {
+        win.setIgnoreMouseEvents(status, { forward: true })
+      }
       this.$store.dispatch('UPDATE_CONFIG', {
         isLiveWindowAlwaysOnTop: status,
       })

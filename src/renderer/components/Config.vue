@@ -128,8 +128,19 @@
           <template #content>
             <div :style="{ 'white-space': 'normal' }">
               <p>如遇到全屏场景下无法展示弹幕窗，可尝试勾选该项</p>
-              <p>该选项将多次尝试置顶弹幕窗口。</p>
+              <p>该选项将多次尝试置顶弹幕窗口</p>
               <p><span :style="{ color: 'pink' }">仅在必要时使用</span></p>
+            </div>
+          </template>
+        </Tooltip>
+      </Checkbox>
+      <Checkbox class="space-left-5px" :model-value="disableIgnoreMouseEvent" @on-change="onChangeDisableIgnoreMouseEvent">
+        <Tooltip placement="top" transfer>
+          置顶时鼠标事件不穿透
+          <template #content>
+            <div :style="{ 'white-space': 'normal' }">
+              <p>默认窗口置顶时不响应鼠标事件，窗口重叠时点击等操作会传递到下面的窗口</p>
+              <p>该选项将保留置顶窗口的鼠标事件</p>
             </div>
           </template>
         </Tooltip>
@@ -235,6 +246,9 @@ export default {
     },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
+    },
+    disableIgnoreMouseEvent() {
+      return this.$store.state.Config.disableIgnoreMouseEvent
     },
     signInMessage() {
       return this.$store.state.Config.signInMessage
@@ -449,6 +463,13 @@ export default {
     onChangeSignInMessage(e) {
       const data = {
         signInMessage: e.target.value,
+      }
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    onChangeDisableIgnoreMouseEvent(value) {
+      const data = {
+        disableIgnoreMouseEvent: value,
       }
       this.$store.dispatch('UPDATE_CONFIG', data)
     },

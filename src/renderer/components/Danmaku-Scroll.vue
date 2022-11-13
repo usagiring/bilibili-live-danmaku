@@ -81,7 +81,6 @@ export default {
     return {
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
-      isScrollDanmakuWindowAlwaysOnTop: false,
       checkOnTopInterval: null,
     }
   },
@@ -95,8 +94,14 @@ export default {
     scrollDanmakuDirection() {
       return this.$store.state.Config.scrollDanmakuDirection
     },
+    isScrollDanmakuWindowAlwaysOnTop() {
+      return this.$store.state.Config.isScrollDanmakuWindowAlwaysOnTop
+    },
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
+    },
+    disableIgnoreMouseEvent() {
+      return this.$store.state.Config.disableIgnoreMouseEvent
     },
     onTopLevel() {
       return this.$store.state.Config.onTopLevel
@@ -232,7 +237,10 @@ export default {
       this.win = null
       this.isShowDanmakuWindow = false
       this.isShowDanmakuWindowLoading = false
-      this.isScrollDanmakuWindowAlwaysOnTop = false
+      // this.isScrollDanmakuWindowAlwaysOnTop = false
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isScrollDanmakuWindowAlwaysOnTop: false,
+      })
     },
 
     changeAlwaysOnTop(status) {
@@ -248,11 +256,14 @@ export default {
         this.checkOnTopInterval = null
       }
       this.win.setAlwaysOnTop(status, this.onTopLevel)
-      this.win.setIgnoreMouseEvents(status, { forward: true })
-      //   this.$store.dispatch("UPDATE_CONFIG", {
-      //     isScrollDanmakuWindowAlwaysOnTop: status,
-      //   });
-      this.isScrollDanmakuWindowAlwaysOnTop = status
+      // 如果鼠标穿透 或者 取消置顶时，设置ignore
+      if (!this.disableIgnoreMouseEvent || !status) {
+        this.win.setIgnoreMouseEvents(status, { forward: true })
+      }
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isScrollDanmakuWindowAlwaysOnTop: status,
+      })
+      // this.isScrollDanmakuWindowAlwaysOnTop = status
     },
 
     async updateBackground(color) {

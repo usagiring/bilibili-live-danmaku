@@ -7,7 +7,7 @@
           <Tooltip max-width="600" transfer placement="right">
             <span class="help">?</span>
             <template #content>
-              <div :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
                 <p>● 本功能依赖阿里云服务实现直播语音识别。</p>
                 <p>● 您需要先在阿里云官网开通账户，并且开通实时语音识别功能，具体操作可参考网上教程。</p>
                 <p>● 本功能依赖ffmpeg。</p>
@@ -21,7 +21,7 @@
       <div class="config-container">
         独立窗口
         <i-switch :model-value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow" />
-        <Checkbox :style="{'padding-left': '10px'}" :model-value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+        <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
       </div>
       <!-- <div class="divider"></div> -->
       <div class="config-container">
@@ -29,7 +29,7 @@
           <Tooltip max-width="600" transfer placement="right">
             <Button size="small" @click="openFFmpegSelector">选择 ffmpeg 文件</Button>
             <template #content>
-              <div :style="{ 'white-space': 'normal', 'line-height': '24px'}">
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
                 <p>● 您可以手动指定ffmpeg文件路径。</p>
                 <p>● 不选择则从环境变量中寻找ffmpeg文件。</p>
               </div>
@@ -38,7 +38,7 @@
         </span>
         <span v-if="ffmpegExe">
           {{ ffmpegExe }}
-          <Icon type="md-close" :style="{color: 'crimson', cursor: 'pointer'}" @click="clearFFmpegPath()" />
+          <Icon type="md-close" :style="{ color: 'crimson', cursor: 'pointer' }" @click="clearFFmpegPath()" />
         </span>
       </div>
       <div class="config-container">
@@ -49,15 +49,12 @@
       </div>
       <div class="config-container">
         <span>
-          <Checkbox
-            :model-value="enableTranslate"
-            :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang ||!toLang"
-            @on-change="changeEnableTranslate"
-          >开启翻译：</Checkbox>
-          <Select v-model:fromLang="fromLang" :disabled="enableTranslate" size="small" style="width:80px">
+          <Checkbox :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang || !toLang" @on-change="changeEnableTranslate">开启翻译：</Checkbox>
+          <Select v-model:fromLang="fromLang" :disabled="enableTranslate" size="small" style="width: 80px">
             <Option v-for="item in fromLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
-          </Select>=>
-          <Select v-model:toLang="toLang" :disabled="enableTranslate" size="small" style="width:80px">
+          </Select>
+          =>
+          <Select v-model:toLang="toLang" :disabled="enableTranslate" size="small" style="width: 80px">
             <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
         </span>
@@ -66,18 +63,11 @@
         <Button :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" size="small" :loading="isStarting" @click="start">开始</Button>
         <Button :disabled="!isStarted" size="small" @click="stop">停止</Button>
       </div>
-      <div class="config-container" :style="{width: '400px'}">
-        <div :style="{'text-align': 'center'}">阿里云</div>
+      <div class="config-container" :style="{ width: '400px' }">
+        <div :style="{ 'text-align': 'center' }">阿里云</div>
         <div>
           <div class="key-item">AccessKeyId:</div>
-          <Input
-            :model-value="aliAccessKeyId"
-            :disabled="isStarted"
-            :style="{display: 'inline-block', width: '220px'}"
-            size="small"
-            placeholder="AccessKeyId..."
-            @on-change="changeAliAccessKeyId"
-          />
+          <Input :model-value="aliAccessKeyId" :disabled="isStarted" :style="{ display: 'inline-block', width: '220px' }" size="small" placeholder="AccessKeyId..." @on-change="changeAliAccessKeyId" />
         </div>
         <div>
           <div class="key-item">AccessKeySecret:</div>
@@ -87,21 +77,14 @@
             size="small"
             placeholder="AccessKeySecret..."
             type="password"
-            :style="{display: 'inline-block', width: '220px'}"
+            :style="{ display: 'inline-block', width: '220px' }"
             @on-change="changeAliAccessKeySecret"
           />
         </div>
         <div>
           <div class="key-item">AppKey:</div>
           <!-- <Input :model-value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
-          <AutoComplete
-            :model-value="aliAppKey"
-            :disabled="isStarted"
-            size="small"
-            placeholder="AppKey..."
-            :style="{display: 'inline-block', width: '220px'}"
-            @on-change="changeAliAppKey"
-          >
+          <AutoComplete :model-value="aliAppKey" :disabled="isStarted" size="small" placeholder="AppKey..." :style="{ display: 'inline-block', width: '220px' }" @on-change="changeAliAppKey">
             <Option v-for="appKey in aliAppKeys" :key="appKey" :value="appKey">
               {{ appKey }}
               <Icon type="md-close" class="remove-history-appkey" @click="removeHistoryAppkey(appKey)" />
@@ -110,7 +93,7 @@
         </div>
         <div>
           <div class="key-item">服务器:</div>
-          <Select v-model="aliServer" class="server-selector" :disabled="isStarted" style="width:200px" size="small">
+          <Select v-model="aliServer" class="server-selector" :disabled="isStarted" style="width: 200px" size="small">
             <Option v-for="item in aliServers" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
         </div>
@@ -120,7 +103,7 @@
       <template v-for="(text, index) in texts" :key="index">
         <div>
           <div>{{ text.text }}</div>
-          <div v-if="text.translate" :style="{color: 'gray'}">{{ text.translate }}</div>
+          <div v-if="text.translate" :style="{ color: 'gray' }">{{ text.translate }}</div>
         </div>
       </template>
     </div>
@@ -128,30 +111,18 @@
 </template>
 
 <script>
-// TODO
-// 设置ffmpeg 路径
-// 实例保存
-
 // 结果
 // 1 输出文件
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
 import { ipcRenderer } from 'electron'
-import * as remote from '@electron/remote'
+import { BrowserWindow, dialog } from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import {
-  initialASR,
-  closeASR,
-  getASRStatus,
-  translateSentence,
-  translateOpen,
-  translateClose,
-  getTranslateStatus,
-} from '../../service/api'
+import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
 import { getRandomPlayUrl } from '../../service/bilibili-recorder'
-const { BrowserWindow, dialog } = remote
+import icon from '../assets/logo.png'
 
 export default {
   data() {
@@ -250,6 +221,9 @@ export default {
     },
     aliAppKeys() {
       return this.$store.state.Config.aliAppKeys
+    },
+    disableIgnoreMouseEvent() {
+      return this.$store.state.Config.disableIgnoreMouseEvent
     },
   },
 
@@ -442,10 +416,8 @@ export default {
           ASRWindowId: win.id,
         })
 
-        const winURL =
-          process.env.NODE_ENV === 'development'
-            ? `http://localhost:9080/#/asr-window`
-            : `file://${__dirname}/index.html#asr-window`
+        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/asr-window` : `file://${__dirname}/index.html#asr-window`
+        win.setIcon(nativeImage.createFromDataURL(icon))
 
         win.loadURL(winURL)
         this.win = win
@@ -489,7 +461,10 @@ export default {
         this.checkOnTopInterval = null
       }
       this.win.setAlwaysOnTop(status, this.onTopLevel)
-      this.win.setIgnoreMouseEvents(status, { forward: true })
+      // 如果鼠标穿透 或者 取消置顶时，设置ignore
+      if (!this.disableIgnoreMouseEvent || !status) {
+        this.win.setIgnoreMouseEvents(status, { forward: true })
+      }
       //   this.$store.dispatch("UPDATE_CONFIG", {
       //     isScrollDanmakuWindowAlwaysOnTop: status,
       //   });

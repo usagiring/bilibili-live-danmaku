@@ -304,6 +304,9 @@ export default {
     isOnTopForce() {
       return this.$store.state.Config.isOnTopForce
     },
+    disableIgnoreMouseEvent() {
+      return this.$store.state.Config.disableIgnoreMouseEvent
+    },
     danmakuWindowId() {
       return this.$store.state.Config.danmakuWindowId
     },
@@ -707,7 +710,11 @@ export default {
       }
       this.win.setAlwaysOnTop(status, this.onTopLevel)
       // this.win.setFullScreenable(false)
-      this.win.setIgnoreMouseEvents(status, { forward: true })
+
+      // 如果鼠标穿透 或者 取消置顶时，设置ignore
+      if (!this.disableIgnoreMouseEvent || !status) {
+        this.win.setIgnoreMouseEvents(status, { forward: true })
+      }
       this.$store.dispatch('UPDATE_CONFIG', {
         isAlwaysOnTop: status,
       })

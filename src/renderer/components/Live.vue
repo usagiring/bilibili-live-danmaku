@@ -195,9 +195,6 @@ export default {
     liveWindowOpacity() {
       return this.$store.state.Config.liveWindowOpacity * 100
     },
-    isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
-    },
     liveWindowX() {
       return this.$store.state.Config.liveWindowX
     },
