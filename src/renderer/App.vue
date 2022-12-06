@@ -55,6 +55,13 @@ body {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.me-ml-2px {
+  margin-left: 2px;
+}
+.me-mr-2px {
+  margin-right: 2px;
+}
 </style>
 
 <style scoped>

@@ -4,9 +4,9 @@
       <Button size="small" @click="sendTestMessage">发送测试弹幕</Button>
       <Button :style="{ 'margin-left': '10px' }" size="small" @click="clearDanmaku">清空弹幕</Button>
     </div>
-    <div class="divider line one-line">
-      <span> 样式预览 </span>
-    </div>
+    <Divider orientation="left" size="small">
+      <span class="divider-text">样式预览</span>
+    </Divider>
     <div class="setting-group">
       <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
         <Container orientation="horizontal" :style="{ 'min-height': '0px' }" @drop="onDrop($event)">
@@ -42,283 +42,339 @@
       </div>
     </div>
 
-    <div class="divider line one-line">
-      <span :style="{ cursor: 'pointer' }" @click="changeCollapse(0)">
+    <Divider orientation="left" size="small">
+      <span class="divider-text" @click="changeCollapse(0)">
         常规设置
         <Icon v-if="collapse[0]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
-    </div>
-    <div v-show="collapse[0]">
-      <div class="setting-group">
-        <div :style="{ display: 'inline-block' }">
-          <span>窗体背景色</span>
-          <ColorPicker transfer :model-value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
-        </div>
-        <Divider type="vertical" />
-        <div :style="{ display: 'inline-block' }">
-          <span :style="{ 'padding-right': '10px' }">整体透明度</span>
-          <div class="avatar-controller-slider">
-            <Slider :model-value="opacity" @on-change="changeOpacity" />
+    </Divider>
+    <transition name="fade">
+      <div v-show="collapse[0]">
+        <div class="setting-group">
+          <div :style="{ display: 'inline-block' }">
+            <span>窗体背景色</span>
+            <ColorPicker transfer :model-value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
+          </div>
+          <Divider type="vertical" />
+          <div :style="{ display: 'inline-block' }">
+            <span :style="{ 'padding-right': '10px' }">整体透明度</span>
+            <div class="avatar-controller-slider">
+              <Slider :model-value="opacity" @on-change="changeOpacity" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="setting-group">
-        <div :style="{ display: 'inline-block' }">
-          <span :style="{ 'padding-right': '10px' }">头像大小</span>
-          <div class="avatar-controller-slider">
-            <Slider :model-value="avatarSize" @on-change="changeAvatarSize" />
+        <div class="setting-group">
+          <div :style="{ display: 'inline-block' }">
+            <span :style="{ 'padding-right': '10px' }">头像大小</span>
+            <div class="avatar-controller-slider">
+              <Slider :model-value="avatarSize" @on-change="changeAvatarSize" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="setting-group">
-        <div :style="{ display: 'inline-block' }">
-          <span>字体</span>
-          <Select
-            class="space-left-2px"
-            :style="{ width: '100px', display: 'inline-block' }"
-            :model-value="danmakuFont"
-            size="small"
-            @on-change="changeDanmakuFont"
-            @on-open-change="onOpenFontSelectChange"
-          >
-            <OptionGroup label="全局值">
-              <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
-            </OptionGroup>
-            <OptionGroup label="通用字体族">
-              <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key" :value="item.value">{{ item.value }}</Option>
-            </OptionGroup>
-            <OptionGroup label="系统">
-              <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key" :value="item.value">{{ item.value }}</Option>
-            </OptionGroup>
-          </Select>
+        <div class="setting-group">
+          <div :style="{ display: 'inline-block' }">
+            <span>字体</span>
+            <Select
+              class="space-left-2px"
+              :style="{ width: '100px', display: 'inline-block' }"
+              :model-value="danmakuFont"
+              size="small"
+              @on-change="changeDanmakuFont"
+              @on-open-change="onOpenFontSelectChange"
+            >
+              <OptionGroup label="全局值">
+                <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+              </OptionGroup>
+              <OptionGroup label="通用字体族">
+                <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+              </OptionGroup>
+              <OptionGroup label="系统">
+                <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+              </OptionGroup>
+            </Select>
+          </div>
+          <Divider type="vertical" />
+          <div :style="{ display: 'inline-block' }">
+            <span>粗细</span>
+            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
+              <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
+                <span>{{ option.value }}</span>
+              </Option>
+            </Select>
+          </div>
         </div>
-        <Divider type="vertical" />
-        <div :style="{ display: 'inline-block' }">
-          <span>粗细</span>
-          <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
-            <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
-              <span>{{ option.value }}</span>
-            </Option>
-          </Select>
+        <div class="setting-group">
+          <div :style="{ display: 'inline-block' }">
+            <span>
+              <Tooltip placement="top" transfer>
+                重复弹幕合并
+                <template #content>
+                  <div class="description-text">
+                    <p>多少毫秒内重复的弹幕将被合并</p>
+                  </div>
+                </template>
+              </Tooltip>
+            </span>
+            <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small" @on-change="changeCombineSimilarTime" />
+            {{ ' ms' }}
+          </div>
+          <Divider type="vertical" />
+          <div :style="{ display: 'inline-block' }">
+            <span>
+              <Tooltip placement="top" transfer>
+                弹幕超时消失
+                <template #content>
+                  <div class="description-text">
+                    <p>为 0 表示不消失，请至少设置2000以上</p>
+                  </div>
+                </template>
+              </Tooltip>
+            </span>
+            <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small" @on-change="changeHiddenExpiredTime" />
+            {{ ' ms' }}
+          </div>
+        </div>
+        <div class="setting-group">
+          <div :style="{ display: 'inline-block' }">
+            <span>礼物栏展示大于</span>
+            <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
+            {{ ' 元' }}
+          </div>
+          <Divider type="vertical" />
+          <div :style="{ display: 'inline-block' }">
+            <span>弹幕礼物展示大于</span>
+            <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
+            {{ ' 元' }}
+          </div>
+        </div>
+        <div class="setting-group">
+          <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
+          <Divider type="vertical" />
+          <span>表情大小</span>
+          <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small" @on-change="changeEmojiSize" />
+        </div>
+        <div class="setting-group">
+          <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
+        </div>
+        <div class="setting-group">
+          <Checkbox :model-value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
+        </div>
+        <div class="setting-group">
+          <!-- <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
+          <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
+        </div>
+        <div class="setting-group">
+          <Checkbox :model-value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
         </div>
       </div>
-      <div class="setting-group">
-        <div :style="{ display: 'inline-block' }">
-          <span>
-            <Tooltip placement="top" transfer>
-              重复弹幕合并
-              <template #content>
-                <div class="description-text">
-                  <p>多少毫秒内重复的弹幕将被合并</p>
-                </div>
-              </template>
-            </Tooltip>
-          </span>
-          <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small" @on-change="changeCombineSimilarTime" />
-          {{ ' ms' }}
-        </div>
-        <Divider type="vertical" />
-        <div :style="{ display: 'inline-block' }">
-          <span>
-            <Tooltip placement="top" transfer>
-              弹幕超时消失
-              <template #content>
-                <div class="description-text">
-                  <p>为 0 表示不消失，请至少设置2000以上</p>
-                </div>
-              </template>
-            </Tooltip>
-          </span>
-          <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small" @on-change="changeHiddenExpiredTime" />
-          {{ ' ms' }}
-        </div>
-      </div>
-      <div class="setting-group">
-        <div :style="{ display: 'inline-block' }">
-          <span>礼物栏展示大于</span>
-          <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
-          {{ ' 元' }}
-        </div>
-        <Divider type="vertical" />
-        <div :style="{ display: 'inline-block' }">
-          <span>弹幕礼物展示大于</span>
-          <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
-          {{ ' 元' }}
-        </div>
-      </div>
-      <div class="setting-group">
-        <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
-        <Divider type="vertical" />
-        <span>表情大小</span>
-        <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small" @on-change="changeEmojiSize" />
-      </div>
-      <div class="setting-group">
-        <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
-      </div>
-      <div class="setting-group">
-        <Checkbox :model-value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
-      </div>
-      <div class="setting-group">
-        <!-- <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
-        <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
-        <Divider type="vertical" />
-        <Checkbox :model-value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
-      </div>
-      <div class="setting-group">
-        <Checkbox :model-value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
-      </div>
-    </div>
+    </transition>
 
-    <div class="divider line one-line">
-      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(1)">
+    <Divider orientation="left" size="small">
+      <span class="divider-text" @click="changeCollapse(1)">
         角色：普通
         <Icon v-if="collapse[1]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
-    </div>
-    <div v-show="collapse[1]" class="disable-user-select">
-      <div class="setting-group">
-        名称：
-        <StyleEditor v-bind="editors[0]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[1]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[2]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[3]" />
-      </div>
-      <div class="setting-group">
-        内容：
-        <StyleEditor v-bind="editors[4]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[5]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[6]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[7]" />
-      </div>
-      <div class="setting-group">
-        整体：
-        <StyleEditor v-bind="editors[8]" />
-        <Divider type="vertical" />
-      </div>
-    </div>
+    </Divider>
 
-    <div class="divider line one-line">
-      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(2)">
+    <transition name="fade">
+      <div v-show="collapse[1]">
+        <div class="setting-group">
+          名称：
+          <StyleEditor v-bind="editors[0]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[1]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[2]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[3]" />
+        </div>
+        <div class="setting-group">
+          内容：
+          <StyleEditor v-bind="editors[4]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[5]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[6]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[7]" />
+        </div>
+        <div class="setting-group">
+          整体：
+          <StyleEditor v-bind="editors[8]" />
+          <Divider type="vertical" />
+        </div>
+      </div>
+    </transition>
+
+    <Divider orientation="left" size="small">
+      <span class="divider-text" @click="changeCollapse(2)">
         角色：舰长
         <Icon v-if="collapse[2]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
-    </div>
-    <div v-show="collapse[2]" class="disable-user-select">
-      <div class="setting-group">
-        名称：
-        <StyleEditor v-bind="editors[9]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[10]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[11]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[12]" />
+    </Divider>
+    <transition name="fade">
+      <div v-show="collapse[2]">
+        <div class="setting-group">
+          名称：
+          <StyleEditor v-bind="editors[9]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[10]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[11]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[12]" />
+        </div>
+        <div class="setting-group">
+          内容：
+          <StyleEditor v-bind="editors[13]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[14]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[15]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[16]" />
+        </div>
+        <div class="setting-group">
+          整体：
+          <StyleEditor v-bind="editors[17]" />
+          <Divider type="vertical" />
+        </div>
       </div>
-      <div class="setting-group">
-        内容：
-        <StyleEditor v-bind="editors[13]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[14]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[15]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[16]" />
-      </div>
-      <div class="setting-group">
-        整体：
-        <StyleEditor v-bind="editors[17]" />
-        <Divider type="vertical" />
-      </div>
-    </div>
+    </transition>
 
-    <div class="divider line one-line">
-      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(3)">
+    <Divider orientation="left" size="small">
+      <span class="divider-text" @click="changeCollapse(3)">
         角色：提督
         <Icon v-if="collapse[3]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
-    </div>
-    <div v-show="collapse[3]" class="disable-user-select">
-      <div class="setting-group">
-        名称：
-        <StyleEditor v-bind="editors[18]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[19]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[20]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[21]" />
+    </Divider>
+    <transition name="fade">
+      <div v-show="collapse[3]">
+        <div class="setting-group">
+          名称：
+          <StyleEditor v-bind="editors[18]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[19]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[20]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[21]" />
+        </div>
+        <div class="setting-group">
+          内容：
+          <StyleEditor v-bind="editors[22]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[23]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[24]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[25]" />
+        </div>
+        <div class="setting-group">
+          整体：
+          <StyleEditor v-bind="editors[26]" />
+          <Divider type="vertical" />
+        </div>
       </div>
-      <div class="setting-group">
-        内容：
-        <StyleEditor v-bind="editors[22]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[23]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[24]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[25]" />
-      </div>
-      <div class="setting-group">
-        整体：
-        <StyleEditor v-bind="editors[26]" />
-        <Divider type="vertical" />
-      </div>
-    </div>
+    </transition>
 
-    <div class="divider line one-line">
-      <span class="disable-user-select" :style="{ cursor: 'pointer' }" @click="changeCollapse(4)">
+    <Divider orientation="left" size="small">
+      <span class="divider-text" @click="changeCollapse(4)">
         角色：总督
         <Icon v-if="collapse[4]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
-    </div>
-    <div v-show="collapse[4]" class="disable-user-select">
-      <div class="setting-group">
-        名称：
-        <StyleEditor v-bind="editors[27]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[28]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[29]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[30]" />
+    </Divider>
+    <transition name="fade">
+      <div v-show="collapse[4]" class="disable-user-select">
+        <div class="setting-group">
+          名称：
+          <StyleEditor v-bind="editors[27]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[28]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[29]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[30]" />
+        </div>
+        <div class="setting-group">
+          内容：
+          <StyleEditor v-bind="editors[31]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[32]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[33]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[34]" />
+        </div>
+        <div class="setting-group">
+          整体：
+          <StyleEditor v-bind="editors[35]" />
+          <Divider type="vertical" />
+        </div>
       </div>
-      <div class="setting-group">
-        内容：
-        <StyleEditor v-bind="editors[31]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[32]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[33]" />
-        <Divider type="vertical" />
-        <StyleEditor v-bind="editors[34]" />
+    </transition>
+
+    <Divider orientation="left" size="small">
+      <span class="divider-text" :style="{ cursor: 'pointer' }" @click="changeCollapse(5)">
+        角色：房管
+        <Icon v-if="collapse[5]" type="md-arrow-dropdown" />
+        <Icon v-else type="md-arrow-dropup" />
+      </span>
+    </Divider>
+    <transition name="fade">
+      <div v-show="collapse[5]" class="disable-user-select">
+        <div class="setting-group">
+          名称：
+          <StyleEditor v-bind="editors[27]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[28]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[29]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[30]" />
+        </div>
+        <div class="setting-group">
+          内容：
+          <StyleEditor v-bind="editors[31]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[32]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[33]" />
+          <Divider type="vertical" />
+          <StyleEditor v-bind="editors[34]" />
+        </div>
+        <div class="setting-group">
+          <!-- <Space align="center"> -->
+          整体：
+          <StyleEditor v-bind="editors[35]" />
+          <Divider type="vertical" />
+          <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
+          <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon" @on-change="changeAdminIcon">
+            <Option v-for="icon in icons" :key="icon" :value="icon"> <Icon :type="icon" /> {{ icon }} </Option>
+          </AutoComplete>
+          <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
+          <ColorPicker :model-value="adminIconColor" size="small" alpha @on-active-change="debouncedChangeAdminIconColor" />
+          <!-- </Space> -->
+        </div>
       </div>
-      <div class="setting-group">
-        整体：
-        <StyleEditor v-bind="editors[35]" />
-        <Divider type="vertical" />
-      </div>
-    </div>
+    </transition>
 
     <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
       <div :style="{ padding: '20px' }">
@@ -401,7 +457,7 @@ import FontList from 'font-list'
 
 import StyleEditor from './StyleEditor'
 import FanMedal from './FanMedal'
-import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR } from '../../service/const'
+import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
 import { mergeSetting, updateSetting, clearMessage, sendMessages } from '../../service/api'
@@ -417,6 +473,7 @@ const defaultFonts = [
     type: 'common',
   })),
 ]
+const icons = [...ICONS]
 
 export default {
   components: {
@@ -800,7 +857,86 @@ export default {
           prop: 'message',
           styleName: 'background',
         },
+
+        // ***** 房管 *****
+        {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '字号',
+          role: 'admin',
+          prop: 'name',
+          styleName: 'font-size',
+        },
+        {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '颜色',
+          role: 'admin',
+          prop: 'name',
+          styleName: 'color',
+        },
+        {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '描边粗细',
+          role: 'admin',
+          prop: 'name',
+          numberStep: 0.1,
+          styleName: '-webkit-text-stroke-width',
+        },
+        {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '描边颜色',
+          role: 'admin',
+          prop: 'name',
+          styleName: '-webkit-text-stroke-color',
+        },
+
+        {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '字号',
+          role: 'admin',
+          prop: 'comment',
+          styleName: 'font-size',
+        },
+        {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '颜色',
+          role: 'admin',
+          prop: 'comment',
+          styleName: 'color',
+        },
+        {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '描边粗细',
+          role: 'admin',
+          prop: 'comment',
+          numberStep: 0.1,
+          styleName: '-webkit-text-stroke-width',
+        },
+        {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '描边颜色',
+          role: 'admin',
+          prop: 'comment',
+          styleName: '-webkit-text-stroke-color',
+        },
+        {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '背景色',
+          role: 'admin',
+          prop: 'message',
+          styleName: 'background',
+        },
       ],
+
+      icons: [],
     }
   },
   computed: {
@@ -945,9 +1081,19 @@ export default {
     emojiSize() {
       return this.$store.state.Config.emojiSize
     },
+    adminIcon() {
+      return this.$store.state.Config.adminIcon
+    },
+    isShowAdminIcon() {
+      return this.$store.state.Config.isShowAdminIcon
+    },
+    adminIconColor() {
+      return this.$store.state.Config.adminIconColor
+    },
   },
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
+    this.debouncedChangeAdminIconColor = debounce(this.changeAdminIconColor, 100)
   },
   mounted() {
     // this.initExamleMessages()
@@ -1406,6 +1552,43 @@ export default {
       await mergeSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
+
+    changeAdminIcon(icon) {
+      console.log(icon)
+      const data = {
+        adminIcon: icon,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    showAdminIcon(status) {
+      const data = {
+        isShowAdminIcon: status,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    changeAdminIconColor(color) {
+      const data = {
+        adminIconColor: color,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    searchAdminIcon(value) {
+      const regexp = new RegExp(value.trim())
+      const result = []
+      for (const icon of icons) {
+        if (regexp.test(icon)) {
+          result.push(icon)
+        }
+        if (result.length > 6) break
+      }
+      this.icons = result
+    },
   },
 }
 </script>
@@ -1478,6 +1661,11 @@ export default {
   &:after {
     background: lightgray;
   }
+}
+
+.divider-text {
+  color: gray;
+  cursor: pointer;
 }
 
 .upload-file-container {
@@ -1555,6 +1743,10 @@ export default {
   & .smooth-dnd-draggable-wrapper {
     cursor: move;
   }
+}
+.admin-icon {
+  font-size: 22px;
+  vertical-align: middle;
 }
 
 .description-text {

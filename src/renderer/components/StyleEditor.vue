@@ -1,6 +1,6 @@
 <template>
   <div :style="{display: 'inline-block'}">
-    <span>{{ name }}</span>
+    <span class="me-mr-2px">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
       <InputNumber :model-value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="debouncedUpdateStyle" />
     </template>
