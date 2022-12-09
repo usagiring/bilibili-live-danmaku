@@ -9,7 +9,7 @@
     </Divider>
     <div class="setting-group">
       <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
-        <Container orientation="horizontal" :style="{ 'min-height': '0px' }" @drop="onDrop($event)">
+        <Container orientation="horizontal" :style="{ 'z-index': 1, 'min-height': '0px' }" @drop="onDrop($event)">
           <template v-for="(setting, index) of messageSettings" :key="index">
             <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <img class="guard-icon" :src="`${getGuardIcon('3')}`" />
@@ -27,7 +27,7 @@
             <Draggable v-if="setting.type === 'avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </Draggable>
-            <Draggable v-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px">
+            <Draggable v-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px message-username" :text="example.uname">
               <span>{{ `${example.uname}` }}</span>
             </Draggable>
             <Draggable v-if="setting.type === 'colon' && setting.isShow" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle">
@@ -35,7 +35,7 @@
             </Draggable>
             <Draggable v-if="setting.type === 'comment'" class="vertical-align-middle">
               <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl" />
-              <span v-else :style="{ ...comment_lv3, ...fontStyle }">{{ example.content }}</span>
+              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment" :text="example.content">{{ example.content }}</span>
             </Draggable>
           </template>
         </Container>
@@ -342,28 +342,28 @@
       <div v-show="collapse[5]" class="disable-user-select">
         <div class="setting-group">
           名称：
-          <StyleEditor v-bind="editors[27]" />
+          <StyleEditor v-bind="editors[36]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[28]" />
+          <StyleEditor v-bind="editors[37]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[29]" />
+          <StyleEditor v-bind="editors[38]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[30]" />
+          <StyleEditor v-bind="editors[39]" />
         </div>
         <div class="setting-group">
           内容：
-          <StyleEditor v-bind="editors[31]" />
+          <StyleEditor v-bind="editors[40]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[32]" />
+          <StyleEditor v-bind="editors[41]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[33]" />
+          <StyleEditor v-bind="editors[42]" />
           <Divider type="vertical" />
-          <StyleEditor v-bind="editors[34]" />
+          <StyleEditor v-bind="editors[43]" />
         </div>
         <div class="setting-group">
           <!-- <Space align="center"> -->
           整体：
-          <StyleEditor v-bind="editors[35]" />
+          <StyleEditor v-bind="editors[44]" />
           <Divider type="vertical" />
           <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
           <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon" @on-change="changeAdminIcon">
@@ -554,7 +554,8 @@ export default {
           role: 0,
           prop: 'name',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          // styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -562,7 +563,8 @@ export default {
           name: '描边颜色',
           role: 0,
           prop: 'name',
-          styleName: '-webkit-text-stroke-color',
+          // styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -588,7 +590,7 @@ export default {
           role: 0,
           prop: 'comment',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -596,7 +598,7 @@ export default {
           name: '描边颜色',
           role: 0,
           prop: 'comment',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -650,7 +652,7 @@ export default {
           role: 3,
           prop: 'name',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -658,7 +660,7 @@ export default {
           name: '描边颜色',
           role: 3,
           prop: 'name',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -684,7 +686,7 @@ export default {
           role: 3,
           prop: 'comment',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -692,7 +694,7 @@ export default {
           name: '描边颜色',
           role: 3,
           prop: 'comment',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -728,7 +730,7 @@ export default {
           role: 2,
           prop: 'name',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -736,7 +738,7 @@ export default {
           name: '描边颜色',
           role: 2,
           prop: 'name',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -762,7 +764,7 @@ export default {
           role: 2,
           prop: 'comment',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -770,7 +772,7 @@ export default {
           name: '描边颜色',
           role: 2,
           prop: 'comment',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
         {
           id: Math.random(),
@@ -805,7 +807,7 @@ export default {
           role: 1,
           prop: 'name',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -813,7 +815,7 @@ export default {
           name: '描边颜色',
           role: 1,
           prop: 'name',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -839,7 +841,7 @@ export default {
           role: 1,
           prop: 'comment',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -847,7 +849,7 @@ export default {
           name: '描边颜色',
           role: 1,
           prop: 'comment',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
         {
           id: Math.random(),
@@ -882,7 +884,7 @@ export default {
           role: 'admin',
           prop: 'name',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -890,7 +892,7 @@ export default {
           name: '描边颜色',
           role: 'admin',
           prop: 'name',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
 
         {
@@ -916,7 +918,7 @@ export default {
           role: 'admin',
           prop: 'comment',
           numberStep: 0.1,
-          styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
         },
         {
           id: Math.random(),
@@ -924,7 +926,7 @@ export default {
           name: '描边颜色',
           role: 'admin',
           prop: 'comment',
-          styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
         },
         {
           id: Math.random(),
@@ -1766,5 +1768,19 @@ export default {
 }
 .number-input-size {
   width: 60px;
+}
+.message-username::before {
+  content: attr(text);
+  position: absolute;
+  z-index: -1;
+  -webkit-text-stroke-width: var(--textStrokeWidth);
+  -webkit-text-stroke-color: var(--textStrokeColor);
+}
+.message-comment::before {
+  content: attr(text);
+  position: absolute;
+  z-index: -1;
+  -webkit-text-stroke-width: var(--textStrokeWidth);
+  -webkit-text-stroke-color: var(--textStrokeColor);
 }
 </style>

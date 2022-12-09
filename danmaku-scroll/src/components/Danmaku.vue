@@ -13,19 +13,10 @@ import PromiseQueue from '../service/promise-queue'
 import { merge, pick } from 'lodash'
 
 const promiseQueue = new PromiseQueue({ limit: 1 })
-interface Size {
-  width: number
-  height: number
-}
 // const MAX_COMMENT_COUNT = 200
 // const COMMENT_QUEUE_LIMIT = 50
 
-const STYLE_FIELDS = [
-  'font-size',
-  '-webkit-text-stroke-width',
-  '-webkit-text-stroke-color',
-  'color',
-]
+const STYLE_FIELDS = ['font-size', '--textStrokeWidth', '--textStrokeColor', 'color']
 
 let ws: any
 
@@ -63,9 +54,7 @@ export default defineComponent({
   //   },
 
   beforeCreate() {
-    document
-      .getElementsByTagName('body')[0]
-      .setAttribute('style', 'background-color:rgba(0,0,0,0);')
+    document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0);')
   },
 
   //   beforeDestroy() {
@@ -291,7 +280,10 @@ export default defineComponent({
     //     }, this.duration + 500)
     //   })
     // },
-    async getImageSize(src: string): Promise<Size> {
+    async getImageSize(src: string): Promise<{
+      width: number
+      height: number
+    }> {
       return new Promise((resolve, reject) => {
         const img = new Image()
         img.onload = function () {
@@ -595,8 +587,8 @@ export default defineComponent({
           const roleStyle = this[`comment_lv${role}`]
           dom.style.color = roleStyle?.color || 'black'
           // div.style.fontSize = roleStyle?.['font-size'] || this.fontSize
-          dom.style.webkitTextStrokeWidth = roleStyle?.['-webkit-text-stroke-width'] || '0px'
-          dom.style.webkitTextStrokeColor = roleStyle?.['-webkit-text-stroke-color'] || 'black'
+          dom.style.webkitTextStrokeWidth = roleStyle?.['--textStrokeWidth'] || '0px'
+          dom.style.webkitTextStrokeColor = roleStyle?.['--textStrokeColor'] || 'black'
         } else {
           dom.style.color = color
           dom.style.webkitTextStrokeWidth = '0.1px'

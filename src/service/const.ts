@@ -134,14 +134,14 @@ export const DEFAULT_STYLE = {
   },
   name_lv0: {
     'font-size': '16px',
-    '-webkit-text-stroke-width': '0px',
-    '-webkit-text-stroke-color': 'white',
+    '--textStrokeWidth': '0px',
+    '--textStrokeColor': 'white',
     color: 'white'
   },
   comment_lv0: {
     'font-size': '16px',
     color: 'white',
-    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,0)'
   },
 
   message_lv3: {
@@ -149,14 +149,14 @@ export const DEFAULT_STYLE = {
   },
   name_lv3: {
     'font-size': '16px',
-    '-webkit-text-stroke-width': '0px',
-    '-webkit-text-stroke-color': 'crimson',
+    '--textStrokeWidth': '0px',
+    '--textStrokeColor': 'crimson',
     color: 'white'
   },
   comment_lv3: {
     'font-size': '16px',
     color: 'white',
-    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,0)'
   },
 
   message_lv2: {
@@ -164,14 +164,14 @@ export const DEFAULT_STYLE = {
   },
   name_lv2: {
     'font-size': '16px',
-    '-webkit-text-stroke-width': '0.2px',
-    '-webkit-text-stroke-color': 'crimson',
+    '--textStrokeWidth': '0.2px',
+    '--textStrokeColor': 'crimson',
     color: 'white'
   },
   comment_lv2: {
     'font-size': '16px',
     color: 'white',
-    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,0)'
   },
 
   message_lv1: {
@@ -179,14 +179,14 @@ export const DEFAULT_STYLE = {
   },
   name_lv1: {
     'font-size': '16px',
-    '-webkit-text-stroke-width': '0.2px',
-    '-webkit-text-stroke-color': 'crimson',
+    '--textStrokeWidth': '0.2px',
+    '--textStrokeColor': 'crimson',
     color: 'white'
   },
   comment_lv1: {
     'font-size': '16px',
     color: 'white',
-    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,0)'
   },
 
   message_lvadmin: {
@@ -194,14 +194,14 @@ export const DEFAULT_STYLE = {
   },
   name_lvadmin: {
     'font-size': '16px',
-    '-webkit-text-stroke-width': '0px',
-    '-webkit-text-stroke-color': 'white',
+    '--textStrokeWidth': '0px',
+    '--textStrokeColor': 'white',
     color: 'white'
   },
   comment_lvadmin: {
     'font-size': '16px',
     color: 'white',
-    "-webkit-text-stroke-color": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,0)'
   },
 }
 export const DEFAULT_CONFIG = {

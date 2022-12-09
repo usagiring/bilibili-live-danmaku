@@ -31,6 +31,8 @@ export default {
         //
       }
     }, 300)
+
+    this.$store.dispatch('CLEAR_TEXT_STROKE_VERSION_0_4_8')
   },
 }
 </script>

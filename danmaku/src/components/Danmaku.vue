@@ -2,85 +2,15 @@
   <div :style="{ position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px', background: background }">
     <div :style="{ position: 'absolute', top: '4px', bottom: '4px', left: '4px', right: '4px', '-webkit-user-select': 'none', opacity: opacity }">
       <!-- @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined" @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined" -->
-      <div
-        v-if="isShowHeadline"
-        :style="{
-          position: 'absolute',
-          top: '0px',
-          width: '100%',
-          height: `${headlines.length ? '36px' : '0px'}`,
-        }"
-        @wheel.prevent="giftScroll"
-      >
-        <div id="gift-show-content-wrapper" class="gift-show-content-wrapper">
-          <transition-group name="fade">
-            <template v-for="gift of headlines">
-              <!-- eslint-disable-next-line -->
-              <div class="gift-show-wrapper" @mouseenter="hoverGift(gift._id)" @mouseleave="unhoverGift(gift._id)">
-                <!-- <transition name="fade"> -->
-                <div v-if="!giftHover.includes(gift._id)" class="gift-show-content" :style="{ background: gift.priceProperties.backgroundColor }">
-                  <div
-                    :style="{
-                      'z-index': -1,
-                      position: 'absolute',
-                      width: `${widthCalculator(gift)}%`,
-                      height: '100%',
-                      background: gift.priceProperties.backgroundBottomColor,
-                    }"
-                  />
-                  <div :style="{ margin: '0 10px', 'font-weight': 'bold', 'z-index': 3, '-webkit-text-stroke-width': '0.3px', '-webkit-text-stroke-color': 'gray' }">
-                    <Avatar :src="gift.avatar || DEFAULT_AVATAR" size="small" />
-                    <template v-if="gift.type === 2">
-                      <span> {{ gift.count === 1 ? `${gift.name}` : `${gift.name}×${gift.count}` }} </span>
-                    </template>
-                    <template v-else-if="gift.totalPrice">
-                      <span>{{ `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}` }}</span>
-                    </template>
-                  </div>
-                </div>
-                <div
-                  v-else
-                  :key="`${gift._id}_extend`"
-                  class="gift-show-content-extend"
-                  :style="{
-                    border: `1px solid ${gift.priceProperties.backgroundBottomColor}`,
-                  }"
-                >
-                  <div class="gift-show-content-header" :style="{ background: gift.priceProperties.backgroundColor }">
-                    <Avatar class="gift-show-content-extend-avatar" :src="gift.avatar || DEFAULT_AVATAR" />
-                    <div :style="{ display: 'inline-block' }">
-                      <p>{{ gift.uname }}</p>
-                      <template v-if="gift.type === 2">
-                        <p>{{ gift.count === 1 ? `${gift.name}` : `${gift.name}×${gift.count}` }}</p>
-                      </template>
-                      <template v-else-if="gift.totalPrice">
-                        <p>{{ `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}` }}</p>
-                      </template>
-                    </div>
-                  </div>
-                  <div
-                    class="gift-show-content-extend-content"
-                    :style="{
-                      background: gift.priceProperties.backgroundBottomColor,
-                    }"
-                  >
-                    <template v-if="gift.type === 3">
-                      {{ gift.content }}
-                      <template v-if="gift.contentJPN && isShowSuperChatJPN">
-                        <div class="divider" />
-                        {{ gift.contentJPN }}
-                      </template>
-                    </template>
-                    <template v-else>
-                      {{ `${gift.uname} 赠送了 ${gift.count} 个 ${gift.name}` }}
-                    </template>
-                  </div>
-                </div>
-                <!-- </transition> -->
-              </div>
-            </template>
-          </transition-group>
-        </div>
+      <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper" @wheel.prevent="giftScroll">
+        <transition-group name="fade">
+          <template v-for="(gift, index) of headlines" :key="index">
+            <div class="gift-tag-wrapper" @mouseenter="hoverGift(gift._id)" @mouseleave="unhoverGift(gift._id)">
+              <GiftTag v-if="!giftHover.includes(gift._id)" :gift="gift" />
+              <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
+            </div>
+          </template>
+        </transition-group>
       </div>
       <div class="message-content-wrapper" :style="{ top: `${headlines.length && isShowHeadline ? '36px' : '0px'}` }">
         <div :style="{ position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag' }" />
@@ -96,8 +26,8 @@
                   ...getMessageStyleByRole(message),
                 }"
               >
-                <Space align="center" size="0">
-                  <template v-if="isShowAdminIcon">
+                <Space align="center" :size="0">
+                  <template v-if="isShowAdminIcon && message.isAdmin">
                     <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
                   </template>
                   <template v-for="(setting, index) of messageSettings" :key="index">
@@ -112,11 +42,11 @@
                       :medal-color-end="message.medalColorEnd"
                       :medal-color-border="message.medalColorBorder"
                     />
-                    <span v-if="setting.type === 'name'" class="margin-lr-1px" :style="{ ...fontStyle, ...getNameStyleByRole(message) }">{{ message.uname }}</span>
+                    <span v-if="setting.type === 'name'" class="margin-lr-1px username" :style="{ ...fontStyle, ...getNameStyleByRole(message) }" :text="message.uname">{{ message.uname }}</span>
                     <span v-if="setting.type === 'colon' && setting.isShow" :style="{ ...fontStyle, ...getNameStyleByRole(message) }">：</span>
                     <span v-if="setting.type === 'comment'">
                       <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" :src="message.emojiUrl" />
-                      <span v-else :style="{ ...fontStyle, ...getCommentStyleByRole(message) }">{{ message.content }}</span>
+                      <span v-else :style="{ ...fontStyle, ...getCommentStyleByRole(message) }" class="comment" :text="message.content">{{ message.content }}</span>
                       <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
                         <Icon type="md-play" />
                         <span>{{ `${comment.fileDuration}"` }}</span>
@@ -179,6 +109,8 @@ import SimilarCommentBadge from './SimilarCommentBadge'
 import GiftCard from './GiftCard'
 import GiftCardMini from './GiftCardMini'
 import FanMedal from './FanMedal'
+import GiftTag from './GiftTag.vue'
+import GiftTagExpand from './GiftTagExpand.vue'
 import { init as initAPI, getSetting, getGiftConfig, getExampleMessages } from '../service/api'
 
 let ws
@@ -191,6 +123,8 @@ export default {
     GiftCard,
     GiftCardMini,
     FanMedal,
+    GiftTag,
+    GiftTagExpand,
   },
   props: ['isPreview', 'isSingleWindow'],
   data() {
@@ -241,6 +175,10 @@ export default {
       message_lv1: {},
       name_lv1: {},
       comment_lv1: {},
+
+      message_lvadmin: {},
+      name_lvadmin: {},
+      comment_lvadmin: {},
     }
   },
   computed: {
@@ -463,7 +401,6 @@ export default {
       superChat.sendAt = Date.now()
       superChat.totalPrice = superChat.price || 0
       superChat.priceProperties = getPriceProperties(superChat.totalPrice) || {}
-
       this.addToHeadline(superChat)
 
       // 某些场景下SC会推送两次信息，判断SuperChatId相同则不发送重复SC
@@ -513,18 +450,15 @@ export default {
     },
 
     getMessageStyleByRole(message) {
-      // const role = (message.role === 1 || message.role === 2) ? 3 : message.role
-      const role = message.role
+      const role = message.isAdmin ? 'admin' : message.role
       return this[`message_lv${role}`]
     },
     getNameStyleByRole(message) {
-      // const role = (message.role === 1 || message.role === 2) ? 3 : message.role
-      const role = message.role
+      const role = message.isAdmin ? 'admin' : message.role
       return this[`name_lv${role}`]
     },
     getCommentStyleByRole(message) {
-      // const role = (message.role === 1 || message.role === 2) ? 3 : message.role
-      const role = message.role
+      const role = message.isAdmin ? 'admin' : message.role
       return this[`comment_lv${role}`]
     },
 
@@ -537,13 +471,6 @@ export default {
     },
     unhoverGift(giftId) {
       this.giftHover = this.giftHover.filter((id) => id !== giftId)
-    },
-    widthCalculator(item) {
-      if (Number(item.existsTime) && Number(item.priceProperties.time)) {
-        return Math.floor((1 - item.existsTime / item.priceProperties.time) * 100)
-      } else {
-        return 100
-      }
     },
     // setIgnoreMouseEvent() {
     //   if (this.isAlwaysOnTop) {
@@ -559,7 +486,7 @@ export default {
     },
 
     giftScroll(e) {
-      const el = document.getElementById('gift-show-content-wrapper')
+      const el = document.getElementById('gift-headline-wrapper')
       el.scrollLeft += e.deltaY
     },
     getGuardIcon(level) {
@@ -607,16 +534,17 @@ export default {
 .layout-footer-center {
   text-align: center;
 }
-.gift-show-content-wrapper {
+.gift-headline-wrapper {
   white-space: nowrap;
   position: absolute;
-  z-index: 999;
+  z-index: 1;
   overflow-x: auto;
   width: 100%;
+  top: 0px;
   /* -webkit-app-region: no-drag; */
 }
 
-.gift-show-content-wrapper::-webkit-scrollbar {
+.gift-headline-wrapper::-webkit-scrollbar {
   display: none;
 }
 
@@ -641,48 +569,9 @@ export default {
   display: none;
 }
 
-.gift-show-wrapper {
+.gift-tag-wrapper {
   display: inline-block;
   vertical-align: top;
-}
-.gift-show-content {
-  display: inline-block;
-  line-height: 32px;
-  border-radius: 20px;
-  height: 32px;
-  margin-right: 3px;
-  color: white;
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.gift-show-content-extend {
-  border-radius: 10px;
-  margin-right: 3px;
-
-  width: 200px;
-  font-size: 12px;
-  position: relative;
-  z-index: 9999;
-  overflow: hidden;
-  /* -webkit-app-region: no-drag */
-}
-
-.gift-show-content-header {
-  padding: 5px 10px;
-}
-
-.gift-show-content-extend-avatar {
-  vertical-align: top;
-  margin-top: 2px;
-}
-
-.gift-show-content-extend-content {
-  padding: 10px 10px;
-
-  color: white;
-  white-space: normal;
 }
 
 .divider {
@@ -702,16 +591,23 @@ export default {
 .is-vertical-align {
   vertical-align: middle;
 }
+.username::before {
+  content: attr(text);
+  position: absolute;
+  z-index: -1;
+  -webkit-text-stroke-width: var(--textStrokeWidth);
+  -webkit-text-stroke-color: var(--textStrokeColor);
+}
+.comment::before {
+  content: attr(text);
+  position: absolute;
+  z-index: -1;
+  -webkit-text-stroke-width: var(--textStrokeWidth);
+  -webkit-text-stroke-color: var(--textStrokeColor);
+}
 
 .max-width {
   width: 100%;
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
 }
 .border-image-default {
   border-style: solid;
