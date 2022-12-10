@@ -42,7 +42,7 @@
                       :medal-color-end="message.medalColorEnd"
                       :medal-color-border="message.medalColorBorder"
                     />
-                    <span v-if="setting.type === 'name'" class="margin-lr-1px username" :style="{ ...fontStyle, ...getNameStyleByRole(message) }" :text="message.uname">{{ message.uname }}</span>
+                    <span v-if="setting.type === 'name'" class="username" :style="{ ...fontStyle, ...getNameStyleByRole(message) }" :text="message.uname">{{ message.uname }}</span>
                     <span v-if="setting.type === 'colon' && setting.isShow" :style="{ ...fontStyle, ...getNameStyleByRole(message) }">：</span>
                     <span v-if="setting.type === 'comment'">
                       <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" :src="message.emojiUrl" />
@@ -591,12 +591,19 @@ export default {
 .is-vertical-align {
   vertical-align: middle;
 }
+.username {
+  margin: auto;
+  white-space: nowrap;
+}
 .username::before {
   content: attr(text);
   position: absolute;
   z-index: -1;
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
+}
+.comment {
+  margin: auto;
 }
 .comment::before {
   content: attr(text);

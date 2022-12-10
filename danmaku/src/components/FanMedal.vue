@@ -7,8 +7,11 @@
       border: `solid 0.5px ${medalColorBorder}`,
       padding: '0px 2px',
       'margin-right': '2px',
+      'white-space': 'nowrap',
     }"
-  >{{ `${medalName}${medalLevel}` }}</span>
+  >
+    {{ `${medalName}${medalLevel}` }}
+  </span>
 </template>
 
 <script>

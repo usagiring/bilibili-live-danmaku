@@ -141,7 +141,7 @@ export const DEFAULT_STYLE = {
   comment_lv0: {
     'font-size': '16px',
     color: 'white',
-    "--textStrokeColor": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,1)'
   },
 
   message_lv3: {
@@ -156,7 +156,7 @@ export const DEFAULT_STYLE = {
   comment_lv3: {
     'font-size': '16px',
     color: 'white',
-    "--textStrokeColor": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,1)'
   },
 
   message_lv2: {
@@ -171,7 +171,7 @@ export const DEFAULT_STYLE = {
   comment_lv2: {
     'font-size': '16px',
     color: 'white',
-    "--textStrokeColor": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,1)'
   },
 
   message_lv1: {
@@ -186,7 +186,7 @@ export const DEFAULT_STYLE = {
   comment_lv1: {
     'font-size': '16px',
     color: 'white',
-    "--textStrokeColor": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,1)'
   },
 
   message_lvadmin: {
@@ -201,7 +201,7 @@ export const DEFAULT_STYLE = {
   comment_lvadmin: {
     'font-size': '16px',
     color: 'white',
-    "--textStrokeColor": 'rgba(0,0,0,0)'
+    "--textStrokeColor": 'rgba(0,0,0,1)'
   },
 }
 export const DEFAULT_CONFIG = {

@@ -1769,12 +1769,18 @@ export default {
 .number-input-size {
   width: 60px;
 }
+.message-username {
+  margin: auto;
+}
 .message-username::before {
   content: attr(text);
   position: absolute;
   z-index: -1;
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
+}
+.message-comment {
+  margin: auto;
 }
 .message-comment::before {
   content: attr(text);

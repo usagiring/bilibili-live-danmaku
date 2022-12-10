@@ -1,5 +1,5 @@
 <template>
-  <div :style="{display: 'inline-block'}">
+  <div :style="{ display: 'inline-block' }">
     <span class="me-mr-2px">{{ name }}</span>
     <template v-if="type === 'InputNumber'">
       <InputNumber :model-value="value" :min="0" :step="numberStep || 1" size="small" :style="{ width: '55px' }" @on-change="debouncedUpdateStyle" />
@@ -15,26 +15,23 @@ import { debounce } from 'lodash'
 import { mergeSetting } from '../../service/api'
 
 export default {
-  props: ["type", "name", "role", "prop", "styleName", "numberStep"],
+  props: ['type', 'name', 'role', 'prop', 'styleName', 'numberStep'],
   data() {
-    return {};
+    return {}
   },
   computed: {
     value() {
       const objKey = `${this.prop}_lv${this.role}`
-      const value = this.$store.state.Config[objKey][
-        `${this.styleName}`
-      ];
-
-      if (this.type === "InputNumber") {
-        if (!value) return 0;
-        return this.pxParser(value);
+      const value = this.$store.state.Config[objKey][`${this.styleName}`]
+      if (this.type === 'InputNumber') {
+        if (!value) return 0
+        return this.pxParser(value)
       }
-      if (this.type === "ColorPicker") {
-        if (!value) return "";
-        return value;
+      if (this.type === 'ColorPicker') {
+        if (!value) return ''
+        return value
       }
-      return "";
+      return ''
     },
   },
   created() {
@@ -42,26 +39,25 @@ export default {
   },
   methods: {
     async updateStyle(value) {
-      value = value || 0;
-      this.$store.dispatch("UPDATE_STYLE", {
+      value = value || 0
+      this.$store.dispatch('UPDATE_STYLE', {
         role: this.role,
         prop: this.prop,
         style: {
-          [this.styleName]:
-            this.type === "InputNumber" ? this.pxFormatter(value) : value,
+          [this.styleName]: this.type === 'InputNumber' ? this.pxFormatter(value) : value,
         },
       })
 
       const objKey = `${this.prop}_lv${this.role}`
       const data = {
-        [objKey]: { [this.styleName]: this.type === "InputNumber" ? this.pxFormatter(value) : value }
+        [objKey]: { [this.styleName]: this.type === 'InputNumber' ? this.pxFormatter(value) : value },
       }
       await mergeSetting(data)
     },
     pxFormatter: (value) => `${value}px`,
-    pxParser: (value) => Number(value.replace("px", "")),
+    pxParser: (value) => Number(value.replace('px', '')),
   },
-};
+}
 </script>
 
 <style scoped>
@@ -70,4 +66,3 @@ export default {
   display: inline-block;
 }
 </style>
-
