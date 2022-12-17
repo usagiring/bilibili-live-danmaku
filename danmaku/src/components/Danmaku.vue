@@ -26,36 +26,42 @@
                   ...getMessageStyleByRole(message),
                 }"
               >
-                <Space align="center" :size="0">
-                  <template v-if="isShowAdminIcon && message.isAdmin">
-                    <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
-                  </template>
-                  <template v-for="(setting, index) of messageSettings" :key="index">
-                    <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.avatar" :style="avatarSizeStyle" />
-                    <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" />
-                    <FanMedal
-                      v-if="setting.type === 'medal' && setting.isShow && message.medalLevel && message.medalName"
-                      class="margin-lr-1px"
-                      :medal-level="message.medalLevel"
-                      :medal-name="message.medalName"
-                      :medal-color-start="message.medalColorStart"
-                      :medal-color-end="message.medalColorEnd"
-                      :medal-color-border="message.medalColorBorder"
-                    />
-                    <span v-if="setting.type === 'name'" class="username" :style="{ ...fontStyle, ...getNameStyleByRole(message) }" :text="message.uname">{{ message.uname }}</span>
-                    <span v-if="setting.type === 'colon' && setting.isShow" :style="{ ...fontStyle, ...getNameStyleByRole(message) }">：</span>
-                    <span v-if="setting.type === 'comment'">
-                      <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" :src="message.emojiUrl" />
-                      <span v-else :style="{ ...fontStyle, ...getCommentStyleByRole(message) }" class="comment" :text="message.content">{{ message.content }}</span>
-                      <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
-                        <Icon type="md-play" />
-                        <span>{{ `${comment.fileDuration}"` }}</span>
-                      </span>
+                <!-- <Space align="center" :size="0"> -->
+                <template v-if="isShowAdminIcon && message.isAdmin">
+                  <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
+                </template>
+                <template v-for="(setting, index) of messageSettings" :key="index">
+                  <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.avatar" :style="{ ...getAvatarSizeStyle(setting) }" />
+                  <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" />
+                  <FanMedal
+                    v-if="setting.type === 'medal' && setting.isShow && message.medalLevel && message.medalName"
+                    class="margin-lr-1px vertical-align-middle"
+                    :medal-level="message.medalLevel"
+                    :medal-name="message.medalName"
+                    :medal-color-start="message.medalColorStart"
+                    :medal-color-end="message.medalColorEnd"
+                    :medal-color-border="message.medalColorBorder"
+                  />
+                  <span v-if="setting.type === 'name'" class="vertical-align-middle" :style="{ ...fontStyle, ...getNameStyleByRole(message), ...getTextShadow(message, 'name') }">{{
+                    message.uname
+                  }}</span>
+                  <span v-if="setting.type === 'colon' && setting.isShow" :style="{ ...fontStyle, ...getNameStyleByRole(message), ...getTextShadow(message, 'name') }" class="vertical-align-middle"
+                    >：</span
+                  >
+                  <span v-if="setting.type === 'comment'">
+                    <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle" :src="message.emojiUrl" />
+                    <span v-else :style="{ ...fontStyle, ...getCommentStyleByRole(message), ...getTextShadow(message, 'comment') }" class="vertical-align-middle">
+                      {{ message.content }}
                     </span>
-                  </template>
-                  <!-- v-bind="message" -->
-                  <SimilarCommentBadge v-if="message.similar > 0" :style="{ 'margin-left': '5px' }" :number="message.similar" />
-                </Space>
+                    <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
+                      <Icon type="md-play" />
+                      <span>{{ `${comment.fileDuration}"` }}</span>
+                    </span>
+                  </span>
+                </template>
+                <!-- v-bind="message" -->
+                <SimilarCommentBadge v-if="message.similar > 0" class="vertical-align-middle" :style="{ 'margin-left': '5px' }" :number="message.similar" />
+                <!-- </Space> -->
               </span>
             </template>
             <template v-if="message.category === 'interactWord'">
@@ -115,7 +121,7 @@ import { init as initAPI, getSetting, getGiftConfig, getExampleMessages } from '
 
 let ws
 let retryWaitTime = 0
-const promiseQueue = new PromiseQueue({ limit: 1 })
+let promiseQueue
 
 export default {
   components: {
@@ -159,6 +165,8 @@ export default {
       isShowAdminIcon: false,
       adminIcon: 'ios-home-outline',
       adminIconColor: 'coral',
+      channelDelayTime: 20,
+      danmakuChannel: 1,
 
       message_lv0: {},
       name_lv0: {},
@@ -182,13 +190,6 @@ export default {
     }
   },
   computed: {
-    avatarSizeStyle() {
-      return {
-        width: `${this.avatarSize}px`,
-        height: `${this.avatarSize}px`,
-        'line-height': `${this.avatarSize}px`,
-      }
-    },
     borderImageStyle() {
       const image = this.borderImages.find((image) => image.isSelected)
       if (!image) return {}
@@ -218,13 +219,13 @@ export default {
   },
   async mounted() {
     const params = new URLSearchParams(window.location.search)
-    this.isExample = params.get('example') || false
     this.port = params.get('port') || 8081
 
     initAPI({ port: this.port })
     const { data: giftMap } = await getGiftConfig()
     this.giftGifMap = giftMap
-    this.getSetting()
+    await this.getSetting()
+    promiseQueue = new PromiseQueue({ limit: this.danmakuChannel })
 
     this.ws()
 
@@ -245,10 +246,6 @@ export default {
         return message.sendAt + this.hiddenExpiredTime > Date.now()
       })
     }, 2000)
-
-    if (this.isExample) {
-      this.initExampleMessage()
-    }
   },
   methods: {
     ws() {
@@ -273,29 +270,28 @@ export default {
         if (payload.cmd === 'SETTING') {
           this.onSetting(payload.payload)
         }
-        if (payload.cmd === (this.isExample ? 'EXAMPLE_COMMENT' : 'COMMENT')) {
-          promiseQueue.push(async () => {
+        if (payload.cmd === 'COMMENT') {
+          if (promiseQueue) {
+            promiseQueue.push(async () => {
+              this.onComment(payload.payload)
+              await wait(this.channelDelayTime)
+            })
+          } else {
             this.onComment(payload.payload)
-            await wait(50)
-          })
+          }
         }
-        if (payload.cmd === (this.isExample ? 'EXAMPLE_GIFT' : 'GIFT')) {
+        if (payload.cmd === 'GIFT') {
           this.onGift(payload.payload)
         }
-        if (payload.cmd === (this.isExample ? 'EXAMPLE_INTERACT' : 'INTERACT')) {
+        if (payload.cmd === 'INTERACT') {
           this.onInteract(payload.payload)
         }
-        if (payload.cmd === (this.isExample ? 'EXAMPLE_SUPER_CHAT' : 'SUPER_CHAT')) {
+        if (payload.cmd === 'SUPER_CHAT') {
           this.onSuperChat(payload.payload)
         }
 
         if (payload.cmd === 'MESSAGE_CLEAR') {
           this.clearMessages()
-        }
-
-        if (payload.cmd === 'EXAMPLE_MESSAGE_RESTORE' && this.isExample) {
-          this.clearMessages()
-          this.initExampleMessage()
         }
       }
 
@@ -449,6 +445,15 @@ export default {
       }
     },
 
+    getAvatarSizeStyle(setting) {
+      if (setting.type !== 'avatar') return
+      return {
+        width: `${setting.size}px`,
+        height: `${setting.size}px`,
+        'line-height': `${setting.size}px`,
+      }
+    },
+
     getMessageStyleByRole(message) {
       const role = message.isAdmin ? 'admin' : message.role
       return this[`message_lv${role}`]
@@ -460,6 +465,32 @@ export default {
     getCommentStyleByRole(message) {
       const role = message.isAdmin ? 'admin' : message.role
       return this[`comment_lv${role}`]
+    },
+
+    getTextShadow(message, type) {
+      const role = message.isAdmin ? 'admin' : message.role
+      const style = this[`${type}_lv${role}`]
+      const textStrokeWidth = style['--textStrokeWidth']
+      const textStrokeColor = style['--textStrokeColor']
+      if (!parseFloat(textStrokeWidth)) return { textShadow: '' }
+      // if (!textStrokeWidth) return { textShadow: '' }
+      if (!textStrokeColor) return { textShadow: '' }
+      // return {
+      //   textShadow: `
+      //     1px 0px ${textStrokeWidth} ${textStrokeColor},
+      //     0px 1px ${textStrokeWidth} ${textStrokeColor},
+      //     -1px 0px ${textStrokeWidth} ${textStrokeColor},
+      //     0px -1px ${textStrokeWidth} ${textStrokeColor}
+      //   `,
+      // }
+      return {
+        textShadow: `
+          ${textStrokeWidth} 0px ${textStrokeWidth} ${textStrokeColor},
+          0px ${textStrokeWidth} ${textStrokeWidth} ${textStrokeColor},
+          -${textStrokeWidth} 0px ${textStrokeWidth} ${textStrokeColor},
+          0px -${textStrokeWidth} ${textStrokeWidth} ${textStrokeColor}
+        `,
+      }
     },
 
     parseMsgType(type) {
@@ -588,10 +619,10 @@ export default {
   background-size: contain;
   background-repeat: no-repeat;
 }
-.is-vertical-align {
+.vertical-align-middle {
   vertical-align: middle;
 }
-.username {
+/* .username {
   margin: auto;
   white-space: nowrap;
 }
@@ -608,10 +639,11 @@ export default {
 .comment::before {
   content: attr(text);
   position: absolute;
+  width: max-content;
   z-index: -1;
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
-}
+} */
 
 .max-width {
   width: 100%;

@@ -289,12 +289,25 @@ export default {
           name: '弹幕回复',
           content: '弹幕回复',
           class: 'process-tag',
+          data: {
+            allowAllUserDanmakuReply: false,
+          },
           template: {
             title: '弹幕回复说明',
             rows: [
               {
                 type: 'Text',
-                value: '需要在设置里输入用户Cookie，且仅当前直播间与用户身份匹配时才会触发。',
+                value: '需要在设置里输入用户Cookie',
+              },
+              {
+                type: 'Text',
+                value: '默认仅当前主播可用，需要使用其他用户回复，请打开下面开关',
+              },
+              {
+                type: 'Checkbox',
+                display: '允许使用任意身份的用户回复',
+                key: 'allowAllUserDanmakuReply',
+                value: false,
               },
             ],
           },
@@ -355,38 +368,26 @@ export default {
     }
     this.giftOptions = giftOptions
   },
-  async mounted() {
-    // const { data: voices } = await getVoices()
-    // const options = voices.map((voice) => {
-    //   return {
-    //     key: voice,
-    //     value: voice,
-    //     label: voice,
-    //   }
-    // })
-
+  mounted() {
     setTimeout(() => {
-      const options = this.$global?.voices?.map((voice) => {
-        return {
-          key: voice.name,
-          value: voice.name,
-          label: voice.name,
-        }
-      }) || []
+      const options =
+        this.$global?.voices?.map((voice) => {
+          return {
+            key: voice.name,
+            value: voice.name,
+            label: voice.name,
+          }
+        }) || []
 
       const voiceTag = this.tags.find((tag) => tag.id === 9)
       voiceTag.template.rows[0].options = options
-    }, 500)
 
-    // const voiceTag = this.tags.find((tag) => tag.id === 9)
-    // // TODO
-    // voiceTag.template.rows[0].options = options
-    const giftTag = this.tags.find((tag) => tag.id === 4)
-    // TODO
-    giftTag.template.rows[0].options = this.giftOptions
+      const giftTag = this.tags.find((tag) => tag.id === 4)
+      giftTag.template.rows[0].options = this.giftOptions
+    }, 500)
   },
   methods: {
-    async onDrop(index, dropResult) {
+    onDrop(index, dropResult) {
       let { addedIndex, payload } = dropResult
       payload = toRaw(payload)
       if (!Number.isFinite(addedIndex)) return
@@ -396,11 +397,11 @@ export default {
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async onDropRule(dropResult) {
+    onDropRule(dropResult) {
       const { removedIndex, addedIndex, payload } = dropResult
       const rules = cloneDeep(this.rules)
       let itemToAdd = payload
@@ -418,7 +419,7 @@ export default {
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -460,27 +461,27 @@ export default {
       return giftIds.map((key) => (this.giftOptions.find((o) => o.key === key) || {}).value).join(',')
     },
 
-    async removeTag(ruleIndex, tagIndex) {
+    removeTag(ruleIndex, tagIndex) {
       const rules = cloneDeep(this.rules)
       rules[ruleIndex].tags.splice(tagIndex, 1)
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async removeRule(ruleIndex) {
+    removeRule(ruleIndex) {
       const rules = cloneDeep(this.rules)
       rules.splice(ruleIndex, 1)
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async addRule() {
+    addRule() {
       const rules = cloneDeep(this.rules)
       const lastRule = rules.slice(-1)[0]
       rules.push({
@@ -493,48 +494,50 @@ export default {
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async changeEnable(index, status) {
+    changeEnable(index, status) {
       const rules = cloneDeep(this.rules)
       rules[index].enable = status
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async onChangeRuleType(index, type) {
+    onChangeRuleType(index, type) {
       const rules = cloneDeep(this.rules)
       rules[index].type = type
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async onDataChange(ruleIndex, tagIndex, payload) {
+    onDataChange(ruleIndex, tagIndex, payload) {
       const rules = cloneDeep(this.rules)
       rules[ruleIndex].tags[tagIndex].data = rules[ruleIndex].tags[tagIndex].data || {}
       rules[ruleIndex].tags[tagIndex].data = Object.assign(rules[ruleIndex].tags[tagIndex].data, payload)
+
+      console.log(ruleIndex, tagIndex, payload, rules)
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    async changeText(ruleIndex, e) {
+    changeText(ruleIndex, e) {
       const rules = cloneDeep(this.rules)
       rules[ruleIndex].text = e.target.value
       const data = {
         autoReplyRules: rules,
       }
-      await updateSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 

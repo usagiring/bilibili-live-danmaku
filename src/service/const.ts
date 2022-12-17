@@ -128,6 +128,8 @@ export const DEFAULT_STYLE = {
   adminIcon: "ios-home-outline",
   isShowAdminIcon: false,
   adminIconColor: 'coral',
+  danmakuChannel: 1,
+  channelDelayTime: 20,
 
   message_lv0: {
     background: 'rgba(0,0,0,0)'

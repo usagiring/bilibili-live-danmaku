@@ -34,6 +34,9 @@
         <div v-if="row.type === 'Input'">
           <Input class="space-left-5px" size="small" :model-value="data[row.key]" :placeholder="row.placeholder" :style="{ width: '250px' }" @on-change="onChangeInputValue(row.key, $event)" />
         </div>
+        <div v-if="row.type === 'Checkbox'">
+          <Checkbox class="space-left-5px" size="small" :model-value="data[row.key]" :style="{ width: '250px' }" @on-change="onChangeValue(row.key, $event)">{{ row.display }}</Checkbox>
+        </div>
         <div v-if="row.type === 'Text'">
           <p>{{ row.value }}</p>
         </div>

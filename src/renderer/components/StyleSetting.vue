@@ -16,12 +16,12 @@
             </Draggable>
             <Draggable v-if="setting.type === 'medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <FanMedal
-                v-if="example.ML && example.MN"
-                :medal-level="example.ML"
-                :medal-name="example.MN"
-                :medal-color-start="example.MCS"
-                :medal-color-end="example.MCE"
-                :medal-color-border="example.MCB"
+                v-if="example.medalLevel && example.medalName"
+                :medal-level="example.medalLevel"
+                :medal-name="example.medalName"
+                :medal-color-start="example.medalColorStart"
+                :medal-color-end="example.medalColorEnd"
+                :medal-color-border="example.medalColorBorder"
               />
             </Draggable>
             <Draggable v-if="setting.type === 'avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
@@ -178,6 +178,25 @@
         </div>
         <div class="setting-group">
           <Checkbox :model-value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
+          <Divider type="vertical" />
+          <Tooltip placement="top" transfer>
+            通道数
+            <template #content>
+              <div class="description-text">
+                <p>同时使用多少条通道显示弹幕</p>
+              </div>
+            </template>
+          </Tooltip>
+          <InputNumber class="space-left-2px" :model-value="danmakuChannel" :min="1" :step="1" :style="{ width: '50px' }" size="small" @on-change="changeDanmakuChannel" />
+          <Tooltip placement="top" transfer>
+            <span class="space-left-2px">延时</span>
+            <template #content>
+              <div class="description-text">
+                <p>每条通道延时多少毫秒显示弹幕</p>
+              </div>
+            </template>
+          </Tooltip>
+          <InputNumber class="space-left-2px" :model-value="channelDelayTime" :min="0" :step="1" :style="{ width: '60px' }" size="small" @on-change="changeChannelDelayTime" /> ms
         </div>
       </div>
     </transition>
@@ -494,12 +513,12 @@ export default {
         isAdmin: 0,
         role: 0,
         content: '这是一条舰长的测试弹幕，可拖拽改变字段顺序~',
-        ML: 21,
-        MN: '测试者',
+        medalLevel: 21,
+        medalName: '测试者',
         medalRoomId: 21452505,
-        MCB: '#5c968e',
-        MCS: '#5c968e',
-        MCE: '#5c968e',
+        medalColorBorder: '#5c968e',
+        medalColorStart: '#5c968e',
+        medalColorEnd: '#5c968e',
         _id: '020wdKl7EYV9c8cD',
       },
       isShowBorderModal: false,
@@ -550,7 +569,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 0,
           prop: 'name',
           numberStep: 0.1,
@@ -586,7 +605,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 0,
           prop: 'comment',
           numberStep: 0.1,
@@ -648,7 +667,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 3,
           prop: 'name',
           numberStep: 0.1,
@@ -682,7 +701,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 3,
           prop: 'comment',
           numberStep: 0.1,
@@ -726,7 +745,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 2,
           prop: 'name',
           numberStep: 0.1,
@@ -760,7 +779,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 2,
           prop: 'comment',
           numberStep: 0.1,
@@ -803,7 +822,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 1,
           prop: 'name',
           numberStep: 0.1,
@@ -837,7 +856,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 1,
           prop: 'comment',
           numberStep: 0.1,
@@ -880,7 +899,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 'admin',
           prop: 'name',
           numberStep: 0.1,
@@ -914,7 +933,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边粗细',
+          name: '描边大小',
           role: 'admin',
           prop: 'comment',
           numberStep: 0.1,
@@ -1091,6 +1110,12 @@ export default {
     },
     adminIconColor() {
       return this.$store.state.Config.adminIconColor
+    },
+    danmakuChannel() {
+      return this.$store.state.Config.danmakuChannel
+    },
+    channelDelayTime() {
+      return this.$store.state.Config.channelDelayTime
     },
   },
   created() {
@@ -1292,10 +1317,16 @@ export default {
           category: 'comment',
           uname: `bli_${randomNumber}`,
           type: 'comment',
-          content: `一条弹幕哟～`,
+          content: `一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～`,
           role: 3,
           sendAt: Date.now(),
           color: 'white',
+          medalLevel: 21,
+          medalName: '测试者',
+          medalRoomId: 0,
+          medalColorBorder: '#5c968e',
+          medalColorStart: '#5c968e',
+          medalColorEnd: '#5c968e',
           // emojiUrl: 'http://i0.hdslb.com/bfs/live/d23f33fb86a1154fc99d1521a742394e5d94a09b.png'
         }
         comment.role = randomRole
@@ -1590,6 +1621,22 @@ export default {
         if (result.length > 6) break
       }
       this.icons = result
+    },
+
+    changeDanmakuChannel(number) {
+      const data = {
+        danmakuChannel: number,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    changeChannelDelayTime(number) {
+      const data = {
+        channelDelayTime: number,
+      }
+      mergeSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
     },
   },
 }
