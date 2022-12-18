@@ -1317,7 +1317,7 @@ export default {
           category: 'comment',
           uname: `bli_${randomNumber}`,
           type: 'comment',
-          content: `一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～一条弹幕哟～`,
+          content: `一条弹幕哟～`,
           role: 3,
           sendAt: Date.now(),
           color: 'white',
