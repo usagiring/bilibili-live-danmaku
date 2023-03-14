@@ -145,6 +145,7 @@ export default {
         this.$Message.error(`播放失败: ${e}`)
       })
 
+      livePlayer.volume = this.liveVolume
       this.flvPlayer.attachMediaElement(livePlayer)
       this.flvPlayer.load()
       await this.flvPlayer.play()

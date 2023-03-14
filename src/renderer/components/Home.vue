@@ -236,6 +236,7 @@ export default {
       downloadRate: '0 KB/s',
       percent: 0,
       selfHistoryRooms: [],
+      waitingSpeakers: [],
 
       username: '',
       avatar: null,
@@ -309,6 +310,9 @@ export default {
     },
     danmakuWindowId() {
       return this.$store.state.Config.danmakuWindowId
+    },
+    waitingSpeakerCount() {
+      return this.$store.state.Config.waitingSpeakerCount
     },
   },
   watch: {
@@ -395,7 +399,21 @@ export default {
 
       if (payload.cmd === 'SPEAK') {
         const { text, voice, speed } = payload.payload
-        this.speak({ text, voice, speed })
+
+        if (this.waitingSpeakers.length > this.waitingSpeakerCount) {
+          // clear list
+          this.waitingSpeakers = []
+        }
+        this.waitingSpeakers.push({ text, voice, speed })
+
+        if (synth.speaking) {
+          console.log('speaking...')
+          return
+        } else {
+          this.speakerRunner()
+        }
+
+        // this.speak({ text, voice, speed })
       }
 
       if (payload.cmd === 'LIKE_CHANGE') {
@@ -846,6 +864,30 @@ export default {
         utterThis.rate = speed
       }
       synth.speak(utterThis)
+    },
+
+    speakerRunner() {
+      const speaker = this.waitingSpeakers.shift()
+      if (!speaker) return
+
+      const { text, voice, speed } = speaker
+      const utterThis = new SpeechSynthesisUtterance()
+      utterThis.text = text
+      if (voice) {
+        const voiceInstance = this.$global.voices.find((v) => v.name === voice)
+        utterThis.voice = voiceInstance
+      }
+      if (speed) {
+        utterThis.rate = speed
+      }
+      utterThis.onend = () => {
+        console.log('speak end...')
+        this.speakerRunner()
+      }
+
+      synth.speak(utterThis)
+      // this.speak(speaker)
+      // this.speakRunner()
     },
 
     close() {

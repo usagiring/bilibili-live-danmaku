@@ -6,11 +6,10 @@
       </Poptip>
     </div>
     <div class="config-item-container">
-      <Poptip confirm title="确认备份并清理数据库？" placement="right" width="400" word-wrap @on-ok="backupAndClearDB">
-        <Button class="config-item">备份并清理数据库</Button>
-      </Poptip>
-      <Tooltip placement="top" max-width="300">
-        <Icon type="md-help" />
+      <Tooltip placement="top" max-width="300" transfer>
+        <Poptip confirm title="确认备份并清理数据库？" placement="right" width="400" word-wrap @on-ok="backupAndClearDB">
+          <Button class="config-item">备份并清理数据库</Button>
+        </Poptip>
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
             <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{ userDataPath }}</p>
@@ -19,11 +18,10 @@
       </Tooltip>
     </div>
     <div class="config-item-container">
-      <Poptip confirm title="确认清理用户头像缓存？" placement="right" width="400" @on-ok="clearUserDB">
-        <Button class="config-item">清理用户头像缓存</Button>
-      </Poptip>
       <Tooltip placement="top" max-width="300">
-        <Icon type="md-help" />
+        <Poptip confirm title="确认清理用户头像缓存？" placement="right" width="400" @on-ok="clearUserDB">
+          <Button class="config-item">清理用户头像缓存</Button>
+        </Poptip>
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
             <p>为了防止触发B站限流，用户头像会缓存，可以清理并重新获取最新数据。</p>
@@ -160,6 +158,19 @@
       <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
       <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
+
+    <div class="config-item-container">
+      <Tooltip placement="top" transfer>
+        最多保留待读语音数
+        <template #content>
+          <div :style="{ 'white-space': 'normal' }">
+            <p>当使用语音播放功能时可设置保留一定数量待读语音，系统按顺序播放</p>
+            <p>触达上限时将清空待读列表，从最新语音开始播放</p>
+          </div>
+        </template>
+        <InputNumber class="space-left-5px" :model-value="waitingSpeakerCount" :min="0" :step="1" :max="50" :style="{ width: '80px' }" @on-change="onChangeWaitingSpeakerCount" />
+      </Tooltip>
+    </div>
   </div>
 </template>
 
@@ -255,6 +266,9 @@ export default {
     },
     onlyTodayZeroIntimacy() {
       return this.$store.state.Config.onlyTodayZeroIntimacy
+    },
+    waitingSpeakerCount() {
+      return this.$store.state.Config.waitingSpeakerCount
     },
   },
   async mounted() {
@@ -477,6 +491,13 @@ export default {
     changeOnlyTodayZeroIntimacy(status) {
       const data = {
         onlyTodayZeroIntimacy: status,
+      }
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    onChangeWaitingSpeakerCount(value) {
+      const data = {
+        waitingSpeakerCount: value,
       }
       this.$store.dispatch('UPDATE_CONFIG', data)
     },

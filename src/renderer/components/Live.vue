@@ -348,6 +348,8 @@ export default {
           console.log(e)
         })
 
+        livePlayer.volume = (Number(this.liveVolume) || 100) / 100
+
         this.flvPlayer.attachMediaElement(livePlayer)
         this.flvPlayer.load()
         await this.flvPlayer.play()

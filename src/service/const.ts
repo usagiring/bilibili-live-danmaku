@@ -278,6 +278,7 @@ export const DEFAULT_CONFIG = {
   ],
   colors: [],
   userInfoFrequencyLimit: 1000,
+  waitingSpeakerCount: 0,
   onTopLevel: 'floating',
   isOnTopForce: false,
   disableIgnoreMouseEvent: false,
