@@ -121,6 +121,8 @@ import { getVoices, updateSetting } from '../../service/api'
 import { getGiftConfig } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
 
+const synth = window.speechSynthesis
+
 const roleOptions = [
   {
     key: 1,
@@ -355,45 +357,71 @@ export default {
   async created() {
     this.debouncedChangeText = debounce(this.changeText, 500)
 
-    const giftOptions = []
-    const giftConfig = await getGiftConfig()
-    for (const key in giftConfig) {
-      const { name, webp } = giftConfig[key]
-      giftOptions.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
-      })
-    }
-    this.giftOptions = giftOptions
+    // const giftOptions = []
+    // const giftConfig = await getGiftConfig()
+    // for (const key in giftConfig) {
+    //   const { name, webp } = giftConfig[key]
+    //   giftOptions.push({
+    //     key: key,
+    //     value: name,
+    //     label: name,
+    //     webp: webp,
+    //   })
+    // }
+    // this.giftOptions = giftOptions
   },
   mounted() {
-    setTimeout(() => {
-      const options =
-        this.$global?.voices?.map((voice) => {
-          return {
-            key: voice.name,
-            value: voice.name,
-            label: voice.name,
-          }
-        }) || []
-
-      const voiceTag = this.tags.find((tag) => tag.id === 9)
-      voiceTag.template.rows[0].options = options
-
-      const giftTag = this.tags.find((tag) => tag.id === 4)
-      giftTag.template.rows[0].options = this.giftOptions
-    }, 500)
+    // setTimeout(() => {
+    //   const options =
+    //     this.$global?.voices?.map((voice) => {
+    //       return {
+    //         key: voice.name,
+    //         value: voice.name,
+    //         label: voice.name,
+    //       }
+    //     }) || []
+    //   const voiceTag = this.tags.find((tag) => tag.id === 9)
+    //   voiceTag.template.rows[0].options = options
+    //   const giftTag = this.tags.find((tag) => tag.id === 4)
+    //   giftTag.template.rows[0].options = this.giftOptions
+    // }, 500)
   },
   methods: {
-    onDrop(index, dropResult) {
+    async onDrop(index, dropResult) {
       let { addedIndex, payload } = dropResult
       payload = toRaw(payload)
       if (!Number.isFinite(addedIndex)) return
       const rules = cloneDeep(this.rules)
+      if (payload.key === 'SPEAK_REPLY') {
+        const options =
+          this.$global?.voices?.map((voice) => {
+            return {
+              key: voice.name,
+              value: voice.name,
+              label: voice.name,
+            }
+          }) ||
+          synth.getVoices() ||
+          []
+        payload.template.rows[0].options = options
+      }
+
+      if (payload.key === 'GIFT') {
+        const giftConfig = await getGiftConfig()
+        const giftOptions = []
+        for (const [key, { name, webp }] of Object.entries(giftConfig)) {
+          giftOptions.push({
+            key: key,
+            value: name,
+            label: name,
+            webp: webp,
+          })
+        }
+        payload.template.rows[0].options = giftOptions
+      }
       rules[index].tags = rules[index].tags || []
       rules[index].tags.splice(addedIndex, 0, payload)
+      console.log(payload)
       const data = {
         autoReplyRules: rules,
       }

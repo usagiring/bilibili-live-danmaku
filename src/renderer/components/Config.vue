@@ -1,13 +1,11 @@
 <template>
   <div>
     <div class="config-item-container">
-      <Poptip confirm title="确认还原弹幕样式？" placement="right" width="300" @on-ok="restoreDefaultStyleSetting">
+      <Poptip confirm title="确认还原弹幕样式？" placement="bottom" width="300" @on-ok="restoreDefaultStyleSetting">
         <Button class="config-item">还原默认弹幕样式</Button>
       </Poptip>
-    </div>
-    <div class="config-item-container">
       <Tooltip placement="top" max-width="300" transfer>
-        <Poptip confirm title="确认备份并清理数据库？" placement="right" width="400" word-wrap @on-ok="backupAndClearDB">
+        <Poptip confirm title="确认备份并清理数据库？" placement="bottom" width="400" word-wrap @on-ok="backupAndClearDB">
           <Button class="config-item">备份并清理数据库</Button>
         </Poptip>
         <template #content>
@@ -16,10 +14,8 @@
           </div>
         </template>
       </Tooltip>
-    </div>
-    <div class="config-item-container">
-      <Tooltip placement="top" max-width="300">
-        <Poptip confirm title="确认清理用户头像缓存？" placement="right" width="400" @on-ok="clearUserDB">
+      <Tooltip placement="top" max-width="300" transfer>
+        <Poptip confirm title="确认清理用户头像缓存？" placement="bottom" width="400" @on-ok="clearUserDB">
           <Button class="config-item">清理用户头像缓存</Button>
         </Poptip>
         <template #content>
@@ -52,24 +48,24 @@
           </div>
         </template>
       </Tooltip>
-      <Tooltip placement="top" content="实验性功能，可能不稳定">
+      <!-- <Tooltip placement="top" content="实验性功能，可能不稳定">
         <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
           <Icon type="ios-flask" />
         </span>
-      </Tooltip>
+      </Tooltip> -->
     </div>
 
     <div class="config-item-container">
       <Input v-model="text" placeholder="让系统说..." :style="{ display: 'inline-block', width: '300px' }" />
       <Button class="space-left-5px" type="primary" shape="circle" icon="ios-play" @click="speak" />
       声音
-      <Select v-model="currentVoice" size="small" :style="{ width: '100px', display: 'inline-block' }">
+      <Select v-model="currentVoice" :style="{ width: '100px', display: 'inline-block' }">
         <Option v-for="voice in displayVoices" :key="voice.key" :value="voice.key" :label="voice.label">
           <span>{{ voice.value }}</span>
         </Option>
       </Select>
       <span class="space-left-5px">语速</span>
-      <InputNumber v-model="voiceSpeed" size="small" :min="0" :step="0.1" :style="{ width: '55px' }" />
+      <InputNumber v-model="voiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
     </div>
 
     <div class="config-item-container">
@@ -143,20 +139,11 @@
           </template>
         </Tooltip>
       </Checkbox>
-      <Tooltip placement="top" content="实验性功能，可能不稳定">
+      <!-- <Tooltip placement="top" content="实验性功能，可能不稳定">
         <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
           <Icon type="ios-flask" />
         </span>
-      </Tooltip>
-    </div>
-
-    <div class="config-item-container">
-      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '200px' }" @on-change="onChangeSignInMessage" />
-      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
-        <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
-      </Poptip>
-      <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
-      <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
+      </Tooltip> -->
     </div>
 
     <div class="config-item-container">
@@ -170,6 +157,15 @@
         </template>
         <InputNumber class="space-left-5px" :model-value="waitingSpeakerCount" :min="0" :step="1" :max="50" :style="{ width: '80px' }" @on-change="onChangeWaitingSpeakerCount" />
       </Tooltip>
+    </div>
+
+    <div class="config-item-container">
+      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '200px' }" @on-change="onChangeSignInMessage" />
+      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
+        <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
+      </Poptip>
+      <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
+      <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
   </div>
 </template>
@@ -576,6 +572,7 @@ export default {
 }
 .config-item {
   width: 150px;
+  margin: 0 5px;
 }
 .close-icon {
   color: crimson;

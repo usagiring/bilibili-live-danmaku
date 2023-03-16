@@ -87,5 +87,5 @@ export async function getGiftConfig() {
   if (__giftConfig) return __giftConfig
   const { data: giftConfig } = await getGiftConfigAPI()
   __giftConfig = giftConfig
-  return giftConfig
+  return giftConfig || {}
 }
