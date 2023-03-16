@@ -1,6 +1,8 @@
 import moment from "moment";
+import { isEmpty } from 'lodash'
 import { PRICE_PROPERTIES, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
 import { getGiftConfig as getGiftConfigAPI } from './api'
+import global from './global'
 
 // TODO 设置一些更小的粒度？ < 1
 export function getPriceProperties(price) {
@@ -82,10 +84,12 @@ export function getRandomItem(items) {
   return null
 }
 
-let __giftConfig
 export async function getGiftConfig() {
-  if (__giftConfig) return __giftConfig
+  if (global.giftConfig) return global.giftConfig
   const { data: giftConfig } = await getGiftConfigAPI()
-  __giftConfig = giftConfig
+  if (!isEmpty(giftConfig)) {
+    global.giftConfig = giftConfig
+  }
+
   return giftConfig || {}
 }

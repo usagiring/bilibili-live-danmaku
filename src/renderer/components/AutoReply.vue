@@ -421,7 +421,7 @@ export default {
       }
       rules[index].tags = rules[index].tags || []
       rules[index].tags.splice(addedIndex, 0, payload)
-      console.log(payload)
+      
       const data = {
         autoReplyRules: rules,
       }
