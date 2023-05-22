@@ -13,6 +13,7 @@ export {
   getDamankuInfo,
   getGiftConfig,
   getUserInfo,
+  getUserInfoV2,
   getHistoryMessages,
   getGuardInfo,
   getPlayUrl,
@@ -67,6 +68,13 @@ async function getGiftConfig(roomId, platform = 'pc') {
 
 async function getUserInfo(userId) {
   const res = await axios.get(`${baseUrl}/x/space/acc/info?mid=${userId}&jsonp=jsonp`, {
+    timeout: 1000
+  })
+  return res.data
+}
+
+async function getUserInfoV2(userId) {
+  const res = await axios.get(`${baseUrl}/x/space/wbi/acc/info?mid=${userId}&platform=web`, {
     timeout: 1000
   })
   return res.data

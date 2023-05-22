@@ -64,6 +64,17 @@ body {
 .me-mr-2px {
   margin-right: 2px;
 }
+.padding-left-2px {
+  padding-left: 2px;
+}
+
+.margin-left-2px {
+  margin-left: 2px;
+}
+
+.margin-left-5px {
+  margin-left: 5px;
+}
 </style>
 
 <style scoped>

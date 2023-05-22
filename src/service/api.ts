@@ -157,6 +157,16 @@ export async function initialASR(body) {
   return res.data
 }
 
+export async function startLiveStreamASR(body) {
+  const res = await axios.post(`${BASE_URL}/api/asr/live/start`, body)
+  return res.data
+}
+
+export async function closeLiveStreamASR(body) {
+  const res = await axios.post(`${BASE_URL}/api/asr/live/close`, body)
+  return res.data
+}
+
 export async function closeASR(body) {
   const res = await axios.post(`${BASE_URL}/api/asr/close`, body)
   return res.data

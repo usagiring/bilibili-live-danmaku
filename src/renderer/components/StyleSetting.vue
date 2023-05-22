@@ -1147,7 +1147,10 @@ export default {
       const setting = settings.find((setting) => setting.type === 'medal')
       setting.isShow = status
 
-      const data = { messageSettings: settings }
+      const data = {
+        messageSettings: settings,
+        isShowFanMedal: status,
+      }
       await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },

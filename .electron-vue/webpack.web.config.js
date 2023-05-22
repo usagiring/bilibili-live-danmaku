@@ -87,7 +87,7 @@ let webConfig = {
             name: 'fonts/[name].[ext]'
           }
         }
-      }
+      },
     ]
   },
   plugins: [

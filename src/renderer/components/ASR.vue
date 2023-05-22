@@ -60,8 +60,25 @@
         </span>
       </div>
       <div class="config-container">
-        <Button :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" size="small" :loading="isStarting" @click="start">开始</Button>
-        <Button :disabled="!isStarted" size="small" @click="stop">停止</Button>
+        <RadioGroup :model-value="audioFrom" @on-change="changeAudioFrom">
+          <Radio label="livestream">
+            <span>从直播流输入音频</span>
+          </Radio>
+          <Radio label="microphone">
+            <span>从麦克风输入音频</span>
+          </Radio>
+        </RadioGroup>
+      </div>
+      <div class="config-container">
+        选择设备：
+        <Select v-model:audioDevices="audioDevices" :disabled="audioFrom !== 'microphone'" size="small" style="width: 220px" @on-open-change="getAudioDevice">
+          <Option v-for="d in audioDevices" :key="d.value" :value="d.value">{{ d.label }}</Option>
+        </Select>
+        <Button class="margin-left-2px" :disabled="audioFrom !== 'microphone'" size="small" @click="openAuidoTestModal">测试</Button>
+      </div>
+      <div class="config-container">
+        <Button type="primary" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" :loading="isStarting" @click="start">开始</Button>
+        <Button class="margin-left-5px" :disabled="!isStarted" @click="stop">停止</Button>
       </div>
       <div class="config-container" :style="{ width: '400px' }">
         <div :style="{ 'text-align': 'center' }">阿里云</div>
@@ -91,12 +108,6 @@
             </Option>
           </AutoComplete>
         </div>
-        <div>
-          <div class="key-item">服务器:</div>
-          <Select v-model="aliServer" class="server-selector" :disabled="isStarted" style="width: 200px" size="small">
-            <Option v-for="item in aliServers" :key="item.value" :value="item.value">{{ item.label }}</Option>
-          </Select>
-        </div>
       </div>
     </div>
     <div class="right-container">
@@ -119,10 +130,11 @@ import { ipcRenderer } from 'electron'
 import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus } from '../../service/api'
+import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus, startLiveStreamASR, closeLiveStreamASR } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
 import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
+import processor from 'worklet-loader!../../service/processor.worklet'
 
 export default {
   data() {
@@ -165,23 +177,25 @@ export default {
           label: '英语',
         },
       ],
-      aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-      aliServers: [
-        {
-          value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-          label: '上海',
-        },
-        {
-          value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
-          label: '北京',
-        },
-        {
-          value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
-          label: '深圳',
-        },
-      ],
+      // aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
+      // aliServers: [
+      //   {
+      //     value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
+      //     label: '上海',
+      //   },
+      //   {
+      //     value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
+      //     label: '北京',
+      //   },
+      //   {
+      //     value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
+      //     label: '深圳',
+      //   },
+      // ],
       texts: [],
       currentTextIndex: 0,
+      audioDevices: [],
+      audioDeviceId: '',
     }
   },
 
@@ -225,6 +239,9 @@ export default {
     disableIgnoreMouseEvent() {
       return this.$store.state.Config.disableIgnoreMouseEvent
     },
+    audioFrom() {
+      return this.$store.state.Config.audioFrom
+    },
   },
 
   created() {
@@ -260,6 +277,26 @@ export default {
   },
 
   methods: {
+    async getAudioDevice() {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      this.audioDevices = devices
+        .filter((d) => d.kind === 'audioinput')
+        .map((d) => {
+          return {
+            value: d.deviceId,
+            label: d.label,
+          }
+        })
+    },
+
+    async changeAudioFrom(value) {
+      const data = {
+        audioFrom: value,
+      }
+      // await updateSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
     onMessage(msg) {
       const payload = JSON.parse(msg.data)
 
@@ -315,17 +352,23 @@ export default {
     async start() {
       this.isStarting = true
 
+      await initialASR({
+        accessKeyId: this.aliAccessKeyId,
+        accessKeySecret: this.aliAccessKeySecret,
+        appKey: this.aliAppKey,
+      })
+
+      if (this.audioFrom === 'microphone') {
+        return this.getMicrophoneAudio()
+      }
+
       const playUrl = await getRandomPlayUrl({
         roomId: this.realRoomId,
         quality: this.playQuality,
         cookie: this.isWithCookie ? this.userCookie : undefined,
       })
 
-      await initialASR({
-        accessKeyId: this.aliAccessKeyId,
-        accessKeySecret: this.aliAccessKeySecret,
-        serviceUrl: this.aliServer,
-        appKey: this.aliAppKey,
+      await startLiveStreamASR({
         playUrl: playUrl,
         ffmpegPath: this.ffmpegExe,
       })
@@ -346,7 +389,51 @@ export default {
 
     async stop() {
       await closeASR({})
+      await closeLiveStreamASR({})
       this.isStarted = false
+    },
+
+    async getMicrophoneAudio() {
+      const option = {
+        audio: true,
+        video: false,
+      }
+      if (!this.audioDeviceId) {
+        option.audio = {
+          deviceId: this.audioDeviceId,
+        }
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(option)
+      const context = new AudioContext({
+        sampleRate: '16000',
+      })
+      const source = context.createMediaStreamSource(stream)
+
+      // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
+      await context.audioWorklet.addModule(processor)
+      const worklet = new AudioWorkletNode(context, 'worklet-processor')
+
+      // let count = 0
+      let sample8192 = []
+      worklet.port.onmessage = (e) => {
+        let sample128 = JSON.parse(e.data)
+        sample8192 = sample8192.concat(sample128)
+
+        if (sample8192.length >= 8192) {
+          const payload = {
+            event: 'AUDIO',
+            data: JSON.stringify(sample8192),
+          }
+          sample8192 = []
+          ws.send(JSON.stringify(payload))
+        }
+      }
+
+      source.connect(worklet)
+      worklet.connect(context.destination)
+
+      this.isStarted = true
+      this.isStarting = false
     },
 
     changeAliAccessKeyId(e) {

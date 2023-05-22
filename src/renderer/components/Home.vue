@@ -204,7 +204,7 @@ import { parseDownloadRate, getGiftConfig } from '../../service/util'
 import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
 import emitter from '../../service/event'
 import { record, cancelRecord, getStatus, setStatus } from '../../service/bilibili-recorder'
-import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfo } from '../../service/bilibili-api'
+import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfoV2 } from '../../service/bilibili-api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, PORT, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
 import icon from '../assets/logo.png'
@@ -563,7 +563,7 @@ export default {
         this.likeNumber = likeNumber
 
         try {
-          const { data: userInfo } = await getUserInfo(uid)
+          const { data: userInfo } = await getUserInfoV2(uid)
           console.log(userInfo)
           const {
             // face,

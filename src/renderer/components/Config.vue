@@ -28,7 +28,7 @@
     <div class="config-item-container">
       Cookie
       <Input class="config-item" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
-      <Tooltip placement="top">
+      <Tooltip placement="top" transfer>
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
