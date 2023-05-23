@@ -24,23 +24,7 @@
         <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
       </div>
       <!-- <div class="divider"></div> -->
-      <div class="config-container">
-        <span>
-          <Tooltip max-width="600" transfer placement="right">
-            <Button size="small" @click="openFFmpegSelector">选择 ffmpeg 文件</Button>
-            <template #content>
-              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
-                <p>● 您可以手动指定ffmpeg文件路径。</p>
-                <p>● 不选择则从环境变量中寻找ffmpeg文件。</p>
-              </div>
-            </template>
-          </Tooltip>
-        </span>
-        <span v-if="ffmpegExe">
-          {{ ffmpegExe }}
-          <Icon type="md-close" :style="{ color: 'crimson', cursor: 'pointer' }" @click="clearFFmpegPath()" />
-        </span>
-      </div>
+
       <div class="config-container">
         <span>
           显示行数：
@@ -69,17 +53,32 @@
           </Radio>
         </RadioGroup>
       </div>
-      <div class="config-container">
+      <div v-if="audioFrom === 'microphone'" class="config-container">
         选择设备：
-        <Select v-model:audioDevices="audioDevices" :disabled="audioFrom !== 'microphone'" size="small" style="width: 220px" @on-open-change="getAudioDevice">
+        <Select v-model:audioDevices="audioDevices" :disabled="audioFrom !== 'microphone'" size="small" style="width: 220px" placeholder="未选择时使用默认设备" @on-open-change="getAudioDevice">
           <Option v-for="d in audioDevices" :key="d.value" :value="d.value">{{ d.label }}</Option>
         </Select>
-        <Button class="margin-left-2px" :disabled="audioFrom !== 'microphone'" size="small" @click="openAuidoTestModal">测试</Button>
+        <!-- <Button class="margin-left-2px" :disabled="audioFrom !== 'microphone'" size="small" @click="openAuidoTestModal">测试</Button> -->
       </div>
-      <div class="config-container">
-        <Button type="primary" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" :loading="isStarting" @click="start">开始</Button>
-        <Button class="margin-left-5px" :disabled="!isStarted" @click="stop">停止</Button>
+
+      <div v-if="audioFrom === 'livestream'" class="config-container">
+        <span>
+          <Tooltip max-width="600" transfer placement="right">
+            <Button size="small" @click="openFFmpegSelector">选择 ffmpeg 文件</Button>
+            <template #content>
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
+                <p>● 您可以手动指定ffmpeg文件路径。</p>
+                <p>● 不选择则从环境变量中寻找ffmpeg文件。</p>
+              </div>
+            </template>
+          </Tooltip>
+        </span>
+        <span v-if="ffmpegExe">
+          {{ ffmpegExe }}
+          <Icon type="md-close" :style="{ color: 'crimson', cursor: 'pointer' }" @click="clearFFmpegPath()" />
+        </span>
       </div>
+
       <div class="config-container" :style="{ width: '400px' }">
         <div :style="{ 'text-align': 'center' }">阿里云</div>
         <div>
@@ -109,7 +108,12 @@
           </AutoComplete>
         </div>
       </div>
+      <div class="config-container">
+        <Button type="primary" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" :loading="isStarting" @click="start">开始</Button>
+        <Button class="margin-left-5px" :disabled="!isStarted" @click="stop">停止</Button>
+      </div>
     </div>
+
     <div class="right-container">
       <template v-for="(text, index) in texts" :key="index">
         <div>
@@ -118,6 +122,11 @@
         </div>
       </template>
     </div>
+
+    <Modal v-model="isMicrophoneNoticeModalOpen" title="即将使用麦克风" @on-ok="microphoneNoticeOk" @on-cancel="microphoneNoticeCancel">
+      <p :style="{ padding: '5px' }">您的麦克风输入数据将提交至云服务商进行分析</p>
+      <Checkbox :style="{ padding: '5px' }">下次不再显示</Checkbox>
+    </Modal>
   </div>
 </template>
 
@@ -135,6 +144,7 @@ import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/co
 import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
 import processor from 'worklet-loader!../../service/processor.worklet'
+import global from '../../service/global'
 
 export default {
   data() {
@@ -196,6 +206,7 @@ export default {
       currentTextIndex: 0,
       audioDevices: [],
       audioDeviceId: '',
+      isMicrophoneNoticeModalOpen: false,
     }
   },
 
@@ -349,18 +360,32 @@ export default {
       }
     },
 
+    openAuidoTestModal() {
+
+    },
+
+    microphoneNoticeOk() {
+      this.getMicrophoneAudio()
+    },
+
+    microphoneNoticeCancel() {
+      this.isStarting = false
+      this.isStarted = false
+    },
+
     async start() {
       this.isStarting = true
+
+      if (this.audioFrom === 'microphone') {
+        this.isMicrophoneNoticeModalOpen = true
+        return
+      }
 
       await initialASR({
         accessKeyId: this.aliAccessKeyId,
         accessKeySecret: this.aliAccessKeySecret,
         appKey: this.aliAppKey,
       })
-
-      if (this.audioFrom === 'microphone') {
-        return this.getMicrophoneAudio()
-      }
 
       const playUrl = await getRandomPlayUrl({
         roomId: this.realRoomId,
@@ -388,12 +413,31 @@ export default {
     },
 
     async stop() {
+      if (this.audioFrom === 'microphone') {
+        if (global.microphoneStream) {
+          global.microphoneStream.getTracks().forEach(function (track) {
+            track.stop()
+          })
+          global.microphoneStream = null
+        }
+        if (global.microphoneAudioContext) {
+          global.microphoneAudioContext.close()
+          global.microphoneAudioContext = null
+        }
+      } else {
+        await closeLiveStreamASR({})
+      }
       await closeASR({})
-      await closeLiveStreamASR({})
       this.isStarted = false
     },
 
     async getMicrophoneAudio() {
+      await initialASR({
+        accessKeyId: this.aliAccessKeyId,
+        accessKeySecret: this.aliAccessKeySecret,
+        appKey: this.aliAppKey,
+      })
+
       const option = {
         audio: true,
         video: false,
@@ -404,9 +448,11 @@ export default {
         }
       }
       const stream = await navigator.mediaDevices.getUserMedia(option)
+      global.microphoneStream = stream
       const context = new AudioContext({
         sampleRate: '16000',
       })
+      global.microphoneAudioContext = context
       const source = context.createMediaStreamSource(stream)
 
       // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
