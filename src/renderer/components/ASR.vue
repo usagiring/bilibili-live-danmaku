@@ -33,8 +33,8 @@
       </div>
       <div class="config-container">
         <span>
-          <Tooltip max-width="600" transfer placement="right">
-            <Checkbox :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate">开启翻译：</Checkbox>
+          <Tooltip max-width="600" transfer placement="top">
+            <span>翻译：</span>
 
             <template #content>
               <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
@@ -49,6 +49,8 @@
           <Select :model-value="mtToLang" :disabled="enableTranslate" size="small" style="width: 80px" @on-change="changeToLang">
             <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
+
+          <Checkbox class="margin-left-10px" :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate">启动</Checkbox>
         </span>
       </div>
       <div class="config-container">

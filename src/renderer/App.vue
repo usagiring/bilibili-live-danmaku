@@ -75,6 +75,10 @@ body {
 .margin-left-5px {
   margin-left: 5px;
 }
+
+.margin-left-10px {
+  margin-left: 10px;
+}
 </style>
 
 <style scoped>
