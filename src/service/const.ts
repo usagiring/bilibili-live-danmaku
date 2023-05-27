@@ -285,6 +285,7 @@ export const DEFAULT_CONFIG = {
   audioFrom: 'livestream',
   mtFromLang: '',
   mtToLang: '',
+  disableMircrophotoNoticeMessage: false,
   messageSettings: [
     {
       type: 'avatar',

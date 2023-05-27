@@ -50,7 +50,9 @@
             <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
 
-          <Checkbox class="margin-left-10px" :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate">启动</Checkbox>
+          <Checkbox class="margin-left-10px" :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate"
+            >启动</Checkbox
+          >
         </span>
       </div>
       <div class="config-container">
@@ -135,7 +137,7 @@
 
     <Modal v-model="isMicrophoneNoticeModalOpen" title="即将使用麦克风" @on-ok="microphoneNoticeOk" @on-cancel="microphoneNoticeCancel">
       <p :style="{ padding: '5px' }">您的麦克风输入数据将提交至云服务商进行分析</p>
-      <Checkbox :style="{ padding: '5px' }">下次不再显示</Checkbox>
+      <Checkbox v-model="__disableMircrophotoNoticeMessage" :style="{ padding: '10px' }">下次不再显示</Checkbox>
     </Modal>
   </div>
 </template>
@@ -168,6 +170,7 @@ export default {
       isShowASRWindow: false,
       isASRWindowAlwaysOnTop: false,
       enableTranslate: false,
+      __disableMircrophotoNoticeMessage: false,
       fromLangs: [
         {
           value: 'auto',
@@ -225,73 +228,6 @@ export default {
     return state
   },
 
-  // data() {
-  // return {
-  //   playQuality: '高清',
-  //   checkOnTopInterval: null,
-  //   isStarting: false,
-  //   isStarted: false,
-  //   isShowASRWindowLoading: false,
-  //   isShowASRWindow: false,
-  //   isASRWindowAlwaysOnTop: false,
-  //   fromLang: 'ja',
-  //   toLang: 'zh',
-  //   enableTranslate: false,
-  //   fromLangs: [
-  //     {
-  //       value: 'auto',
-  //       label: '自动（需开启语音识别）',
-  //     },
-  //     {
-  //       value: 'ja',
-  //       label: '日语',
-  //     },
-  //     {
-  //       value: 'en',
-  //       label: '英语',
-  //     },
-  //     {
-  //       value: 'zh',
-  //       label: '中文',
-  //     },
-  //   ],
-  //   toLangs: [
-  //     {
-  //       value: 'zh',
-  //       label: '中文',
-  //     },
-  //     {
-  //       value: 'ja',
-  //       label: '日语',
-  //     },
-  //     {
-  //       value: 'en',
-  //       label: '英语',
-  //     },
-  //   ],
-  //   // aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-  //   // aliServers: [
-  //   //   {
-  //   //     value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
-  //   //     label: '上海',
-  //   //   },
-  //   //   {
-  //   //     value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
-  //   //     label: '北京',
-  //   //   },
-  //   //   {
-  //   //     value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
-  //   //     label: '深圳',
-  //   //   },
-  //   // ],
-  //   texts: [],
-  //   currentTextIndex: 0,
-  //   audioDevices: [],
-  //   audioDeviceId: '',
-  //   isMicrophoneNoticeModalOpen: false,
-  // }
-  // },
-
   computed: {
     realRoomId() {
       return this.$store.state.Config.realRoomId
@@ -340,6 +276,9 @@ export default {
     },
     mtToLang() {
       return this.$store.state.Config.mtToLang
+    },
+    disableMircrophotoNoticeMessage() {
+      return this.$store.state.Config.disableMircrophotoNoticeMessage
     },
   },
 
@@ -468,6 +407,11 @@ export default {
     openAuidoTestModal() {},
 
     microphoneNoticeOk() {
+      if (this.__disableMircrophotoNoticeMessage) {
+        this.$store.dispatch('UPDATE_CONFIG', {
+          disableMircrophotoNoticeMessage: true,
+        })
+      }
       this.getMicrophoneAudio()
     },
 
@@ -480,8 +424,13 @@ export default {
       this.isStarting = true
 
       if (this.audioFrom === 'microphone') {
-        this.isMicrophoneNoticeModalOpen = true
-        return
+        if (this.disableMircrophotoNoticeMessage) {
+          await this.getMicrophoneAudio()
+          return
+        } else {
+          this.isMicrophoneNoticeModalOpen = true
+          return
+        }
       }
 
       await initialASR({
