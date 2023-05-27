@@ -282,6 +282,9 @@ export const DEFAULT_CONFIG = {
   onTopLevel: 'floating',
   isOnTopForce: false,
   disableIgnoreMouseEvent: false,
+  audioFrom: 'livestream',
+  mtFromLang: '',
+  mtToLang: '',
   messageSettings: [
     {
       type: 'avatar',

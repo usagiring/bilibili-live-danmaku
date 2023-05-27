@@ -33,22 +33,30 @@
       </div>
       <div class="config-container">
         <span>
-          <Checkbox :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !fromLang || !toLang" @on-change="changeEnableTranslate">开启翻译：</Checkbox>
-          <Select v-model:fromLang="fromLang" :disabled="enableTranslate" size="small" style="width: 80px">
+          <Tooltip max-width="600" transfer placement="right">
+            <Checkbox :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate">开启翻译：</Checkbox>
+
+            <template #content>
+              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
+                <p>● 需开启阿里云服务：机器翻译（通用版翻译引擎）。</p>
+              </div>
+            </template>
+          </Tooltip>
+          <Select :model-value="mtFromLang" :disabled="enableTranslate" size="small" style="width: 80px" @on-change="changeFromLang">
             <Option v-for="item in fromLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
           =>
-          <Select v-model:toLang="toLang" :disabled="enableTranslate" size="small" style="width: 80px">
+          <Select :model-value="mtToLang" :disabled="enableTranslate" size="small" style="width: 80px" @on-change="changeToLang">
             <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
           </Select>
         </span>
       </div>
       <div class="config-container">
         <RadioGroup :model-value="audioFrom" @on-change="changeAudioFrom">
-          <Radio label="livestream">
+          <Radio label="livestream" :disabled="isStarted">
             <span>从直播流输入音频</span>
           </Radio>
-          <Radio label="microphone">
+          <Radio label="microphone" :disabled="isStarted">
             <span>从麦克风输入音频</span>
           </Radio>
         </RadioGroup>
@@ -145,10 +153,11 @@ import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
 import processor from 'worklet-loader!../../service/processor.worklet'
 import global from '../../service/global'
+import { reactive } from 'vue'
 
 export default {
-  data() {
-    return {
+  setup() {
+    const state = reactive({
       playQuality: '高清',
       checkOnTopInterval: null,
       isStarting: false,
@@ -157,9 +166,11 @@ export default {
       isShowASRWindow: false,
       isASRWindowAlwaysOnTop: false,
       enableTranslate: false,
-      fromLang: 'ja',
-      toLang: 'zh',
       fromLangs: [
+        {
+          value: 'auto',
+          label: '自动（需开启语种识别）',
+        },
         {
           value: 'ja',
           label: '日语',
@@ -207,8 +218,77 @@ export default {
       audioDevices: [],
       audioDeviceId: '',
       isMicrophoneNoticeModalOpen: false,
-    }
+    })
+
+    return state
   },
+
+  // data() {
+  // return {
+  //   playQuality: '高清',
+  //   checkOnTopInterval: null,
+  //   isStarting: false,
+  //   isStarted: false,
+  //   isShowASRWindowLoading: false,
+  //   isShowASRWindow: false,
+  //   isASRWindowAlwaysOnTop: false,
+  //   fromLang: 'ja',
+  //   toLang: 'zh',
+  //   enableTranslate: false,
+  //   fromLangs: [
+  //     {
+  //       value: 'auto',
+  //       label: '自动（需开启语音识别）',
+  //     },
+  //     {
+  //       value: 'ja',
+  //       label: '日语',
+  //     },
+  //     {
+  //       value: 'en',
+  //       label: '英语',
+  //     },
+  //     {
+  //       value: 'zh',
+  //       label: '中文',
+  //     },
+  //   ],
+  //   toLangs: [
+  //     {
+  //       value: 'zh',
+  //       label: '中文',
+  //     },
+  //     {
+  //       value: 'ja',
+  //       label: '日语',
+  //     },
+  //     {
+  //       value: 'en',
+  //       label: '英语',
+  //     },
+  //   ],
+  //   // aliServer: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
+  //   // aliServers: [
+  //   //   {
+  //   //     value: 'wss://nls-gateway-cn-shanghai.aliyuncs.com/ws/v1',
+  //   //     label: '上海',
+  //   //   },
+  //   //   {
+  //   //     value: 'wss://nls-gateway-cn-beijing.aliyuncs.com/ws/v1',
+  //   //     label: '北京',
+  //   //   },
+  //   //   {
+  //   //     value: 'wss://nls-gateway-cn-shenzhen.aliyuncs.com/ws/v1',
+  //   //     label: '深圳',
+  //   //   },
+  //   // ],
+  //   texts: [],
+  //   currentTextIndex: 0,
+  //   audioDevices: [],
+  //   audioDeviceId: '',
+  //   isMicrophoneNoticeModalOpen: false,
+  // }
+  // },
 
   computed: {
     realRoomId() {
@@ -253,6 +333,12 @@ export default {
     audioFrom() {
       return this.$store.state.Config.audioFrom
     },
+    mtFromLang() {
+      return this.$store.state.Config.mtFromLang
+    },
+    mtToLang() {
+      return this.$store.state.Config.mtToLang
+    },
   },
 
   created() {
@@ -265,8 +351,6 @@ export default {
     getTranslateStatus().then(({ message, data }) => {
       if (message === '1') {
         this.enableTranslate = true
-        this.fromLang = data?.fromLang
-        this.toLang = data?.toLang
       }
     })
 
@@ -308,6 +392,22 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
+    changeFromLang(value) {
+      const data = {
+        mtFromLang: value,
+      }
+      // await updateSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    changeToLang(value) {
+      const data = {
+        mtToLang: value,
+      }
+      // await updateSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
     onMessage(msg) {
       const payload = JSON.parse(msg.data)
 
@@ -327,20 +427,20 @@ export default {
           text: payload.payload?.payload?.result,
         }
         this.texts = texts
-        if (this.enableTranslate) {
-          if (this.fromLangs !== this.toLangs) {
-            translate({
-              accessKeyId: this.aliAccessKeyId,
-              accessKeySecret: this.aliAccessKeySecret,
-              from: this.fromLang,
-              to: this.toLang,
-              text: payload.payload?.payload?.result,
-              payload: {
-                id: payload.payload?.header?.message_id,
-              },
-            })
-          }
-        }
+        // if (this.enableTranslate) {
+        // if (this.fromLangs !== this.toLangs) {
+        //   translate({
+        //     accessKeyId: this.aliAccessKeyId,
+        //     accessKeySecret: this.aliAccessKeySecret,
+        //     from: this.mtFromLang,
+        //     to: this.mtToLang,
+        //     text: payload.payload?.payload?.result,
+        //     payload: {
+        //       id: payload.payload?.header?.message_id,
+        //     },
+        //   })
+        // }
+        // }
       }
 
       if (payload.cmd === 'ASR_SENTENCE_CHANGE') {
@@ -355,14 +455,15 @@ export default {
       if (payload.cmd === 'MECHINE_TRANSLATE') {
         const index = this.texts.findIndex(({ id }) => payload.payload?.id === id)
         const text = this.texts[index]
-        text.translate = payload.payload?.message
-        this.$set(this.texts, index, text)
+        if (text) {
+          text.translate = payload.payload?.message
+        }
+        // this.texts[index] = text
+        // this.$set(this.texts, index, text)
       }
     },
 
-    openAuidoTestModal() {
-
-    },
+    openAuidoTestModal() {},
 
     microphoneNoticeOk() {
       this.getMicrophoneAudio()
@@ -465,7 +566,7 @@ export default {
         let sample128 = JSON.parse(e.data)
         sample8192 = sample8192.concat(sample128)
 
-        if (sample8192.length >= 8192) {
+        if (sample8192.length >= 16384) {
           const payload = {
             event: 'AUDIO',
             data: JSON.stringify(sample8192),
@@ -627,14 +728,15 @@ export default {
     async changeEnableTranslate(status) {
       if (status) {
         await translateOpen({
-          fromLang: this.fromLang,
-          toLang: this.toLang,
+          accessKeyId: this.aliAccessKeyId,
+          accessKeySecret: this.aliAccessKeySecret,
+          fromLang: this.mtFromLang,
+          toLang: this.mtToLang,
         })
-        this.enableTranslate = true
       } else {
         await translateClose()
-        this.enableTranslate = false
       }
+      this.enableTranslate = status
     },
   },
 }

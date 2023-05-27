@@ -4,7 +4,7 @@
       <template v-for="(text, index) in texts" :key="index">
         <div class="text">
           <div>{{ text.text }}</div>
-          <div v-if="text.translate" :style="{color: 'aliceblue', 'font-size': '16px'}">{{ text.translate }}</div>
+          <div v-if="text.translate" :style="{ color: 'aliceblue', 'font-size': '16px' }">{{ text.translate }}</div>
         </div>
       </template>
     </div>
@@ -12,14 +12,15 @@
 </template>
 
 <script>
+import { reactive } from 'vue'
 import ws from '../../service/ws'
 
 export default {
-  data() {
-    return {
+  setup() {
+    return reactive({
       texts: [],
       currentTextIndex: 0,
-    }
+    })
   },
 
   computed: {
@@ -32,9 +33,7 @@ export default {
   },
 
   beforeCreate() {
-    document
-      .getElementsByTagName('body')[0]
-      .setAttribute('style', 'background-color:rgba(0,0,0,0.2);')
+    document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0.2);')
   },
 
   created() {
@@ -80,7 +79,6 @@ export default {
         const index = this.texts.findIndex(({ id }) => payload.payload?.id === id)
         const text = this.texts[index]
         text.translate = payload.payload?.message
-        this.$set(this.texts, index, text)
       }
     },
   },
