@@ -1,5 +1,7 @@
 import axios from 'axios'
-import cookie from "cookie";
+import cookie from "cookie"
+import md5 from 'md5'
+import global from './global'
 import httpAdapter from './http'
 
 const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:9080' : 'https://api.bilibili.com'
@@ -74,7 +76,14 @@ async function getUserInfo(userId) {
 }
 
 async function getUserInfoV2(userId) {
-  const res = await axios.get(`${baseUrl}/x/space/wbi/acc/info?mid=${userId}&platform=web`, {
+  const querystring = await getSignedQueryString({
+    params: {
+      mid: userId,
+      platform: 'web'
+    }
+  })
+
+  const res = await axios.get(`${baseUrl}/x/space/wbi/acc/info?${querystring}`, {
     timeout: 1000
   })
   return res.data
@@ -194,4 +203,76 @@ async function getMedalList(data = {}, userCookie) {
     }
   )
   return res.data
+}
+
+const mixinKeyEncTab = [
+  46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
+  33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40,
+  61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11,
+  36, 20, 34, 44, 52
+]
+
+async function getWbiKeys() {
+  const res = await axios.get(`https://api.bilibili.com/x/web-interface/nav`, {
+    headers: Object.assign({}, defaultHeaders),
+    adapter: httpAdapter
+  })
+  const data = res.data
+  const { img_url, sub_url } = data.data.wbi_img
+  const imgKey = img_url.replace('https://i0.hdslb.com/bfs/wbi/', '').replace('.png', '')
+  const subKey = sub_url.replace('https://i0.hdslb.com/bfs/wbi/', '').replace('.png', '')
+  return {
+    imgKey,
+    subKey
+  }
+}
+
+// 对 imgKey 和 subKey 进行字符顺序打乱编码
+async function getMixinKey() {
+  const wbi = global.wbi
+  // if(wbi?.expired && wbi?.mixinKey && wbi.expired < new Date()) {
+  //   return wbi.mixinKey
+  // }
+  if (wbi?.mixinKey) return wbi.mixinKey
+
+  const { imgKey, subKey } = await getWbiKeys()
+  const orig = imgKey + subKey
+
+  let temp = ''
+  mixinKeyEncTab.forEach((n) => {
+    temp += orig[n]
+  })
+  const mixinKey = temp.slice(0, 32)
+
+  global.wbi = {
+    mixinKey
+  }
+
+  return mixinKey
+}
+
+async function getSignedQueryString({ params }) {
+  const mixinKey = await getMixinKey()
+  const currTime = Math.round(Date.now() / 1000)
+  // const chr_filter = /[!'\(\)*]/g
+
+  Object.assign(params, { wts: currTime })    // 添加 wts 字段
+
+  const querystring = Object.keys(params)
+    .sort() // 按照 key 重排参数
+    .map((key) => {
+      return `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+    })
+    .join('&')
+
+  // Object.keys(params).sort().forEach((key) => {
+  //   query.push(
+  //     encodeURIComponent(key) +
+  //     '=' +
+  //     // 过滤 value 中的 "!'()*" 字符
+  //     encodeURIComponent(('' + params[key]).replace(chr_filter, ''))
+  //   )
+  // })
+  const wbi_sign = md5(querystring + mixinKey) // 计算 w_rid
+  return `${querystring}&w_rid=${wbi_sign}`
 }
