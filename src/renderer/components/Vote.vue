@@ -1,12 +1,19 @@
 <template>
   <div :style="{ 'user-select': 'none' }">
-    <div>
-      <Button class="vote-button" :disabled="isWatching || !isConnected" @click="start">开始</Button>
-      <Button class="vote-button" :disabled="!isWatching" @click="stop">停止</Button>
-      <Button class="vote-button" @click="showVoteRecord">投票记录</Button>
-    </div>
-
     <div class="left-container">
+      <div>
+        <Button class="vote-button" :disabled="isWatching || !isConnected" @click="start">开始</Button>
+        <Button class="vote-button" :disabled="!isWatching" @click="stop">停止</Button>
+        <Button class="vote-button" @click="showVoteRecord">投票记录</Button>
+      </div>
+
+      <div :style="{ margin: '10px 0 10px 0' }">
+        <Checkbox :model-value="isAccurateMatch" :disabled="isWatching" @on-change="changeIsAccurateMatch">精确匹配</Checkbox>
+        <Tooltip placement="bottom" transfer>
+          <Checkbox :model-value="allowReVote" :disabled="isWatching" @on-change="changeAllowReVote">允许改票</Checkbox>
+          <template #content> 同一位用户投票记录以最后一次为准 </template>
+        </Tooltip>
+      </div>
       <div>
         <div class="keyword-container">关键字</div>
         <div class="content-container">描述</div>
@@ -14,10 +21,10 @@
       <template v-for="(item, index) in options" :key="index">
         <div>
           <div class="keyword-container">
-            <Input :model-value="item.keyword" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionKeyword(index, $event)" />
+            <Input :model-value="item.keyword" :disabled="isWatching" @on-change="changeOptionKeyword(index, $event)" />
           </div>
           <div class="content-container">
-            <Input :model-value="item.value" :disabled="isWatching" :style="{ padding: '5px' }" @on-change="changeOptionContent(index, $event)" />
+            <Input :model-value="item.value" :disabled="isWatching" @on-change="changeOptionContent(index, $event)" />
             <span />
           </div>
           <div class="remove-icon-container">
@@ -26,9 +33,9 @@
         </div>
       </template>
 
-      <div :style="{ padding: '5px'}">
+      <div :style="{ 'margin-top': '5px' }">
         <Button type="primary" long :disabled="isWatching" @click="addOption">
-          <Icon :style="{'font-weight': 'bold'}" type="md-add" />
+          <Icon :style="{ 'font-weight': 'bold' }" type="md-add" />
         </Button>
       </div>
     </div>
@@ -61,7 +68,7 @@
 
     <Modal v-model="isShowVoteRecord" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(value, uid) in userMap" :key="uid">
-        <p>{{ value }}</p>
+        <p>{{ value.message }}</p>
       </template>
     </Modal>
   </div>
@@ -94,6 +101,8 @@ import * as echarts from 'echarts'
 import { shuffle, cloneDeep } from 'lodash'
 import ws from '../../service/ws'
 import { COLORS } from '../../service/const'
+import { dateFormat } from '../../service/util'
+
 let colorPool = shuffle(COLORS)
 let chart = null
 
@@ -114,6 +123,12 @@ export default {
     },
     options() {
       return this.$store.state.Config.voteOptions
+    },
+    isAccurateMatch() {
+      return this.$store.state.Config.isAccurateMatch
+    },
+    allowReVote() {
+      return this.$store.state.Config.allowReVote
     },
   },
   beforeUnmount() {
@@ -353,16 +368,35 @@ export default {
       const message = JSON.parse(msg.data)
       if (message.cmd !== 'COMMENT') return
       const comment = message.payload
-      // 已经记录过的用户不再重复统计
-      if (this.userMap[comment.uid]) return
-      const index = this.optionRegexps.findIndex((regexp) => {
-        return regexp.test(comment.content)
-      })
+
+      if (this.userMap[comment.uid]) {
+        // 如果允许改票...
+        if (this.allowReVote) {
+          const index = this.userMap[comment.uid].index
+          this.data[index].value--
+        } else {
+          // 已经记录过的用户不再重复统计
+          return
+        }
+      }
+
+      let index
+      if (this.isAccurateMatch) {
+        index = this.keywords.findIndex((keyword) => {
+          return keyword === comment.content
+        })
+      } else {
+        index = this.optionRegexps.findIndex((regexp) => {
+          return regexp.test(comment.content)
+        })
+      }
       if (!~index) return
+
       // 记录统计
-      this.userMap[
-        comment.uid
-      ] = `${comment.uname}(${comment.uid}): ${comment.content} -> ${this.keywords[index]}`
+      this.userMap[comment.uid] = {
+        index,
+        message: `${this.keywords[index]} | ${comment.uname}:${comment.content} | ${dateFormat(comment.sendAt)} `,
+      }
       // 输入图表
       this.data[index].value++
       this.updateChartData()
@@ -405,6 +439,22 @@ export default {
         voteOptions: options,
       })
     },
+
+    changeIsAccurateMatch(value) {
+      const data = {
+        isAccurateMatch: value,
+      }
+      // updateSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    changeAllowReVote(value) {
+      const data = {
+        allowReVote: value,
+      }
+      // updateSetting(data)
+      this.$store.dispatch('UPDATE_CONFIG', data)
+    },
   },
 }
 </script>
@@ -420,7 +470,7 @@ export default {
 }
 
 .vote-button {
-  margin: 5px 0 0 15px;
+  margin: 5px 10px 0 0;
 }
 
 .option-input {
@@ -428,16 +478,16 @@ export default {
   display: inline-block;
 }
 .left-container {
-  margin-top: 15px;
+  margin: 20px 0 0 25px;
   width: 325px;
-  margin-left: 10px;
   display: inline-block;
   vertical-align: top;
 }
 .keyword-container {
-  width: 80px;
+  width: 60px;
   display: inline-block;
   text-align: center;
+  margin: 0px 5px 5px 0px;
 }
 .content-container {
   width: 220px;
@@ -450,11 +500,13 @@ export default {
   display: inline-block;
   vertical-align: middle;
   cursor: pointer;
+  font-size: 20px;
+  margin-left: 10px;
 }
 
 .right-container {
   display: inline-block;
   vertical-align: top;
-  margin-left: 10px;
+  margin: 20px 0 0 20px;
 }
 </style>

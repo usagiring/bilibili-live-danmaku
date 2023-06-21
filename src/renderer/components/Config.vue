@@ -160,33 +160,62 @@
     </div>
 
     <div class="config-item-container">
-      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '200px' }" @on-change="onChangeSignInMessage" />
+      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '120px' }" @on-change="onChangeSignInMessage" />
       <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
         <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
       </Poptip>
       <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
+      <Button class="space-left-5px" type="primary" :disabled="!userCookie" @click="showSignInModal">手动签到</Button>
       <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
+
+    <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
+      <template v-for="(medal, i) in medals" :key="i">
+        <Row align="middle" class-name="medal-list-container disable-user-select">
+          <i-col span="3">
+            <FanMedal v-bind="medal" />
+          </i-col>
+          <i-col span="8">
+            <span :style="{ cursor: 'pointer' }" @click="openBiliLiveRoom(medal.roomId)">{{ medal.uname }}</span>
+            <Icon v-if="medal.liveStatus === 1" :style="{ color: 'green', 'font-size': '16px', margin: '3px 0 0 2px' }" type="ios-radio-button-on" />
+          </i-col>
+          <i-col span="8">
+            <span>亲密度:{{ medal.todayFeed }}/{{ medal.dayLimit }}</span>
+          </i-col>
+          <i-col span="4">
+            <Button @click="signInSingle(medal.roomId)">签到</Button>
+          </i-col>
+        </Row>
+      </template>
+      <Page :total="medalTotal" :page-size="10" @on-change="changeMedalPage" />
+    </Modal>
   </div>
 </template>
 
 <script>
 import { uniq } from 'lodash'
-import { ipcRenderer } from 'electron'
+import { reactive } from 'vue'
+import { ipcRenderer, shell } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
-const browserWindow = getCurrentWindow()
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
-
+import FanMedal from './FanMedal'
+import { parseHexColor } from '../../service/util'
 import { clearDB, backupDB, updateSetting } from '../../service/api'
 import { getGiftConfig, wait } from '../../service/util'
-import { sendMessage, getMedalList, getRoomInfoV2 } from '../../service/bilibili-api'
+import { sendMessage, getMedalList, getRoomInfoV2, getRoomInfoByIds } from '../../service/bilibili-api'
+
+const browserWindow = getCurrentWindow()
 const synth = window.speechSynthesis
 
 export default {
-  data() {
-    return {
+  components: {
+    FanMedal,
+  },
+
+  setup() {
+    const state = reactive({
       userDataPath: '',
-      advancedAutoReplyRuleModal: false,
+      isShowSignInModal: false,
       giftSelectors: [],
       selectedGiftIds: [],
       advancedAutoReplyRules: [],
@@ -199,8 +228,14 @@ export default {
       signInTotalCount: 0,
       isLightMedal: true,
       displayVoices: [],
-    }
+      medalTotal: 0,
+      medals: [],
+    })
+    return state
   },
+  // data() {
+  //   return {}
+  // },
   computed: {
     userCookie() {
       return this.$store.state.Config.userCookie
@@ -329,105 +364,6 @@ export default {
       })
     },
 
-    async changeWatchLottery(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
-        isWatchLottery: status,
-      })
-    },
-
-    async changeAutoReplyText(e) {
-      const [defaultRule, ...rest] = this.autoReplyRules
-      const __copy = Object.assign({}, defaultRule)
-      __copy.text = e.target.value
-      const data = {
-        autoReplyRules: [__copy, ...rest],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
-    async changeOnlyGold(status) {
-      const [defaultRule, ...rest] = this.autoReplyRules
-      const __copy = Object.assign({}, defaultRule)
-      __copy.onlyGold = !status
-      const data = {
-        autoReplyRules: [__copy, ...rest],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
-    showAdvancedAutoReplyRule() {
-      this.advancedAutoReplyRuleModal = true
-    },
-
-    // 清空高级规则，保留第一条默认规则
-    async restoreDefaultAutoReplyRule() {
-      this.advancedAutoReplyRules = []
-      const data = {
-        autoReplyRules: [this.autoReplyRules[0]],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-      this.$Message.success('清空成功！')
-    },
-
-    // addAutoReplyRule() {
-    //   const autoReplyRules = [...this.autoReplyRules]
-    //   const initRule = {
-    //     priority: Math.max(...autoReplyRules.map(r => r.priority)) + 1,
-    //     giftNumber: 0,
-    //     giftId: null,
-    //     text: '',
-    //     isTextReply: false,
-    //     isSpeakReply: false,
-    //   }
-    //   this.advancedAutoReplyRules.push(initRule)
-    // },
-
-    async submitAutoReplyRules() {
-      const data = {
-        autoReplyRules: [this.autoReplyRules[0], ...this.advancedAutoReplyRules],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-      this.$Message.success('保存成功！')
-    },
-
-    removeAutoReplyRule(index) {
-      this.advancedAutoReplyRules.splice(index, 1)
-    },
-
-    async changeOnlyMyselfRoom(status) {
-      const data = {
-        onlyMyselfRoom: status,
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
-    async changeSpeakReply(status) {
-      const [defaultRule, ...rest] = this.autoReplyRules
-      const __copy = Object.assign({}, defaultRule)
-      __copy.isSpeakReply = status
-      const data = {
-        autoReplyRules: [__copy, ...rest],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
-    async changeTextReply(status) {
-      const [defaultRule, ...rest] = this.autoReplyRules
-      const __copy = Object.assign({}, defaultRule)
-      __copy.isTextReply = status
-      const data = {
-        autoReplyRules: [__copy, ...rest],
-      }
-      await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
     speak() {
       const voice = this.voices.find((voice) => voice.name === this.currentVoice)
       const utterThis = new SpeechSynthesisUtterance()
@@ -484,18 +420,66 @@ export default {
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
-    changeOnlyTodayZeroIntimacy(status) {
-      const data = {
-        onlyTodayZeroIntimacy: status,
-      }
-      this.$store.dispatch('UPDATE_CONFIG', data)
-    },
-
     onChangeWaitingSpeakerCount(value) {
       const data = {
         waitingSpeakerCount: value,
       }
       this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    async showSignInModal() {
+      this.isShowSignInModal = true
+
+      if (!this.medals.length || !this.medalTotal) {
+        this.getMedals({ page: 1, pageSize: 10 })
+      }
+    },
+
+    changeMedalPage(page) {
+      this.getMedals({ page, pageSize: 10 })
+    },
+
+    async getMedals({ page = 1, pageSize = 10 }) {
+      const userCookie = this.userCookie
+      if (!userCookie) return
+
+      const signInMessage = this.signInMessage || '打卡'
+
+      const { data } = await getMedalList({ page, pageSize }, userCookie)
+      const { count, items } = data
+      this.medalTotal = count
+      this.medals = items
+
+      this.medals = items.map((item) => {
+        const { medal_color_start, medal_color_end, medal_color_border, medal_name, level, today_feed, uname, day_limit, roomid, target_id } = item
+        return {
+          medalColorStart: parseHexColor(medal_color_start),
+          medalColorEnd: parseHexColor(medal_color_end),
+          medalColorBorder: parseHexColor(medal_color_border),
+          medalName: medal_name,
+          medalLevel: level,
+          todayFeed: today_feed,
+          dayLimit: day_limit,
+          uname: uname,
+          roomId: roomid,
+          uid: target_id,
+        }
+      })
+
+      const { data: roomMap } = await getRoomInfoByIds(this.medals.map((medal) => medal.roomId))
+
+      const roomMapByUid = Object.values(roomMap).reduce((map, room) => {
+        return Object.assign(map, { [room.uid]: room })
+      }, {})
+
+      this.medals.forEach((medal) => {
+        medal.liveStatus = roomMapByUid[medal.uid]?.live_status // 1 直播中 2 轮播中？
+      })
+    },
+
+    openBiliLiveRoom(roomId) {
+      if (!roomId) return
+      shell.openExternal(`https://live.bilibili.com/${roomId}`)
     },
 
     async signIn() {
@@ -562,6 +546,33 @@ export default {
 
       this.$Message.success('签到完成！')
     },
+
+    async signInSingle(roomId) {
+      if (!this.userCookie) return
+      const signInMessage = this.signInMessage || '打卡'
+
+      const { data } = await getRoomInfoV2(roomId)
+      const { room_id: realRoomId } = data.room_info
+      const result = await sendMessage(
+        {
+          message: signInMessage,
+          roomId: realRoomId,
+        },
+        this.userCookie
+      )
+      if (result.data.message) {
+        this.$Message.error({
+          content: `签到未成功: ${result.data.message}`,
+          duration: 1,
+        })
+      } else {
+        this.signInCount++
+        this.$Message.success({
+          content: `签到成功`,
+          duration: 1,
+        })
+      }
+    },
   },
 }
 </script>
@@ -595,5 +606,8 @@ export default {
 }
 .space-left-5px {
   margin-left: 5px;
+}
+.medal-list-container > div {
+  margin: 2px 0;
 }
 </style>
