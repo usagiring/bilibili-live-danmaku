@@ -420,6 +420,10 @@ export default {
         const { likeNumber } = payload.payload
         this.likeNumber = likeNumber
       }
+
+      if(payload.cmd === 'LOG_IN_NOTICE') {
+        this.$Message.error('检测到B站用户名显示异常，尝试重新连接弹幕系统...')
+      }
     })
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
@@ -434,10 +438,16 @@ export default {
     }, 10000)
 
     // 刷新舰长数 间隔1分钟
-    this.guardNumberTimer = setInterval(async () => {
+    this.guardNumberTimer = setInterval(() => {
       if (!this.isConnected || !this.realRoomId || !this.roomUserId) return
-      const guardInfo = await getGuardInfo(this.realRoomId, this.roomUserId)
-      this.guardNumber = guardInfo.data.info.num
+
+      getGuardInfo(this.realRoomId, this.roomUserId)
+        .then((result) => {
+          this.guardNumber = result.data.info.num
+        })
+        .catch((e) => {
+          console.error('get guard info failed')
+        })
     }, 60000)
 
     const { isRecording } = getStatus()
@@ -476,10 +486,10 @@ export default {
           return
         }
 
-        const { room_id: roomId, live_status: liveStatus } = data.room_info
+        const { uid, room_id: roomId, live_status: liveStatus } = data.room_info
         const { uname, face, gender } = data.anchor_info.base_info
 
-        await connectRoom({ roomId: Number(roomId), uid: 0 })
+        await connectRoom({ roomId: Number(roomId), uid: uid || 0 })
 
         const config = {
           isConnected: status,
