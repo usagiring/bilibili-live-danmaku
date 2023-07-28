@@ -376,6 +376,7 @@ export default {
     async onChangeColor(value) {
       if (!value.length) {
         this.$Message.warning('至少需要一个值')
+        return
       }
       const data = {
         colors: value,

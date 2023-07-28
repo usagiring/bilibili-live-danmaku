@@ -48,21 +48,6 @@
           <Icon type="md-pie" />
         </Button>
       </ButtonGroup>
-      <!-- <Tooltip placement="top">
-        <Icon type="md-help" class="info-icon" :style="{'font-size': '16px', 'vertical-align': 'middle'}" />
-        <div slot="content">
-          <div class="description-text">
-            <p>
-              使用方法: 输入 "{关键字} + 备注" 其中 {}
-              内会被匹配，其他作为文字展示。多个选项使用换行分隔。
-            </p>
-            <p>例如:</p>
-            <p>{A} 选项A</p>
-            <p>{B} 选项B</p>
-            <p>{这是一个选项所有文本都会参与匹配}</p>
-          </div>
-        </div>
-      </Tooltip>-->
       <div id="chart" />
     </div>
 
@@ -114,7 +99,7 @@ export default {
       userMap: {},
       keywords: [],
       optionRegexps: [],
-      colorPool: []
+      colorPool: [],
     }
   },
   computed: {
@@ -139,6 +124,10 @@ export default {
   },
   beforeUnmount() {
     this.stop()
+    if (chart) {
+      chart.clear()
+      chart = null
+    }
   },
   methods: {
     initChart() {
@@ -179,83 +168,6 @@ export default {
     stop() {
       this.isWatching = false
       ws.removeEventListener('message', this.onVoteMessage)
-    },
-
-    makeChart(options = {}) {
-      const chartOptions = {}
-
-      if (this.type === 'pie') {
-        Object.assign(chartOptions, {
-          series: [
-            {
-              name: '计数',
-              type: 'pie',
-              minShowLabelAngle: 1,
-              label: {
-                show: true,
-                position: 'outside',
-                formatter: '{b}: {d}%',
-              },
-              data: this.data,
-            },
-          ],
-          legend: {
-            orient: 'vertical',
-            left: 'left',
-          },
-          grid: {
-            top: 0,
-            left: 0,
-            rigth: 0,
-          },
-        })
-      }
-
-      if (this.type === 'bar') {
-        Object.assign(chartOptions, {
-          tooltip: {
-            show: true,
-            // formatter: '{b}: {c}'
-          },
-          series: [
-            {
-              name: '计数',
-              type: 'bar',
-              barWidth: 30,
-              itemStyle: {
-                borderType: 'solid',
-                // borderColor: "silver",
-                // borderWidth: 1,
-                barBorderRadius: [0, 20, 20, 0], //（顺时针左上，右上，右下，左下）
-              },
-              data: this.data,
-            },
-          ],
-          xAxis: {
-            type: 'value',
-            splitLine: {
-              // show: false,
-            },
-            axisTick: {
-              show: false,
-            },
-          },
-          yAxis: {
-            type: 'category',
-            data: this.keywords,
-            axisTick: {
-              show: false,
-            },
-          },
-          grid: {
-            top: 20,
-            left: 5,
-            rigth: 20,
-          },
-        })
-      }
-
-      chart.setOption(chartOptions)
     },
 
     makePieChart() {
