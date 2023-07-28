@@ -5,11 +5,17 @@ import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC
 import '../renderer/store'
 import * as bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main'
+import { PORT, SAVE_ALL_BILI_MESSAGE, DANMAKU_RENDER_PATH } from '../service/config-loader'
 
 initialize()
 
 bilibiliBridge.init({
-  USER_DATA_PATH: app.getPath('userData')
+  USER_DATA_PATH: app.getPath('userData'),
+  roomId: 1,
+  isConnected: false,
+  PORT,
+  SAVE_ALL_BILI_MESSAGE,
+  HTML_PATH: process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../danmaku-dist') : DANMAKU_RENDER_PATH || path.join(__dirname, 'danmaku'),
 })
 
 /**

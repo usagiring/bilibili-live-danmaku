@@ -1,7 +1,7 @@
 // 全局变量
-const globalObject = {
+const globalVar = {
     name: 'bilibili-live-danmaku',
     voices: []
 };
 
-export default globalObject
+export default globalVar

@@ -50,6 +50,16 @@
                   >
                   <span v-if="setting.type === 'comment'">
                     <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle" :src="message.emojiUrl" />
+                    <span v-else-if="message.emots" :style="{ ...fontStyle, ...getCommentStyleByRole(message), ...getTextShadow(message, 'comment') }" class="vertical-align-middle">
+                      <template v-for="(str, index) of message.splitContent" :key="index">
+                        <template v-if="message.emots[str]">
+                          <img :style="{ height: `${message.emots[str].height || 20}px` }" class="vertical-align-middle" :src="message.emots[str].url" />
+                        </template>
+                        <template v-else>
+                          {{ str }}
+                        </template>
+                      </template>
+                    </span>
                     <span v-else :style="{ ...fontStyle, ...getCommentStyleByRole(message), ...getTextShadow(message, 'comment') }" class="vertical-align-middle">
                       {{ message.content }}
                     </span>
@@ -345,6 +355,18 @@ export default {
             return
           }
         }
+      }
+
+      if (comment.emots) {
+        const keys = Object.keys(comment.emots)
+        const regstr = keys
+          .map((key) => key.replace(/\[|\]/g, ''))
+          .map((key) => `\\[${key}\\]`)
+          .join('|')
+
+        const regexp = new RegExp(`(${regstr})`, 'g')
+        const splitContent = comment.content.split(regexp)
+        comment.splitContent = splitContent
       }
 
       if (this.messages.length > MAX_MESSAGE) {

@@ -156,6 +156,8 @@ import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/co
 import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
 import processor from 'worklet-loader!../../service/processor.worklet'
+// import { AudioWorklet } from '../../service/audio-worklet'
+// const { AudioWorklet } = require('../../service/audio-worklet/index.js') 
 import global from '../../service/global'
 import { reactive } from 'vue'
 
@@ -508,6 +510,7 @@ export default {
       const source = context.createMediaStreamSource(stream)
 
       // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
+      // await context.audioWorklet.addModule(AudioWorklet(new URL("../../service/processor.worklet.js", import.meta.url)))
       await context.audioWorklet.addModule(processor)
       const worklet = new AudioWorkletNode(context, 'worklet-processor')
 
@@ -515,6 +518,7 @@ export default {
       let sample8192 = []
       worklet.port.onmessage = (e) => {
         let sample128 = JSON.parse(e.data)
+        console.log(sample128)
         sample8192 = sample8192.concat(sample128)
 
         if (sample8192.length >= 16384) {

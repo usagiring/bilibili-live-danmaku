@@ -73,7 +73,7 @@
         色彩表
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
-            <p>控制图表可选色</p>
+            <p>控制图表可选色，支持自定义颜色，请输入CSS固有色值或者以#开头的16进制色值，如#66ccff</p>
           </div>
         </template>
       </Tooltip>
@@ -271,7 +271,7 @@ export default {
       return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS
     },
     colorOptions() {
-      const color = uniq(COLORS, this.colors)
+      const color = uniq([...COLORS, ...this.colors])
       return color.map((color, index) => {
         return {
           key: index,

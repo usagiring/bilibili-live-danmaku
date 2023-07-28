@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { BASE_URL } from './const'
+import { BASE_URL } from '../service/config-loader'
 
 export async function connect({ roomId }) {
   const res = await axios.post(`${BASE_URL}/api/rooms/${roomId}/connect`)

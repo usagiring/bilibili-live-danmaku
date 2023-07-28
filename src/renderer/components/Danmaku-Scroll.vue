@@ -71,7 +71,7 @@
 
 <script>
 import { debounce } from 'lodash'
-import { PORT } from '../../service/const'
+import { PORT } from '../../service/config-loader'
 import { updateSetting } from '../../service/api'
 import { BrowserWindow, nativeImage } from '@electron/remote'
 import icon from '../assets/logo.png'

@@ -54,7 +54,7 @@ let rendererConfig = {
               less: 'vue-style-loader!css-loader!less-loader'
             }
           }
-        }
+        },
       },
       {
         test: /\.scss$/,
@@ -118,7 +118,7 @@ let rendererConfig = {
       //     }
       //   }
       // }
-    ]
+    ],
   },
   node: {
     __dirname: process.env.NODE_ENV !== 'production',
@@ -140,7 +140,7 @@ let rendererConfig = {
         : false
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
   ],
   output: {
     filename: '[name].js',

@@ -103,7 +103,6 @@ import ws from '../../service/ws'
 import { COLORS } from '../../service/const'
 import { dateFormat } from '../../service/util'
 
-let colorPool = shuffle(COLORS)
 let chart = null
 
 export default {
@@ -115,6 +114,7 @@ export default {
       userMap: {},
       keywords: [],
       optionRegexps: [],
+      colorPool: []
     }
   },
   computed: {
@@ -130,6 +130,12 @@ export default {
     allowReVote() {
       return this.$store.state.Config.allowReVote
     },
+    colors() {
+      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS
+    },
+  },
+  beforeMount() {
+    this.colorPool = shuffle(this.colors)
   },
   beforeUnmount() {
     this.stop()
@@ -360,8 +366,8 @@ export default {
       this.isShowVoteRecord = true
     },
     randomPickColor() {
-      const color = colorPool.shift()
-      colorPool.push(color)
+      const color = this.colorPool.shift()
+      this.colorPool.push(color)
       return color
     },
     onVoteMessage: async function (msg) {

@@ -64,8 +64,8 @@ let webConfig = {
               sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
               scss: 'vue-style-loader!css-loader!sass-loader',
               less: 'vue-style-loader!css-loader!less-loader'
-            }
-          }
+            },
+          },
         }
       },
       {
@@ -88,7 +88,7 @@ let webConfig = {
           }
         }
       },
-    ]
+    ],
   },
   plugins: [
     new VueLoaderPlugin(),
@@ -107,7 +107,7 @@ let webConfig = {
       'process.env.IS_WEB': 'true'
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
   ],
   output: {
     filename: '[name].js',
