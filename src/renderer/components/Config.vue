@@ -85,7 +85,7 @@
       </Select>
     </div>
 
-    <div class="config-item-container">
+    <!-- <div class="config-item-container">
       <Tooltip placement="top" transfer>
         获取头像速率限制
         <template #content>
@@ -96,7 +96,7 @@
         </template>
       </Tooltip>
       <InputNumber class="space-left-5px" :model-value="userInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" @on-change="onChangeUserInfoFrequencyLimit" />
-    </div>
+    </div> -->
 
     <div class="config-item-container">
       <Tooltip placement="top" transfer>
