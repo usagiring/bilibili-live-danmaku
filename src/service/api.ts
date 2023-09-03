@@ -199,3 +199,8 @@ export async function getTranslateStatus() {
   const res = await axios.get(`${BASE_URL}/api/translate/status`)
   return res.data
 }
+
+export async function needRefreshCookie() {
+  const res = await axios.get(`${BASE_URL}/api/need-refresh-cookie`)
+  return res.data
+}

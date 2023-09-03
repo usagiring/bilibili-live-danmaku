@@ -27,7 +27,7 @@
     </div>
     <div class="config-item-container">
       Cookie
-      <Input class="config-item" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
+      <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Tooltip placement="top" transfer>
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
@@ -37,6 +37,9 @@
           </div>
         </template>
       </Tooltip>
+      <template v-if="needRefreshCookie">
+        <span :style="{ color: 'crimson' }">Cookie需要更新</span>
+      </template>
     </div>
     <div class="config-item-container">
       <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }" @on-change="changeAutoRecord"> 自动录制 </Checkbox>
@@ -200,7 +203,7 @@ import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
-import { clearDB, backupDB, updateSetting } from '../../service/api'
+import { clearDB, backupDB, updateSetting, needRefreshCookie } from '../../service/api'
 import { getGiftConfig, wait } from '../../service/util'
 import { sendMessage, getMedalList, getRoomInfoV2, getRoomInfoByIds } from '../../service/bilibili-api'
 
@@ -230,6 +233,7 @@ export default {
       displayVoices: [],
       medalTotal: 0,
       medals: [],
+      needRefreshCookie: false,
     })
     return state
   },
@@ -329,6 +333,14 @@ export default {
     }, 500)
 
     this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
+
+    if (this.userCookie) {
+      needRefreshCookie().then(({ data }) => {
+        if (data.refresh) {
+          this.needRefreshCookie = true
+        }
+      })
+    }
   },
   methods: {
     async restoreDefaultStyleSetting() {
