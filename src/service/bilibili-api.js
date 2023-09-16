@@ -84,6 +84,8 @@ async function getUserInfoV2(userId) {
   })
 
   const res = await axios.get(`${baseUrl}/x/space/wbi/acc/info?${querystring}`, {
+    headers: Object.assign({}, defaultHeaders),
+    adapter: httpAdapter,
     timeout: 1000
   })
   return res.data

@@ -1,6 +1,19 @@
 <template>
   <div class="disable-user-select">
-    <div class="setting-group" :style="{ 'padding-top': '10px' }">
+    <Drawer title="关于弹幕用户名、头像不显示说明" placement="bottom" height="70" :closable="true" v-model="showDrawTip">
+      <p>由于B站隐私策略限制，未登录用户无法查看用户名、头像、ID</p>
+      <p>未登录会导致投票、统计功能不可用</p>
+      <p>您可以通过<Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
+      <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，完整复制粘贴到设置中</p>
+      <img src="../assets/tip-01.png" />
+    </Drawer>
+    <div class="setting-group">
+      <Alert type="warning" :style="{ cursor: 'pointer' }" @click="showDrawTip = true">
+        <Icon type="ios-megaphone" :style="{ 'font-size': '16px' }" />
+        <span> 关于弹幕用户名、头像不显示说明</span>
+      </Alert>
+    </div>
+    <div class="setting-group" :style="{ 'padding-top': '0px' }">
       <Button size="small" @click="sendTestMessage">发送测试弹幕</Button>
       <Button :style="{ 'margin-left': '10px' }" size="small" @click="clearDanmaku">清空弹幕</Button>
     </div>
@@ -521,6 +534,7 @@ export default {
         medalColorEnd: '#5c968e',
         _id: '020wdKl7EYV9c8cD',
       },
+      showDrawTip: false,
       isShowBorderModal: false,
       images: [],
       selectedImageBorderIndex: 0,

@@ -33,11 +33,6 @@
 
         <div class="status-wrapper">
           <div class="status-padding status-shadow">
-            <Icon type="md-flame" />
-            <span class="header-icon-text"> 人气值 </span>
-            {{ ninkiNumber }}
-          </div>
-          <div class="status-padding status-shadow">
             <Icon type="md-star" />
             <span class="header-icon-text"> 关注数 </span>
             {{ fansNumber }}
@@ -46,6 +41,11 @@
             <Icon type="md-heart" />
             <span class="header-icon-text"> 粉丝团 </span>
             {{ fansClubNumber }}
+          </div>
+          <div class="status-padding status-shadow">
+            <Icon class="status-shadow" type="md-eye" />
+            <span class="header-icon-text"> 观看数 </span>
+            {{ watchedNumber }}
           </div>
         </div>
         <div class="status-wrapper">
@@ -62,16 +62,10 @@
             <span class="space-left-2px status-shadow">{{ peopleNumber }}</span>
           </div>
           <div class="status-padding">
-            <Tooltip :content="`${watchedNumber}人看过`">
-              <Icon class="status-shadow" type="md-eye" />
+            <Tooltip :content="`${likeNumber}次点赞`">
+              <Icon class="status-shadow" type="md-thumbs-up" />
             </Tooltip>
-            <span class="space-left-2px status-shadow">{{ watchedNumber }}</span>
-          </div>
-        </div>
-        <div class="status-wrapper">
-          <div class="status-padding status-shadow">
-            <Icon type="md-thumbs-up" />
-            {{ likeNumber }}
+            <span class="space-left-2px status-shadow">{{ likeNumber }}</span>
           </div>
         </div>
         <div v-if="hasNewVersion" class="updater-wrapper">
@@ -422,9 +416,9 @@ export default {
         this.likeNumber = likeNumber
       }
 
-      if (payload.cmd === 'LOG_IN_NOTICE') {
-        this.$Message.error('检测到B站用户名显示异常，尝试重新连接弹幕系统...')
-      }
+      // if (payload.cmd === 'LOG_IN_NOTICE') {
+      //   this.$Message.error('检测到B站用户名显示异常，尝试重新连接弹幕系统...')
+      // }
     })
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
