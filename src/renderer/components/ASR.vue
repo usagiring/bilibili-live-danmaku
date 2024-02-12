@@ -124,6 +124,10 @@
         <Button type="primary" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" :loading="isStarting" @click="start">开始</Button>
         <Button class="margin-left-5px" :disabled="!isStarted" @click="stop">停止</Button>
       </div>
+
+      <Divider size="small"> </Divider>
+
+      <Button :loading="isStartingSpeechToDanmaku" class="config-container" @click="showSpeechToDanmaku">语音发送弹幕</Button>
     </div>
 
     <div class="right-container">
@@ -137,7 +141,7 @@
 
     <Modal v-model="isMicrophoneNoticeModalOpen" title="即将使用麦克风" @on-ok="microphoneNoticeOk" @on-cancel="microphoneNoticeCancel">
       <p :style="{ padding: '5px' }">您的麦克风输入数据将提交至云服务商进行分析</p>
-      <Checkbox v-model="__disableMircrophotoNoticeMessage" :style="{ padding: '10px' }">下次不再显示</Checkbox>
+      <Checkbox v-model="isDisableMircrophotoNoticeMessagePersistent" :style="{ padding: '10px' }">下次不再显示</Checkbox>
     </Modal>
   </div>
 </template>
@@ -151,13 +155,25 @@ import { ipcRenderer } from 'electron'
 import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
-import { initialASR, closeASR, getASRStatus, translateSentence, translateOpen, translateClose, getTranslateStatus, startLiveStreamASR, closeLiveStreamASR } from '../../service/api'
+import {
+  initialASR,
+  closeASR,
+  getASRStatus,
+  translateSentence,
+  translateOpen,
+  translateClose,
+  getTranslateStatus,
+  startLiveStreamASR,
+  closeLiveStreamASR,
+  initialSpeechRegcognition,
+  speechToText,
+} from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
 import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
 import processor from 'worklet-loader!../../service/processor.worklet'
 // import { AudioWorklet } from '../../service/audio-worklet'
-// const { AudioWorklet } = require('../../service/audio-worklet/index.js') 
+// const { AudioWorklet } = require('../../service/audio-worklet/index.js')
 import global from '../../service/global'
 import { reactive } from 'vue'
 
@@ -172,7 +188,9 @@ export default {
       isShowASRWindow: false,
       isASRWindowAlwaysOnTop: false,
       enableTranslate: false,
-      __disableMircrophotoNoticeMessage: false,
+      isStartingSpeechToDanmaku: false,
+      isDisableMircrophotoNoticeMessagePersistent: false,
+      disableMircrophotoNoticeMessageTemp: false,
       fromLangs: [
         {
           value: 'auto',
@@ -409,24 +427,32 @@ export default {
     openAuidoTestModal() {},
 
     microphoneNoticeOk() {
-      if (this.__disableMircrophotoNoticeMessage) {
+      this.disableMircrophotoNoticeMessageTemp = true
+      if (this.isDisableMircrophotoNoticeMessagePersistent) {
         this.$store.dispatch('UPDATE_CONFIG', {
           disableMircrophotoNoticeMessage: true,
         })
       }
-      this.getMicrophoneAudio()
+
+      if (this.isStarting) {
+        this.getMicrophoneAudio()
+      }
+      if (this.isStartingSpeechToDanmaku) {
+        this.showSpeechToDanmaku()
+      }
     },
 
     microphoneNoticeCancel() {
       this.isStarting = false
       this.isStarted = false
+      this.isStartingSpeechToDanmaku = false
     },
 
     async start() {
       this.isStarting = true
 
       if (this.audioFrom === 'microphone') {
-        if (this.disableMircrophotoNoticeMessage) {
+        if (this.disableMircrophotoNoticeMessage || this.disableMircrophotoNoticeMessageTemp) {
           await this.getMicrophoneAudio()
           return
         } else {
@@ -550,6 +576,44 @@ export default {
         aliAccessKeySecret: e.target.value,
       }
       this.$store.dispatch('UPDATE_CONFIG', data)
+    },
+
+    async showSpeechToDanmaku() {
+      this.isStartingSpeechToDanmaku = true
+      if (!this.disableMircrophotoNoticeMessage && !this.disableMircrophotoNoticeMessageTemp) {
+        this.isMicrophoneNoticeModalOpen = true
+        return
+      }
+
+      await initialSpeechRegcognition({
+        accessKeyId: this.aliAccessKeyId,
+        accessKeySecret: this.aliAccessKeySecret,
+        appKey: this.aliAppKey,
+      })
+
+      const win = new BrowserWindow({
+        width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
+        height: this.liveWindowHeight || 320,
+        // x, y,
+        x: this.liveWindowX || 640,
+        y: this.liveWindowY || 320,
+        autoHideMenuBar: true,
+        // frame: false,
+        // transparent: true,
+        // hasShadow: false,
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+        },
+        resizable: true,
+      })
+
+      const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/speech-to-danmaku` : `file://${__dirname}/index.html#speech-to-danmaku`
+      win.setIcon(nativeImage.createFromDataURL(icon))
+
+      win.loadURL(winURL)
+
+      this.isStartingSpeechToDanmaku = false
     },
 
     changeAliAppKey(value) {

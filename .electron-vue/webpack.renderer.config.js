@@ -141,6 +141,20 @@ let rendererConfig = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        // ...
+        {
+          from: "node_modules/@ricky0123/vad/dist/*.worklet.js",
+          to: "[name][ext]",
+        },
+        {
+          from: "node_modules/@ricky0123/vad/dist/*.onnx",
+          to: "[name][ext]",
+        },
+        { from: "node_modules/onnxruntime-web/dist/*.wasm", to: "[name][ext]" },
+      ],
+    }),
   ],
   output: {
     filename: '[name].js',

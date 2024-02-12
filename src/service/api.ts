@@ -204,3 +204,13 @@ export async function needRefreshCookie() {
   const res = await axios.get(`${BASE_URL}/api/need-refresh-cookie`)
   return res.data
 }
+
+export async function initialSpeechRegcognition(body) {
+  const res = await axios.post(`${BASE_URL}/api/speech-recognition/initial`, body)
+  return res.data
+}
+
+export async function speechToText(body) {
+  const res = await axios.post(`${BASE_URL}/api/speech-recognition/speech-to-text`, body)
+  return res.data
+}

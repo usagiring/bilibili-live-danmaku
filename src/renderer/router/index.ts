@@ -68,6 +68,10 @@ const routes = [
     component: () => import('../components/ASRWindow.vue')
   },
   {
+    path: '/speech-to-danmaku',
+    component: () => import('../components/SpeechToDanmaku.vue')
+  },
+  {
     path: '/live-window',
     component: () => import('../components/LiveWindow.vue')
   },

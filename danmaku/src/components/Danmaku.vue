@@ -77,6 +77,8 @@
             <template v-if="message.category === 'interactWord'">
               <!-- 入场消息设置默认使用普通设置 -->
               <p :style="getCommentStyleByRole({ role: 0 })">
+                <Avatar class="margin-lr-1px" :src="message.face" :style="{width: `28px`, height: `28px`, 'line-height': `28px`}" />
+                <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
                 <FanMedal
                   v-if="isShowFanMedal && message.medalLevel && message.medalName"
                   :medal-level="message.medalLevel"

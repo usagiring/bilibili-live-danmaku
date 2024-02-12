@@ -21,8 +21,8 @@
                   ● 每一条规则应该要有至少一条<span :style="{ color: 'aquamarine' }">执行规则</span>，可以有若干条<span :style="{ color: 'violet' }">限制规则</span>。
                   <span :style="{ color: 'pink' }">拖拽</span>上面「标签」到规则栏！
                 </p>
-                <p>● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user.name} {gift.name} {comment.content} {superchat.content}。 模版占位符将被替换为实际内容！</p>
-                <p>● 例如：触发类型：弹幕，回复文字模版：{user.name}说 {comment.content}，规则：佩戴粉丝牌，语音播放。 表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)</p>
+                <p>● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。 模版占位符将被替换为实际内容！</p>
+                <p>● 例如：触发类型：弹幕，回复文字模版：{user}说 {comment}，规则：佩戴粉丝牌，语音播放。 表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)</p>
                 <!-- <p>
                 例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
               </p> -->
