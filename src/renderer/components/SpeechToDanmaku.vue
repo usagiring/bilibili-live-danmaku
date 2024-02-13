@@ -116,6 +116,8 @@ export default {
 
   methods: {
     async requestMic() {
+      const self = this
+
       try {
         // window.AudioContext = window.AudioContext || window.webkitAudioContext
         // audioContext = new AudioContext()
