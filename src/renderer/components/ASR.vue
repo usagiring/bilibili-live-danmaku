@@ -544,7 +544,6 @@ export default {
       let sample8192 = []
       worklet.port.onmessage = (e) => {
         let sample128 = JSON.parse(e.data)
-        console.log(sample128)
         sample8192 = sample8192.concat(sample128)
 
         if (sample8192.length >= 16384) {

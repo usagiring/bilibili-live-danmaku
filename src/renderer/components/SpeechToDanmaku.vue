@@ -23,8 +23,8 @@
       </Button>
       <!-- </Col> -->
       <!-- <Col span="8"> -->
-      <Button :style="{ margin: '0 10px' }">
-        <Icon size="16" type="ios-mic-outline" @click="cancel" />
+      <Button :style="{ margin: '0 10px' }" @click="cancel">
+        <Icon size="16" type="ios-mic-outline" />
         Cancel
       </Button>
       <!-- </Col> -->
@@ -38,9 +38,19 @@ import ws from '../../service/ws'
 import { speechToText } from '../../service/api'
 import { sendMessage } from '../../service/bilibili-api'
 
-import * as vad from '@ricky0123/vad'
-import { env } from 'onnxruntime-web'
-env.wasm.wasmPaths = window.location.protocol === 'file:' ? window.location.href.substring(0, window.location.href.indexOf('app.asar')) : ''
+// 依赖过大50mb 放弃使用
+// import * as vad from '@ricky0123/vad'
+// import vad2 from 'voice-activity-detection'
+import vad3 from '../../service/vad'
+import processor from 'worklet-loader!../../service/processor.worklet'
+
+/**
+ * @description 开发环境开启以下配置
+ */
+// import { env } from 'onnxruntime-web'
+// env.wasm.wasmPaths = window.location.protocol === 'file:' ? window.location.href.substring(0, window.location.href.indexOf('app.asar')) : ''
+
+let isVoiceActive = false
 
 export default {
   setup() {
@@ -70,32 +80,34 @@ export default {
     ws.addEventListener('message', this.onMessage)
   },
 
-  mounted() {
-    vad.MicVAD.new({
-      onSpeechStart: () => {
-        console.log('Speech start detected')
-        this.isLoading = true
-      },
-      onSpeechEnd: (audio) => {
-        if (audio.length > 300000) {
-          this.isLoading = false
-          return
-        }
-        const pcmData = new Int16Array(audio.length)
+  async mounted() {
+    // vad.MicVAD.new({
+    //   onSpeechStart: () => {
+    //     console.log('Speech start detected')
+    //     this.isLoading = true
+    //   },
+    //   onSpeechEnd: (audio) => {
+    //     if (audio.length > 300000) {
+    //       this.isLoading = false
+    //       return
+    //     }
+    //     const pcmData = new Int16Array(audio.length)
 
-        // 32bit to 16bit
-        for (let i = 0; i < audio.length; i++) {
-          let s = Math.max(-1, Math.min(1, audio[i]))
-          s = s < 0 ? s * 0x8000 : s * 0x7fff
-          pcmData[i] = s
-        }
-        this.isLoading = false
-        speechToText({ appKey: this.aliAppKey, payload: JSON.stringify(Array.from(pcmData)) })
-        // do something with `audio` (Float32Array of audio samples at sample rate 16000)...
-      },
-    }).then((myvad) => {
-      myvad.start()
-    })
+    //     // 32bit to 16bit
+    //     for (let i = 0; i < audio.length; i++) {
+    //       let s = Math.max(-1, Math.min(1, audio[i]))
+    //       s = s < 0 ? s * 0x8000 : s * 0x7fff
+    //       pcmData[i] = s
+    //     }
+    //     this.isLoading = false
+    //     // speechToText({ appKey: this.aliAppKey, payload: JSON.stringify(Array.from(pcmData)) })
+    //     // do something with `audio` (Float32Array of audio samples at sample rate 16000)...
+    //   },
+    // }).then((myvad) => {
+    //   myvad.start()
+    // })
+
+    this.requestMic()
   },
 
   beforeUnmount() {
@@ -103,6 +115,122 @@ export default {
   },
 
   methods: {
+    async requestMic() {
+      try {
+        // window.AudioContext = window.AudioContext || window.webkitAudioContext
+        // audioContext = new AudioContext()
+
+        // navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia
+        // navigator.getUserMedia({ audio: true }, this.startUserMedia, this.handleMicConnectError)
+
+        const option = {
+          audio: true,
+          video: false,
+        }
+        // if (!this.audioDeviceId) {
+        //   option.audio = {
+        //     deviceId: this.audioDeviceId,
+        //   }
+        // }
+        const context = new AudioContext({
+          sampleRate: '16000',
+        })
+        const stream = await navigator.mediaDevices.getUserMedia(option)
+        // this.startUserMedia(context, stream)
+
+        const source = context.createMediaStreamSource(stream)
+        var options = {
+          source: source,
+          voice_stop: function () {
+            console.log('voice_stop')
+            isVoiceActive = false
+            self.isLoading = false
+          },
+          voice_start: function () {
+            console.log('voice_start')
+            isVoiceActive = true
+            self.isLoading = true
+          },
+        }
+
+        // Create VAD
+        var vad = new vad3(options)
+
+        // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
+        // await context.audioWorklet.addModule(AudioWorklet(new URL("../../service/processor.worklet.js", import.meta.url)))
+        await context.audioWorklet.addModule(processor)
+        const worklet = new AudioWorkletNode(context, 'worklet-processor')
+
+        // let count = 0
+        let sample = []
+        let voiceRaw = []
+
+        let isSendThisPak = false
+        worklet.port.onmessage = (e) => {
+          let sample128 = JSON.parse(e.data)
+          sample = sample.concat(sample128)
+
+          if (isVoiceActive) {
+            isSendThisPak = true
+          }
+
+          if (sample.length >= 8192) {
+            if (isSendThisPak && voiceRaw.length < 300000) {
+              voiceRaw = voiceRaw.concat(sample)
+            }
+
+            if (!isSendThisPak) {
+              console.log('voiceRaw', voiceRaw.length)
+              if (voiceRaw.length && voiceRaw.length < 300000) {
+                speechToText({ appKey: this.aliAppKey, payload: JSON.stringify(voiceRaw) })
+              }
+              voiceRaw = []
+            }
+
+            sample = []
+            isSendThisPak = false
+          }
+        }
+
+        source.connect(worklet)
+        worklet.connect(context.destination)
+      } catch (e) {
+        this.handleUserMediaError()
+        throw e
+      }
+    },
+
+    handleUserMediaError() {
+      console.warn('Mic input is not supported by the browser.')
+    },
+
+    handleMicConnectError() {
+      console.warn('Could not connect microphone. Possible rejected by the user or is blocked by the browser.')
+    },
+
+    startUserMedia(audioContext, stream) {
+      const self = this
+      var options = {
+        noiseCaptureDuration: 200,
+        smoothingTimeConstant: 0.1,
+        minNoiseLevel: 0.3,
+        maxNoiseLevel: 0.7,
+        avgNoiseMultiplier: 1.2,
+        onVoiceStart: function () {
+          console.log('voice start')
+          isVoiceActive = true
+          self.isLoading = true
+        },
+        onVoiceStop: function () {
+          console.log('voice stop')
+          isVoiceActive = false
+          self.isLoading = false
+        },
+        onUpdate: function (val) {},
+      }
+      vad2(audioContext, stream, options)
+    },
+
     onMessage(msg) {
       const payload = JSON.parse(msg.data)
 
