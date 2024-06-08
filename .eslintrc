@@ -3,6 +3,9 @@
     "plugin:vue/vue3-essential",
     "plugin:vue/vue3-recommended"
   ],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
     "no-console": "off",
     "no-debugger": "off",

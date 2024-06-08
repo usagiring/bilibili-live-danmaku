@@ -4,9 +4,10 @@ import { DEFAULT_STYLE } from './const'
 
 const defaultOptions = {
   ...DEFAULT_STYLE,
+  // @ts-ignore
   ...store.state.Config,
 }
 
-export function init(options) {
+export default function init(options) {
   bridge(Object.assign({}, defaultOptions, options))
 }

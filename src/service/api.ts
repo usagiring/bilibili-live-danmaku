@@ -2,7 +2,7 @@ import axios from 'axios'
 import { BASE_URL } from '../service/config-loader'
 
 export async function connect({ roomId, uid }) {
-  const res = await axios.post(`${BASE_URL}/api/rooms/${roomId}/connect`, {
+  const res = await axios.post(`${BASE_URL}/api/room/${roomId}/connect`, {
     roomId,
     uid,
   })
@@ -10,7 +10,7 @@ export async function connect({ roomId, uid }) {
 }
 
 export async function disconnect({ roomId }) {
-  const res = await axios.post(`${BASE_URL}/api/rooms/${roomId}/disconnect`)
+  const res = await axios.post(`${BASE_URL}/api/room/${roomId}/disconnect`)
   return res.data
 }
 
@@ -20,24 +20,24 @@ export async function touch() {
 }
 
 export async function getRealTimeViewersCount({ roomId }) {
-  const res = await axios.get(`${BASE_URL}/api/rooms/${roomId}/real-time/viewers/count`)
+  const res = await axios.get(`${BASE_URL}/api/room/${roomId}/real-time/viewer/count`)
   return res.data
 }
 
 export async function getRoomStatus({ roomId }) {
-  const res = await axios.get(`${BASE_URL}/api/rooms/${roomId}/status`)
+  const res = await axios.get(`${BASE_URL}/api/room/${roomId}/status`)
   return res.data
 }
 
 export async function clearDB({ names }) {
-  const res = await axios.post(`${BASE_URL}/api/dbs/clear`, {
+  const res = await axios.post(`${BASE_URL}/api/db/clear`, {
     names
   })
   return res.data
 }
 
 export async function backupDB({ names }) {
-  const res = await axios.post(`${BASE_URL}/api/dbs/backup`, {
+  const res = await axios.post(`${BASE_URL}/api/db/backup`, {
     names
   })
   return res.data
@@ -45,94 +45,94 @@ export async function backupDB({ names }) {
 
 // { [any]: any }
 export async function mergeSetting(settings) {
-  const res = await axios.put(`${BASE_URL}/api/settings/merge`, settings)
+  const res = await axios.put(`${BASE_URL}/api/setting/merge`, settings)
   return res.data
 }
 
-export async function replaceSetting(settings) {
-  const res = await axios.put(`${BASE_URL}/api/settings/replace`, settings)
-  return res.data
-}
+// export async function replaceSetting(settings) {
+//   const res = await axios.put(`${BASE_URL}/api/settings/replace`, settings)
+//   return res.data
+// }
 
 export async function updateSetting(settings) {
-  const res = await axios.put(`${BASE_URL}/api/settings/update`, settings)
+  const res = await axios.put(`${BASE_URL}/api/setting/update`, settings)
   return res.data
 }
 
 export async function clearMessage() {
-  const res = await axios.post(`${BASE_URL}/api/messages/clear`)
+  const res = await axios.post(`${BASE_URL}/api/message/clear`)
   return res.data
 }
 
 export async function queryGifts(body) {
-  const res = await axios.post(`${BASE_URL}/api/gifts/query`, body)
+  const res = await axios.post(`${BASE_URL}/api/gift/query`, body)
   return res.data
 }
 
 export async function queryInteracts(body) {
-  const res = await axios.post(`${BASE_URL}/api/interacts/query`, body)
+  const res = await axios.post(`${BASE_URL}/api/interact/query`, body)
   return res.data
 }
 
 export async function queryComments(body) {
-  const res = await axios.post(`${BASE_URL}/api/comments/query`, body)
+  const res = await axios.post(`${BASE_URL}/api/comment/query`, body)
   return res.data
 }
 
 export async function queryLotteryHistories(body) {
-  const res = await axios.post(`${BASE_URL}/api/lottery-histories/query`, body)
+  const res = await axios.post(`${BASE_URL}/api/lottery/history/query`, body)
   return res.data
 }
 
 export async function deleteLotteryHistories(body) {
-  const res = await axios.delete(`${BASE_URL}/api/lottery-histories`, body)
+  const res = await axios.delete(`${BASE_URL}/api/lottery/history`, body)
   return res.data
 }
 
 export async function addLotteryHistory(body) {
-  const res = await axios.post(`${BASE_URL}/api/lottery-histories`, body)
+  const res = await axios.post(`${BASE_URL}/api/lottery/history`, body)
   return res.data
 }
 
 export async function countComments(body) {
-  const res = await axios.post(`${BASE_URL}/api/comments/count`, body)
+  const res = await axios.post(`${BASE_URL}/api/comment/count`, body)
   return res.data
 }
 
 export async function countInteracts(body) {
-  const res = await axios.post(`${BASE_URL}/api/interacts/count`, body)
+  const res = await axios.post(`${BASE_URL}/api/interact/count`, body)
   return res.data
 }
 
 export async function countGifts(body) {
-  const res = await axios.post(`${BASE_URL}/api/gifts/count`, body)
+  const res = await axios.post(`${BASE_URL}/api/gift/count`, body)
   return res.data
 }
 
 export async function sendMessages(body) {
-  const res = await axios.post(`${BASE_URL}/api/messages/send`, body)
+  const res = await axios.post(`${BASE_URL}/api/message/send`, body)
   return res.data
 }
 
-export async function sendExampleMessages(body) {
-  const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)
+// export async function sendExampleMessages(body) {
+//   const res = await axios.post(`${BASE_URL}/api/messages/examples/send`, body)
+//   return res.data
+// }
+
+export async function getGiftConfig(roomId: string) {
+  const res = await axios.get(`${BASE_URL}/api/room/${roomId}/gift/map`)
   return res.data
 }
 
-export async function getGiftConfig() {
-  const res = await axios.get(`${BASE_URL}/api/gifts/config`)
-  return res.data
-}
+// export async function getVoices() {
+//   const res = await axios.get(`${BASE_URL}/api/voices`)
+//   return res.data
+// }
 
-export async function getVoices() {
-  const res = await axios.get(`${BASE_URL}/api/voices`)
-  return res.data
-}
-
-export async function speak(body) {
-  const res = await axios.post(`${BASE_URL}/api/speak`, body)
-  return res.data
-}
+// export async function speak(body) {
+//   const res = await axios.post(`${BASE_URL}/api/speak`, body)
+//   return res.data
+// }
 
 export async function statistic(body) {
   const res = await axios.post(`${BASE_URL}/api/statistic`, body)
@@ -140,12 +140,12 @@ export async function statistic(body) {
 }
 
 export async function commentWordExtract(body) {
-  const res = await axios.post(`${BASE_URL}/api/comments/word-extract`, body)
+  const res = await axios.post(`${BASE_URL}/api/statistic/comment/keyword-extract`, body)
   return res.data
 }
 
 export async function exportFile(body) {
-  const res = await axios.post(`${BASE_URL}/api/export`, body, {
+  const res = await axios.post(`${BASE_URL}/api/statistic/gift/export`, body, {
     // responseType: 'stream', // ?????
     // decompress: false,
     transitional: {
