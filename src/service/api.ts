@@ -43,19 +43,10 @@ export async function backupDB({ names }) {
   return res.data
 }
 
-// { [any]: any }
-export async function mergeSetting(settings) {
-  const res = await axios.put(`${BASE_URL}/api/setting/merge`, settings)
-  return res.data
-}
-
-// export async function replaceSetting(settings) {
-//   const res = await axios.put(`${BASE_URL}/api/settings/replace`, settings)
-//   return res.data
-// }
-
 export async function updateSetting(settings) {
-  const res = await axios.put(`${BASE_URL}/api/setting/update`, settings)
+  const res = await axios.put(`${BASE_URL}/api/setting`, {
+    upsert: settings
+  })
   return res.data
 }
 
@@ -149,7 +140,7 @@ export async function exportFile(body) {
     // responseType: 'stream', // ?????
     // decompress: false,
     transitional: {
-      forcedJSONParsing: false
+      forcedJSONParsing: false,
     }
   })
   return res.data

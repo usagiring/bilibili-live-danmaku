@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { mergeSetting } from '../../service/api'
+import { updateSetting } from '../../service/api'
 
 export default {
   data() {
@@ -79,7 +79,7 @@ export default {
           enable: status
         },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -90,7 +90,7 @@ export default {
           roles: values
         },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -101,7 +101,7 @@ export default {
           keyword: e.target.value
         },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -112,7 +112,7 @@ export default {
           count: number
         },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     },
 
@@ -124,7 +124,7 @@ export default {
           useHintText: status
         },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch("UPDATE_CONFIG", data)
     }
   }

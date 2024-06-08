@@ -3,10 +3,19 @@
     "./src/**/*"
   ],
   "compilerOptions": {
-    "module": "es2015",
-    "moduleResolution": "node",
+    // "module": "es2015",
+    // "moduleResolution": "node",
+    // "target": "es5",
+    // "sourceMap": true,
+    // "allowJs": true,
+    "outDir": "./dist/",
+    "noImplicitAny": false,
+    "module": "es6",
     "target": "es5",
-    "sourceMap": true,
-    "allowJs": true
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   }
 }

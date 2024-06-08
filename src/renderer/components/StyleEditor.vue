@@ -12,7 +12,7 @@
 
 <script>
 import { debounce } from 'lodash'
-import { mergeSetting } from '../../service/api'
+import { updateSetting } from '../../service/api'
 
 export default {
   props: ['type', 'name', 'role', 'prop', 'styleName', 'numberStep'],
@@ -52,7 +52,7 @@ export default {
       const data = {
         [objKey]: { [this.styleName]: this.type === 'InputNumber' ? this.pxFormatter(value) : value },
       }
-      await mergeSetting(data)
+      await updateSetting(data)
     },
     pxFormatter: (value) => `${value}px`,
     pxParser: (value) => Number(value.replace('px', '')),

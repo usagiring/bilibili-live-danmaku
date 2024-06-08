@@ -492,7 +492,7 @@ import FanMedal from './FanMedal'
 import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
-import { mergeSetting, updateSetting, clearMessage, sendMessages } from '../../service/api'
+import { updateSetting, clearMessage, sendMessages } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -1170,7 +1170,7 @@ export default {
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async sendTestMessage() {
@@ -1186,7 +1186,7 @@ export default {
         background: color,
         // scrollDanmakuBackground: color,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async changeAvatarSize(size) {
@@ -1215,14 +1215,14 @@ export default {
         opacity: Number((number / 100).toFixed(2)),
       }
       this.$store.dispatch('UPDATE_CONFIG', data)
-      await mergeSetting(data)
+      await updateSetting(data)
     },
 
     async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1230,7 +1230,7 @@ export default {
       const data = {
         hiddenExpiredTime: number,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1238,14 +1238,14 @@ export default {
       const data = {
         showHeadlineThreshold: number,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1253,7 +1253,7 @@ export default {
       const data = {
         isShowSilverGift: status,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1371,7 +1371,7 @@ export default {
       const data = {
         danmakuFont: value,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1379,7 +1379,7 @@ export default {
       const data = {
         isUseMiniGiftCard: value,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1441,7 +1441,7 @@ export default {
       const data = {
         emojiSize: number,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1547,7 +1547,7 @@ export default {
       const data = {
         fontWeight: value,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1555,7 +1555,7 @@ export default {
       const data = {
         isShowHeadline: value,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1583,7 +1583,7 @@ export default {
       const data = {
         isShowType1: status,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1591,7 +1591,7 @@ export default {
       const data = {
         isShowType2: status,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1599,7 +1599,7 @@ export default {
       const data = {
         isShowSuperChatJPN: status,
       }
-      await mergeSetting(data)
+      await updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1608,7 +1608,7 @@ export default {
       const data = {
         adminIcon: icon,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1616,7 +1616,7 @@ export default {
       const data = {
         isShowAdminIcon: status,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1624,7 +1624,7 @@ export default {
       const data = {
         adminIconColor: color,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1644,7 +1644,7 @@ export default {
       const data = {
         danmakuChannel: number,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
 
@@ -1652,14 +1652,14 @@ export default {
       const data = {
         channelDelayTime: number,
       }
-      mergeSetting(data)
+      updateSetting(data)
       this.$store.dispatch('UPDATE_CONFIG', data)
     },
   },
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .setting-key {
   padding-top: 5px;
 }
@@ -1698,35 +1698,32 @@ export default {
   background-size: contain;
   background-repeat: no-repeat;
 }
-// .divider {
-//   display: flex;
-// }
 
 .divider {
   display: flex;
+}
 
-  &:before,
-  &:after {
-    content: '';
-    flex: 1;
-  }
+.divider:before,
+.divider:after {
+  content: '';
+  flex: 1;
 }
 
 .line {
   align-items: center;
+}
 
-  &:before,
-  &:after {
-    height: 1px;
-    margin: 0 1em;
-  }
+.line:before,
+.line:after {
+  height: 1px;
+  margin: 0 1em;
 }
 
 .one-line {
-  &:before,
-  &:after {
-    background: lightgray;
-  }
+}
+.one-line:before,
+.one-line:after {
+  background: lightgray;
 }
 
 .divider-text {
@@ -1805,11 +1802,11 @@ export default {
   display: inline-block;
   -webkit-user-select: none;
   user-select: none;
-
-  & .smooth-dnd-draggable-wrapper {
-    cursor: move;
-  }
 }
+.operatable-preview-text .smooth-dnd-draggable-wrapper {
+  cursor: move;
+}
+
 .admin-icon {
   font-size: 22px;
   vertical-align: middle;
@@ -1824,9 +1821,9 @@ export default {
 }
 
 .max-width {
-  // display: inline-block;
   width: 100%;
 }
+
 .space-left-2px {
   margin-left: 2px;
 }
