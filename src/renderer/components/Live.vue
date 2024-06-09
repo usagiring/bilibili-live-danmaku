@@ -90,13 +90,20 @@
 import * as flvjs from 'flv.js'
 import { ipcRenderer } from 'electron'
 import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
-import { record, getRandomPlayUrl, cancelRecord, getStatus, setStatus } from '../../service/bilibili-recorder'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
 import { parseDownloadRate, parseHexColor } from '../../service/util'
-import { sendMessage, getInfoByUser, wearMedal } from '../../service/bilibili-api'
+import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
+
+const qualityMap = {
+  原画: 10000,
+  蓝光: 400,
+  超清: 250,
+  高清: 150,
+  流畅: 80,
+}
 
 export default {
   components: {
@@ -210,23 +217,18 @@ export default {
   },
   mounted() {
     // this.getMedalData();
-    const { recordStartTime, recordId, isRecording } = getStatus()
+    const { data } = getRecordState({ roomId: this.realRoomId })
+    const { startAt, recordId, isRecording } = data
     this.isRecording = isRecording
 
     if (this.isRecording) {
-      this.recordDuring = Date.now() - recordStartTime
+      this.recordDuring = Date.now() - startAt
       this.recordTimer = setInterval(() => {
-        this.recordDuring = Date.now() - recordStartTime
+        this.recordDuring = Date.now() - startAt
       }, 1000)
-
-      emitter.on(`${recordId}-download-rate`, ({ bps, totalSize }) => {
-        this.downloadRate = parseDownloadRate(bps)
-      })
     }
 
-    emitter.on('record-cancel', () => {
-      this.isRecording = false
-    })
+    ws.addEventListener('message', this.onRecordMessage)
 
     if (this.liveWindowId) {
       const win = BrowserWindow.fromId(this.liveWindowId)
@@ -241,33 +243,44 @@ export default {
     })
   },
   beforeUnmount() {
-    const { recordId } = getStatus()
-    if (recordId) {
-      emitter.removeAllListeners(`${recordId}-download-rate`)
-    }
+    ws.removeEventListener('message', this.onRecordMessage)
   },
   methods: {
+    onRecordMessage(msg) {
+      const data = JSON.parse(msg.data)
+      if (data.cmd === 'RECORD_RATE') {
+        const { bps, totalSize } = data.payload
+        this.downloadRate = parseDownloadRate(bps)
+      }
+      if (data.cmd === 'RECORD_END') {
+      }
+    },
+
     async startRecord() {
       try {
+        const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
+        const output = path.join(recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+        console.log(`record: OUTPUT: ${output}`)
+
         const { id } = await record({
           roomId: this.realRoomId,
-          recordDir: this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record',
-          quality: this.recordQuality,
-          cookie: this.isWithCookie ? this.userCookie : undefined,
+          output: output,
+          qn: qualityMap[this.recordQuality] || 400,
+          withCookie: this.isWithCookie,
         })
 
-        emitter.on(`${id}-download-rate`, ({ bps, totalSize }) => {
-          this.downloadRate = parseDownloadRate(bps)
-        })
+        // emitter.on(`${id}-download-rate`, ({ bps, totalSize }) => {
+        //   this.downloadRate = parseDownloadRate(bps)
+        // })
 
         this.isRecording = true
         const recordStartTime = Date.now()
 
-        setStatus({
-          recordStartTime,
-          isRecording: true,
-          recordId: id,
-        })
+        // setStatus({
+        //   recordStartTime,
+        //   isRecording: true,
+        //   recordId: id,
+        // })
 
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - recordStartTime
@@ -279,35 +292,40 @@ export default {
       }
     },
     async cancelRecord() {
-      const { recordId } = getStatus()
+      const { data } = getRecordState({ roomId: this.realRoomId })
+      const recordId = data.recordId
       if (!recordId) {
         console.warn(new Error('recordId not found.'))
         return
       }
       try {
-        await cancelRecord(recordId)
+        await cancelRecord({
+          roomId,
+          recordId,
+        })
       } catch (e) {
         console.warn(e)
       }
 
       this.isRecording = false
 
-      setStatus({
-        recordStartTime: 0,
-        isRecording: false,
-        recordId: '',
-      })
+      // setStatus({
+      //   recordStartTime: 0,
+      //   isRecording: false,
+      //   recordId: '',
+      // })
 
-      emitter.removeAllListeners(`${recordId}-download-rate`)
+      // emitter.removeAllListeners(`${recordId}-download-rate`)
       clearInterval(this.recordTimer)
-      emitter.emit('record-cancel')
+      // emitter.emit('record-cancel')
     },
     async play() {
-      const playUrl = await getRandomPlayUrl({
+      const { data } = await getRandomPlayUrl({
         roomId: this.realRoomId,
-        quality: this.playQuality,
-        cookie: this.isWithCookie ? this.userCookie : undefined,
+        quality: qualityMap[this.playQuality] || 400,
+        withCookie: this.isWithCookie,
       })
+      const playUrl = data.url
       console.log(playUrl)
 
       if (this.isShowLiveWindow) {
@@ -359,13 +377,14 @@ export default {
     },
 
     async playWindowLive(playUrl) {
-      playUrl =
-        playUrl ||
-        (await getRandomPlayUrl({
+      if (!playUrl) {
+        const { data } = await getRandomPlayUrl({
           roomId: this.realRoomId,
-          quality: this.playQuality,
-          cookie: this.isWithCookie ? this.userCookie : undefined,
-        }))
+          quality: qualityMap[this.playQuality] || 400,
+          withCookie: this.isWithCookie,
+        })
+        playUrl = data.url
+      }
       console.log(`windowId: ${this.liveWindowId}`)
       ipcRenderer.send(IPC_LIVE_WINDOW_PLAY, {
         windowId: this.liveWindowId,
@@ -398,14 +417,10 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendMessage(
+        const result = await sendComment(
           {
             message: this.message,
             roomId: this.realRoomId,
-            color: 16777215,
-            fontsize: 25,
-            mode: 1,
-            bubble: 0,
           },
           this.userCookie
         )
@@ -429,7 +444,7 @@ export default {
       if (!this.userCookie) return
       this.getMedalDataLoading = true
       // 该接口会同时触发进入房间消息！
-      const { data } = await getInfoByUser(this.realRoomId, this.userCookie)
+      const { data } = await getUserInfoInRoom(this.realRoomId)
       const { medal } = data || {}
       const { curr_weared, is_weared } = medal || {}
       if (!is_weared) {
@@ -452,7 +467,7 @@ export default {
       if (!this.userCookie || !this.medalId) return
       this.isWearing = true
       try {
-        const result = await wearMedal(this.medalId, this.userCookie)
+        const result = await wearMedal(this.medalId)
         this.medalData = null
         this.getMedalDataLoading = true
         setTimeout(async () => {

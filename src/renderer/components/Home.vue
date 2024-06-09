@@ -195,10 +195,21 @@ import { ipcRenderer, shell } from 'electron'
 import { BrowserWindow, getCurrentWindow, Tray, nativeImage, Menu } from '@electron/remote'
 
 import { parseDownloadRate, getGiftConfig } from '../../service/util'
-import { connect as connectRoom, getRealTimeViewersCount, getRoomStatus, disconnect, updateSetting } from '../../service/api'
+import {
+  connect as connectRoom,
+  getRealTimeViewersCount,
+  getRoomStatus,
+  disconnect,
+  updateSetting,
+  getRoomInfoV2,
+  getGuardInfo,
+  getRoomInfoByIds,
+  getUserInfoV2,
+  record,
+  cancelRecord,
+  getRecordState,
+} from '../../service/api'
 import emitter from '../../service/event'
-import { record, cancelRecord, getStatus, setStatus } from '../../service/bilibili-recorder'
-import { getRoomInfoV2, getGuardInfo, getRoomInfoByIds, getUserInfoV2 } from '../../service/bilibili-api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
 import icon from '../assets/logo.png'
@@ -445,14 +456,8 @@ export default {
         })
     }, 60000)
 
-    const { isRecording } = getStatus()
-    this.isRecording = isRecording
-    emitter.on('record-start', () => {
-      this.isRecording = true
-    })
-    emitter.on('record-cancel', () => {
-      this.isRecording = false
-    })
+    const { data } = getRecordState({ roomId: this.realRoomId })
+    this.isRecording = data.isRecording
 
     await this.fillRoomLiveStatus(this.historyRooms)
 
@@ -491,7 +496,8 @@ export default {
         }
         this.$store.dispatch('UPDATE_CONFIG', config)
 
-        const { isRecording } = getStatus()
+        const { data } = getRecordState()
+        const { isRecording } = data
         if (liveStatus === 1 && this.isAutoRecord && !isRecording) {
           LIVE_STATUS = 2
           this.startRecord()
@@ -796,40 +802,39 @@ export default {
           throw new Error('roomId required.')
         }
 
-        const { id } = await record({
-          roomId: this.realRoomId,
-          recordDir: this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record',
-          quality: '原画',
-          cookie: this.isWithCookie ? this.userCookie : undefined,
-        })
+        const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
+        const output = path.join(recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+        console.log(`record: OUTPUT: ${output}`)
 
-        setStatus({
-          recordId: id,
-          recordStartTime: Date.now(),
-          isRecording: true,
+        const { data } = await record({
+          roomId: this.realRoomId,
+          output: output,
+          qn: 10000,
+          withCookie: this.isWithCookie,
         })
-        emitter.emit('record-start')
+        this.isRecording = true
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`)
       }
     },
     async cancelRecord() {
-      const { recordId } = getStatus()
+      const { data } = getRecordState({
+        roomId: this.realRoomId,
+      })
+      const recordId = data.recordId
       if (!recordId) {
         console.warn(new Error('recordId not found.'))
         return
       }
       try {
-        await cancelRecord(recordId)
+        await cancelRecord({
+          roomId: this.realRoomId,
+          recordId,
+        })
       } catch (e) {
         console.warn(e)
       }
-      setStatus({
-        recordId: '',
-        recordStartTime: 0,
-        isRecording: false,
-      })
-      emitter.emit('record-cancel')
+      this.isRecording = false
     },
 
     removeHistoryRoom(room) {

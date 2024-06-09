@@ -205,3 +205,87 @@ export async function speechToText(body) {
   const res = await axios.post(`${BASE_URL}/api/speech-recognition/speech-to-text`, body)
   return res.data
 }
+
+export async function sendComment({ message, roomId }) {
+  const res = await axios.post(`${BASE_URL}/api/bilibili/room/${roomId}/comment/send`, {
+    comment: message
+  })
+  return res.data
+}
+
+export async function getMedalList({ page, pageSize }) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/medal/list?page=${page}&pageSize=${pageSize}`)
+  return res.data
+}
+
+export async function getRoomInfoV2(roomId) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/info`)
+  return res.data
+}
+
+export async function getRoomInfoByIds(roomIds) {
+  const res = await axios.post(`${BASE_URL}/api/bilibili/room/info`, {
+    roomIds: roomIds
+  })
+  return res.data
+}
+
+export async function getGuardInfo(roomId, uid) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/guard?uid=${uid}`)
+  return res.data
+}
+
+export async function getUserInfoV2(uid) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/user/${uid}/info`)
+  return res.data
+}
+
+export async function getUserInfoInRoom(roomId) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/user/info`)
+  return res.data
+}
+
+export async function wearMedal(medalId) {
+  const res = await axios.post(`${BASE_URL}/api/bilibili/medal/wear`, {
+    medalId
+  })
+  return res.data
+}
+
+export async function getRandomPlayUrl(roomId) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/playurl`)
+  return res.data
+}
+
+export async function record({
+  roomId,
+  output,
+  qn,
+  platform,
+  withCookie
+}) {
+  const res = await axios.post(`${BASE_URL}/api/room/${roomId}/record/start`, {
+    output,
+    qn,
+    platform,
+    withCookie
+  })
+  return res.data
+}
+
+export async function cancelRecord({
+  roomId,
+  recordId,
+}) {
+  const res = await axios.post(`${BASE_URL}/api/room/${roomId}/record/cancel`, {
+    recordId
+  })
+  return res.data
+}
+
+export async function getRecordState({
+  roomId
+}) {
+  const res = await axios.get(`${BASE_URL}/api/room/${roomId}/record/status`)
+  return res.data
+}

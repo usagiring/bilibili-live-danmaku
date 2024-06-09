@@ -6,12 +6,12 @@ export function init({ port }) {
 }
 
 export async function getSetting() {
-  const res = await axios.get(`${BASE_URL}/api/settings`)
+  const res = await axios.get(`${BASE_URL}/api/setting`)
   return res.data
 }
 
 export async function getGiftConfig() {
-  const res = await axios.get(`${BASE_URL}/api/gifts/config`)
+  const res = await axios.get(`${BASE_URL}/api/gift/config`)
   return res.data
 }
 

@@ -35,8 +35,7 @@
 <script>
 import { reactive } from 'vue'
 import ws from '../../service/ws'
-import { speechToText } from '../../service/api'
-import { sendMessage } from '../../service/bilibili-api'
+import { speechToText, sendComment } from '../../service/api'
 
 // 依赖过大50mb 放弃使用
 // import * as vad from '@ricky0123/vad'
@@ -258,14 +257,10 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendMessage(
+        const result = await sendComment(
           {
             message: this.message,
             roomId: this.realRoomId,
-            color: 16777215,
-            fontsize: 25,
-            mode: 1,
-            bubble: 0,
           },
           this.userCookie
         )

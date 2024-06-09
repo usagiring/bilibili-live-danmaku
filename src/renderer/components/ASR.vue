@@ -167,9 +167,9 @@ import {
   closeLiveStreamASR,
   initialSpeechRegcognition,
   speechToText,
+  getRandomPlayUrl,
 } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
-import { getRandomPlayUrl } from '../../service/bilibili-recorder'
 import icon from '../assets/logo.png'
 import processor from 'worklet-loader!../../service/processor.worklet'
 // import { AudioWorklet } from '../../service/audio-worklet'
@@ -467,11 +467,12 @@ export default {
         appKey: this.aliAppKey,
       })
 
-      const playUrl = await getRandomPlayUrl({
+      const { data } = await getRandomPlayUrl({
         roomId: this.realRoomId,
         quality: this.playQuality,
         cookie: this.isWithCookie ? this.userCookie : undefined,
       })
+      const playUrl = data.url
 
       await startLiveStreamASR({
         playUrl: playUrl,

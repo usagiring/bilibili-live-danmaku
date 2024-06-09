@@ -24,7 +24,7 @@ import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
 import * as flvjs from 'flv.js'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
-import { sendMessage } from '../../service/bilibili-api'
+import { sendComment } from '../../service/api'
 const win = getCurrentWindow()
 
 export default {
@@ -207,14 +207,10 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendMessage(
+        const result = await sendComment(
           {
             message: this.message,
             roomId: this.realRoomId,
-            color: 16777215,
-            fontsize: 25,
-            mode: 1,
-            bubble: 0,
           },
           this.userCookie
         )

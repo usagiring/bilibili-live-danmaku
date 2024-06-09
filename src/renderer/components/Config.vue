@@ -203,9 +203,8 @@ import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
-import { clearDB, backupDB, updateSetting, needRefreshCookie } from '../../service/api'
+import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds } from '../../service/api'
 import { getGiftConfig, wait } from '../../service/util'
-import { sendMessage, getMedalList, getRoomInfoV2, getRoomInfoByIds } from '../../service/bilibili-api'
 
 const browserWindow = getCurrentWindow()
 const synth = window.speechSynthesis
@@ -458,7 +457,7 @@ export default {
 
       const signInMessage = this.signInMessage || '打卡'
 
-      const { data } = await getMedalList({ page, pageSize }, userCookie)
+      const { data } = await getMedalList({ page, pageSize })
       const { count, items } = data
       this.medalTotal = count
       this.medals = items
@@ -507,7 +506,7 @@ export default {
 
       do {
         try {
-          const { data } = await getMedalList({ page, pageSize }, userCookie)
+          const { data } = await getMedalList({ page, pageSize })
           const { count, items } = data
           total = count
           this.signInTotalCount = total
@@ -528,7 +527,7 @@ export default {
 
             const { data } = await getRoomInfoV2(roomId)
             const { room_id: realRoomId } = data.room_info
-            const result = await sendMessage(
+            const result = await sendComment(
               {
                 message: signInMessage,
                 roomId: realRoomId,
@@ -566,7 +565,7 @@ export default {
 
       const { data } = await getRoomInfoV2(roomId)
       const { room_id: realRoomId } = data.room_info
-      const result = await sendMessage(
+      const result = await sendComment(
         {
           message: signInMessage,
           roomId: realRoomId,
