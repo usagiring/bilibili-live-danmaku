@@ -129,7 +129,7 @@ import GiftCardMini from './GiftCardMini'
 import FanMedal from './FanMedal'
 import GiftTag from './GiftTag.vue'
 import GiftTagExpand from './GiftTagExpand.vue'
-import { init as initAPI, getSetting, getGiftConfig, getExampleMessages } from '../service/api'
+import { init as initAPI, getSetting, getGiftConfig } from '../service/api'
 
 let ws
 let retryWaitTime = 0
@@ -147,6 +147,7 @@ export default {
   props: ['isPreview', 'isSingleWindow'],
   data() {
     return {
+      roomId: 0,
       giftHover: [],
       DEFAULT_AVATAR,
       giftGifMap: {},
@@ -232,9 +233,10 @@ export default {
   async mounted() {
     const params = new URLSearchParams(window.location.search)
     this.port = params.get('port') || 8081
+    this.roomId = params.get('roomId')
 
     initAPI({ port: this.port })
-    const { data: giftMap } = await getGiftConfig()
+    const { data: giftMap } = await getGiftConfig(this.roomId)
     this.giftGifMap = giftMap
     await this.getSetting()
     promiseQueue = new PromiseQueue({ limit: this.danmakuChannel })
@@ -546,24 +548,6 @@ export default {
     },
     getGuardIcon(level) {
       return GUARD_ICON_MAP[level]
-    },
-
-    async initExampleMessage() {
-      const { data: messages } = await getExampleMessages()
-      messages.forEach((msg) => {
-        if (msg.cmd === 'EXAMPLE_COMMENT') {
-          this.onComment(msg.payload)
-        }
-        if (msg.cmd === 'EXAMPLE_GIFT') {
-          this.onGift(msg.payload)
-        }
-        if (msg.cmd === 'EXAMPLE_INTERACT') {
-          this.onInteract(msg.payload)
-        }
-        if (msg.cmd === 'EXAMPLE_SUPER_CHAT') {
-          this.onSuperChat(msg.payload)
-        }
-      })
     },
 
     playAudio(url) {

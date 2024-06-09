@@ -78,9 +78,9 @@
 
 <script>
 import { shell } from 'electron'
-import { getRandomItem, dateFormat, getGiftConfig } from '../../service/util'
+import { getRandomItem, dateFormat } from '../../service/util'
 import { DEFAULT_AVATAR } from '../../service/const'
-import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
+import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories, getGiftConfig } from '../../service/api'
 import ws from '../../service/ws'
 
 export default {
@@ -127,7 +127,7 @@ export default {
     },
   },
   async mounted() {
-    const giftConfig = await getGiftConfig()
+    const giftConfig = await getGiftConfig(this.realRoomId)
     for (const key in giftConfig) {
       const { name, webp } = giftConfig[key]
       this.giftSelectors.push({

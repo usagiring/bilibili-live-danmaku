@@ -203,8 +203,8 @@ import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
-import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds } from '../../service/api'
-import { getGiftConfig, wait } from '../../service/util'
+import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds, getGiftConfig } from '../../service/api'
+import { wait } from '../../service/util'
 
 const browserWindow = getCurrentWindow()
 const synth = window.speechSynthesis
@@ -218,7 +218,6 @@ export default {
     const state = reactive({
       userDataPath: '',
       isShowSignInModal: false,
-      giftSelectors: [],
       selectedGiftIds: [],
       advancedAutoReplyRules: [],
       voices: [],
@@ -306,17 +305,6 @@ export default {
     },
   },
   async mounted() {
-    const giftConfig = await getGiftConfig()
-    for (const key in giftConfig) {
-      const { name, webp } = giftConfig[key]
-      this.giftSelectors.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
-      })
-    }
-
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
 
     setTimeout(() => {

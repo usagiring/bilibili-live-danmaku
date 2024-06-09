@@ -192,9 +192,10 @@
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer, shell } from 'electron'
+import path from 'path'
 import { BrowserWindow, getCurrentWindow, Tray, nativeImage, Menu } from '@electron/remote'
 
-import { parseDownloadRate, getGiftConfig } from '../../service/util'
+import { parseDownloadRate, dateFormat } from '../../service/util'
 import {
   connect as connectRoom,
   getRealTimeViewersCount,
@@ -208,8 +209,8 @@ import {
   record,
   cancelRecord,
   getRecordState,
+  // getGiftConfig,
 } from '../../service/api'
-import emitter from '../../service/event'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
 import icon from '../assets/logo.png'
@@ -236,7 +237,6 @@ export default {
       hasNewVersion: false,
       isAppUpdating: false,
       isAppUpdateStarting: false,
-      isRecording: false,
       isLottering: false,
       topPhoto: '',
       downloadRate: '0 KB/s',
@@ -320,6 +320,9 @@ export default {
     waitingSpeakerCount() {
       return this.$store.state.Config.waitingSpeakerCount
     },
+    isRecording() {
+      return this.$store.state.Config.isRecording
+    },
   },
   watch: {
     async historyRooms(newValue, oldValue) {
@@ -385,7 +388,6 @@ export default {
       }
 
       if (payload.cmd === 'GIFT_CONFIG') {
-        getGiftConfig()
       }
 
       if (payload.cmd === 'DANMAKU_COMMAND_RESULT') {
@@ -456,8 +458,10 @@ export default {
         })
     }, 60000)
 
-    const { data } = getRecordState({ roomId: this.realRoomId })
-    this.isRecording = data.isRecording
+    const { data } = await getRecordState({ roomId: this.realRoomId })
+    this.$store.dispatch('UPDATE_CONFIG', {
+      isRecording: data?.isRecording,
+    })
 
     await this.fillRoomLiveStatus(this.historyRooms)
 
@@ -496,8 +500,13 @@ export default {
         }
         this.$store.dispatch('UPDATE_CONFIG', config)
 
-        const { data } = getRecordState()
-        const { isRecording } = data
+        const { data: recordData } = await getRecordState({
+          roomId: this.realRoomId,
+        })
+        const isRecording = recordData?.isRecording
+        this.$store.dispatch('UPDATE_CONFIG', {
+          isRecording: isRecording,
+        })
         if (liveStatus === 1 && this.isAutoRecord && !isRecording) {
           LIVE_STATUS = 2
           this.startRecord()
@@ -653,7 +662,7 @@ export default {
         //     ? `http://localhost:9080/#/danmaku-window`
         //     : `file://${__dirname}/index.html#danmaku-window`;
 
-        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:${PORT}?port=${PORT}` : `http://localhost:${PORT}?port=${PORT}`
+        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}` : `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`
         win.setIcon(nativeImage.createFromDataURL(icon))
         win.loadURL(winURL)
         this.win = win
@@ -812,13 +821,15 @@ export default {
           qn: 10000,
           withCookie: this.isWithCookie,
         })
-        this.isRecording = true
+        this.$store.dispatch('UPDATE_CONFIG', {
+          isRecording: true,
+        })
       } catch (e) {
         this.$Message.error(`录制失败: ${e.message}`)
       }
     },
     async cancelRecord() {
-      const { data } = getRecordState({
+      const { data } = await getRecordState({
         roomId: this.realRoomId,
       })
       const recordId = data.recordId
@@ -834,7 +845,9 @@ export default {
       } catch (e) {
         console.warn(e)
       }
-      this.isRecording = false
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isRecording: false,
+      })
     },
 
     removeHistoryRoom(room) {

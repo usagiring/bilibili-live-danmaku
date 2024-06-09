@@ -92,10 +92,12 @@ import { ipcRenderer } from 'electron'
 import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
-import { parseDownloadRate, parseHexColor } from '../../service/util'
+import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
+import ws from '../../service/ws'
+import path from 'path'
 
 const qualityMap = {
   原画: 10000,
@@ -123,7 +125,6 @@ export default {
       playQuality: '超清',
       resolution: '480',
       getMedalDataLoading: false,
-      isRecording: false,
       isShowLiveWindow: false,
       isShowLiveWindowLoading: false,
       checkOnTopInterval: null,
@@ -214,14 +215,18 @@ export default {
     liveVolume() {
       return this.$store.state.Config.liveVolume * 100
     },
+    isRecording() {
+      return this.$store.state.Config.isRecording
+    },
   },
-  mounted() {
-    // this.getMedalData();
-    const { data } = getRecordState({ roomId: this.realRoomId })
+  async mounted() {
+    const { data } = await getRecordState({ roomId: this.realRoomId })
     const { startAt, recordId, isRecording } = data
-    this.isRecording = isRecording
+    this.$store.dispatch('UPDATE_CONFIG', {
+      isRecording: isRecording,
+    })
 
-    if (this.isRecording) {
+    if (isRecording) {
       this.recordDuring = Date.now() - startAt
       this.recordTimer = setInterval(() => {
         this.recordDuring = Date.now() - startAt
@@ -259,7 +264,7 @@ export default {
     async startRecord() {
       try {
         const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
-        const output = path.join(recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+        const output = path.join(recordDir, `./${this.realRoomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
         console.log(`record: OUTPUT: ${output}`)
 
         const { id } = await record({
@@ -273,7 +278,9 @@ export default {
         //   this.downloadRate = parseDownloadRate(bps)
         // })
 
-        this.isRecording = true
+        this.$store.dispatch('UPDATE_CONFIG', {
+          isRecording: true,
+        })
         const recordStartTime = Date.now()
 
         // setStatus({
@@ -285,14 +292,13 @@ export default {
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - recordStartTime
         }, 1000)
-
-        emitter.emit('record-start')
       } catch (e) {
+        console.log(e)
         this.$Message.error(`录制失败: ${e.message}`)
       }
     },
     async cancelRecord() {
-      const { data } = getRecordState({ roomId: this.realRoomId })
+      const { data } = await getRecordState({ roomId: this.realRoomId })
       const recordId = data.recordId
       if (!recordId) {
         console.warn(new Error('recordId not found.'))
@@ -300,14 +306,16 @@ export default {
       }
       try {
         await cancelRecord({
-          roomId,
+          roomId: this.realRoomId,
           recordId,
         })
       } catch (e) {
         console.warn(e)
       }
 
-      this.isRecording = false
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isRecording: false,
+      })
 
       // setStatus({
       //   recordStartTime: 0,
@@ -322,7 +330,7 @@ export default {
     async play() {
       const { data } = await getRandomPlayUrl({
         roomId: this.realRoomId,
-        quality: qualityMap[this.playQuality] || 400,
+        qn: qualityMap[this.playQuality] || 400,
         withCookie: this.isWithCookie,
       })
       const playUrl = data.url
@@ -380,7 +388,7 @@ export default {
       if (!playUrl) {
         const { data } = await getRandomPlayUrl({
           roomId: this.realRoomId,
-          quality: qualityMap[this.playQuality] || 400,
+          qn: qualityMap[this.playQuality] || 400,
           withCookie: this.isWithCookie,
         })
         playUrl = data.url

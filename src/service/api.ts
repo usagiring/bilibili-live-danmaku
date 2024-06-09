@@ -252,8 +252,12 @@ export async function wearMedal(medalId) {
   return res.data
 }
 
-export async function getRandomPlayUrl(roomId) {
-  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/playurl`)
+export async function getRandomPlayUrl({
+  roomId,
+  qn,
+  withCookie
+}) {
+  const res = await axios.get(`${BASE_URL}/api/bilibili/room/${roomId}/playurl?qn=${qn}&withCookie=${withCookie}`)
   return res.data
 }
 

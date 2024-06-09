@@ -117,8 +117,7 @@
 import { toRaw } from 'vue'
 import { Container, Draggable } from 'vue3-smooth-dnd'
 import TagContent from './TagContent.vue'
-import { getVoices, updateSetting } from '../../service/api'
-import { getGiftConfig } from '../../service/util'
+import { getVoices, updateSetting, getGiftConfig } from '../../service/api'
 import { cloneDeep, debounce } from 'lodash'
 
 const synth = window.speechSynthesis
@@ -350,6 +349,9 @@ export default {
     }
   },
   computed: {
+    realRoomId() {
+      return this.$store.state.Config.realRoomId
+    },
     rules() {
       return this.$store.state.Config.autoReplyRules
     },
@@ -407,7 +409,7 @@ export default {
       }
 
       if (payload.key === 'GIFT') {
-        const giftConfig = await getGiftConfig()
+        const giftConfig = await getGiftConfig(this.realRoomId)
         const giftOptions = []
         for (const [key, { name, webp }] of Object.entries(giftConfig)) {
           giftOptions.push({
@@ -421,7 +423,7 @@ export default {
       }
       rules[index].tags = rules[index].tags || []
       rules[index].tags.splice(addedIndex, 0, payload)
-      
+
       const data = {
         autoReplyRules: rules,
       }

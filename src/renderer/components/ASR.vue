@@ -469,7 +469,7 @@ export default {
 
       const { data } = await getRandomPlayUrl({
         roomId: this.realRoomId,
-        quality: this.playQuality,
+        qn: 150,
         cookie: this.isWithCookie ? this.userCookie : undefined,
       })
       const playUrl = data.url

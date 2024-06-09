@@ -11,7 +11,7 @@ export async function getSetting() {
   return res.data
 }
 
-export async function getGiftConfig() {
-  const res = await axios.get(`${BASE_URL}/api/gifts/config`)
-  return res.data
-}
+// export async function getGiftConfig(roomId) {
+//   const res = await axios.get(`${BASE_URL}/api/room/${roomId}/gift/map`)
+//   return res.data
+// }

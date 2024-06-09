@@ -14,13 +14,14 @@
     "link": "npm run build && cp package.json dist && cd dist && npm link"
   },
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.7.2",
     "core-js": "^3.25.0",
     "moment": "^2.29.4",
     "view-ui-plus": "^1.3.1",
     "vue": "^3.2.38"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.12.0",
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
