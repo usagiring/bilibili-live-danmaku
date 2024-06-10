@@ -5,6 +5,7 @@
       <p>未登录会导致投票、统计功能不可用</p>
       <p>您可以通过<Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
       <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，完整复制粘贴到设置中</p>
+      <p>Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
       <img src="../assets/tip-01.png" />
     </Drawer>
     <div class="setting-group">

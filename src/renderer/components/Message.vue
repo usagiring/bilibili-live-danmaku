@@ -30,7 +30,7 @@
                     <template v-for="(comment, i) in comments" :key="i">
                       <div class="comment-content">
                         <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
-                        <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`">
+                        <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`" />
                         <FanMedal
                           v-if="comment.medalLevel && comment.medalName"
                           class="space-left-2"
@@ -48,7 +48,7 @@
                           <Icon type="md-play" />
                           <span>{{ `${comment.fileDuration}"` }}</span>
                         </span>
-                        <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl">
+                        <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl" />
                         <span v-else>{{ comment.content }}</span>
                       </div>
                     </template>
@@ -107,7 +107,7 @@ import { shell } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
 const window = getCurrentWindow()
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
-import { getPriceProperties, dateFormat } from '../../service/util'
+import { getPriceProperties, dateFormat, wait } from '../../service/util'
 import { queryGifts, queryInteracts, queryComments } from '../../service/api'
 import GiftCardMini from './GiftCardMini'
 import FanMedal from './FanMedal'
@@ -133,16 +133,20 @@ export default {
       comments: [],
       interacts: [],
       gifts: [],
-      isShowUserSpaceLink: false,
       scrollHeightLeftTop: 300,
       scrollHeightLeftBottom: 100,
       scrollHeightRight: 1000,
-      isShowSilverGift: false,
     }
   },
   computed: {
     enableMessageListenMode() {
       return this.$store.state.Config.enableMessageListenMode
+    },
+    isShowSilverGift() {
+      return this.$store.state.Config.isShowSilverGift
+    },
+    isShowUserSpaceLink() {
+      return this.$store.state.Config.isShowUserSpaceLink
     },
   },
   created() {
@@ -270,9 +274,7 @@ export default {
     },
 
     async searchGift(options = {}) {
-      const { sort, skip, limit, scrollToken } = options
-      if (scrollToken) {
-      }
+      const { sort, skip, limit, scrollToken, isShowSilverGift } = options
       const query = {}
       if (this.roomId) {
         query.roomId = parseInt(this.roomId)
@@ -301,7 +303,8 @@ export default {
         query.sendAt = query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
-      if (!this.isShowSilverGift) {
+      
+      if (!(isShowSilverGift !== undefined ? isShowSilverGift : this.isShowSilverGift)) {
         query.coinType = 1
       }
       const { data: gifts } = await queryGifts({
@@ -345,7 +348,9 @@ export default {
       })
     },
     showUserSpaceLink(status) {
-      this.isShowUserSpaceLink = status
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isShowUserSpaceLink: status,
+      })
     },
     splitLeftMoving(e) {
       const leftTop = document.getElementById('split-left-top')
@@ -435,7 +440,9 @@ export default {
       })
     },
     async showSilverGift(status) {
-      this.isShowSilverGift = status
+      this.$store.dispatch('UPDATE_CONFIG', {
+        isShowSilverGift: status,
+      })
       let gifts = await this.searchGift({
         isShowSilverGift: status,
       })

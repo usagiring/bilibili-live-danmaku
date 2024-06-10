@@ -14,23 +14,34 @@
         @on-clear="clearDateRange"
       />
       <Button class="space-left-5px" type="primary" shape="circle" icon="ios-search" :disabled="!roomId" @click="statistic" />
-      <Button class="space-left-5px" shape="circle" icon="md-download" :disabled="!roomId" @click="download" />
     </div>
+    <div :style="{ padding: '10px 20px 0 20px' }">
+      <Alert type="info">
+        <Icon type="md-information-circle" :style="{ 'font-size': '16px' }" />
+        <span> 数据仅供参考，实际数据请以官方数据为准。请注意舰长未区分续费与原价，统一以原价计算。未设置Cookie时，部分数据不支持。 </span>
+      </Alert>
+    </div>
+
+    <div :style="{ padding: '0px 25px 0 25px' }">
+      <Button type="primary" class="workclound-button" shape="circle" icon="md-cloud" @click="generateWordCloud">生成词云</Button>
+      <Button class="space-left-5px" shape="circle" icon="md-download" :disabled="!roomId" @click="download">礼物导出</Button>
+    </div>
+
     <div class="main-container">
-      <div class="text-container">
-        <p :style="{ 'max-width': '300px' }">数据仅供参考，实际数据请以官方数据为准。请注意舰长未区分续费与原价，统一以原价计算。</p>
+      <div class="text-container" :style="{ width: '300px' }">
         <p>获得金瓜子: {{ totalGold }}</p>
         <p>弹幕数: {{ totalComment }}</p>
         <p>送礼人数: {{ totalSendGiftUser }}</p>
         <p>赠送礼物最多的人: {{ topSendGiftUser.uname }}</p>
         <p>发送弹幕最多的人: {{ topCommentUser.uname }}</p>
       </div>
-      <div id="wordcloud-chart">
-        <Button type="primary" class="workclound-button" @click="generateWordCloud">生成词云</Button>
-      </div>
 
       <div id="chart" />
     </div>
+
+    <Drawer title="弹幕词云" placement="bottom" height="70" :closable="true" v-model="isShowWordCloud">
+      <div id="wordcloud-chart"></div>
+    </Drawer>
   </div>
 </template>
 
@@ -85,6 +96,7 @@ export default {
       topCommentUser: {}, // 发送弹幕最多的人
 
       chart: null,
+      isShowWordCloud: false
     }
   },
   created() {
@@ -214,6 +226,8 @@ export default {
         const chartDOM = document.getElementById('wordcloud-chart')
         this.wordCloudChart = echarts.init(chartDOM)
       }
+
+      this.isShowWordCloud = true
 
       const [start, end] = this.dateRange
       const { data } = await commentWordExtract({
@@ -370,11 +384,11 @@ export default {
 }
 .main-container {
   position: relative;
-  padding: 10px 40px 0 40px;
+  padding: 10px 20px 0 20px;
 }
 .text-container {
   display: inline-block;
-  vertical-align: middle;
+  vertical-align: top;
 }
 .text-container > p {
   padding: 10px;
@@ -390,16 +404,16 @@ export default {
   right: 0px;
   top: 0px;
   display: inline-block;
-  height: 330px;
-  width: 700px;
+  height: 500px;
+  width: 800px;
 }
 
-.workclound-button {
+/* .workclound-button {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
+} */
 .space-left-5px {
   margin-left: 5px;
 }

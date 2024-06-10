@@ -1,5 +1,12 @@
 <template>
-  <div :style="{ 'user-select': 'none' }">
+  <div class="disable-user-select">
+    <div :style="{ padding: '10px 20px 0 20px' }">
+      <Alert type="info">
+        <Icon type="md-information-circle" :style="{ 'font-size': '16px' }" />
+        <span> 未设置Cookie时，仅以弹幕内容作为依据，允许多次投票 </span>
+      </Alert>
+    </div>
+
     <div class="left-container">
       <div>
         <Button class="vote-button" :disabled="isWatching || !isConnected" @click="start">开始</Button>
@@ -8,7 +15,10 @@
       </div>
 
       <div :style="{ margin: '10px 0 10px 0' }">
-        <Checkbox :model-value="isAccurateMatch" :disabled="isWatching" @on-change="changeIsAccurateMatch">精确匹配</Checkbox>
+        <Tooltip placement="bottom" transfer>
+          <Checkbox :model-value="isAccurateMatch" :disabled="isWatching" @on-change="changeIsAccurateMatch">精确匹配</Checkbox>
+          <template #content> 弹幕是否精确匹配关键字 </template>
+        </Tooltip>
         <Tooltip placement="bottom" transfer>
           <Checkbox :model-value="allowReVote" :disabled="isWatching" @on-change="changeAllowReVote">允许改票</Checkbox>
           <template #content> 同一位用户投票记录以最后一次为准 </template>
@@ -52,7 +62,7 @@
     </div>
 
     <Modal v-model="isShowVoteRecord" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
-      <template v-for="(value, uid) in userMap" :key="uid">
+      <template v-for="(value, uid, index) in userMap" :key="index">
         <p>{{ value.message }}</p>
       </template>
     </Modal>
@@ -287,14 +297,20 @@ export default {
       if (message.cmd !== 'COMMENT') return
       const comment = message.payload
 
-      if (this.userMap[comment.uid]) {
-        // 如果允许改票...
-        if (this.allowReVote) {
-          const index = this.userMap[comment.uid].index
-          this.data[index].value--
-        } else {
-          // 已经记录过的用户不再重复统计
-          return
+      // 未登录时
+      if (!comment.uid) {
+      }
+
+      if (comment.uid) {
+        if (this.userMap[comment.uid]) {
+          // 如果允许改票...
+          if (this.allowReVote) {
+            const index = this.userMap[comment.uid].index
+            this.data[index].value--
+          } else {
+            // 已经记录过的用户不再重复统计
+            return
+          }
         }
       }
 
@@ -311,7 +327,8 @@ export default {
       if (!~index) return
 
       // 记录统计
-      this.userMap[comment.uid] = {
+      // 如果未登录时，以 _id 为 key
+      this.userMap[comment.uid || comment._id] = {
         index,
         message: `${this.keywords[index]} | ${comment.uname}:${comment.content} | ${dateFormat(comment.sendAt)} `,
       }
@@ -396,7 +413,7 @@ export default {
   display: inline-block;
 }
 .left-container {
-  margin: 20px 0 0 25px;
+  margin: 10px 0 0 25px;
   width: 325px;
   display: inline-block;
   vertical-align: top;
@@ -425,6 +442,6 @@ export default {
 .right-container {
   display: inline-block;
   vertical-align: top;
-  margin: 20px 0 0 20px;
+  margin: 10px 0 0 20px;
 }
 </style>

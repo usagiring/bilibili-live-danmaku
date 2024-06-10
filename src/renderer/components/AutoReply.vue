@@ -1,15 +1,24 @@
 <template>
   <div>
-    <div class="tag-container">
-      <Container :get-child-payload="getTagPayload" orientation="horizontal" behaviour="copy" @drop="onDrop">
-        <Draggable v-for="tag in tags" :key="tag.id">
-          <div :class="tag.class ? `draggable-tag ${tag.class}` : 'draggable-tag'">
-            {{ tag.name }}
-          </div>
-        </Draggable>
-      </Container>
+    <div :style="{ padding: '10px 20px 0 20px' }">
+      <Alert type="info">
+        <Icon type="md-information-circle" :style="{ 'font-size': '16px' }" />
+        <span> 未设置Cookie时，弹幕回复不生效 </span>
+      </Alert>
     </div>
-    <Row :style="{ padding: '6px' }">
+
+    <div :style="{ padding: '0 20px 0 20px' }">
+      <div class="tag-container">
+        <Container :get-child-payload="getTagPayload" orientation="horizontal" behaviour="copy" @drop="onDrop">
+          <Draggable v-for="tag in tags" :key="tag.id">
+            <div :class="tag.class ? `draggable-tag ${tag.class}` : 'draggable-tag'">
+              {{ tag.name }}
+            </div>
+          </Draggable>
+        </Container>
+      </div>
+    </div>
+    <Row :style="{ padding: '10px 10px 5px 10px' }">
       <i-col span="1">
         <div class="col-header">
           <Tooltip max-width="600" transfer placement="right">
@@ -51,14 +60,13 @@
     <Container :get-child-payload="getRulePayload" drag-handle-selector=".column-drag-handle" @drop="onDropRule">
       <template v-for="(rule, index) in rules" :key="index">
         <Draggable>
-          <Row :style="{ padding: '6px' }">
+          <Row class="line-container">
             <i-col span="1">
-              <div>
-                <span class="column-drag-handle" style="float: left; padding: 0 10px">&#x2630;</span>
-              </div>
+              <!-- <span class="column-drag-handler">&#x2630;</span> -->
+              <Icon class="flex-center column-drag-handler" type="ios-move" />
             </i-col>
             <i-col span="1" :style="{ 'text-align': 'center' }">
-              <Checkbox :model-value="rule.enable" :style="{ 'vertical-align': 'middle', 'margin-left': '8px' }" @on-change="changeEnable(index, $event)" />
+              <Checkbox :model-value="rule.enable" class="flex-center" :style="{ 'margin-left': '8px' }" @on-change="changeEnable(index, $event)" />
             </i-col>
             <i-col span="2">
               <Select :model-value="rule.type" :style="{ padding: '0 7px' }" transfer size="small" @on-change="onChangeRuleType(index, $event)">
@@ -72,7 +80,7 @@
             </i-col>
             <i-col span="13">
               <Container
-                :style="{ width: '100%' }"
+                :style="{ display: 'flex', 'align-items': 'center' }"
                 :drop-placeholder="dropPlaceholderOptions"
                 :should-accept-drop="(src, payload) => shouldAcceptDrop(index, src, payload)"
                 orientation="horizontal"
@@ -93,13 +101,13 @@
                     <template v-else>
                       <span>{{ fillDisplay(tag) }} </span>
                     </template>
-                    <Icon type="md-close" class="remove-rule" @click="removeTag(index, tagIndex)" />
+                    <Icon type="md-remove" class="remove-button" @click="removeTag(index, tagIndex)" />
                   </div>
                 </template>
               </Container>
             </i-col>
-            <i-col span="1">
-              <Icon type="md-close" class="remove-rule" @click="removeRule(index)" />
+            <i-col span="1" class="remove-button-container">
+              <Icon type="md-remove" class="remove-button flex-center" @click="removeRule(index)" />
             </i-col>
           </Row>
         </Draggable>
@@ -593,10 +601,12 @@ export default {
 
 <style scoped>
 .tag-container {
-  padding: 5px 0 3px 10px;
+  padding: 5px 10px 5px 10px;
+  border: 1px dashed silver;
+  border-radius: 10px;
 }
 .draggable-tag {
-  border: 1.2px dashed violet;
+  border: 1px solid violet;
   border-radius: 10px;
   padding: 3px 10px;
   margin: 6px;
@@ -606,7 +616,7 @@ export default {
   cursor: move;
 }
 .process-tag {
-  border: 1.2px dashed green !important;
+  border: 1px solid green !important;
 }
 .sub-process-tag {
   border: 1px solid green !important;
@@ -621,17 +631,39 @@ export default {
   -webkit-user-select: none;
   user-select: none;
 }
-.remove-rule {
+.remove-button {
   font-size: 16px;
   color: crimson;
+  cursor: pointer;
+  height: 100%;
 }
 .col-header {
   text-align: center;
 }
-.column-drag-handle {
+.column-drag-handler {
   cursor: move;
 }
 .info-icon {
   font-size: 16px;
+}
+.remove-button-container {
+  cursor: pointer;
+  height: 100%;
+}
+.remove-button-container:hover {
+  border: 1px dashed crimson;
+  border-radius: 20px;
+}
+.line-container {
+  padding: 5px 10px 5px 10px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

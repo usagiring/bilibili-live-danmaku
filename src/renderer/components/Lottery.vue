@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div class="selector-content">
+      <Input v-model="description" placeholder="关于本次祈愿的一些描述..." />
+    </div>
+
     <div class="selector-wrapper">
       <div class="selector-content" :style="isDanmaku && { border: '2px solid orange' }">
         <Radio class="" :model-value="isDanmaku" @on-change="selectDanmakuOrGift">弹幕</Radio>
@@ -7,7 +11,7 @@
         <InputNumber v-model="medalLevel" :min="0" size="small" :style="{ width: '55px' }" />
         <Input v-model="danmakuText" size="small" placeholder="弹幕..." style="width: 300px" />
       </div>
-      <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
+      <!-- <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
         <Radio :model-value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
         <Select v-model="selectedGiftIds" :style="{ width: '400px', display: 'inline-block' }" filterable multiple size="small">
           <Option v-for="gift in giftSelectors" :key="gift.key" :value="gift.key" :label="gift.label">
@@ -16,10 +20,7 @@
             <span :style="{ color: 'silver' }">{{ `id: ${gift.key}` }}</span>
           </Option>
         </Select>
-      </div>
-      <div class="selector-content">
-        <Input v-model="description" placeholder="一些描述..." />
-      </div>
+      </div> -->
     </div>
     <div class="button-cotainer">
       <template v-if="isRunning">
@@ -205,13 +206,13 @@ export default {
               name,
               count: count,
               price: count * price,
-            }
+            },
           }
         } else {
           userGift.count = userGift.count + singleCount
           userGift.price = userGift.price + singleCount * price
           this.userGiftMap = Object.assign(this.userGiftMap, {
-            [key]: userGift
+            [key]: userGift,
           })
         }
 
