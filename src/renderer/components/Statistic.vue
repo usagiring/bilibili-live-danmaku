@@ -96,7 +96,7 @@ export default {
       topCommentUser: {}, // 发送弹幕最多的人
 
       chart: null,
-      isShowWordCloud: false
+      isShowWordCloud: false,
     }
   },
   created() {

@@ -1,8 +1,5 @@
 <template>
-  <div
-    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
-    class="message-super-chat"
-  >
+  <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
     <div
       :style="{
         background: `${priceProperties.backgroundColor}`,
@@ -37,16 +34,8 @@
 
 <script>
 export default {
-  props: [
-    "priceProperties",
-    "avatar",
-    "uname",
-    "name",
-    "totalPrice",
-    "count",
-    "type",
-  ],
-};
+  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'],
+}
 </script>
 
 <style scoped>

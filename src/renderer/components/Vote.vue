@@ -35,7 +35,6 @@
           </div>
           <div class="content-container">
             <Input :model-value="item.value" :disabled="isWatching" @on-change="changeOptionContent(index, $event)" />
-            <span />
           </div>
           <div class="remove-icon-container">
             <Icon type="md-remove" @click="removeOption(index)" />

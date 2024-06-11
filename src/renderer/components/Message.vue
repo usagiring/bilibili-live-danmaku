@@ -303,7 +303,7 @@ export default {
         query.sendAt = query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
-      
+
       if (!(isShowSilverGift !== undefined ? isShowSilverGift : this.isShowSilverGift)) {
         query.coinType = 1
       }
