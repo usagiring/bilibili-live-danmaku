@@ -17,7 +17,7 @@
       <div :style="{ margin: '10px 0 10px 0' }">
         <Tooltip placement="bottom" transfer>
           <Checkbox :model-value="isAccurateMatch" :disabled="isWatching" @on-change="changeIsAccurateMatch">精确匹配</Checkbox>
-          <template #content> 弹幕是否精确匹配关键字 </template>
+          <template #content> 弹幕与关键字必须完全一致 </template>
         </Tooltip>
         <Tooltip placement="bottom" transfer>
           <Checkbox :model-value="allowReVote" :disabled="isWatching" @on-change="changeAllowReVote">允许改票</Checkbox>

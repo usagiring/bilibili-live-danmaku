@@ -5,7 +5,8 @@
       <p>未登录会导致投票、统计功能不可用</p>
       <p>您可以通过<Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
       <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，完整复制粘贴到设置中</p>
-      <p>Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
+      <p>目前已支持APP端扫码登录</p>
+      <p :style="{ color: 'crimson' }">Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
       <img src="../assets/tip-01.png" />
     </Drawer>
     <div class="setting-group">
@@ -217,7 +218,7 @@
 
     <Divider orientation="left" size="small">
       <span class="divider-text" @click="changeCollapse(1)">
-        角色：普通
+        个性化弹幕设置
         <Icon v-if="collapse[1]" type="md-arrow-dropdown" />
         <Icon v-else type="md-arrow-dropup" />
       </span>
@@ -225,186 +226,181 @@
 
     <transition name="fade">
       <div v-show="collapse[1]">
-        <div class="setting-group">
-          名称：
-          <StyleEditor v-bind="editors[0]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[1]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[2]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[3]" />
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>普通弹幕</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[8]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>昵称</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[0]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[1]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[2]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[3]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[4]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[5]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[6]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[7]" />
+          </div>
         </div>
-        <div class="setting-group">
-          内容：
-          <StyleEditor v-bind="editors[4]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[5]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[6]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[7]" />
-        </div>
-        <div class="setting-group">
-          整体：
-          <StyleEditor v-bind="editors[8]" />
-          <Divider type="vertical" />
-        </div>
-      </div>
-    </transition>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" @click="changeCollapse(2)">
-        角色：舰长
-        <Icon v-if="collapse[2]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
-      </span>
-    </Divider>
-    <transition name="fade">
-      <div v-show="collapse[2]">
-        <div class="setting-group">
-          名称：
-          <StyleEditor v-bind="editors[9]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[10]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[11]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[12]" />
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>舰长弹幕</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[17]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>昵称</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[9]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[10]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[11]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[12]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[13]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[14]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[15]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[16]" />
+          </div>
         </div>
-        <div class="setting-group">
-          内容：
-          <StyleEditor v-bind="editors[13]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[14]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[15]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[16]" />
-        </div>
-        <div class="setting-group">
-          整体：
-          <StyleEditor v-bind="editors[17]" />
-          <Divider type="vertical" />
-        </div>
-      </div>
-    </transition>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" @click="changeCollapse(3)">
-        角色：提督
-        <Icon v-if="collapse[3]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
-      </span>
-    </Divider>
-    <transition name="fade">
-      <div v-show="collapse[3]">
-        <div class="setting-group">
-          名称：
-          <StyleEditor v-bind="editors[18]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[19]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[20]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[21]" />
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>提督弹幕</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[26]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>昵称</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[18]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[19]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[20]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[21]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[22]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[23]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[24]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[25]" />
+          </div>
         </div>
-        <div class="setting-group">
-          内容：
-          <StyleEditor v-bind="editors[22]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[23]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[24]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[25]" />
-        </div>
-        <div class="setting-group">
-          整体：
-          <StyleEditor v-bind="editors[26]" />
-          <Divider type="vertical" />
-        </div>
-      </div>
-    </transition>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" @click="changeCollapse(4)">
-        角色：总督
-        <Icon v-if="collapse[4]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
-      </span>
-    </Divider>
-    <transition name="fade">
-      <div v-show="collapse[4]" class="disable-user-select">
-        <div class="setting-group">
-          名称：
-          <StyleEditor v-bind="editors[27]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[28]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[29]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[30]" />
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>总督弹幕</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[35]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>昵称</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[27]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[28]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[29]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[30]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[31]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[32]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[33]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[34]" />
+          </div>
         </div>
-        <div class="setting-group">
-          内容：
-          <StyleEditor v-bind="editors[31]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[32]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[33]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[34]" />
-        </div>
-        <div class="setting-group">
-          整体：
-          <StyleEditor v-bind="editors[35]" />
-          <Divider type="vertical" />
-        </div>
-      </div>
-    </transition>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" :style="{ cursor: 'pointer' }" @click="changeCollapse(5)">
-        角色：房管
-        <Icon v-if="collapse[5]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
-      </span>
-    </Divider>
-    <transition name="fade">
-      <div v-show="collapse[5]" class="disable-user-select">
-        <div class="setting-group">
-          名称：
-          <StyleEditor v-bind="editors[36]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[37]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[38]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[39]" />
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>房管弹幕</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[44]" />
+            <Divider type="vertical" />
+            <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
+            <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon" @on-change="changeAdminIcon">
+              <Option v-for="icon in icons" :key="icon" :value="icon"> <Icon :type="icon" /> {{ icon }} </Option>
+            </AutoComplete>
+            <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
+            <ColorPicker :model-value="adminIconColor" size="small" alpha @on-active-change="debouncedChangeAdminIconColor" />
+            <!-- </Space> -->
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>昵称</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[36]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[37]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[38]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[39]" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[40]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[41]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[42]" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editors[43]" />
+          </div>
         </div>
-        <div class="setting-group">
-          内容：
-          <StyleEditor v-bind="editors[40]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[41]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[42]" />
-          <Divider type="vertical" />
-          <StyleEditor v-bind="editors[43]" />
-        </div>
-        <div class="setting-group">
-          <!-- <Space align="center"> -->
-          整体：
-          <StyleEditor v-bind="editors[44]" />
-          <Divider type="vertical" />
-          <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
-          <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon" @on-change="changeAdminIcon">
-            <Option v-for="icon in icons" :key="icon" :value="icon"> <Icon :type="icon" /> {{ icon }} </Option>
-          </AutoComplete>
-          <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
-          <ColorPicker :model-value="adminIconColor" size="small" alpha @on-active-change="debouncedChangeAdminIconColor" />
-          <!-- </Space> -->
+
+        <div class="danmaku-setting-wrapper">
+          <div class="danmaku-setting-item-wrapper">
+            <span>交互消息</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editorV2.interactBackground" />
+          </div>
+          <div class="danmaku-setting-item-wrapper">
+            <span>内容</span>
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editorV2.interactContentSize" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editorV2.interactContentColor" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editorV2.interactContentBorderWidth" />
+            <Divider type="vertical" />
+            <StyleEditor v-bind="editorV2.interactContentBorderColor" />
+          </div>
         </div>
       </div>
     </transition>
@@ -563,6 +559,52 @@ export default {
         },
       ],
 
+      editorV2: {
+        interactBackground: {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '背景色',
+          role: 'interact',
+          prop: 'message',
+          styleName: 'background',
+        },
+        interactContentSize: {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '字号',
+          role: 'interact',
+          prop: 'comment',
+          styleName: 'font-size',
+        },
+        interactContentColor: {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '颜色',
+          role: 'interact',
+          prop: 'comment',
+          styleName: 'color',
+        },
+        interactContentBorderWidth: {
+          id: Math.random(),
+          type: 'InputNumber',
+          name: '描边宽度',
+          role: 'interact',
+          prop: 'comment',
+          numberStep: 0.1,
+          // styleName: '-webkit-text-stroke-width',
+          styleName: '--textStrokeWidth',
+        },
+        interactContentBorderColor: {
+          id: Math.random(),
+          type: 'ColorPicker',
+          name: '描边颜色',
+          role: 'interact',
+          prop: 'comment',
+          // styleName: '-webkit-text-stroke-color',
+          styleName: '--textStrokeColor',
+        },
+      },
+
       editors: [
         // ***** normal *****
         {
@@ -584,7 +626,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 0,
           prop: 'name',
           numberStep: 0.1,
@@ -620,7 +662,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 0,
           prop: 'comment',
           numberStep: 0.1,
@@ -682,7 +724,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 3,
           prop: 'name',
           numberStep: 0.1,
@@ -716,7 +758,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 3,
           prop: 'comment',
           numberStep: 0.1,
@@ -760,7 +802,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 2,
           prop: 'name',
           numberStep: 0.1,
@@ -794,7 +836,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 2,
           prop: 'comment',
           numberStep: 0.1,
@@ -837,7 +879,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 1,
           prop: 'name',
           numberStep: 0.1,
@@ -871,7 +913,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 1,
           prop: 'comment',
           numberStep: 0.1,
@@ -914,7 +956,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 'admin',
           prop: 'name',
           numberStep: 0.1,
@@ -948,7 +990,7 @@ export default {
         {
           id: Math.random(),
           type: 'InputNumber',
-          name: '描边大小',
+          name: '描边宽度',
           role: 'admin',
           prop: 'comment',
           numberStep: 0.1,
@@ -1850,5 +1892,16 @@ export default {
   z-index: -1;
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
+}
+.danmaku-setting-wrapper {
+  border: 1px solid lightgray;
+  margin: 10px 20px;
+  padding: 8px 10px;
+  border-radius: 20px;
+  border-end-end-radius: 80px 80px;
+  border-start-end-radius: 80px 80px;
+}
+.danmaku-setting-item-wrapper {
+  padding: 2px;
 }
 </style>

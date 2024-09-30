@@ -76,8 +76,8 @@
             </template>
             <template v-if="message.category === 'interactWord'">
               <!-- 入场消息设置默认使用普通设置 -->
-              <p :style="getCommentStyleByRole({ role: 0 })">
-                <Avatar class="margin-lr-1px" :src="message.face" :style="{width: `28px`, height: `28px`, 'line-height': `28px`}" />
+              <p :style="getInteractMessageStyle()">
+                <Avatar class="margin-lr-1px" :src="message.face" :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
                 <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
                 <FanMedal
                   v-if="isShowFanMedal && message.medalLevel && message.medalName"
@@ -87,8 +87,7 @@
                   :medal-color-end="message.medalColorEnd"
                   :medal-color-border="message.medalColorBorder"
                 />
-                <span :style="{ color: message.unameColor ? message.unameColor : undefined }">{{ message.uname }}</span>
-                {{ `${parseMsgType(message.type)}了直播间` }}
+                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ `${message.uname} ${parseMsgType(message.type)}了直播间` }}</span>
               </p>
             </template>
             <template v-if="message.category === 'superChat'">
@@ -120,6 +119,7 @@
 </template>
 
 <script>
+import { set } from 'lodash'
 import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../service/const'
 import { getPriceProperties, wait } from '../service/util'
 import PromiseQueue from '../service/promise-queue'
@@ -200,6 +200,9 @@ export default {
       message_lvadmin: {},
       name_lvadmin: {},
       comment_lvadmin: {},
+
+      message_lvinteract: {},
+      comment_lvinteract: {},
     }
   },
   computed: {
@@ -333,7 +336,7 @@ export default {
     onSetting(payload) {
       console.log(payload)
       for (const key in payload) {
-        this[key] = payload[key]
+        set(this, key, payload[key])
       }
     },
     onComment(comment) {
@@ -492,6 +495,12 @@ export default {
       const role = message.isAdmin ? 'admin' : message.role
       return this[`comment_lv${role}`]
     },
+    getInteractMessageStyle() {
+      return this.message_lvinteract
+    },
+    getInteractContentStyle() {
+      return this.comment_lvinteract
+    },
 
     getTextShadow(message, type) {
       const role = message.isAdmin ? 'admin' : message.role
@@ -509,6 +518,22 @@ export default {
       //     0px -1px ${textStrokeWidth} ${textStrokeColor}
       //   `,
       // }
+      return {
+        textShadow: `
+          ${textStrokeWidth} 0px ${textStrokeWidth} ${textStrokeColor},
+          0px ${textStrokeWidth} ${textStrokeWidth} ${textStrokeColor},
+          -${textStrokeWidth} 0px ${textStrokeWidth} ${textStrokeColor},
+          0px -${textStrokeWidth} ${textStrokeWidth} ${textStrokeColor}
+        `,
+      }
+    },
+
+    getInteractTextShadow() {
+      const style = this.comment_lvinteract
+      const textStrokeWidth = style['--textStrokeWidth']
+      const textStrokeColor = style['--textStrokeColor']
+      if (!parseFloat(textStrokeWidth)) return { textShadow: '' }
+      if (!textStrokeColor) return { textShadow: '' }
       return {
         textShadow: `
           ${textStrokeWidth} 0px ${textStrokeWidth} ${textStrokeColor},

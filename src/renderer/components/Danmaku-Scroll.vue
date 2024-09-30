@@ -174,6 +174,7 @@ export default {
           scrollDanmakuWindowId: win.id,
         })
 
+        console.log(win)
         const winURL = `http://localhost:${PORT}/danmaku-scroll?port=${PORT}`
         win.setIcon(nativeImage.createFromDataURL(icon))
         win.loadURL(winURL)

@@ -293,3 +293,13 @@ export async function getRecordState({
   const res = await axios.get(`${BASE_URL}/api/room/${roomId}/record/status`)
   return res.data
 }
+
+export async function getQrCode() {
+  const res = await axios.get(`${BASE_URL}/api/login/qr-code/generate`)
+  return res.data
+}
+
+export async function loginFromQrCode(qrCodeKey) {
+  const res = await axios.get(`${BASE_URL}/api/login/qr-code/poll?qrCodeKey=${qrCodeKey}`)
+  return res.data
+}

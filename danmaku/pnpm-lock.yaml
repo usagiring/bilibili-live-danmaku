@@ -14,6 +14,9 @@ importers:
       core-js:
         specifier: ^3.25.0
         version: 3.37.1
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       moment:
         specifier: ^2.29.4
         version: 2.30.1

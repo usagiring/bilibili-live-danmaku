@@ -28,6 +28,7 @@
     <div class="config-item-container">
       Cookie
       <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
+      <Button @click="showQrCodeLoginModal">扫码登录</Button>
       <Tooltip placement="top" transfer>
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
@@ -37,9 +38,6 @@
           </div>
         </template>
       </Tooltip>
-      <template v-if="needRefreshCookie">
-        <span :style="{ color: 'crimson' }">Cookie需要更新</span>
-      </template>
     </div>
     <div class="config-item-container">
       <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }" @on-change="changeAutoRecord"> 自动录制 </Checkbox>
@@ -172,6 +170,11 @@
       <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
 
+    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode" :style="{ 'text-align': 'center' }">
+      <canvas id="qrcode"></canvas>
+      <div>请使用手机端APP扫码，手机端确认之后，点击“确定”</div>
+    </Modal>
+
     <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(medal, i) in medals" :key="i">
         <Row align="middle" class-name="medal-list-container disable-user-select">
@@ -203,8 +206,9 @@ import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
-import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds, getGiftConfig } from '../../service/api'
+import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds, getQrCode, loginFromQrCode as loginFromQrCodeApi } from '../../service/api'
 import { wait } from '../../service/util'
+import QRCode from 'qrcode'
 
 const browserWindow = getCurrentWindow()
 const synth = window.speechSynthesis
@@ -232,6 +236,8 @@ export default {
       medalTotal: 0,
       medals: [],
       needRefreshCookie: false,
+      qrCodeKey: '',
+      isShowQRCodeLoginModal: false,
     })
     return state
   },
@@ -572,6 +578,32 @@ export default {
           duration: 1,
         })
       }
+    },
+
+    showQrCodeLoginModal() {
+      this.isShowQRCodeLoginModal = true
+
+      this.showQrCode()
+    },
+
+    async showQrCode() {
+      const res = await getQrCode()
+      const { url, qrcode_key } = res.data
+      this.qrCodeKey = qrcode_key
+      const qrcode = document.getElementById('qrcode')
+      QRCode.toCanvas(qrcode, url, (error) => {
+        if (error) console.error(error)
+      })
+    },
+
+    async loginFromQrCode() {
+      const data = await loginFromQrCodeApi(this.qrCodeKey)
+      const setting = {
+        userCookie: data.cookie,
+        refreshToken: data.refresh_token,
+      }
+      await updateSetting(setting)
+      this.$store.dispatch('UPDATE_CONFIG', setting)
     },
   },
 }

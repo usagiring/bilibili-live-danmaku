@@ -7,7 +7,7 @@ export function init({ port }: { port: string }) {
 }
 
 export async function getSetting() {
-  const res = await axios.get(`${BASE_URL}/api/settings`)
+  const res = await axios.get(`${BASE_URL}/api/setting`)
   return res.data
 }
 

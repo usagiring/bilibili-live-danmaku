@@ -192,6 +192,15 @@ export const DEFAULT_STYLE = {
     color: 'white',
     "--textStrokeColor": 'rgba(0,0,0,1)'
   },
+
+  message_lvinteract: {
+    background: 'rgba(0,0,0,0)'
+  },
+  comment_lvinteract: {
+    'font-size': '16px',
+    color: 'white',
+    "--textStrokeColor": 'rgba(0,0,0,1)'
+  },
 }
 export const DEFAULT_CONFIG = {
   roomId: 1,
