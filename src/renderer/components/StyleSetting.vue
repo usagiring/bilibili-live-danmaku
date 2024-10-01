@@ -26,18 +26,11 @@
       <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
         <Container orientation="horizontal" :style="{ 'z-index': 1, 'min-height': '0px' }" @drop="onDrop($event)">
           <template v-for="(setting, index) of messageSettings" :key="index">
-            <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            <!-- <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <img class="guard-icon" :src="`${getGuardIcon('3')}`" />
-            </Draggable>
+            </Draggable> -->
             <Draggable v-if="setting.type === 'medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
-              <FanMedal
-                v-if="example.medalLevel && example.medalName"
-                :medal-level="example.medalLevel"
-                :medal-name="example.medalName"
-                :medal-color-start="example.medalColorStart"
-                :medal-color-end="example.medalColorEnd"
-                :medal-color-border="example.medalColorBorder"
-              />
+              <FanMedal v-if="example.medal" :medal="example.medal" :role="example.role" />
             </Draggable>
             <Draggable v-if="setting.type === 'avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
@@ -173,8 +166,8 @@
           <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
           <Divider type="vertical" />
           <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
-          <Divider type="vertical" />
-          <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox>
+          <!-- <Divider type="vertical" /> -->
+          <!-- <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox> -->
         </div>
         <div class="setting-group">
           <Checkbox :model-value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
@@ -521,14 +514,19 @@ export default {
         uid: 1,
         uname: '测试账号',
         isAdmin: 0,
-        role: 0,
+        role: 3,
         content: '这是一条舰长的测试弹幕，可拖拽改变字段顺序~',
-        medalLevel: 21,
-        medalName: '测试者',
-        medalRoomId: 21452505,
-        medalColorBorder: '#5c968e',
-        medalColorStart: '#5c968e',
-        medalColorEnd: '#5c968e',
+        medal: {
+          name: '测试者',
+          level: 21,
+          rid: 21452505,
+          color: {
+            border: '#5c968e',
+            background: '#5c968e',
+            text: '#FFFFFF',
+            level: '#5c968e',
+          },
+        },
         _id: '020wdKl7EYV9c8cD',
       },
       showDrawTip: false,
@@ -1381,12 +1379,17 @@ export default {
           role: 3,
           sendAt: Date.now(),
           color: 'white',
-          medalLevel: 21,
-          medalName: '测试者',
-          medalRoomId: 0,
-          medalColorBorder: '#5c968e',
-          medalColorStart: '#5c968e',
-          medalColorEnd: '#5c968e',
+          medal: {
+          name: '测试者',
+          level: 21,
+          rid: 21452505,
+          color: {
+            border: '#5c968e',
+            background: '#5c968e',
+            text: '#FFFFFF',
+            level: '#FFFFFF',
+          },
+        },
           // emojiUrl: 'http://i0.hdslb.com/bfs/live/d23f33fb86a1154fc99d1521a742394e5d94a09b.png'
         }
         comment.role = randomRole
@@ -1556,6 +1559,7 @@ export default {
       if (removedIndex === null && addedIndex === null) return
 
       const messageSettings = cloneDeep(this.messageSettings)
+      messageSettings.find(s => s.type === 'guard').isShow = false
       const hiddenItems = messageSettings
         .map((setting, index) => {
           if (!setting.isShow) {

@@ -179,10 +179,10 @@
     <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(medal, i) in medals" :key="i">
         <Row align="middle" class-name="medal-list-container disable-user-select">
-          <i-col span="3">
-            <FanMedal v-bind="medal" />
+          <i-col span="4">
+            <FanMedal :medal="medal" :role="medal.guard" />
           </i-col>
-          <i-col span="8">
+          <i-col span="7">
             <span :style="{ cursor: 'pointer' }" @click="openBiliLiveRoom(medal.roomId)">{{ medal.uname }}</span>
             <Icon v-if="medal.liveStatus === 1" :style="{ color: 'green', 'font-size': '16px', margin: '3px 0 0 2px' }" type="ios-radio-button-on" />
           </i-col>
@@ -455,17 +455,23 @@ export default {
 
       const { data } = await getMedalList({ page, pageSize })
       const { count, items } = data
+
+      console.log(data)
       this.medalTotal = count
       this.medals = items
 
       this.medals = items.map((item) => {
-        const { medal_color_start, medal_color_end, medal_color_border, medal_name, level, today_feed, uname, day_limit, roomid, target_id } = item
+        const { medal_color_start, medal_color_end, medal_color_border, medal_name, level, today_feed, uname, day_limit, roomid, target_id, guard_level } = item
         return {
-          medalColorStart: parseHexColor(medal_color_start),
-          medalColorEnd: parseHexColor(medal_color_end),
-          medalColorBorder: parseHexColor(medal_color_border),
-          medalName: medal_name,
-          medalLevel: level,
+          name: medal_name,
+          level: level,
+          guard: guard_level,
+          color: {
+            background: parseHexColor(medal_color_start),
+            border: parseHexColor(medal_color_border),
+            text: '#FFFFFF',
+            level: parseHexColor(medal_color_start),
+          },
           todayFeed: today_feed,
           dayLimit: day_limit,
           uname: uname,

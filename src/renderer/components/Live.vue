@@ -57,7 +57,7 @@
     <video id="live-player" controls :style="{ height: `${resolution}px` }" />
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
-        <FanMedal v-bind="medalData" />
+        <FanMedal :medal="medalData" :role="medalData.guard" />
       </template>
       <template v-else>
         <Tooltip transfer placement="top">
@@ -93,7 +93,7 @@ import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
 import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
-import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
+import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState, backupDB } from '../../service/api'
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
 import ws from '../../service/ws'
@@ -454,19 +454,24 @@ export default {
       // 该接口会同时触发进入房间消息！
       const { data } = await getUserInfoInRoom(this.realRoomId)
       const { medal } = data || {}
-      const { curr_weared, is_weared } = medal || {}
+      const { curr_weared_v2, is_weared } = medal || {}
       if (!is_weared) {
         this.$Message.info('当前未佩戴粉丝牌')
         this.getMedalDataLoading = false
         return
       }
-      const { medal_color_start, medal_color_end, medal_color_border, medal_name, level } = curr_weared
+      const { v2_medal_color_border, level, v2_medal_color_level, v2_medal_color_start, v2_medal_color_text, guard_level, name } = curr_weared_v2
+
       this.medalData = {
-        medalColorStart: parseHexColor(medal_color_start),
-        medalColorEnd: parseHexColor(medal_color_end),
-        medalColorBorder: parseHexColor(medal_color_border),
-        medalName: medal_name,
-        medalLevel: level,
+        name: name,
+        level: level,
+        guard: guard_level,
+        color: {
+          background: v2_medal_color_start,
+          border: v2_medal_color_border,
+          level: v2_medal_color_level,
+          text: v2_medal_color_text,
+        },
       }
       this.getMedalDataLoading = false
     },

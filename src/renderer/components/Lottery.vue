@@ -167,7 +167,7 @@ export default {
         if (this.userCommentMap[comment.uid]) return
         // 当前房间粉丝牌等级过滤
         if (this.medalLevel) {
-          if (comment.medalRoomId !== this.realRoomId || comment.medalLevel < this.medalLevel) return
+          if (comment.medal?.rid !== this.realRoomId || comment.medal?.level < this.medalLevel) return
         }
         const regexp = new RegExp(this.danmakuText, 'i')
         const isMatch = regexp.test(comment.content)

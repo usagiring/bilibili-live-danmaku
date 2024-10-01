@@ -30,16 +30,8 @@
                     <template v-for="(comment, i) in comments" :key="i">
                       <div class="comment-content">
                         <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
-                        <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`" />
-                        <FanMedal
-                          v-if="comment.medalLevel && comment.medalName"
-                          class="space-left-2"
-                          :medal-level="comment.medalLevel"
-                          :medal-name="comment.medalName"
-                          :medal-color-start="comment.medalColorStart"
-                          :medal-color-end="comment.medalColorEnd"
-                          :medal-color-border="comment.medalColorBorder"
-                        />
+                        <!-- <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`" /> -->
+                        <FanMedal v-if="comment.medal" class="space-left-2" :medal="comment.medal" :role="comment.role" />
                         <span class="space-left-2">{{ `${comment.uname}` }}</span>
                         <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
                         <!-- <span>{{ `: ${comment.comment}` }}</span> -->
@@ -61,15 +53,7 @@
                     <template v-for="(interact, i) in interacts" :key="i">
                       <div>
                         <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
-                        <FanMedal
-                          v-if="interact.medalLevel && interact.medalName"
-                          class="space-left-2"
-                          :medal-level="interact.medalLevel"
-                          :medal-name="interact.medalName"
-                          :medal-color-start="interact.medalColorStart"
-                          :medal-color-end="interact.medalColorEnd"
-                          :medal-color-border="interact.medalColorBorder"
-                        />
+                        <FanMedal v-if="interact.medal" class="space-left-2" :medal="interact.medal" :role="interact.medal.guard" />
                         <span class="space-left-2" :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
                         <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
                         <span>{{ getInteractType(interact.type) }}了直播间</span>

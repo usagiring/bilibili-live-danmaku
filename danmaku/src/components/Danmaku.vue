@@ -32,16 +32,8 @@
                 </template>
                 <template v-for="(setting, index) of messageSettings" :key="index">
                   <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.avatar" :style="{ ...getAvatarSizeStyle(setting) }" />
-                  <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" />
-                  <FanMedal
-                    v-if="setting.type === 'medal' && setting.isShow && message.medalLevel && message.medalName"
-                    class="margin-lr-1px vertical-align-middle"
-                    :medal-level="message.medalLevel"
-                    :medal-name="message.medalName"
-                    :medal-color-start="message.medalColorStart"
-                    :medal-color-end="message.medalColorEnd"
-                    :medal-color-border="message.medalColorBorder"
-                  />
+                  <!-- <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
+                  <FanMedal v-if="setting.type === 'medal' && setting.isShow && message.medal" class="margin-lr-1px vertical-align-middle" :medal="message.medal" :role="message.role" />
                   <span v-if="setting.type === 'name'" class="vertical-align-middle" :style="{ ...fontStyle, ...getNameStyleByRole(message), ...getTextShadow(message, 'name') }">{{
                     message.uname
                   }}</span>
@@ -79,14 +71,7 @@
               <p :style="getInteractMessageStyle()">
                 <Avatar class="margin-lr-1px" :src="message.face" :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
                 <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
-                <FanMedal
-                  v-if="isShowFanMedal && message.medalLevel && message.medalName"
-                  :medal-level="message.medalLevel"
-                  :medal-name="message.medalName"
-                  :medal-color-start="message.medalColorStart"
-                  :medal-color-end="message.medalColorEnd"
-                  :medal-color-border="message.medalColorBorder"
-                />
+                <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
                 <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ `${message.uname} ${parseMsgType(message.type)}了直播间` }}</span>
               </p>
             </template>
