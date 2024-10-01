@@ -29,6 +29,7 @@
       Cookie
       <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Button @click="showQrCodeLoginModal">扫码登录</Button>
+      <!-- <Button @click="refreshCookie">刷新Cookie</Button> -->
       <Tooltip placement="top" transfer>
         <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
         <template #content>
@@ -207,7 +208,20 @@ import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
-import { clearDB, backupDB, updateSetting, needRefreshCookie, sendComment, getMedalList, getRoomInfoV2, getRoomInfoByIds, getQrCode, loginFromQrCode as loginFromQrCodeApi } from '../../service/api'
+import {
+  clearDB,
+  backupDB,
+  updateSetting,
+  needRefreshCookie,
+  sendComment,
+  getMedalList,
+  getRoomInfoV2,
+  getRoomInfoByIds,
+  getQrCode,
+  loginFromQrCode as loginFromQrCodeApi,
+  refreshCookie as refreshCookieApi,
+  refreshCookieStep1 as refreshCookieStep1Api,
+} from '../../service/api'
 import { wait } from '../../service/util'
 import QRCode from 'qrcode'
 
@@ -311,6 +325,12 @@ export default {
     waitingSpeakerCount() {
       return this.$store.state.Config.waitingSpeakerCount
     },
+    isNeedRefreshCookieCache() {
+      return this.$store.state.Config.isNeedRefreshCookieCache
+    },
+    refreshToken() {
+      return this.$store.state.Config.refreshToken
+    },
   },
   async mounted() {
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
@@ -330,14 +350,36 @@ export default {
     this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
 
     if (this.userCookie) {
-      needRefreshCookie().then(({ data }) => {
-        if (data.refresh) {
+      console.log(this.isNeedRefreshCookieCache)
+      if (!this.isNeedRefreshCookieCache || this.isNeedRefreshCookieCache < Date.now() - 1000 * 60 * 60 * 6) {
+        needRefreshCookie().then(({ data }) => {
+          console.log(data)
+
+          if (!data.refresh) {
+            this.$store.dispatch('UPDATE_CONFIG', {
+              isNeedRefreshCookieCache: Date.now(),
+            })
+            return
+          }
+
           this.needRefreshCookie = true
-        }
-      })
+          this.refreshCookie()
+        })
+      }
     }
   },
   methods: {
+    async refreshCookie() {
+      const { data } = await refreshCookieApi({ refreshToken: this.refreshToken })
+      const { refreshToken, userCookie } = data
+      const setting = {
+        userCookie: userCookie,
+        refreshToken: refreshToken,
+      }
+      await updateSetting(setting)
+      this.$store.dispatch('UPDATE_CONFIG', setting)
+    },
+
     async restoreDefaultStyleSetting() {
       await updateSetting(DEFAULT_STYLE)
       this.$store.dispatch('UPDATE_CONFIG', DEFAULT_STYLE)

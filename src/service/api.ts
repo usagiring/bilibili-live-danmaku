@@ -192,7 +192,12 @@ export async function getTranslateStatus() {
 }
 
 export async function needRefreshCookie() {
-  const res = await axios.get(`${BASE_URL}/api/need-refresh-cookie`)
+  const res = await axios.get(`${BASE_URL}/api/cookie/refresh/check`)
+  return res.data
+}
+
+export async function refreshCookie(body: { refreshToken: string }) {
+  const res = await axios.post(`${BASE_URL}/api/cookie/refresh`, body)
   return res.data
 }
 
