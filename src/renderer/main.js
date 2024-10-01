@@ -12,5 +12,6 @@ const app = createApp(App)
   .use(ViewUIPlus)
 
 app.config.globalProperties.$global = global
+app.provide('globalValue', global)
 
 app.mount('#app')

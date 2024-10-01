@@ -20,6 +20,7 @@
           <span>{{ row.display }}</span>
           <Select class="space-left-5px" size="small" :model-value="data[row.key]" :style="{ display: 'inline-block', width: '250px' }" @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
+              <img v-if="option.webp" :src="option.webp" :style="{ 'vertical-align': 'middle', width: '25px' }" />
               <span>{{ option.value }}</span>
             </Option>
           </Select>
@@ -27,6 +28,7 @@
         <div v-if="row.type === 'MultiSelect'">
           <Select class="space-left-5px" size="small" multiple :model-value="data[row.key]" :style="{ display: 'inline-block' }" filterable @on-change="onChangeValue(row.key, $event)">
             <Option v-for="(option, index) in row.options" :key="index" :value="option.key" :label="option.label">
+              <img v-if="option.webp" :src="option.webp" :style="{ 'vertical-align': 'middle', width: '25px' }" />
               <span>{{ option.value }}</span>
             </Option>
           </Select>

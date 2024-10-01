@@ -170,9 +170,10 @@
       <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
 
-    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode" :style="{ 'text-align': 'center' }">
+    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode" :loading="loginFromQrCodeLoading" :style="{ 'text-align': 'center' }">
       <canvas id="qrcode"></canvas>
       <div>请使用手机端APP扫码，手机端确认之后，点击“确定”</div>
+      <div :style="{ color: 'crimson' }">{{ qrCodeLoginErrorMessage }}</div>
     </Modal>
 
     <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
@@ -238,6 +239,7 @@ export default {
       needRefreshCookie: false,
       qrCodeKey: '',
       isShowQRCodeLoginModal: false,
+      loginFromQrCodeLoading: true,
     })
     return state
   },
@@ -597,13 +599,21 @@ export default {
     },
 
     async loginFromQrCode() {
+      this.loginFromQrCodeLoading = true
       const data = await loginFromQrCodeApi(this.qrCodeKey)
+      if (data.code) {
+        this.loginFromQrCodeLoading = false
+        this.qrCodeLoginErrorMessage = data.message
+        return
+      }
       const setting = {
         userCookie: data.cookie,
         refreshToken: data.refresh_token,
       }
       await updateSetting(setting)
       this.$store.dispatch('UPDATE_CONFIG', setting)
+      this.loginFromQrCodeLoading = false
+      this.isShowQRCodeLoginModal = false
     },
   },
 }

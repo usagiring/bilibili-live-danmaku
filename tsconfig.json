@@ -10,11 +10,11 @@
     // "allowJs": true,
     "outDir": "./dist/",
     "noImplicitAny": false,
-    "module": "esnext",
+    "module": "nodenext",
     // "target": "es5",
     "jsx": "react",
     "allowJs": true,
-    "moduleResolution": "node",
+    // "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   }

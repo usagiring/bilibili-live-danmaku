@@ -92,7 +92,7 @@ export default {
       isGift: false,
       historyModal: false,
       histories: [],
-      giftSelectors: [],
+      // giftSelectors: [],
       medalLevel: 0,
       danmakuText: '',
       selectedGiftIds: [],
@@ -128,16 +128,16 @@ export default {
     },
   },
   async mounted() {
-    const giftConfig = await getGiftConfig(this.realRoomId)
-    for (const key in giftConfig) {
-      const { name, webp } = giftConfig[key]
-      this.giftSelectors.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
-      })
-    }
+    // const { data: giftConfig } = await getGiftConfig(this.realRoomId)
+    // for (const key in giftConfig) {
+    //   const { name, webp } = giftConfig[key]
+    //   this.giftSelectors.push({
+    //     key: key,
+    //     value: name,
+    //     label: name,
+    //     webp: webp,
+    //   })
+    // }
   },
   beforeUnmount() {
     this.stop()
