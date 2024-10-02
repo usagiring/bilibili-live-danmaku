@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.8
         version: 2.1.2(electron@32.1.2)
       '@tokine/bilibili-bridge':
-        specifier: 0.2.17
-        version: 0.2.17(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+        specifier: 0.2.20
+        version: 0.2.20(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.7.2
         version: 1.7.7
@@ -1090,6 +1090,11 @@ packages:
     resolution: {integrity: sha512-mNVu1nvkpSd8Q8gMebGbCkDWJ51ODetrFvLKYusej+V0ByD4btqHYnPIzTBLXnQMVUlm/oxVwqmWBY3zQfZilw==}
     engines: {node: '>= 18'}
 
+  '@koa/send@git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d':
+    resolution: {commit: dee43921a9f0faed54b141cb8cc49765a047e35d, repo: git@github.com:usagiring/send.git, type: git}
+    version: 6.0.0
+    engines: {node: '>= 16'}
+
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
@@ -1257,8 +1262,8 @@ packages:
   '@tokine/asr@1.0.0':
     resolution: {integrity: sha512-YEOrebezQJFZWmWZuQUO0lQdzODLW1WW/RZiX+VDGeribujtW10Zuux6XxSgiAJDf5VbaedzxGvteOu8hXfV7w==}
 
-  '@tokine/bilibili-bridge@0.2.17':
-    resolution: {integrity: sha512-3qiocVVlht2n/m1d+E6dBabNjNgH6Nj1yjq0E2JtsM1UPYMrfzSQ0TZz/gciIRvniRF4QG4hMlhM8gjuJIxu5Q==}
+  '@tokine/bilibili-bridge@0.2.20':
+    resolution: {integrity: sha512-vvSnBk/2Cshxw3OtDdBIYfAf7c7jb12u4ifIX5dd2l2aLAdkm1W+/E+5tLqT0oXMjS7wl1NwfRmLDDEYB0yx3A==}
 
   '@tokine/bilibili-recorder@0.1.0':
     resolution: {integrity: sha512-MiDOdRNO+qAefgy2eAe+ruU+CEg+are3C1VLzNzyqsHD8Vog99JZpuPyp5U+E6sBmn2kpMuaq/zc7KTgdEADDA==}
@@ -4244,6 +4249,10 @@ packages:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
 
+  resolve-path@1.4.0:
+    resolution: {integrity: sha512-i1xevIst/Qa+nA9olDxLWnLk8YZbi8R/7JPbCMcgyWaFR6bKWaexgJgEB5oc2PKMjYdrHynyz0NY+if+H98t1w==}
+    engines: {node: '>= 0.8'}
+
   resolve-url@0.2.1:
     resolution: {integrity: sha512-ZuF55hVUQaaczgOIwqWzkEcEidmlD/xl44x1UZnhOXcYuFN2S6+rcxpG+C1N3So0wvNI3DmJICUFfu2SxhBmvg==}
     deprecated: https://github.com/lydell/resolve-url#deprecated
@@ -6391,6 +6400,11 @@ snapshots:
       koa-compose: 4.1.0
       path-to-regexp: 6.3.0
 
+  '@koa/send@git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d':
+    dependencies:
+      http-errors: 2.0.0
+      resolve-path: 1.4.0
+
   '@leichtgewicht/ip-codec@2.0.5': {}
 
   '@malept/cross-spawn-promise@2.0.0':
@@ -6539,10 +6553,11 @@ snapshots:
       - encoding
       - supports-color
 
-  '@tokine/bilibili-bridge@0.2.17(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
+  '@tokine/bilibili-bridge@0.2.20(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
     dependencies:
       '@koa/cors': 3.4.3
       '@koa/router': 13.1.0
+      '@koa/send': git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d
       '@node-rs/jieba': 1.10.3
       '@tokine/asr': 1.0.0(encoding@0.1.13)
       '@tokine/bilibili-recorder': 0.1.0
@@ -9990,6 +10005,11 @@ snapshots:
   resolve-alpn@1.2.1: {}
 
   resolve-from@4.0.0: {}
+
+  resolve-path@1.4.0:
+    dependencies:
+      http-errors: 1.6.3
+      path-is-absolute: 1.0.1
 
   resolve-url@0.2.1: {}
 
