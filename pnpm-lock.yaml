@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.8
         version: 2.1.2(electron@32.1.2)
       '@tokine/bilibili-bridge':
-        specifier: 0.2.20
-        version: 0.2.20(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+        specifier: 0.2.21
+        version: 0.2.21(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.7.2
         version: 1.7.7
@@ -64,7 +64,7 @@ importers:
         version: 4.1.0(vue@3.5.10(typescript@4.9.5))
       vuex-electron:
         specifier: github:usagiring/vuex-electron
-        version: git+https://git@github.com:usagiring/vuex-electron.git#6b34b4f56f2e721239753d8573071db46843179d
+        version: https://codeload.github.com/usagiring/vuex-electron/tar.gz/6b34b4f56f2e721239753d8573071db46843179d
       yaml:
         specifier: ^2.4.4
         version: 2.5.1
@@ -1090,8 +1090,8 @@ packages:
     resolution: {integrity: sha512-mNVu1nvkpSd8Q8gMebGbCkDWJ51ODetrFvLKYusej+V0ByD4btqHYnPIzTBLXnQMVUlm/oxVwqmWBY3zQfZilw==}
     engines: {node: '>= 18'}
 
-  '@koa/send@git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d':
-    resolution: {commit: dee43921a9f0faed54b141cb8cc49765a047e35d, repo: git@github.com:usagiring/send.git, type: git}
+  '@koa/send@https://codeload.github.com/usagiring/send/tar.gz/b4e23ebdaf12d0639be13faf843941cfcb282303':
+    resolution: {tarball: https://codeload.github.com/usagiring/send/tar.gz/b4e23ebdaf12d0639be13faf843941cfcb282303}
     version: 6.0.0
     engines: {node: '>= 16'}
 
@@ -1262,8 +1262,8 @@ packages:
   '@tokine/asr@1.0.0':
     resolution: {integrity: sha512-YEOrebezQJFZWmWZuQUO0lQdzODLW1WW/RZiX+VDGeribujtW10Zuux6XxSgiAJDf5VbaedzxGvteOu8hXfV7w==}
 
-  '@tokine/bilibili-bridge@0.2.20':
-    resolution: {integrity: sha512-vvSnBk/2Cshxw3OtDdBIYfAf7c7jb12u4ifIX5dd2l2aLAdkm1W+/E+5tLqT0oXMjS7wl1NwfRmLDDEYB0yx3A==}
+  '@tokine/bilibili-bridge@0.2.21':
+    resolution: {integrity: sha512-YotUeOoiCb9/RXi3LutAYxiTiBYieHL4RF1G+qTmC9DaRHrVyFL5wbWeJXnYTtpQEDbgsHE2zrr4qHeZHwc8mw==}
 
   '@tokine/bilibili-recorder@0.1.0':
     resolution: {integrity: sha512-MiDOdRNO+qAefgy2eAe+ruU+CEg+are3C1VLzNzyqsHD8Vog99JZpuPyp5U+E6sBmn2kpMuaq/zc7KTgdEADDA==}
@@ -3343,8 +3343,8 @@ packages:
     resolution: {integrity: sha512-MjlznhLLKy9+kG8nAXKJLM0/ClsQp/Or2vI3a5rbSQmgl8IJBQO0KI5FA70BvW+hqjtxjp49SpH2E7okS6NmHg==}
     engines: {node: '>= 7.6.0'}
 
-  koa@git+https://git@github.com:usagiring/koa.git#7cd9dae14033e7c5f3937df0a63462b71b843e2e:
-    resolution: {commit: 7cd9dae14033e7c5f3937df0a63462b71b843e2e, repo: git@github.com:usagiring/koa.git, type: git}
+  koa@https://codeload.github.com/usagiring/koa/tar.gz/7cd9dae14033e7c5f3937df0a63462b71b843e2e:
+    resolution: {tarball: https://codeload.github.com/usagiring/koa/tar.gz/7cd9dae14033e7c5f3937df0a63462b71b843e2e}
     version: 3.0.0-alpha.1
     engines: {node: '>= 18'}
 
@@ -4249,10 +4249,6 @@ packages:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
 
-  resolve-path@1.4.0:
-    resolution: {integrity: sha512-i1xevIst/Qa+nA9olDxLWnLk8YZbi8R/7JPbCMcgyWaFR6bKWaexgJgEB5oc2PKMjYdrHynyz0NY+if+H98t1w==}
-    engines: {node: '>= 0.8'}
-
   resolve-url@0.2.1:
     resolution: {integrity: sha512-ZuF55hVUQaaczgOIwqWzkEcEidmlD/xl44x1UZnhOXcYuFN2S6+rcxpG+C1N3So0wvNI3DmJICUFfu2SxhBmvg==}
     deprecated: https://github.com/lydell/resolve-url#deprecated
@@ -4323,8 +4319,8 @@ packages:
   sax@1.4.1:
     resolution: {integrity: sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==}
 
-  say@git+https://git@github.com:usagiring/say.js.git#57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0:
-    resolution: {commit: 57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0, repo: git@github.com:usagiring/say.js.git, type: git}
+  say@https://codeload.github.com/usagiring/say.js/tar.gz/57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0:
+    resolution: {tarball: https://codeload.github.com/usagiring/say.js/tar.gz/57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0}
     version: 0.16.0
     engines: {node: '>=6.9'}
 
@@ -4881,8 +4877,8 @@ packages:
       typescript:
         optional: true
 
-  vuex-electron@git+https://git@github.com:usagiring/vuex-electron.git#6b34b4f56f2e721239753d8573071db46843179d:
-    resolution: {commit: 6b34b4f56f2e721239753d8573071db46843179d, repo: git@github.com:usagiring/vuex-electron.git, type: git}
+  vuex-electron@https://codeload.github.com/usagiring/vuex-electron/tar.gz/6b34b4f56f2e721239753d8573071db46843179d:
+    resolution: {tarball: https://codeload.github.com/usagiring/vuex-electron/tar.gz/6b34b4f56f2e721239753d8573071db46843179d}
     version: 2.0.0
 
   vuex@4.1.0:
@@ -6400,10 +6396,9 @@ snapshots:
       koa-compose: 4.1.0
       path-to-regexp: 6.3.0
 
-  '@koa/send@git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d':
+  '@koa/send@https://codeload.github.com/usagiring/send/tar.gz/b4e23ebdaf12d0639be13faf843941cfcb282303':
     dependencies:
       http-errors: 2.0.0
-      resolve-path: 1.4.0
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
@@ -6553,11 +6548,11 @@ snapshots:
       - encoding
       - supports-color
 
-  '@tokine/bilibili-bridge@0.2.20(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
+  '@tokine/bilibili-bridge@0.2.21(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)':
     dependencies:
       '@koa/cors': 3.4.3
       '@koa/router': 13.1.0
-      '@koa/send': git+https://git@github.com:usagiring/send.git#dee43921a9f0faed54b141cb8cc49765a047e35d
+      '@koa/send': https://codeload.github.com/usagiring/send/tar.gz/b4e23ebdaf12d0639be13faf843941cfcb282303
       '@node-rs/jieba': 1.10.3
       '@tokine/asr': 1.0.0(encoding@0.1.13)
       '@tokine/bilibili-recorder': 0.1.0
@@ -6568,14 +6563,14 @@ snapshots:
       cookie: 0.6.0
       iconv-lite: 0.4.24
       jsonwebtoken: 8.5.1
-      koa: git+https://git@github.com:usagiring/koa.git#7cd9dae14033e7c5f3937df0a63462b71b843e2e
+      koa: https://codeload.github.com/usagiring/koa/tar.gz/7cd9dae14033e7c5f3937df0a63462b71b843e2e
       koa-bodyparser: 4.4.1
       koa-logger: 3.2.1
       lodash: 4.17.21
       moment: 2.30.1
       nedb: 1.8.0
       protobufjs: 7.4.0
-      say: git+https://git@github.com:usagiring/say.js.git#57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0
+      say: https://codeload.github.com/usagiring/say.js/tar.gz/57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0
       ws: 7.5.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
@@ -9093,7 +9088,7 @@ snapshots:
       humanize-number: 0.0.2
       passthrough-counter: 1.0.0
 
-  koa@git+https://git@github.com:usagiring/koa.git#7cd9dae14033e7c5f3937df0a63462b71b843e2e:
+  koa@https://codeload.github.com/usagiring/koa/tar.gz/7cd9dae14033e7c5f3937df0a63462b71b843e2e:
     dependencies:
       accepts: 1.3.8
       cache-content-type: 1.0.1
@@ -10006,11 +10001,6 @@ snapshots:
 
   resolve-from@4.0.0: {}
 
-  resolve-path@1.4.0:
-    dependencies:
-      http-errors: 1.6.3
-      path-is-absolute: 1.0.1
-
   resolve-url@0.2.1: {}
 
   resolve@1.22.8:
@@ -10082,7 +10072,7 @@ snapshots:
 
   sax@1.4.1: {}
 
-  say@git+https://git@github.com:usagiring/say.js.git#57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0:
+  say@https://codeload.github.com/usagiring/say.js/tar.gz/57e5dd5a037abfee7cf2fcc48c33be7ae503ffe0:
     dependencies:
       one-time: 0.0.4
 
@@ -10666,7 +10656,7 @@ snapshots:
     optionalDependencies:
       typescript: 4.9.5
 
-  vuex-electron@git+https://git@github.com:usagiring/vuex-electron.git#6b34b4f56f2e721239753d8573071db46843179d:
+  vuex-electron@https://codeload.github.com/usagiring/vuex-electron/tar.gz/6b34b4f56f2e721239753d8573071db46843179d:
     dependencies:
       deepmerge: 2.2.1
       electron-store: 8.2.0
