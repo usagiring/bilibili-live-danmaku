@@ -88,7 +88,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
-    "@tokine/bilibili-bridge": "0.2.13",
+    "@tokine/bilibili-bridge": "0.2.17",
     "axios": "^1.7.2",
     "echarts": "^5.3.3",
     "echarts-wordcloud": "^2.0.0",
@@ -134,7 +134,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^32.1.2",
-    "electron-builder": "^23.3.3",
+    "electron-builder": "^25.0.5",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",
     "eslint": "^8.46.0",
@@ -155,7 +155,7 @@
     "vue-template-compiler": "^2.7.10",
     "vue-tsc": "^0.40.1",
     "webpack": "5.74.0",
-    "webpack-dev-server": "^4.10.1",
+    "webpack-dev-server": "^4.15.2",
     "webpack-hot-middleware": "^2.25.2",
     "worklet-loader": "^2.0.0"
   }

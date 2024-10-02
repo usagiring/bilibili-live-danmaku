@@ -67,31 +67,7 @@ function startRenderer() {
         static: {
           directory: path.resolve(__dirname, "static"),
         },
-        // contentBase: path.join(__dirname, '../'),
-        // quiet: true,
         hot: true,
-        // liveReload: false,
-        // hotOnly: true,
-        proxy: {
-          '/xlive': {
-            target: "https://api.live.bilibili.com",
-            changeOrigin: true
-          },
-          '/x': {
-            target: "https://api.bilibili.com",
-            changeOrigin: true
-          },
-          '/room': {
-            target: "https://api.live.bilibili.com",
-            changeOrigin: true
-          }
-        },
-        // before(app, ctx) {
-        //   // app.use(hotMiddleware)
-        //   ctx.middleware.waitUntilValid(() => {
-        //     resolve()
-        //   })
-        // },
         onBeforeSetupMiddleware: function (devServer) {
           devServer.middleware.waitUntilValid(() => {
             resolve()
