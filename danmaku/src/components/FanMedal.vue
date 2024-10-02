@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { GUARD_ICON_MAP } from '../../service/const'
+import { GUARD_ICON_MAP } from '../service/const'
 
 const props = defineProps({
   medal: Object,
