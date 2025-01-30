@@ -308,3 +308,15 @@ export async function loginFromQrCode(qrCodeKey) {
   const res = await axios.get(`${BASE_URL}/api/login/qr-code/poll?qrCodeKey=${qrCodeKey}`)
   return res.data
 }
+
+export async function addLike({
+  roomId,
+  ruid,
+  count
+}) {
+  const res = await axios.post(`${BASE_URL}/api/bilibili/room/${roomId}/like`, {
+    ruid,
+    count,
+  })
+  return res.data
+}

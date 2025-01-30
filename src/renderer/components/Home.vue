@@ -27,8 +27,11 @@
       <div class="user-info-container">
         <div class="avatar-wrapper">
           <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
-          <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : '未连接' }}</span>
-          <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on' : 'live-tag-off'">{{ liveStatus === 1 ? '直播中' : '未开播' }}</span>
+          <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{
+            username ? username : '未连接' }}</span>
+          <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on' : 'live-tag-off'">
+            {{ liveStatus === 1 ? '直播中' : '未开播' }}
+          </span>
         </div>
 
         <div class="status-wrapper">
@@ -56,15 +59,21 @@
             <span class="space-left-2px status-shadow">{{ guardNumber }}</span>
           </div>
           <div class="status-padding">
-            <Tooltip content="十分钟内互动人数">
+            <Tooltip content="房间观众">
               <Icon class="status-shadow" type="md-person" />
             </Tooltip>
-            <span class="space-left-2px status-shadow">{{ peopleNumber }}</span>
+            <span class="space-left-2px status-shadow">{{ onlineNumber }}</span>
           </div>
           <div class="status-padding">
-            <Tooltip :content="`${likeNumber}次点赞`">
-              <Icon class="status-shadow" type="md-thumbs-up" />
-            </Tooltip>
+            <Poptip v-model="showLikeConfirm">
+              <Icon class="status-shadow like-button" type="md-thumbs-up" />
+              <template #content>
+                我要给喜欢的主播点
+                <InputNumber size="small" max="1000" min="1" :style="{ width: '50px' }" v-model="addlikeNumber"></InputNumber>
+                次赞！
+                <Button size="small" @click="like">确定</Button>
+              </template>
+            </Poptip>
             <span class="space-left-2px status-shadow">{{ likeNumber }}</span>
           </div>
         </div>
@@ -85,18 +94,23 @@
       <div class="room-controller-container transparent-mask">
         <div>
           <span>直播间号：</span>
-          <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small" :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
+          <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small"
+            :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
             <Option v-for="room in selfHistoryRooms" :key="room.roomId" :value="room.roomId">
               <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
               {{ `${room.uname} (${room.roomId})` }}
-              <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{ room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
+              <span
+                :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{
+                  room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
               <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
             </Option>
           </AutoComplete>
           <span :style="{ 'padding-left': '10px' }">连接</span>
-          <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
+          <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId"
+            @on-change="connect" />
           <span :style="{ 'padding-left': '20px' }">弹幕窗</span>
-          <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
+          <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading"
+            @on-change="showDanmakuWindow" />
           <template v-if="isShowDanmakuWindow">
             <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
             <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
@@ -116,62 +130,62 @@
         <Sider class="sider-bar" v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
           <Menu theme="light" width="auto" :class="menuitemClasses">
             <MenuItem name="1-1" to="/style">
-              <Icon type="md-color-palette" />
-              <span>样式</span>
+            <Icon type="md-color-palette" />
+            <span>样式</span>
             </MenuItem>
             <MenuItem name="1-2" to="/message">
-              <Icon type="md-chatboxes" />
-              <span>消息</span>
+            <Icon type="md-chatboxes" />
+            <span>消息</span>
             </MenuItem>
             <MenuItem name="1-3" to="/live">
-              <Icon type="md-play" />
-              <span>直播</span>
+            <Icon type="md-play" />
+            <span>直播</span>
             </MenuItem>
             <MenuItem name="1-4" to="/vote">
-              <Icon type="md-pie" />
-              <span>投票</span>
+            <Icon type="md-pie" />
+            <span>投票</span>
             </MenuItem>
             <MenuItem name="1-6" to="/statistic">
-              <Icon type="md-stats" />
-              <span>统计</span>
+            <Icon type="md-stats" />
+            <span>统计</span>
             </MenuItem>
             <MenuItem name="1-7" to="/auto-reply">
-              <Icon type="md-repeat" />
-              <span>回复</span>
+            <Icon type="md-repeat" />
+            <span>回复</span>
             </MenuItem>
             <MenuItem name="1-9" to="/danmaku-scroll">
-              <Icon type="ios-water" />
-              <span>弹幕2</span>
+            <Icon type="ios-water" />
+            <span>弹幕2</span>
             </MenuItem>
             <MenuItem name="1-5" to="/lottery">
-              <div :style="{ position: 'relative', display: 'inline-block' }">
-                <Icon type="md-bonfire" />
-                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-              </div>
-              <span>祈愿</span>
+            <div :style="{ position: 'relative', display: 'inline-block' }">
+              <Icon type="md-bonfire" />
+              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+            </div>
+            <span>祈愿</span>
             </MenuItem>
             <MenuItem name="1-8" to="/command">
-              <div :style="{ position: 'relative', display: 'inline-block' }">
-                <!-- <Icon type="md-code" /> -->
-                <Icon type="md-color-wand" />
-                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-              </div>
-              <span>咒语</span>
+            <div :style="{ position: 'relative', display: 'inline-block' }">
+              <!-- <Icon type="md-code" /> -->
+              <Icon type="md-color-wand" />
+              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+            </div>
+            <span>咒语</span>
             </MenuItem>
             <MenuItem name="1-10" to="/asr">
-              <div :style="{ position: 'relative', display: 'inline-block' }">
-                <Icon type="md-ionitron" />
-                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-              </div>
-              <span>语音识别</span>
+            <div :style="{ position: 'relative', display: 'inline-block' }">
+              <Icon type="md-ionitron" />
+              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+            </div>
+            <span>语音识别</span>
             </MenuItem>
             <MenuItem name="1-11" to="/config">
-              <Icon type="md-settings" />
-              <span>设置</span>
+            <Icon type="md-settings" />
+            <span>设置</span>
             </MenuItem>
             <MenuItem name="1-12" to="/help">
-              <Icon type="md-help" />
-              <span>帮助</span>
+            <Icon type="md-help" />
+            <span>帮助</span>
             </MenuItem>
           </Menu>
           <!-- <template #trigger>
@@ -210,6 +224,7 @@ import {
   cancelRecord,
   getRecordState,
   // getGiftConfig,
+  addLike,
 } from '../../service/api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
 import ws from '../../service/ws'
@@ -232,7 +247,7 @@ export default {
       isShowDanmakuWindowLoading: false,
       isAlwaysOnTop: false,
       giftTimer: null,
-      peopleTimer: null,
+      // peopleTimer: null,
       isConnecting: false,
       hasNewVersion: false,
       isAppUpdating: false,
@@ -243,6 +258,8 @@ export default {
       percent: 0,
       selfHistoryRooms: [],
       waitingSpeakers: [],
+      showLikeConfirm: false,
+      addlikeNumber: 1,
 
       username: '',
       avatar: null,
@@ -250,7 +267,8 @@ export default {
       fansNumber: 0,
       fansClubNumber: 0,
       liveStatus: 0,
-      peopleNumber: 0,
+      // peopleNumber: 0,
+      onlineNumber: 0,
       guardNumber: 0,
       roomUserId: 0,
       watchedNumber: 0,
@@ -331,7 +349,7 @@ export default {
       await this.fillRoomLiveStatus(newValue)
     },
   },
-  created() {},
+  created() { },
   async mounted() {
     this.displayRoomId = this.realRoomId
 
@@ -439,11 +457,11 @@ export default {
     })
     ipcRenderer.send(IPC_CHECK_FOR_UPDATE)
 
-    this.peopleTimer = setInterval(async () => {
-      if (!this.realRoomId || !this.isConnected) return
-      const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
-      this.peopleNumber = result.data
-    }, 10000)
+    // this.peopleTimer = setInterval(async () => {
+    //   if (!this.realRoomId || !this.isConnected) return
+    //   const result = await getRealTimeViewersCount({ roomId: this.realRoomId })
+    //   this.peopleNumber = result.data
+    // }, 10000)
 
     // 刷新舰长数 间隔1分钟
     this.guardNumberTimer = setInterval(() => {
@@ -473,9 +491,9 @@ export default {
     if (this.giftTimer) {
       clearInterval(this.giftTimer)
     }
-    if (this.peopleTimer) {
-      clearInterval(this.peopleTimer)
-    }
+    // if (this.peopleTimer) {
+    //   clearInterval(this.peopleTimer)
+    // }
   },
   methods: {
     async connect(status) {
@@ -563,7 +581,6 @@ export default {
           live_status: liveStatus,
           live_start_time, // 直播开始时间 unixtime
           online,
-          like_info_v3,
         } = data.room_info
 
         const { uname, face, gender } = data.anchor_info.base_info
@@ -572,6 +589,8 @@ export default {
         const { medal_name, medal_id, fansclub } = data.anchor_info.medal_info || {}
         const { num: watchedNumber } = data.watched_show || {}
         const { total_likes: likeNumber } = data.like_info_v3 || {}
+        const onlineNumber = data.room_rank_info?.user_rank_entry?.user_contribution_rank_entry?.count || 0
+
         this.username = uname
         this.avatar = face
         this.ninkiNumber = online
@@ -581,6 +600,7 @@ export default {
         this.roomUserId = uid
         this.watchedNumber = watchedNumber
         this.likeNumber = likeNumber
+        this.onlineNumber = onlineNumber
 
         try {
           const { data: userInfo } = await getUserInfoV2(uid)
@@ -621,7 +641,8 @@ export default {
         this.fansNumber = 0
         this.fansClubNumber = 0
         this.liveStatus = 0
-        this.peopleNumber = 0
+        // this.peopleNumber = 0
+        this.onlineNumber = 0
         this.guardNumber = 0
         this.topPhoto = ''
         this.watchedNumber = 0
@@ -943,6 +964,15 @@ export default {
       tray.setToolTip('bilibili-danmaku')
       tray.setContextMenu(contextMenu)
     },
+
+    async like() {
+      await addLike({
+        roomId: this.realRoomId,
+        ruid: this.roomUserId,
+        count: this.addlikeNumber
+      })
+      this.showLikeConfirm = false
+    }
   },
 }
 </script>
@@ -951,9 +981,11 @@ export default {
 .ivu-layout-sider-trigger {
   background: white;
 }
+
 .ivu-layout-sider {
   background: white;
 }
+
 .ivu-layout-sider-trigger-icon {
   color: #515a6e;
 }
@@ -966,6 +998,7 @@ export default {
   flex-direction: column;
   overflow: hidden;
 }
+
 #title-bar {
   height: 35px;
   -webkit-app-region: drag;
@@ -1008,7 +1041,7 @@ export default {
   width: 150px;
 }
 
-#title-bar-status > span {
+#title-bar-status>span {
   display: inline-block;
   height: 16px;
   position: absolute;
@@ -1068,18 +1101,22 @@ export default {
   flex: 0 0 auto;
   background: ghostwhite;
 }
+
 .main-container {
   flex: 1 1 auto;
   overflow: auto;
   z-index: 1;
 }
+
 .avatar-wrapper {
   display: inline-block;
   vertical-align: top;
 }
+
 .header-icon-text {
   font-size: 12px;
 }
+
 .status-wrapper {
   vertical-align: top;
   display: inline-block;
@@ -1090,6 +1127,7 @@ export default {
 .status-padding {
   padding: 5px 25px 5px 10px;
 }
+
 .status-shadow {
   /* background: radial-gradient(farthest-side, white 20%, rgba(0, 0, 0, 0) 100%); */
   text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
@@ -1101,6 +1139,7 @@ export default {
   top: 0px;
   right: 10px;
 }
+
 .user-info-container {
   height: 84px;
   line-height: 84px;
@@ -1108,18 +1147,21 @@ export default {
   position: relative;
   margin: 0 60px;
 }
+
 .room-controller-container {
   position: relative;
   height: 48px;
   line-height: 48px;
   padding: 0 60px;
 }
+
 .layout-content {
   height: 100%;
   width: 100%;
   background: white;
   position: relative;
 }
+
 /* .ivu-btn-dashed {
   border-color: green;
 } */
@@ -1139,19 +1181,23 @@ export default {
   vertical-align: bottom;
   transition: width 0.2s ease 0.2s;
 }
+
 .menu-item i {
   transform: translateX(0px);
   transition: font-size 0.2s ease, transform 0.2s ease;
   vertical-align: middle;
   font-size: 16px;
 }
-.ivu-menu-item > i {
+
+.ivu-menu-item>i {
   margin-right: 2px;
 }
+
 .collapsed-menu span {
   width: 0px;
   transition: width 0.2s ease;
 }
+
 .collapsed-menu i {
   transform: translateX(5px);
   transition: font-size 0.2s ease 0.2s, transform 0.2s ease 0.2s;
@@ -1183,6 +1229,7 @@ export default {
   height: 20px;
   width: 20px;
 }
+
 .record-icon::before,
 .record-icon::after {
   content: '';
@@ -1206,6 +1253,7 @@ export default {
     transform: rotate(360deg);
   }
 }
+
 .lottery-icon {
   font-size: 20px;
   color: dodgerblue;
@@ -1241,6 +1289,7 @@ export default {
   width: 100%;
   min-width: 950px;
 }
+
 .live-tag-on {
   border: 1px solid mediumseagreen;
   border-radius: 8px;
@@ -1249,6 +1298,7 @@ export default {
   margin-left: 5px;
   background: rgba(255, 255, 255, 0.2);
 }
+
 .live-tag-off {
   border: 1px solid gray;
   border-radius: 8px;
@@ -1256,22 +1306,30 @@ export default {
   padding: 3px 5px;
   margin-left: 5px;
 }
+
 .transparent-mask {
   background: linear-gradient(to top, white, rgba(0, 0, 0, 0));
 }
+
 .username-label {
   padding: 5px 15px;
   /* background: radial-gradient(farthest-side, rgba(255, 255, 255, 0.8) 60%, rgba(0, 0, 0, 0) 100%); */
   text-shadow: white 1px 0 2px, white 0 1px 2px, white -1px 0 2px, white 0 -1px 2px;
 }
+
 .space-left-2px {
   margin-left: 2px;
 }
+
 .sider-bar {
   overflow-y: auto;
 }
 
 .sider-bar::-webkit-scrollbar {
   display: none;
+}
+
+.like-button {
+  cursor: pointer;
 }
 </style>
