@@ -71,7 +71,7 @@
                 我要给喜欢的主播点
                 <InputNumber size="small" max="1000" min="1" :style="{ width: '50px' }" v-model="addlikeNumber"></InputNumber>
                 次赞！
-                <Button size="small" @click="like">确定</Button>
+                <Button size="small" :disabled="!userCookie" @click="like">确定</Button>
               </template>
             </Poptip>
             <span class="space-left-2px status-shadow">{{ likeNumber }}</span>
@@ -969,7 +969,7 @@ export default {
       await addLike({
         roomId: this.realRoomId,
         ruid: this.roomUserId,
-        count: this.addlikeNumber
+        count: this.addlikeNumber || 1,
       })
       this.showLikeConfirm = false
     }
