@@ -27,8 +27,7 @@
       <div class="user-info-container">
         <div class="avatar-wrapper">
           <Avatar :src="avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
-          <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{
-            username ? username : '未连接' }}</span>
+          <span class="username-label" :style="isConnected && { cursor: 'pointer' }" @click="openBiliLiveRoom">{{ username ? username : '未连接' }}</span>
           <span v-if="username" :class="liveStatus === 1 ? 'live-tag-on' : 'live-tag-off'">
             {{ liveStatus === 1 ? '直播中' : '未开播' }}
           </span>
@@ -94,23 +93,18 @@
       <div class="room-controller-container transparent-mask">
         <div>
           <span>直播间号：</span>
-          <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small"
-            :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
+          <AutoComplete clearable :model-value="displayRoomId" placeholder="请输入直播间号" size="small" :disabled="isConnected" style="width: 120px" @on-change="changeRoomId">
             <Option v-for="room in selfHistoryRooms" :key="room.roomId" :value="room.roomId">
               <Avatar :src="room.face || DEFAULT_AVATAR" size="small" />
               {{ `${room.uname} (${room.roomId})` }}
-              <span
-                :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{
-                  room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
+              <span :style="room.liveStatus === 1 ? { 'font-size': '12px', color: 'green' } : { 'font-size': '12px', color: 'silver' }">{{ room.liveStatus === 1 ? '直播中' : '未开播' }}</span>
               <Icon type="md-close" class="remove-history-room" @click="removeHistoryRoom(room)" />
             </Option>
           </AutoComplete>
           <span :style="{ 'padding-left': '10px' }">连接</span>
-          <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId"
-            @on-change="connect" />
+          <i-switch class="space-left-2px" :model-value="isConnected" :loading="isConnecting" :disabled="!displayRoomId" @on-change="connect" />
           <span :style="{ 'padding-left': '20px' }">弹幕窗</span>
-          <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading"
-            @on-change="showDanmakuWindow" />
+          <i-switch class="space-left-2px" :model-value="isShowDanmakuWindow" :loading="isShowDanmakuWindowLoading" @on-change="showDanmakuWindow" />
           <template v-if="isShowDanmakuWindow">
             <span :style="{ 'padding-left': '20px' }">窗口置顶</span>
             <i-switch v-model="isAlwaysOnTop" @on-change="alwaysOnTop" />
@@ -130,62 +124,62 @@
         <Sider class="sider-bar" v-model="isCollapsed" collapsible :collapsed-width="78" :width="140">
           <Menu theme="light" width="auto" :class="menuitemClasses">
             <MenuItem name="1-1" to="/style">
-            <Icon type="md-color-palette" />
-            <span>样式</span>
+              <Icon type="md-color-palette" />
+              <span>样式</span>
             </MenuItem>
             <MenuItem name="1-2" to="/message">
-            <Icon type="md-chatboxes" />
-            <span>消息</span>
+              <Icon type="md-chatboxes" />
+              <span>消息</span>
             </MenuItem>
             <MenuItem name="1-3" to="/live">
-            <Icon type="md-play" />
-            <span>直播</span>
+              <Icon type="md-play" />
+              <span>直播</span>
             </MenuItem>
             <MenuItem name="1-4" to="/vote">
-            <Icon type="md-pie" />
-            <span>投票</span>
+              <Icon type="md-pie" />
+              <span>投票</span>
             </MenuItem>
             <MenuItem name="1-6" to="/statistic">
-            <Icon type="md-stats" />
-            <span>统计</span>
+              <Icon type="md-stats" />
+              <span>统计</span>
             </MenuItem>
             <MenuItem name="1-7" to="/auto-reply">
-            <Icon type="md-repeat" />
-            <span>回复</span>
+              <Icon type="md-repeat" />
+              <span>回复</span>
             </MenuItem>
             <MenuItem name="1-9" to="/danmaku-scroll">
-            <Icon type="ios-water" />
-            <span>弹幕2</span>
+              <Icon type="ios-water" />
+              <span>弹幕2</span>
             </MenuItem>
             <MenuItem name="1-5" to="/lottery">
-            <div :style="{ position: 'relative', display: 'inline-block' }">
-              <Icon type="md-bonfire" />
-              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-            </div>
-            <span>祈愿</span>
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <Icon type="md-bonfire" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>祈愿</span>
             </MenuItem>
             <MenuItem name="1-8" to="/command">
-            <div :style="{ position: 'relative', display: 'inline-block' }">
-              <!-- <Icon type="md-code" /> -->
-              <Icon type="md-color-wand" />
-              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-            </div>
-            <span>咒语</span>
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <!-- <Icon type="md-code" /> -->
+                <Icon type="md-color-wand" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>咒语</span>
             </MenuItem>
             <MenuItem name="1-10" to="/asr">
-            <div :style="{ position: 'relative', display: 'inline-block' }">
-              <Icon type="md-ionitron" />
-              <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
-            </div>
-            <span>语音识别</span>
+              <div :style="{ position: 'relative', display: 'inline-block' }">
+                <Icon type="md-ionitron" />
+                <div :style="{ position: 'absolute', right: '-25px', top: '-10px', 'font-size': '10px' }">beta</div>
+              </div>
+              <span>语音识别</span>
             </MenuItem>
             <MenuItem name="1-11" to="/config">
-            <Icon type="md-settings" />
-            <span>设置</span>
+              <Icon type="md-settings" />
+              <span>设置</span>
             </MenuItem>
             <MenuItem name="1-12" to="/help">
-            <Icon type="md-help" />
-            <span>帮助</span>
+              <Icon type="md-help" />
+              <span>帮助</span>
             </MenuItem>
           </Menu>
           <!-- <template #trigger>
@@ -349,7 +343,7 @@ export default {
       await this.fillRoomLiveStatus(newValue)
     },
   },
-  created() { },
+  created() {},
   async mounted() {
     this.displayRoomId = this.realRoomId
 
@@ -447,6 +441,12 @@ export default {
         this.likeNumber = likeNumber
       }
 
+      // if (payload.cmd === 'BILI_WS_CONNECT') {
+      //   const { status } = payload.payload
+      //   if (status === 'failed') {
+      //     this.$Message.error('弹幕连接失败，请尝试更新或清空Cookie后重试连接...')
+      //   }
+      // }
       // if (payload.cmd === 'LOG_IN_NOTICE') {
       //   this.$Message.error('检测到B站用户名显示异常，尝试重新连接弹幕系统...')
       // }
@@ -972,7 +972,7 @@ export default {
         count: this.addlikeNumber || 1,
       })
       this.showLikeConfirm = false
-    }
+    },
   },
 }
 </script>
@@ -1041,7 +1041,7 @@ export default {
   width: 150px;
 }
 
-#title-bar-status>span {
+#title-bar-status > span {
   display: inline-block;
   height: 16px;
   position: absolute;
@@ -1189,7 +1189,7 @@ export default {
   font-size: 16px;
 }
 
-.ivu-menu-item>i {
+.ivu-menu-item > i {
   margin-right: 2px;
 }
 
