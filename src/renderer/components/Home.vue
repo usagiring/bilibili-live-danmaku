@@ -611,7 +611,9 @@ export default {
             top_photo,
           } = userInfo
 
-          this.topPhoto = top_photo
+
+          const topPhotoUrl = new URL(top_photo, 'https://i0.hdslb.com')
+          this.topPhoto = topPhotoUrl.href
         } catch (e) {
           console.log(e)
         }
