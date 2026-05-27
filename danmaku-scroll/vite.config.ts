@@ -7,11 +7,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve('src')
-    }
+    },
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue']
   },
   base: './',
   build: {
-    outDir: '../danmaku-dist/danmaku-scroll',
+    outDir: 'dist',
     emptyOutDir: true,
   }
 })

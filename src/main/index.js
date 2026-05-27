@@ -19,7 +19,7 @@ bilibiliBridge({
   USER_DATA_PATH: app.getPath('userData'),
   PORT,
   SAVE_ALL_BILI_MESSAGE,
-  HTML_PATH: import.meta.env.DEV ? path.join(__dirname, '../../danmaku-dist') : DANMAKU_RENDER_PATH || path.join(__dirname, '../danmaku-dist'),
+  HTML_PATH: import.meta.env.DEV ? path.join(__dirname, '../../danmaku/dist') : DANMAKU_RENDER_PATH || path.join(__dirname, '../danmaku-dist'),
 })
 
 /**

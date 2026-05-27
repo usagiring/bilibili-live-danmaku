@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build && electron-builder",
-    "build:all": "npm run build:danmaku && npm run build:danmaku-scroll && electron-vite build && cp -r danmaku-dist out/ && electron-builder",
+    "build:all": "npm run build:danmaku && npm run build:danmaku-scroll && electron-vite build && mkdir -p out/danmaku-dist/danmaku-scroll && cp -r danmaku/dist/* out/danmaku-dist/ && cp -r danmaku-scroll/dist/* out/danmaku-dist/danmaku-scroll/ && electron-builder",
     "build:dir": "electron-vite build && electron-builder --dir",
     "build:clean": "rm -rf out",
     "build:web": "vite build",
@@ -49,7 +49,8 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": "zip"
     },
     "win": {
       "icon": "build/icons/icon.ico",
