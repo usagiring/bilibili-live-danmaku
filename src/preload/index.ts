@@ -12,8 +12,5 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (channel: string, func: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => func(...args))
   },
-  invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args),
-  handle: (channel: string, func: (...args: unknown[]) => Promise<unknown>) => {
-    ipcRenderer.handle(channel, (_event, ...args) => func(...args))
-  }
+  invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args)
 })

@@ -9,5 +9,9 @@ export default defineConfig({
       '@': resolve('src')
     }
   },
-  base: './'
+  base: './',
+  build: {
+    outDir: '../danmaku-dist',
+    emptyOutDir: true,
+  }
 })

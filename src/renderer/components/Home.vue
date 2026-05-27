@@ -231,7 +231,6 @@ import {
   addLike,
 } from '../../service/api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
-import icon from '../assets/logo.png'
 import { PORT } from '../../service/config-loader'
 
 const synth = window.speechSynthesis

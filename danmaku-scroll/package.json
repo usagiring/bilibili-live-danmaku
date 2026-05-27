@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:monorepo": "vite build && rm -rf ../danmaku-dist/danmaku-scroll && mv dist ../danmaku-dist/danmaku-scroll",
+    "build:monorepo": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {

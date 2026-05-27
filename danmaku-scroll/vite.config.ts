@@ -9,5 +9,9 @@ export default defineConfig({
       '@': resolve('src')
     }
   },
-  base: './'
+  base: './',
+  build: {
+    outDir: '../danmaku-dist/danmaku-scroll',
+    emptyOutDir: true,
+  }
 })
