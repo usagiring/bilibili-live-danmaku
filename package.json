@@ -13,8 +13,7 @@
     "build:clean": "rm -rf out",
     "build:web": "cd web && npm run build",
     "pack": "electron-vite build",
-    "release": "npm run build -- -p always",
-    "build:danmaku": "cd danmaku && npm run build:monorepo"
+    "release": "npm run build -- -p always"
   },
   "repository": {
     "type": "git",

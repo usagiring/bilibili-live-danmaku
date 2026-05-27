@@ -16,8 +16,8 @@ export default defineConfig({
     emptyOutDir: true,
     rolldownOptions: {
       input: {
-        'danmaku/index': resolve(__dirname, 'danmaku/index.html'),
-        'danmaku-scroll/index': resolve(__dirname, 'danmaku-scroll/index.html'),
+        'dm/index': resolve(__dirname, 'pages/dm/index.html'),
+        'dm-raw-style/index': resolve(__dirname, 'pages/dm-raw-style/index.html'),
       }
     }
   }
