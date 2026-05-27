@@ -204,7 +204,6 @@
 import { uniq } from 'lodash'
 import { reactive } from 'vue'
 import { ipcRenderer, shell } from 'electron'
-import { getCurrentWindow } from '@electron/remote'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
@@ -224,7 +223,6 @@ import {
 import { wait } from '../../service/util'
 import QRCode from 'qrcode'
 
-const browserWindow = getCurrentWindow()
 const synth = window.speechSynthesis
 
 export default {
@@ -382,20 +380,20 @@ export default {
     async restoreDefaultStyleSetting() {
       await updateSetting(DEFAULT_STYLE)
       this.$store.dispatch('UPDATE_CONFIG', DEFAULT_STYLE)
-      browserWindow.reload()
+      location.reload()
     },
 
     async backupAndClearDB() {
       // 从 ./data 里备份 comment gift interact, 并 removeall
       await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
       await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      browserWindow.reload()
+      location.reload()
     },
 
     async clearUserDB() {
       // 清空用户数据缓存
       await clearDB({ names: ['user'] })
-      browserWindow.reload()
+      location.reload()
     },
 
     async changeCookie(e) {

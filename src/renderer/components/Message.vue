@@ -88,8 +88,6 @@
 
 <script>
 import { shell } from 'electron'
-import { getCurrentWindow } from '@electron/remote'
-const window = getCurrentWindow()
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../../service/util'
 import { queryGifts, queryInteracts, queryComments } from '../../service/api'
@@ -140,14 +138,14 @@ export default {
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
     this.searchAll()
-    window.on('resize', this.onResize)
+    window.addEventListener('resize', this.onResize)
 
     if (this.enableMessageListenMode) {
       this.listenStart()
     }
   },
   beforeUnmount() {
-    window.removeListener('resize', this.onResize)
+    window.removeEventListener('resize', this.onResize)
     this.listenStop()
   },
   mounted() {

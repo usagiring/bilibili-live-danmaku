@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow, app } from 'electron'
+import { ipcMain, dialog, BrowserWindow, app, Tray, Menu, nativeImage } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
@@ -14,9 +14,22 @@ import {
   IPC_LIVE_WINDOW_CLOSE,
   IPC_CHOOSE_DIRECTORY,
   IPC_SAVE_FILE,
+  IPC_CREATE_CHILD_WINDOW,
+  IPC_CLOSE_CHILD_WINDOW,
+  IPC_SHOW_OPEN_DIALOG,
+  IPC_GET_CURRENT_WINDOW_ID,
+  IPC_WINDOW_ACTION,
 } from '../service/const'
 
-export function registerIpcHandlers(mainWindow) {
+function getRendererUrl(hash: string) {
+  // electron-vite 在构建时替换 import.meta.env.DEV
+  if (import.meta.env.DEV) {
+    return `${process.env.ELECTRON_RENDERER_URL}#${hash}`
+  }
+  return `file://${path.join(__dirname, '../renderer/index.html')}#${hash}`
+}
+
+export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
   // ---- 基础信息 ----
 
@@ -32,37 +45,118 @@ export function registerIpcHandlers(mainWindow) {
     return app.getVersion()
   })
 
+  ipcMain.handle(IPC_GET_CURRENT_WINDOW_ID, async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    return win?.id ?? mainWindow.id
+  })
+
+  // ---- 窗口操作 ----
+
+  ipcMain.handle(IPC_WINDOW_ACTION, async (event, { action }: { action: string }) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
+    switch (action) {
+      case 'minimize': win.minimize(); break
+      case 'maximize': win.maximize(); break
+      case 'unmaximize': win.unmaximize(); break
+      case 'close': win.close(); break
+      case 'hide': win.hide(); break
+      case 'show': win.show(); break
+    }
+  })
+
+  ipcMain.handle('IPC_HIDE_TO_TRAY', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
+    // 这里无法从渲染进程传 icon，用默认行为
+    win.hide()
+  })
+
   // ---- Electron Remote ----
 
   ipcMain.handle(IPC_ENABLE_WEB_CONTENTS, async (_event, data) => {
     if (data.windowId) {
-      enable(BrowserWindow.fromId(data.windowId).webContents)
+      const win = BrowserWindow.fromId(data.windowId)
+      if (win) enable(win.webContents)
     }
+  })
+
+  // ---- 子窗口 ----
+
+  ipcMain.handle(IPC_CREATE_CHILD_WINDOW, async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow }) => {
+    const parent = BrowserWindow.fromWebContents(event.sender) ?? mainWindow
+    const winURL = url || getRendererUrl(hash)
+
+    const win = new BrowserWindow({
+      width: width || 800,
+      height: height || 600,
+      parent,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+      },
+      alwaysOnTop: alwaysOnTop ?? false,
+      resizable: resizable ?? true,
+      frame: frame ?? true,
+      transparent: transparent ?? false,
+      hasShadow: hasShadow ?? true,
+    })
+
+    if (iconDataUrl) {
+      win.setIcon(nativeImage.createFromDataURL(iconDataUrl))
+    }
+
+    win.loadURL(winURL)
+    return { windowId: win.id }
+  })
+
+  ipcMain.handle(IPC_CLOSE_CHILD_WINDOW, async (_event, { windowId }: { windowId: number }) => {
+    const win = BrowserWindow.fromId(windowId)
+    if (win && !win.isDestroyed()) {
+      win.close()
+    }
+  })
+
+  ipcMain.handle('IPC_WINDOW_CONTROL', async (_event, { windowId, method, args }: { windowId: number; method: string; args?: unknown[] }) => {
+    const win = BrowserWindow.fromId(windowId)
+    if (!win || win.isDestroyed()) return null
+    if (method === 'getSize') return win.getSize()
+    if (method === 'getPosition') return win.getPosition()
+    if (method === 'setFocusable') return win.setFocusable(args?.[0] as boolean)
+    if (method === 'moveTop') return win.moveTop()
+    if (method === 'setAlwaysOnTop') return win.setAlwaysOnTop(args?.[0] as boolean, (args?.[1] as any))
+    if (method === 'setIgnoreMouseEvents') return win.setIgnoreMouseEvents(args?.[0] as boolean, (args?.[1] as any))
+    return null
   })
 
   // ---- 子窗口通信 ----
 
   ipcMain.on(IPC_LIVE_WINDOW_PLAY, (_event, data) => {
     if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_PLAY, data)
+      BrowserWindow.fromId(data.windowId)?.webContents.send(IPC_LIVE_WINDOW_PLAY, data)
     }
   })
 
   ipcMain.on(IPC_LIVE_WINDOW_ON_TOP, (_event, data) => {
     if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_ON_TOP, data)
+      BrowserWindow.fromId(data.windowId)?.webContents.send(IPC_LIVE_WINDOW_ON_TOP, data)
     }
   })
 
   ipcMain.on(IPC_LIVE_WINDOW_CLOSE, (_event, data) => {
     if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
+      BrowserWindow.fromId(data.windowId)?.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
     } else {
       mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
     }
   })
 
-  // ---- 文件操作（渲染进程委托给主进程执行） ----
+  // ---- 文件对话框 ----
+
+  ipcMain.handle(IPC_SHOW_OPEN_DIALOG, async (_event, options) => {
+    const result = await dialog.showOpenDialog(options)
+    return result
+  })
 
   ipcMain.handle(IPC_CHOOSE_DIRECTORY, async () => {
     const result = await dialog.showOpenDialog({
@@ -73,6 +167,8 @@ export function registerIpcHandlers(mainWindow) {
     }
     return null
   })
+
+  // ---- 文件保存 ----
 
   ipcMain.handle(IPC_SAVE_FILE, async (_event, { filePath, roomId, start, end, fileName }) => {
     const res = await axios.post(`${BASE_URL}/api/statistic/gift/export`, {
@@ -96,3 +192,4 @@ export function registerIpcHandlers(mainWindow) {
     return true
   })
 }
+

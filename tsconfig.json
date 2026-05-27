@@ -3,19 +3,18 @@
     "./src/**/*"
   ],
   "compilerOptions": {
-    // "module": "es2015",
-    // "moduleResolution": "node",
-    // "target": "es5",
-    // "sourceMap": true,
-    // "allowJs": true,
     "outDir": "./dist/",
     "noImplicitAny": false,
-    "module": "nodenext",
-    // "target": "es5",
-    "jsx": "react",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "jsx": "preserve",
     "allowJs": true,
-    // "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": [
+      "vite/client"
+    ]
   }
 }

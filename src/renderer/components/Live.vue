@@ -89,15 +89,13 @@
 <script>
 import * as flvjs from 'flv.js'
 import { ipcRenderer } from 'electron'
-import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import emitter from '../../service/event'
-import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
+import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_CHOOSE_DIRECTORY } from '../../service/const'
 import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState, backupDB } from '../../service/api'
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
 import ws from '../../service/ws'
-import path from 'path'
 
 const qualityMap = {
   原画: 10000,
@@ -236,11 +234,7 @@ export default {
     ws.addEventListener('message', this.onRecordMessage)
 
     if (this.liveWindowId) {
-      const win = BrowserWindow.fromId(this.liveWindowId)
-      if (win) {
-        this.isShowLiveWindow = true
-        this.win = win
-      }
+      this.isShowLiveWindow = true
     }
 
     ipcRenderer.on(IPC_LIVE_WINDOW_CLOSE, () => {
@@ -264,7 +258,7 @@ export default {
     async startRecord() {
       try {
         const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
-        const output = path.join(recordDir, `./${this.realRoomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+        const output = `${recordDir}/${this.realRoomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
         console.log(`record: OUTPUT: ${output}`)
 
         const { id } = await record({
@@ -409,11 +403,8 @@ export default {
     },
 
     async openRecordSaveFolderSelector() {
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-      })
-      if (!result.canceled) {
-        const recordDir = result.filePaths[0]
+      const recordDir = await ipcRenderer.invoke(IPC_CHOOSE_DIRECTORY)
+      if (recordDir) {
         this.$store.dispatch('UPDATE_CONFIG', {
           recordDir,
         })
@@ -541,40 +532,22 @@ export default {
       this.isShowLiveWindowLoading = true
 
       if (status) {
-        // window.open(
-        //   `http://localhost:9080/#/live-window`,
-        //   'live-window',
-        //   'frame=false,transparent=true,hasShadow=false,width=640,height=320,resizable=true'
-        // )
-        const win = new BrowserWindow({
+        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+          hash: '/live-window',
           width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
           height: this.liveWindowHeight || 320,
-          // x, y,
-          x: this.liveWindowX || 640,
-          y: this.liveWindowY || 320,
-          frame: false,
-          transparent: true,
-          hasShadow: false,
-          webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-          },
+          iconDataUrl: icon,
           resizable: true,
         })
 
         await ipcRenderer.invoke(IPC_ENABLE_WEB_CONTENTS, {
-          windowId: win.id,
+          windowId,
         })
 
         this.$store.dispatch('UPDATE_CONFIG', {
-          liveWindowId: win.id,
+          liveWindowId: windowId,
         })
 
-        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/live-window` : `file://${__dirname}/index.html#live-window`
-
-        win.loadURL(winURL)
-        win.setIcon(nativeImage.createFromDataURL(icon))
-        this.win = win
         this.isShowLiveWindow = true
         this.isShowLiveWindowLoading = false
       } else {

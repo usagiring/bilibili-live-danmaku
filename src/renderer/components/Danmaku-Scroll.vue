@@ -71,9 +71,10 @@
 
 <script>
 import { debounce } from 'lodash'
+import { ipcRenderer } from 'electron'
 import { PORT } from '../../service/config-loader'
 import { updateSetting } from '../../service/api'
-import { BrowserWindow, nativeImage } from '@electron/remote'
+import { IPC_CREATE_CHILD_WINDOW } from '../../service/const'
 import icon from '../assets/logo.png'
 
 export default {
@@ -138,70 +139,32 @@ export default {
   created() {
     this.debouncedUpdateBackground = debounce(this.updateBackground, 100)
 
-    let win
     if (this.scrollDanmakuWindowId) {
-      win = BrowserWindow.fromId(this.scrollDanmakuWindowId)
-    }
-
-    if (win) {
-      this.win = win
       this.isShowDanmakuWindow = true
     }
   },
 
   methods: {
-    showDanmakuWindow(status) {
+    async showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
       this.isShowDanmakuWindowLoading = true
 
       if (status) {
-        const win = new BrowserWindow({
+        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+          url: `http://localhost:${PORT}/danmaku-scroll?port=${PORT}`,
           width: this.scrollDanmakuWidth || 480,
           height: this.scrollDanmakuHeight || 540,
-          // x, y,
-          x: this.scrollDanmakuX || 0,
-          y: this.scrollDanmakuY || 0,
+          iconDataUrl: icon,
           frame: false,
           transparent: true,
           hasShadow: false,
-          // webPreferences: {
-          //   nodeIntegration: true,
-          // },
           resizable: true,
         })
 
         this.$store.dispatch('UPDATE_CONFIG', {
-          scrollDanmakuWindowId: win.id,
+          scrollDanmakuWindowId: windowId,
         })
 
-        console.log(win)
-        const winURL = `http://localhost:${PORT}/danmaku-scroll?port=${PORT}`
-        win.setIcon(nativeImage.createFromDataURL(icon))
-        win.loadURL(winURL)
-        win.on('close', (e) => {
-          this.closeDanmakuWindow()
-        })
-        win.on(
-          'resize',
-          debounce(() => {
-            const [width, height] = win.getSize()
-            this.$store.dispatch('UPDATE_CONFIG', {
-              scrollDanmakuWidth: width,
-              scrollDanmakuHeight: height,
-            })
-          }, 400)
-        )
-        win.on(
-          'move',
-          debounce(() => {
-            const [x, y] = win.getPosition()
-            this.$store.dispatch('UPDATE_CONFIG', {
-              scrollDanmakuX: x,
-              scrollDanmakuY: y,
-            })
-          }, 400)
-        )
-        this.win = win
         this.isShowDanmakuWindow = true
         this.isShowDanmakuWindowLoading = false
       } else {

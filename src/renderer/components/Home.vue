@@ -200,19 +200,28 @@
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer, shell } from 'electron'
-import path from 'path'
-import { BrowserWindow, getCurrentWindow, Tray, nativeImage, Menu } from '@electron/remote'
+import icon from '../assets/logo.png'
 
 import { parseDownloadRate, dateFormat } from '../../service/util'
 import {
   connect as connectRoom,
-  getRealTimeViewersCount,
+  getUserInfoInRoom,
+  getRoomInfoByIds,
+  wearMedal,
+  sendComment,
+  backupDB,
+} from '../../service/api'
+import {
+  IPC_CREATE_CHILD_WINDOW,
+  IPC_WINDOW_ACTION,
+} from '../../service/const'
+import ws from '../../service/ws'
+import {
   getRoomStatus,
   disconnect,
   updateSetting,
   getRoomInfoV2,
   getGuardInfo,
-  getRoomInfoByIds,
   getUserInfoV2,
   record,
   cancelRecord,
@@ -221,7 +230,6 @@ import {
   addLike,
 } from '../../service/api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
-import ws from '../../service/ws'
 import icon from '../assets/logo.png'
 import { PORT } from '../../service/config-loader'
 
@@ -656,39 +664,26 @@ export default {
       }
     },
 
-    showDanmakuWindow(status) {
+    async showDanmakuWindow(status) {
       // const { x, y } = screen.getCursorScreenPoint();
       this.isShowDanmakuWindowLoading = true
 
       if (status) {
-        const win = new BrowserWindow({
+        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+          url: `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`,
           width: this.windowWidth || 480,
           height: this.windowHeight || 540,
-          // x, y,
-          x: this.windowX || 0,
-          y: this.windowY || 0,
+          iconDataUrl: icon,
           frame: false,
           transparent: true,
           hasShadow: false,
-          // webPreferences: {
-          //   nodeIntegration: true,
-          // },
           resizable: true,
         })
 
         this.$store.dispatch('UPDATE_CONFIG', {
-          danmakuWindowId: win.id,
+          danmakuWindowId: windowId,
         })
 
-        // const winURL =
-        //   process.env.NODE_ENV === "development"
-        //     ? `http://localhost:9080/#/danmaku-window`
-        //     : `file://${__dirname}/index.html#danmaku-window`;
-
-        const winURL = `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`
-        win.setIcon(nativeImage.createFromDataURL(icon))
-        win.loadURL(winURL)
-        this.win = win
         this.danmakuWindowBindEvent()
         this.isShowDanmakuWindow = true
         this.isShowDanmakuWindowLoading = false
@@ -835,7 +830,7 @@ export default {
         }
 
         const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
-        const output = path.join(recordDir, `./${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`)
+        const output = `${recordDir}/${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
         console.log(`record: OUTPUT: ${output}`)
 
         const { data } = await record({
@@ -937,34 +932,15 @@ export default {
     },
 
     close() {
-      const win = getCurrentWindow()
-      win.close()
+      ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })
     },
 
     minimize() {
-      const win = getCurrentWindow()
-      win.minimize()
+      ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' })
     },
 
     hideToTray() {
-      const win = getCurrentWindow()
-      win.hide()
-      const tray = new Tray(nativeImage.createFromDataURL(icon))
-      const func = () => {
-        win.show()
-        tray.destroy()
-      }
-      tray.on('click', func)
-      const contextMenu = Menu.buildFromTemplate([
-        {
-          label: '显示',
-          type: 'normal',
-          click: func,
-        },
-        { label: '关闭', role: 'quit', type: 'normal' },
-      ])
-      tray.setToolTip('bilibili-danmaku')
-      tray.setContextMenu(contextMenu)
+      ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' })
     },
 
     async like() {

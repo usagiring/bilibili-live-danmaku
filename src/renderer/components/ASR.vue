@@ -152,7 +152,6 @@
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
 import { ipcRenderer } from 'electron'
-import { BrowserWindow, dialog, nativeImage } from '@electron/remote'
 import { uniq } from 'lodash'
 import ws from '../../service/ws'
 import {
@@ -169,7 +168,7 @@ import {
   speechToText,
   getRandomPlayUrl,
 } from '../../service/api'
-import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
+import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_SHOW_OPEN_DIALOG } from '../../service/const'
 import icon from '../assets/logo.png'
 const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)
 // import { AudioWorklet } from '../../service/audio-worklet'
@@ -319,12 +318,9 @@ export default {
   },
 
   mounted() {
+    // 子窗口已由主进程管理，ID 存储在 store 中
     if (this.ASRWindowId) {
-      const win = BrowserWindow.fromId(this.ASRWindowId)
-      if (win) {
-        this.isShowASRWindow = true
-        this.win = win
-      }
+      this.isShowASRWindow = true
     }
   },
 
@@ -591,27 +587,13 @@ export default {
         appKey: this.aliAppKey,
       })
 
-      const win = new BrowserWindow({
+      const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+        hash: '/speech-to-danmaku',
         width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
         height: this.liveWindowHeight || 320,
-        // x, y,
-        x: this.liveWindowX || 640,
-        y: this.liveWindowY || 320,
-        autoHideMenuBar: true,
-        // frame: false,
-        // transparent: true,
-        // hasShadow: false,
-        webPreferences: {
-          nodeIntegration: true,
-          contextIsolation: false,
-        },
+        iconDataUrl: icon,
         resizable: true,
       })
-
-      const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/speech-to-danmaku` : `file://${__dirname}/index.html#speech-to-danmaku`
-      win.setIcon(nativeImage.createFromDataURL(icon))
-
-      win.loadURL(winURL)
 
       this.isStartingSpeechToDanmaku = false
     },
@@ -624,7 +606,7 @@ export default {
     },
 
     async openFFmpegSelector() {
-      const result = await dialog.showOpenDialog({
+      const result = await ipcRenderer.invoke(IPC_SHOW_OPEN_DIALOG, {
         properties: ['openFile'],
       })
       if (!result.canceled) {
@@ -640,46 +622,28 @@ export default {
       this.isShowASRWindowLoading = true
 
       if (status) {
-        // window.open(
-        //   `http://localhost:9080/#/live-window`,
-        //   'live-window',
-        //   'frame=false,transparent=true,hasShadow=false,width=640,height=320,resizable=true'
-        // )
-        const win = new BrowserWindow({
+        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+          hash: '/asr-window',
           width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
           height: this.liveWindowHeight || 320,
-          // x, y,
-          x: this.liveWindowX || 640,
-          y: this.liveWindowY || 320,
-          frame: false,
-          transparent: true,
-          hasShadow: false,
-          webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-          },
+          iconDataUrl: icon,
           resizable: true,
         })
 
         await ipcRenderer.invoke(IPC_ENABLE_WEB_CONTENTS, {
-          windowId: win.id,
+          windowId,
         })
 
         this.$store.dispatch('UPDATE_CONFIG', {
-          ASRWindowId: win.id,
+          ASRWindowId: windowId,
         })
 
-        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080/#/asr-window` : `file://${__dirname}/index.html#asr-window`
-        win.setIcon(nativeImage.createFromDataURL(icon))
-
-        win.loadURL(winURL)
-        this.win = win
         this.isShowASRWindow = true
         this.isShowASRWindowLoading = false
       } else {
-        if (!this.win) return
+        if (!this.ASRWindowId) return
         try {
-          this.win.close()
+          await ipcRenderer.invoke(IPC_CLOSE_CHILD_WINDOW, { windowId: this.ASRWindowId })
         } catch (e) {
           console.log('Close window error', e)
         }

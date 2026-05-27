@@ -50,6 +50,7 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
+        input: resolve('src/renderer/index.html'),
         external: ['fs', 'path', 'os', 'child_process', 'crypto', 'events', 'util', 'assert', 'stream', 'http', 'https', 'url', 'net', 'tls', 'dns', 'dgram', 'electron', '@electron/remote']
       }
     },
