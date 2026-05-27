@@ -13,6 +13,4 @@ data/
 tmp/
 *.log
 electron-vite-vue/
-danmaku-dist/
-danmaku/dist/
-danmaku-scroll/dist/
+web/dist/

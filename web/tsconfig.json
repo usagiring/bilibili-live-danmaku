@@ -3,24 +3,19 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "strict": true,
-    "jsx": "preserve",
-    "jsxImportSource": "vue",
+    "allowJs": true,
+    "checkJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "sourceMap": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    },
-    "types": [],
-    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts", "env.d.ts"],
+  "include": ["pages/**/*.js", "pages/**/*.ts", "pages/**/*.vue", "env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

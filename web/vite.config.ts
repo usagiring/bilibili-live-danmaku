@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': resolve('src')
+      '@': resolve('pages')
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue']
   },
@@ -14,5 +14,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    rolldownOptions: {
+      input: {
+        'danmaku/index': resolve(__dirname, 'danmaku/index.html'),
+        'danmaku-scroll/index': resolve(__dirname, 'danmaku-scroll/index.html'),
+      }
+    }
   }
 })
