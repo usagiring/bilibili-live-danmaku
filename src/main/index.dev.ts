@@ -8,17 +8,21 @@
 /* eslint-disable */
 
 // Install `electron-debug`
-require('electron-debug')({ showDevTools: false })
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const electronDebug = require('electron-debug')
+electronDebug({ showDevTools: false })
 
 // Install `vue-devtools`
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const electronDevtoolsInstaller = require('electron-devtools-installer')
+
 require('electron').app.on('ready', () => {
-  let installExtension = require('electron-devtools-installer')
-  installExtension.default(installExtension.VUEJS_DEVTOOLS)
+  electronDevtoolsInstaller.default(electronDevtoolsInstaller.VUEJS_DEVTOOLS)
     .then(() => {})
-    .catch(err => {
+    .catch((err: unknown) => {
       console.log('Unable to install `vue-devtools`: \n', err)
     })
 })
 
 // Require `main` process to boot app
-require('./index')
+import('./index')

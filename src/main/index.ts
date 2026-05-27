@@ -1,25 +1,29 @@
-import { app, BrowserWindow, ipcMain, nativeImage, session, Menu, Tray } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
 import '../renderer/store'
 import bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main'
-import { PORT, SAVE_ALL_BILI_MESSAGE, DANMAKU_RENDER_PATH } from '../service/config-loader'
+import { port, saveAllBiliMessage } from '../service/config-loader'
 import { registerIpcHandlers } from './ipc'
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __static: string
+}
 
 initialize()
 
 process.on('uncaughtException', (error) => {
-  console.log('uncaughtException');
-  console.error(error);
-});
+  console.log('uncaughtException')
+  console.error(error)
+})
 
 bilibiliBridge({
-  USER_DATA_PATH: app.getPath('userData'),
-  PORT,
-  SAVE_ALL_BILI_MESSAGE,
-  HTML_PATH: import.meta.env.DEV ? path.join(__dirname, '../../web/dist/pages/dm') : DANMAKU_RENDER_PATH || path.join(__dirname, '../danmaku-dist/pages/dm'),
+  userDataPath: app.getPath('userData'),
+  port,
+  saveAllBiliMessage,
 })
 
 /**
@@ -29,9 +33,9 @@ if (!import.meta.env.DEV) {
   global.__static = path.join(__dirname, '../static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
+let mainWindow: BrowserWindow | null = null
 const winURL = import.meta.env.DEV
-  ? process.env.ELECTRON_RENDERER_URL
+  ? process.env.ELECTRON_RENDERER_URL!
   : `file://${path.join(__dirname, '../renderer/index.html')}`
 
 function createWindow() {
@@ -60,11 +64,6 @@ function createWindow() {
   })
 
   enable(mainWindow.webContents)
-
-  // mainWindow.on('close', (e) => {
-  //   app.quit()
-  // })
-
 }
 
 app.on('ready', () => {
@@ -84,7 +83,7 @@ app.on('ready', () => {
   createWindow()
 
   // 注册所有 IPC 处理器
-  registerIpcHandlers(mainWindow)
+  registerIpcHandlers(mainWindow!)
 
   /**
    * Auto Updater
@@ -96,11 +95,9 @@ app.on('ready', () => {
   if (!import.meta.env.DEV) {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
-    // autoUpdater.checkForUpdatesAndNotify()
 
-    ipcMain.on(IPC_CHECK_FOR_UPDATE, async (event) => {
+    ipcMain.on(IPC_CHECK_FOR_UPDATE, async (_event: IpcMainEvent) => {
       autoUpdater.checkForUpdates()
-      // event.sender.send(IPC_UPDATE_AVAILABLE)
     })
 
     ipcMain.on(IPC_DOWNLOAD_UPDATE, () => {
@@ -108,21 +105,16 @@ app.on('ready', () => {
     })
 
     autoUpdater.on('update-available', () => {
-      mainWindow.webContents.send(IPC_UPDATE_AVAILABLE)
+      mainWindow!.webContents.send(IPC_UPDATE_AVAILABLE)
     })
 
-    autoUpdater.on('download-progress', (progress, bytesPerSecond, percent, total, transferred) => {
-      mainWindow.webContents.send(IPC_DOWNLOAD_PROGRESS, {
-        progress,
-        bytesPerSecond,
-        percent,
-        total
+    autoUpdater.on('download-progress', (progress) => {
+      mainWindow!.webContents.send(IPC_DOWNLOAD_PROGRESS, {
+        progress: progress.percent,
+        bytesPerSecond: progress.bytesPerSecond,
+        percent: progress.percent,
+        total: progress.total,
       })
-
-      // NOTE: 完成load之后再
-      //   mainWindow.webContents.on('did-finish-load', function () {
-      //     mainWindow.webContents.send('channelCanBeAnything', 'message');
-      // });
     })
 
     autoUpdater.on('update-downloaded', () => {
@@ -130,7 +122,7 @@ app.on('ready', () => {
     })
 
     autoUpdater.on('error', (error) => {
-      console.error(`AutoUpdate: ${error === null ? "unknown" : (error.stack || error).toString()}`)
+      console.error(`AutoUpdate: ${error === null ? 'unknown' : (error.stack || error).toString()}`)
     })
 
     autoUpdater.on('update-not-available', () => {
