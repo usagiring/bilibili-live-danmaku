@@ -7,11 +7,11 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build && electron-builder",
-    "build:all": "npm run build:web && electron-vite build && mkdir -p out/danmaku-dist && cp -r web/dist/* out/danmaku-dist/ && electron-builder",
+    "build": "npm run build:web && electron-vite build && mkdir -p out/web && cp -r web/dist/* out/web/ && electron-builder",
+    "build:main": "electron-vite build && electron-builder",
+    "build:web": "cd web && npm run build",
     "build:dir": "electron-vite build && electron-builder --dir",
     "build:clean": "rm -rf out",
-    "build:web": "cd web && npm run build",
     "pack": "electron-vite build",
     "release": "npm run build -- -p always"
   },

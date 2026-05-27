@@ -5,16 +5,13 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "checkJs": false,
+    "noEmit": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "isolatedModules": true
   },
   "include": ["pages/**/*.js", "pages/**/*.ts", "pages/**/*.vue", "env.d.ts"],
   "exclude": ["node_modules", "dist"]

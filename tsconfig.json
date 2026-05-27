@@ -1,47 +1,22 @@
 {
   "compilerOptions": {
-    // ---- Language & Environment ----
     "target": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
-    "useDefineForClassFields": true,
-    // ---- Modules ----
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    // ---- Paths ----
-    // 注意：electron-vite 中 main 进程 @ → src/main，renderer 进程 @ → src/renderer
-    // 此处仅提供一个 fallback，实际解析由 Vite alias 接管
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    // ---- Emit ----
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "declaration": false,
-    // ---- Interop ----
+    "noEmit": true,
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    // ---- Type Checking ----
     "strict": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
     "noImplicitAny": false,
-    // ---- Types ----
-    "types": [
-      "vite/client"
-    ]
+    "sourceMap": true,
+    "types": ["vite/client"]
   },
   "include": [
     "src/**/*.ts",
