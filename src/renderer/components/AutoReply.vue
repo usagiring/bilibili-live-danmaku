@@ -9,13 +9,15 @@
 
     <div :style="{ padding: '0 20px 0 20px' }">
       <div class="tag-container">
-        <Container :get-child-payload="getTagPayload" group-name="tag-container" orientation="horizontal" behaviour="copy">
-          <Draggable v-for="tag in tags" :key="tag.id">
+        <draggable :list="tags" :group="{ name: 'tags', pull: 'clone', put: false }"
+          :sort="false" item-key="id" :clone="cloneTag"
+          class="tag-draggable-source">
+          <template #item="{ element: tag }">
             <div :class="tag.class ? `draggable-tag ${tag.class}` : 'draggable-tag'">
               {{ tag.name }}
             </div>
-          </Draggable>
-        </Container>
+          </template>
+        </draggable>
       </div>
     </div>
 
@@ -28,10 +30,12 @@
               <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
                 <p>● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。</p>
                 <p>
-                  ● 每一条规则应该要有至少一条<span :style="{ color: 'aquamarine' }">执行规则</span>，可以有若干条<span :style="{ color: 'violet' }">限制规则</span>。
+                  ● 每一条规则应该要有至少一条<span :style="{ color: 'aquamarine' }">执行规则</span>，可以有若干条<span
+                    :style="{ color: 'violet' }">限制规则</span>。
                   <span :style="{ color: 'pink' }">拖拽</span>上面「标签」到规则栏！
                 </p>
-                <p>● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。 模版占位符将被替换为实际内容！</p>
+                <p>● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。
+                  模版占位符将被替换为实际内容！</p>
                 <p>● 例如：触发类型：弹幕，回复文字模版：{user}说 {comment}，规则：佩戴粉丝牌，语音播放。 表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)</p>
                 <!-- <p>
                 例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
@@ -58,15 +62,9 @@
       </i-col>
       <i-col span="1" />
     </Row>
-    <Container
-      :get-child-payload="getRulePayload"
-      :should-accept-drop="(src, payload) => shouldRuleAcceptDrop({ src, payload, groupName: 'rule' })"
-      group-name="rule-container"
-      drag-handle-selector=".column-drag-handler"
-      @drop="onDropRule"
-    >
-      <Draggable v-for="(rule, index) in rules" :key="index">
-        <!-- <Draggable> -->
+    <draggable :list="rules" group="rules" handle=".column-drag-handler"
+      @change="onRuleDragChange">
+      <template #item="{ element: rule, index }">
         <Row class="line-container">
           <i-col span="1">
             <!-- <span class="column-drag-handler">&#x2630;</span> -->
@@ -74,35 +72,36 @@
             <span class="flex-center column-drag-handler">&#x2630;</span>
           </i-col>
           <i-col span="1" :style="{ 'text-align': 'center' }">
-            <Checkbox :model-value="rule.enable" class="flex-center" :style="{ 'margin-left': '8px' }" @on-change="changeEnable(index, $event)" />
+            <Checkbox :model-value="rule.enable" class="flex-center" :style="{ 'margin-left': '8px' }"
+              @on-change="changeEnable(index, $event)" />
           </i-col>
           <i-col span="2">
-            <Select :model-value="rule.type" :style="{ padding: '0 7px' }" transfer size="small" @on-change="onChangeRuleType(index, $event)">
+            <Select :model-value="rule.type" :style="{ padding: '0 7px' }" transfer size="small"
+              @on-change="onChangeRuleType(index, $event)">
               <Option v-for="(option, index1) in types" :key="index1" :value="option.key" :label="option.label">
                 <span>{{ option.value }}</span>
               </Option>
             </Select>
           </i-col>
           <i-col span="6">
-            <Input :model-value="rule.text" placeholder="回复内容..." :style="{ padding: '0 7px' }" size="small" @on-change="debouncedChangeText(index, $event)" />
+            <Input :model-value="rule.text" placeholder="回复内容..." :style="{ padding: '0 7px' }" size="small"
+              @on-change="debouncedChangeText(index, $event)" />
           </i-col>
           <i-col span="13">
-            <Container
+            <draggable :list="rule.tags" :group="{ name: 'tags', pull: false, put: true }"
+              :sort="false" item-key="id" ghost-class="drop-preview"
               :style="{ display: 'flex', 'align-items': 'center' }"
-              :drop-placeholder="dropPlaceholderOptions"
-              :should-accept-drop="(src, payload) => shouldTagAcceptDrop({ src, payload, index, groupName: 'tag' })"
-              group-name="tag-container"
-              orientation="horizontal"
-              @drop="onDropTag(index, $event)"
-            >
-              <template v-for="(tag, tagIndex) in rule.tags" :key="tag.id">
+              @change="(e) => onTagChange(index, e)"
+              :move="(e) => onTagMove(index, e)">
+              <template #item="{ element: tag, index: tagIndex }">
                 <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'">
                   <template v-if="tag.template">
                     <Poptip placement="bottom" transfer>
                       <span>{{ fillDisplay(tag) }} </span>
                       <template #content>
                         <div>
-                          <TagContent :template="tag.template" :data="tag.data" @value-change="onDataChange(index, tagIndex, $event)" />
+                          <TagContent :template="tag.template" :data="tag.data"
+                            @value-change="onDataChange(index, tagIndex, $event)" />
                         </div>
                       </template>
                     </Poptip>
@@ -113,15 +112,14 @@
                   <Icon type="md-remove" class="remove-button" @click="removeTag(index, tagIndex)" />
                 </div>
               </template>
-            </Container>
+            </draggable>
           </i-col>
           <i-col span="1" class="remove-button-container">
             <Icon type="md-remove" class="remove-button flex-center" @click="removeRule(index)" />
           </i-col>
         </Row>
-      </Draggable>
-      <!-- </template> -->
-    </Container>
+      </template>
+    </draggable>
     <div :style="{ padding: '5px 20px' }">
       <Button type="primary" long @click="addRule">
         <Icon :style="{ 'font-weight': 'bold' }" type="md-add" />
@@ -132,11 +130,11 @@
 
 <script setup>
 import { cloneDeep, debounce } from 'lodash'
-import { toRaw, computed, inject, reactive } from 'vue'
+import { computed, inject, reactive } from 'vue'
 import { useConfigStore } from '../store'
 const globalValue = inject('globalValue')
 
-import { Container, Draggable } from 'vue3-smooth-dnd'
+import draggable from 'vuedraggable'
 import TagContent from './TagContent.vue'
 import { updateSetting, getGiftConfig } from '../../service/api'
 
@@ -169,10 +167,6 @@ const dropAcceptRules = {
   interact: ['MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'],
 }
 
-const dropPlaceholderOptions = reactive({
-  className: 'drop-preview',
-  animationDuration: '150',
-})
 const giftOptions = reactive([])
 const types = reactive([
   {
@@ -378,12 +372,12 @@ const debouncedChangeText = debounce(changeText, 500)
 //   debouncedChangeText = debounce(changeText, 500)
 // }
 
-async function onDropTag(index, dropResult) {
-  let { addedIndex, payload } = dropResult
-  const tag = toRaw(payload.tag)
-  if (!Number.isFinite(addedIndex)) return
+async function onTagChange(ruleIndex, evt) {
+  if (!evt.added) return
+  const { element: tag, newIndex: addedIndex } = evt.added
   const _rules = cloneDeep(rules.value)
-  if (tag.key === 'SPEAK_REPLY') {
+  const clonedTag = cloneDeep(tag)
+  if (clonedTag.key === 'SPEAK_REPLY') {
     const options =
       globalValue?.voices?.map((voice) => {
         return {
@@ -392,10 +386,10 @@ async function onDropTag(index, dropResult) {
           label: voice.name,
         }
       }) || []
-      tag.template.rows[0].options = options
+    clonedTag.template.rows[0].options = options
   }
 
-  if (tag.key === 'GIFT') {
+  if (clonedTag.key === 'GIFT') {
     const { data: giftConfig } = await getGiftConfig(realRoomId.value)
     const giftOptions = []
     for (const [key, { name, webp }] of Object.entries(giftConfig)) {
@@ -406,10 +400,10 @@ async function onDropTag(index, dropResult) {
         webp: webp,
       })
     }
-    tag.template.rows[0].options = giftOptions
+    clonedTag.template.rows[0].options = giftOptions
   }
-  _rules[index].tags = _rules[index].tags || []
-  _rules[index].tags.splice(addedIndex, 0, tag)
+  _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
+  _rules[ruleIndex].tags.splice(addedIndex, 0, clonedTag)
 
   const data = {
     autoReplyRules: _rules,
@@ -418,17 +412,12 @@ async function onDropTag(index, dropResult) {
   store.UPDATE_CONFIG(data)
 }
 
-function onDropRule(dropResult) {
-  const { removedIndex, addedIndex, payload } = dropResult
+function onRuleDragChange(evt) {
+  if (!evt.moved) return
+  const { oldIndex, newIndex } = evt.moved
   const _rules = cloneDeep(rules.value)
-  let itemToAdd = payload.rule
-  if (Number.isFinite(removedIndex)) {
-    itemToAdd = _rules.splice(removedIndex, 1)[0]
-  }
-
-  if (Number.isFinite(addedIndex)) {
-    _rules.splice(addedIndex, 0, itemToAdd)
-  }
+  const itemToAdd = _rules.splice(oldIndex, 1)[0]
+  _rules.splice(newIndex, 0, itemToAdd)
   // rules.forEach((rule, index) => {
   //   rule.priority = index
   // })
@@ -441,17 +430,17 @@ function onDropRule(dropResult) {
   store.UPDATE_CONFIG(data)
 }
 
-function getTagPayload(index) {
-  return {
-    groupName: 'tag',
-    tag: tags[index],
-  }
+function cloneTag(tag) {
+  return cloneDeep(tag)
 }
-function getRulePayload(index) {
-  return {
-    groupName: 'rule',
-    rule: rules.value[index],
-  }
+
+function onTagMove(ruleIndex, evt) {
+  const tag = evt.draggedContext.element
+  const dropRule = rules.value[ruleIndex]
+  if (!dropRule?.type) return false
+  if (!dropAcceptRules[dropRule.type].includes(tag.key)) return false
+  if (dropRule.tags.find((t) => t.key === tag.key)) return false
+  return true
 }
 // transfer 函数映射表，替代 <script setup> 中不可用的 this
 const transferFns = { roleNames, giftName }
@@ -570,30 +559,7 @@ function changeText(ruleIndex, e) {
   store.UPDATE_CONFIG(data)
 }
 
-function shouldTagAcceptDrop({ src, payload, index, groupName }) {
-  if (groupName !== payload.groupName) return false
-  const tag = payload.tag
-  const dropRule = rules.value[index]
 
-  if (!dropRule?.type) {
-    // $Message.warning('请先设置类型')
-    return false
-  }
-  if (!dropAcceptRules[dropRule.type].includes(tag.key)) {
-    // $Message.warning('该规则不适用于该类型')
-    return false
-  }
-  if (dropRule.tags.find((__tag) => __tag.key === tag.key)) {
-    // $Message.warning('已存在相同规则')
-    return false
-  }
-  return true
-}
-
-function shouldRuleAcceptDrop({ src, payload, groupName }) {
-  if (groupName !== payload.groupName) return false
-  return true
-}
 </script>
 
 <style scoped>
@@ -602,6 +568,7 @@ function shouldRuleAcceptDrop({ src, payload, groupName }) {
   border: 1px dashed silver;
   border-radius: 10px;
 }
+
 .draggable-tag {
   border: 1px solid violet;
   border-radius: 10px;
@@ -612,12 +579,15 @@ function shouldRuleAcceptDrop({ src, payload, groupName }) {
   user-select: none;
   cursor: move;
 }
+
 .process-tag {
   border: 1px solid green !important;
 }
+
 .sub-process-tag {
   border: 1px solid green !important;
 }
+
 .rule-tag {
   border: 1px solid violet;
   border-radius: 10px;
@@ -628,29 +598,36 @@ function shouldRuleAcceptDrop({ src, payload, groupName }) {
   -webkit-user-select: none;
   user-select: none;
 }
+
 .remove-button {
   font-size: 16px;
   color: crimson;
   cursor: pointer;
   height: 100%;
 }
+
 .col-header {
   text-align: center;
 }
+
 .column-drag-handler {
   cursor: move;
 }
+
 .info-icon {
   font-size: 16px;
 }
+
 .remove-button-container {
   cursor: pointer;
   height: 100%;
 }
+
 .remove-button-container:hover {
   border: 1px dashed crimson;
   border-radius: 20px;
 }
+
 .line-container {
   padding: 5px 10px 5px 10px;
   height: 40px;
@@ -658,6 +635,7 @@ function shouldRuleAcceptDrop({ src, payload, groupName }) {
   justify-content: center;
   display: flex;
 }
+
 .flex-center {
   display: flex;
   align-items: center;

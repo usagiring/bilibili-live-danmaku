@@ -24,29 +24,28 @@
     </Divider>
     <div class="setting-group">
       <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
-        <Container orientation="horizontal" :style="{ 'z-index': 1, 'min-height': '0px' }" @drop="onDrop($event)">
-          <template v-for="(setting, index) of messageSettings" :key="index">
-            <!-- <Draggable v-if="setting.type === 'guard' && setting.isShow" class="vertical-align-middle padding-lr-1px">
-              <img class="guard-icon" :src="`${getGuardIcon('3')}`" />
-            </Draggable> -->
-            <Draggable v-if="setting.type === 'medal' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+        <draggable :list="displayMessageSettings" group="messages"
+          :style="{ 'z-index': 1, 'min-height': '0px' }"
+          @change="onDragChange">
+          <template #item="{ element: setting }">
+            <div v-if="setting.type === 'medal'" class="vertical-align-middle padding-lr-1px">
               <FanMedal v-if="example.medal" :medal="example.medal" :role="example.role" />
-            </Draggable>
-            <Draggable v-if="setting.type === 'avatar' && setting.isShow" class="vertical-align-middle padding-lr-1px">
+            </div>
+            <div v-else-if="setting.type === 'avatar'" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
-            </Draggable>
-            <Draggable v-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px message-username" :text="example.uname">
+            </div>
+            <div v-else-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px message-username">
               <span>{{ `${example.uname}` }}</span>
-            </Draggable>
-            <Draggable v-if="setting.type === 'colon' && setting.isShow" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle">
+            </div>
+            <div v-else-if="setting.type === 'colon'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle">
               <span>：</span>
-            </Draggable>
-            <Draggable v-if="setting.type === 'comment'" class="vertical-align-middle">
+            </div>
+            <div v-else-if="setting.type === 'comment'" class="vertical-align-middle">
               <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl" />
-              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment" :text="example.content">{{ example.content }}</span>
-            </Draggable>
+              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment">{{ example.content }}</span>
+            </div>
           </template>
-        </Container>
+        </draggable>
       </div>
     </div>
 
@@ -475,7 +474,7 @@
 
 <script>
 import { useConfigStore } from '../store'
-import { Container, Draggable } from 'vue3-smooth-dnd'
+import draggable from 'vuedraggable'
 import FontList from 'font-list'
 
 import StyleEditor from './StyleEditor'
@@ -502,8 +501,7 @@ export default {
   components: {
     StyleEditor,
     FanMedal,
-    Container,
-    Draggable,
+    draggable,
   },
   data() {
     return {
@@ -1085,6 +1083,9 @@ export default {
     messageSettings() {
       return useConfigStore().messageSettings
     },
+    displayMessageSettings() {
+      return this.messageSettings.filter(s => s.isShow)
+    },
     userCookie() {
       return useConfigStore().userCookie
     },
@@ -1555,9 +1556,9 @@ export default {
       this.collapse = collapse
     },
 
-    async onDrop(dropResult) {
-      const { addedIndex, removedIndex, payload } = dropResult
-      if (removedIndex === null && addedIndex === null) return
+    onDragChange(evt) {
+      if (!evt.moved) return
+      const { oldIndex, newIndex } = evt.moved
 
       const messageSettings = cloneDeep(this.messageSettings)
       messageSettings.find(s => s.type === 'guard').isShow = false
@@ -1573,13 +1574,8 @@ export default {
         .filter(Boolean)
       const displayItems = messageSettings.filter((setting) => setting.isShow)
 
-      let itemToAdd
-      if (removedIndex !== null) {
-        itemToAdd = displayItems.splice(removedIndex, 1)[0]
-      }
-      if (addedIndex !== null) {
-        displayItems.splice(addedIndex, 0, itemToAdd)
-      }
+      const itemToAdd = displayItems.splice(oldIndex, 1)[0]
+      displayItems.splice(newIndex, 0, itemToAdd)
 
       hiddenItems.forEach((item) => {
         displayItems.splice(item.index, 0, item.data)
@@ -1587,7 +1583,7 @@ export default {
       const data = {
         messageSettings: displayItems,
       }
-      await updateSetting(data)
+      updateSetting(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
