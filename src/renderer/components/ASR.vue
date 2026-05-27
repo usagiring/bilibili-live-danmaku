@@ -147,6 +147,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 // 结果
 // 1 输出文件
 // 2 实时显示(独立窗口)
@@ -174,11 +175,9 @@ const processorUrl = new URL('../../service/processor.worklet.js', import.meta.u
 // import { AudioWorklet } from '../../service/audio-worklet'
 // const { AudioWorklet } = require('../../service/audio-worklet/index.js')
 import global from '../../service/global'
-import { reactive } from 'vue'
-
 export default {
-  setup() {
-    const state = reactive({
+  data() {
+    return {
       playQuality: '高清',
       checkOnTopInterval: null,
       isStarting: false,
@@ -242,62 +241,60 @@ export default {
       audioDevices: [],
       audioDeviceId: '',
       isMicrophoneNoticeModalOpen: false,
-    })
-
-    return state
+    }
   },
 
   computed: {
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
     isWithCookie() {
-      return this.$store.state.Config.isWithCookie
+      return useConfigStore().isWithCookie
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     aliAccessKeyId() {
-      return this.$store.state.Config.aliAccessKeyId
+      return useConfigStore().aliAccessKeyId
     },
     aliAccessKeySecret() {
-      return this.$store.state.Config.aliAccessKeySecret
+      return useConfigStore().aliAccessKeySecret
     },
     aliAppKey() {
-      return this.$store.state.Config.aliAppKey
+      return useConfigStore().aliAppKey
     },
     ffmpegExe() {
-      return this.$store.state.Config.ffmpegExe
+      return useConfigStore().ffmpegExe
     },
     ASRWindowId() {
-      return this.$store.state.Config.ASRWindowId
+      return useConfigStore().ASRWindowId
     },
     isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
+      return useConfigStore().isOnTopForce
     },
     onTopLevel() {
-      return this.$store.state.Config.onTopLevel
+      return useConfigStore().onTopLevel
     },
     ASRLineCount() {
-      return this.$store.state.Config.ASRLineCount
+      return useConfigStore().ASRLineCount
     },
     aliAppKeys() {
-      return this.$store.state.Config.aliAppKeys
+      return useConfigStore().aliAppKeys
     },
     disableIgnoreMouseEvent() {
-      return this.$store.state.Config.disableIgnoreMouseEvent
+      return useConfigStore().disableIgnoreMouseEvent
     },
     audioFrom() {
-      return this.$store.state.Config.audioFrom
+      return useConfigStore().audioFrom
     },
     mtFromLang() {
-      return this.$store.state.Config.mtFromLang
+      return useConfigStore().mtFromLang
     },
     mtToLang() {
-      return this.$store.state.Config.mtToLang
+      return useConfigStore().mtToLang
     },
     disableMircrophotoNoticeMessage() {
-      return this.$store.state.Config.disableMircrophotoNoticeMessage
+      return useConfigStore().disableMircrophotoNoticeMessage
     },
   },
 
@@ -346,7 +343,7 @@ export default {
         audioFrom: value,
       }
       // await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeFromLang(value) {
@@ -354,7 +351,7 @@ export default {
         mtFromLang: value,
       }
       // await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeToLang(value) {
@@ -362,7 +359,7 @@ export default {
         mtToLang: value,
       }
       // await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onMessage(msg) {
@@ -425,7 +422,7 @@ export default {
     microphoneNoticeOk() {
       this.disableMircrophotoNoticeMessageTemp = true
       if (this.isDisableMircrophotoNoticeMessagePersistent) {
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           disableMircrophotoNoticeMessage: true,
         })
       }
@@ -484,7 +481,7 @@ export default {
       } else {
         aliAppKeys = [...this.aliAppKeys, this.aliAppKey]
       }
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         aliAppKeys: uniq(aliAppKeys),
       })
     },
@@ -564,14 +561,14 @@ export default {
       const data = {
         aliAccessKeyId: e.target.value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeAliAccessKeySecret(e) {
       const data = {
         aliAccessKeySecret: e.target.value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showSpeechToDanmaku() {
@@ -602,7 +599,7 @@ export default {
       const data = {
         aliAppKey: value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async openFFmpegSelector() {
@@ -611,7 +608,7 @@ export default {
       })
       if (!result.canceled) {
         const ffmpegExe = result.filePaths[0]
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           ffmpegExe,
         })
         await this.$nextTick()
@@ -634,7 +631,7 @@ export default {
           windowId,
         })
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           ASRWindowId: windowId,
         })
 
@@ -652,7 +649,7 @@ export default {
     },
 
     async clearDanmakuWindowInfo() {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         ASRWindowId: null,
       })
       // clear
@@ -692,18 +689,18 @@ export default {
       const data = {
         ASRLineCount: number,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     clearFFmpegPath() {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         ffmpegExe: null,
       })
     },
 
     removeHistoryAppkey(appKey) {
       const aliAppKeys = this.aliAppKeys.filter((__appKey) => __appKey !== appKey)
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         aliAppKeys,
       })
     },

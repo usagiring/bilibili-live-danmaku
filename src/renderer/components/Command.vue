@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { updateSetting } from '../../service/api'
 
 export default {
@@ -68,7 +69,7 @@ export default {
   },
   computed: {
     muteCommandSetting() {
-      return this.$store.state.Config.muteCommandSetting || {}
+      return useConfigStore().muteCommandSetting || {}
     },
   },
   methods: {
@@ -80,7 +81,7 @@ export default {
         },
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async onChangeMuteSettingRoles(values) {
@@ -91,7 +92,7 @@ export default {
         },
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async onChangeMuteSettingKeyWord(e) {
@@ -102,7 +103,7 @@ export default {
         },
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async onChangeMuteSettingCount(number) {
@@ -113,7 +114,7 @@ export default {
         },
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeMuteSettingUseHint(status) {
@@ -125,7 +126,7 @@ export default {
         },
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
   },
 }

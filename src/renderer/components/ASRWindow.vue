@@ -12,23 +12,23 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { useConfigStore } from '../store'
 import ws from '../../service/ws'
 
 export default {
-  setup() {
-    return reactive({
+  data() {
+    return {
       texts: [],
       currentTextIndex: 0,
-    })
+    }
   },
 
   computed: {
     ASRWindowId() {
-      return this.$store.state.Config.ASRWindowId
+      return useConfigStore().ASRWindowId
     },
     ASRLineCount() {
-      return this.$store.state.Config.ASRLineCount
+      return useConfigStore().ASRLineCount
     },
   },
 

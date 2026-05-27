@@ -46,7 +46,7 @@
 </template>
 
 <script type="module">
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { ipcRenderer } from 'electron'
 import { statistic as statisticAPI, commentWordExtract } from '../../service/api'
 import { dateFormat } from '../../service/util'
@@ -96,9 +96,9 @@ export default {
     }
   },
   created() {
-    this.roomId = this.$store.state.Config.realRoomId
-    const start = moment().startOf('day').toDate()
-    const end = moment().endOf('day').toDate()
+    this.roomId = useConfigStore().realRoomId
+    const start = dayjs().startOf('day').toDate()
+    const end = dayjs().endOf('day').toDate()
     this.dateRange = [start, end]
   },
   mounted() {

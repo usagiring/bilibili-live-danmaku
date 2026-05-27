@@ -197,6 +197,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer, shell } from 'electron'
@@ -282,37 +283,37 @@ export default {
       return ['menu-item', this.isCollapsed ? 'collapsed-menu' : '']
     },
     isConnected() {
-      return this.$store.state.Config.isConnected || false
+      return useConfigStore().isConnected || false
     },
     windowWidth() {
-      return this.$store.state.Config.windowWidth
+      return useConfigStore().windowWidth
     },
     windowHeight() {
-      return this.$store.state.Config.windowHeight
+      return useConfigStore().windowHeight
     },
     windowX() {
-      return this.$store.state.Config.windowX
+      return useConfigStore().windowX
     },
     windowY() {
-      return this.$store.state.Config.windowY
+      return useConfigStore().windowY
     },
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
     recordDir() {
-      return this.$store.state.Config.recordDir
+      return useConfigStore().recordDir
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     isWithCookie() {
-      return this.$store.state.Config.isWithCookie
+      return useConfigStore().isWithCookie
     },
     isAutoRecord() {
-      return this.$store.state.Config.isAutoRecord
+      return useConfigStore().isAutoRecord
     },
     historyRooms() {
-      return this.$store.state.Config.historyRooms
+      return useConfigStore().historyRooms
     },
     // filteredRooms() {
     //   return this.historyRooms.filter(room => {
@@ -323,25 +324,25 @@ export default {
     //   })
     // }
     isWatchLottery() {
-      return this.$store.state.Config.isWatchLottery
+      return useConfigStore().isWatchLottery
     },
     onTopLevel() {
-      return this.$store.state.Config.onTopLevel
+      return useConfigStore().onTopLevel
     },
     isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
+      return useConfigStore().isOnTopForce
     },
     disableIgnoreMouseEvent() {
-      return this.$store.state.Config.disableIgnoreMouseEvent
+      return useConfigStore().disableIgnoreMouseEvent
     },
     danmakuWindowId() {
-      return this.$store.state.Config.danmakuWindowId
+      return useConfigStore().danmakuWindowId
     },
     waitingSpeakerCount() {
-      return this.$store.state.Config.waitingSpeakerCount
+      return useConfigStore().waitingSpeakerCount
     },
     isRecording() {
-      return this.$store.state.Config.isRecording
+      return useConfigStore().isRecording
     },
   },
   watch: {
@@ -485,7 +486,7 @@ export default {
     }, 60000)
 
     const { data } = await getRecordState({ roomId: this.realRoomId })
-    this.$store.dispatch('UPDATE_CONFIG', {
+    useConfigStore().UPDATE_CONFIG({
       isRecording: data?.isRecording,
     })
 
@@ -524,13 +525,13 @@ export default {
         const config = {
           isConnected: status,
         }
-        this.$store.dispatch('UPDATE_CONFIG', config)
+        useConfigStore().UPDATE_CONFIG(config)
 
         const { data: recordData } = await getRecordState({
           roomId: this.realRoomId,
         })
         const isRecording = recordData?.isRecording
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           isRecording: isRecording,
         })
         if (liveStatus === 1 && this.isAutoRecord && !isRecording) {
@@ -542,7 +543,7 @@ export default {
         if (!this.historyRooms.find((room) => room.roomId === roomId)) {
           let historyRooms = this.historyRooms.map((room) => toRaw(room))
           historyRooms = [...(historyRooms.length > MAX_HISTORY_ROOM ? historyRooms.slice(1) : historyRooms), { roomId, uname, face }]
-          this.$store.dispatch('UPDATE_CONFIG', {
+          useConfigStore().UPDATE_CONFIG({
             historyRooms,
           })
         }
@@ -641,7 +642,7 @@ export default {
           medalId: medal_id,
           medalName: medal_name,
         }
-        this.$store.dispatch('UPDATE_CONFIG', config)
+        useConfigStore().UPDATE_CONFIG(config)
 
         return data
       } else {
@@ -658,7 +659,7 @@ export default {
         this.watchedNumber = 0
         this.likeNumber = 0
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           isConnected: false,
         })
       }
@@ -680,7 +681,7 @@ export default {
           resizable: true,
         })
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           danmakuWindowId: windowId,
         })
 
@@ -702,7 +703,7 @@ export default {
       if (!this.win) return
       this.win.on('close', (e) => {
         if (!this.win) return
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           danmakuWindowId: null,
         })
         // clear
@@ -719,7 +720,7 @@ export default {
         'resize',
         debounce(() => {
           const [width, height] = this.win.getSize()
-          this.$store.dispatch('UPDATE_CONFIG', {
+          useConfigStore().UPDATE_CONFIG({
             windowWidth: width,
             windowHeight: height,
           })
@@ -730,7 +731,7 @@ export default {
         'move',
         debounce(() => {
           const [x, y] = this.win.getPosition()
-          this.$store.dispatch('UPDATE_CONFIG', {
+          useConfigStore().UPDATE_CONFIG({
             windowX: x,
             windowY: y,
           })
@@ -739,7 +740,7 @@ export default {
     },
 
     clearDanmakuWindowInfo() {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         danmakuWindowId: null,
       })
       // clear
@@ -771,7 +772,7 @@ export default {
       if (!this.disableIgnoreMouseEvent || !status) {
         this.win.setIgnoreMouseEvents(status, { forward: true })
       }
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isAlwaysOnTop: status,
       })
     },
@@ -839,7 +840,7 @@ export default {
           qn: 10000,
           withCookie: this.isWithCookie,
         })
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           isRecording: true,
         })
       } catch (e) {
@@ -863,14 +864,14 @@ export default {
       } catch (e) {
         console.warn(e)
       }
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isRecording: false,
       })
     },
 
     removeHistoryRoom(room) {
       const historyRooms = this.historyRooms.filter((e) => e.roomId !== room.roomId)
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         historyRooms: historyRooms,
       })
     },

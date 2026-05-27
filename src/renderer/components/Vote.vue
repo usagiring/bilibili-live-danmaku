@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { toRaw } from 'vue'
 import * as echarts from 'echarts'
 
@@ -113,19 +114,19 @@ export default {
   },
   computed: {
     isConnected() {
-      return this.$store.state.Config.isConnected
+      return useConfigStore().isConnected
     },
     options() {
-      return this.$store.state.Config.voteOptions
+      return useConfigStore().voteOptions
     },
     isAccurateMatch() {
-      return this.$store.state.Config.isAccurateMatch
+      return useConfigStore().isAccurateMatch
     },
     allowReVote() {
-      return this.$store.state.Config.allowReVote
+      return useConfigStore().allowReVote
     },
     colors() {
-      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS
+      return useConfigStore().colors.length ? useConfigStore().colors : COLORS
     },
   },
   beforeMount() {
@@ -344,7 +345,7 @@ export default {
           value: '',
         },
       ]
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         voteOptions: options,
       })
     },
@@ -353,7 +354,7 @@ export default {
       if (this.isWatching) return
       const options = [...this.options.map(toRaw)]
       options.splice(index, 1)
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         voteOptions: options,
       })
     },
@@ -361,7 +362,7 @@ export default {
     changeOptionKeyword(index, e) {
       const options = cloneDeep(this.options)
       options[index].keyword = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         voteOptions: options,
       })
     },
@@ -369,7 +370,7 @@ export default {
     changeOptionContent(index, e) {
       const options = cloneDeep(this.options)
       options[index].content = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         voteOptions: options,
       })
     },
@@ -379,7 +380,7 @@ export default {
         isAccurateMatch: value,
       }
       // updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeAllowReVote(value) {
@@ -387,7 +388,7 @@ export default {
         allowReVote: value,
       }
       // updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
   },
 }

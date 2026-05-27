@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import * as flvjs from 'flv.js'
 import { ipcRenderer } from 'electron'
 import emitter from '../../service/event'
@@ -175,52 +176,52 @@ export default {
   },
   computed: {
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
     medalId() {
-      return this.$store.state.Config.medalId
+      return useConfigStore().medalId
     },
     recordDir() {
-      return this.$store.state.Config.recordDir
+      return useConfigStore().recordDir
     },
     recordDuringFormat() {
       return new Date(this.recordDuring).toISOString().substr(11, 8)
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     isWithCookie() {
-      return this.$store.state.Config.isWithCookie
+      return useConfigStore().isWithCookie
     },
     liveWindowId() {
-      return this.$store.state.Config.liveWindowId
+      return useConfigStore().liveWindowId
     },
     isLiveWindowAlwaysOnTop() {
-      return this.$store.state.Config.isLiveWindowAlwaysOnTop
+      return useConfigStore().isLiveWindowAlwaysOnTop
     },
     liveWindowOpacity() {
-      return this.$store.state.Config.liveWindowOpacity * 100
+      return useConfigStore().liveWindowOpacity * 100
     },
     liveWindowX() {
-      return this.$store.state.Config.liveWindowX
+      return useConfigStore().liveWindowX
     },
     liveWindowY() {
-      return this.$store.state.Config.liveWindowY
+      return useConfigStore().liveWindowY
     },
     liveWindowHeight() {
-      return this.$store.state.Config.liveWindowHeight
+      return useConfigStore().liveWindowHeight
     },
     liveVolume() {
-      return this.$store.state.Config.liveVolume * 100
+      return useConfigStore().liveVolume * 100
     },
     isRecording() {
-      return this.$store.state.Config.isRecording
+      return useConfigStore().isRecording
     },
   },
   async mounted() {
     const { data } = await getRecordState({ roomId: this.realRoomId })
     const { startAt, recordId, isRecording } = data
-    this.$store.dispatch('UPDATE_CONFIG', {
+    useConfigStore().UPDATE_CONFIG({
       isRecording: isRecording,
     })
 
@@ -272,7 +273,7 @@ export default {
         //   this.downloadRate = parseDownloadRate(bps)
         // })
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           isRecording: true,
         })
         const recordStartTime = Date.now()
@@ -307,7 +308,7 @@ export default {
         console.warn(e)
       }
 
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isRecording: false,
       })
 
@@ -405,7 +406,7 @@ export default {
     async openRecordSaveFolderSelector() {
       const recordDir = await ipcRenderer.invoke(IPC_CHOOSE_DIRECTORY)
       if (recordDir) {
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           recordDir,
         })
         await this.$nextTick()
@@ -492,7 +493,7 @@ export default {
     },
 
     async withCookie(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isWithCookie: status,
       })
     },
@@ -514,7 +515,7 @@ export default {
       const data = {
         liveWindowOpacity: Number((number / 100).toFixed(2)),
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeLiveVolume(number) {
@@ -522,7 +523,7 @@ export default {
       const data = {
         liveVolume: liveVolume,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
 
       const videoDOM = document.getElementById('live-player')
       videoDOM.volume = liveVolume
@@ -544,7 +545,7 @@ export default {
           windowId,
         })
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           liveWindowId: windowId,
         })
 

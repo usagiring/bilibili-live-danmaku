@@ -1,8 +1,8 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { PRICE_PROPERTIES } from './const'
 
 export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
-  return moment(date).format(formatter);
+  return dayjs(date).format(formatter);
 }
 
 export function getPriceProperties(price) {

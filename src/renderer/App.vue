@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { useConfigStore } from './store'
 import { touch } from '../service/api'
 
 export default {
@@ -32,7 +33,7 @@ export default {
       }
     }, 300)
 
-    this.$store.dispatch('CLEAR_TEXT_STROKE_VERSION_0_4_8')
+    useConfigStore().CLEAR_TEXT_STROKE_VERSION_0_4_8()
   },
 }
 </script>

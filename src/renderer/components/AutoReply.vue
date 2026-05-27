@@ -132,8 +132,8 @@
 
 <script setup>
 import { cloneDeep, debounce } from 'lodash'
-import { toRaw, toRefs, computed, reactive, inject } from 'vue'
-import { useStore } from 'vuex'
+import { toRaw, computed, inject, reactive } from 'vue'
+import { useConfigStore } from '../store'
 const globalValue = inject('globalValue')
 
 import { Container, Draggable } from 'vue3-smooth-dnd'
@@ -142,7 +142,7 @@ import { updateSetting, getGiftConfig } from '../../service/api'
 
 const synth = window.speechSynthesis
 
-const store = useStore()
+const store = useConfigStore()
 
 const roleOptions = [
   {
@@ -365,11 +365,11 @@ const tags = reactive([
 ])
 
 const realRoomId = computed(() => {
-  return store.state.Config.realRoomId
+  return store.realRoomId
 })
 
 const rules = computed(() => {
-  return store.state.Config.autoReplyRules
+  return store.autoReplyRules
 })
 
 const debouncedChangeText = debounce(changeText, 500)
@@ -415,7 +415,7 @@ async function onDropTag(index, dropResult) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function onDropRule(dropResult) {
@@ -438,7 +438,7 @@ function onDropRule(dropResult) {
   }
   console.log(data)
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function getTagPayload(index) {
@@ -453,6 +453,9 @@ function getRulePayload(index) {
     rule: rules.value[index],
   }
 }
+// transfer 函数映射表，替代 <script setup> 中不可用的 this
+const transferFns = { roleNames, giftName }
+
 function fillDisplay(tag) {
   let display = tag.content
   const match = tag.content.matchAll(/{.*}/g)
@@ -462,7 +465,7 @@ function fillDisplay(tag) {
     if (~substr.indexOf('transfer')) {
       const [, func] = substr.split(':')
       console.log(func, tag)
-      value = this[func](tag)
+      value = transferFns[func]?.(tag) ?? ''
     }
     return Object.assign(map, {
       [next[0]]: value,
@@ -493,7 +496,7 @@ function removeTag(ruleIndex, tagIndex) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function removeRule(ruleIndex) {
@@ -503,7 +506,7 @@ function removeRule(ruleIndex) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function addRule() {
@@ -520,7 +523,7 @@ function addRule() {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function changeEnable(index, status) {
@@ -531,7 +534,7 @@ function changeEnable(index, status) {
   }
   console.log(data)
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function onChangeRuleType(index, type) {
@@ -541,7 +544,7 @@ function onChangeRuleType(index, type) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 // tag 里发出的数据变更事件
@@ -554,7 +557,7 @@ function onDataChange(ruleIndex, tagIndex, payload) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function changeText(ruleIndex, e) {
@@ -564,7 +567,7 @@ function changeText(ruleIndex, e) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.dispatch('UPDATE_CONFIG', data)
+  store.UPDATE_CONFIG(data)
 }
 
 function shouldTagAcceptDrop({ src, payload, index, groupName }) {

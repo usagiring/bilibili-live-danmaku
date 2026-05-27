@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { updateSetting } from '../../service/api'
 
@@ -22,7 +23,7 @@ export default {
   computed: {
     value() {
       const objKey = `${this.prop}_lv${this.role}`
-      const value = this.$store.state.Config[objKey][`${this.styleName}`]
+      const value = useConfigStore()[objKey][`${this.styleName}`]
       if (this.type === 'InputNumber') {
         if (!value) return 0
         return this.pxParser(value)
@@ -40,7 +41,7 @@ export default {
   methods: {
     async updateStyle(value) {
       value = value || 0
-      this.$store.dispatch('UPDATE_STYLE', {
+      useConfigStore().UPDATE_STYLE({
         role: this.role,
         prop: this.prop,
         style: {

@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { PORT } from '../../service/config-loader'
@@ -87,52 +88,52 @@ export default {
   },
   computed: {
     scrollDanmakuFontSize() {
-      return this.$store.state.Config.scrollDanmakuFontSize
+      return useConfigStore().scrollDanmakuFontSize
     },
     scrollDanmakuDuration() {
-      return this.$store.state.Config.scrollDanmakuDuration
+      return useConfigStore().scrollDanmakuDuration
     },
     scrollDanmakuDirection() {
-      return this.$store.state.Config.scrollDanmakuDirection
+      return useConfigStore().scrollDanmakuDirection
     },
     isScrollDanmakuWindowAlwaysOnTop() {
-      return this.$store.state.Config.isScrollDanmakuWindowAlwaysOnTop
+      return useConfigStore().isScrollDanmakuWindowAlwaysOnTop
     },
     isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
+      return useConfigStore().isOnTopForce
     },
     disableIgnoreMouseEvent() {
-      return this.$store.state.Config.disableIgnoreMouseEvent
+      return useConfigStore().disableIgnoreMouseEvent
     },
     onTopLevel() {
-      return this.$store.state.Config.onTopLevel
+      return useConfigStore().onTopLevel
     },
     scrollDanmakuWindowId() {
-      return this.$store.state.Config.scrollDanmakuWindowId
+      return useConfigStore().scrollDanmakuWindowId
     },
     scrollDanmakuWidth() {
-      return this.$store.state.Config.scrollDanmakuWidth
+      return useConfigStore().scrollDanmakuWidth
     },
     scrollDanmakuHeight() {
-      return this.$store.state.Config.scrollDanmakuHeight
+      return useConfigStore().scrollDanmakuHeight
     },
     scrollDanmakuX() {
-      return this.$store.state.Config.scrollDanmakuX
+      return useConfigStore().scrollDanmakuX
     },
     scrollDanmakuY() {
-      return this.$store.state.Config.scrollDanmakuY
+      return useConfigStore().scrollDanmakuY
     },
     scrollDanmakuBackground() {
-      return this.$store.state.Config.scrollDanmakuBackground
+      return useConfigStore().scrollDanmakuBackground
     },
     scrollDanmakuOpacity() {
-      return this.$store.state.Config.scrollDanmakuOpacity
+      return useConfigStore().scrollDanmakuOpacity
     },
     scrollDanmakuStyleExtend() {
-      return this.$store.state.Config.scrollDanmakuStyleExtend
+      return useConfigStore().scrollDanmakuStyleExtend
     },
     scrollDanmakuEmojiSize() {
-      return this.$store.state.Config.scrollDanmakuEmojiSize
+      return useConfigStore().scrollDanmakuEmojiSize
     },
   },
 
@@ -161,7 +162,7 @@ export default {
           resizable: true,
         })
 
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           scrollDanmakuWindowId: windowId,
         })
 
@@ -176,7 +177,7 @@ export default {
         scrollDanmakuFontSize: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeScrollDanmakuDuration(value) {
@@ -184,12 +185,12 @@ export default {
         scrollDanmakuDuration: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     closeDanmakuWindow() {
       if (!this.win) return
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         scrollDanmakuWindowId: null,
       })
       // clear
@@ -202,7 +203,7 @@ export default {
       this.isShowDanmakuWindow = false
       this.isShowDanmakuWindowLoading = false
       // this.isScrollDanmakuWindowAlwaysOnTop = false
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isScrollDanmakuWindowAlwaysOnTop: false,
       })
     },
@@ -224,7 +225,7 @@ export default {
       if (!this.disableIgnoreMouseEvent || !status) {
         this.win.setIgnoreMouseEvents(status, { forward: true })
       }
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isScrollDanmakuWindowAlwaysOnTop: status,
       })
       // this.isScrollDanmakuWindowAlwaysOnTop = status
@@ -235,7 +236,7 @@ export default {
         scrollDanmakuBackground: color,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeScrollDanmakuOpacity(value) {
@@ -243,7 +244,7 @@ export default {
         scrollDanmakuOpacity: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeScrollDanmakuDirection(value) {
@@ -251,7 +252,7 @@ export default {
         scrollDanmakuDirection: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeScrollDanmakuStyleExtend(value) {
@@ -259,7 +260,7 @@ export default {
         scrollDanmakuStyleExtend: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeScrollDanmakuEmojiSize(value) {
@@ -267,7 +268,7 @@ export default {
         scrollDanmakuEmojiSize: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
   },
 }

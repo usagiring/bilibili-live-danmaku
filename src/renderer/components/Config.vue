@@ -27,7 +27,8 @@
     </div>
     <div class="config-item-container">
       Cookie
-      <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password" placeholder="Cookie..." clearable @on-change="changeCookie" />
+      <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password"
+        placeholder="Cookie..." clearable @on-change="changeCookie" />
       <Button @click="showQrCodeLoginModal">扫码登录</Button>
       <!-- <Button @click="refreshCookie">刷新Cookie</Button> -->
       <Tooltip placement="top" transfer>
@@ -41,7 +42,8 @@
       </Tooltip>
     </div>
     <div class="config-item-container">
-      <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }" @on-change="changeAutoRecord"> 自动录制 </Checkbox>
+      <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }"
+        @on-change="changeAutoRecord"> 自动录制 </Checkbox>
       <Tooltip transfer placement="top">
         <Icon type="md-help" />
         <template #content>
@@ -79,7 +81,8 @@
           </div>
         </template>
       </Tooltip>
-      <Select class="color-selector space-left-5px" :model-value="colors" multiple filterable allow-create @on-change="onChangeColor">
+      <Select class="color-selector space-left-5px" :model-value="colors" multiple filterable allow-create
+        @on-change="onChangeColor">
         <Option v-for="option in colorOptions" :key="option.index" :value="option.value" :label="option.label">
           <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px' }" />
           <span>{{ option.label }}</span>
@@ -113,7 +116,8 @@
           </div>
         </template>
       </Tooltip>
-      <Select class="on-top-level-selector space-left-5px" :model-value="onTopLevel" :style="{ width: '200px' }" @on-change="onChangeOnTopLevel">
+      <Select class="on-top-level-selector space-left-5px" :model-value="onTopLevel" :style="{ width: '200px' }"
+        @on-change="onChangeOnTopLevel">
         <Option v-for="(option, index) in opTopLevelOptions" :key="index" :value="option" :label="option">
           <span>{{ option }}</span>
         </Option>
@@ -130,7 +134,8 @@
           </template>
         </Tooltip>
       </Checkbox>
-      <Checkbox class="space-left-5px" :model-value="disableIgnoreMouseEvent" @on-change="onChangeDisableIgnoreMouseEvent">
+      <Checkbox class="space-left-5px" :model-value="disableIgnoreMouseEvent"
+        @on-change="onChangeDisableIgnoreMouseEvent">
         <Tooltip placement="top" transfer>
           置顶时鼠标事件不穿透
           <template #content>
@@ -157,13 +162,16 @@
             <p>触达上限时将清空待读列表，从最新语音开始播放</p>
           </div>
         </template>
-        <InputNumber class="space-left-5px" :model-value="waitingSpeakerCount" :min="0" :step="1" :max="50" :style="{ width: '80px' }" @on-change="onChangeWaitingSpeakerCount" />
+        <InputNumber class="space-left-5px" :model-value="waitingSpeakerCount" :min="0" :step="1" :max="50"
+          :style="{ width: '80px' }" @on-change="onChangeWaitingSpeakerCount" />
       </Tooltip>
     </div>
 
     <div class="config-item-container">
-      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '120px' }" @on-change="onChangeSignInMessage" />
-      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap @on-ok="signIn">
+      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '120px' }"
+        @on-change="onChangeSignInMessage" />
+      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap
+        @on-ok="signIn">
         <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
       </Poptip>
       <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
@@ -171,13 +179,15 @@
       <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
     </div>
 
-    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode" :loading="loginFromQrCodeLoading" :style="{ 'text-align': 'center' }">
+    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode"
+      :loading="loginFromQrCodeLoading" :style="{ 'text-align': 'center' }">
       <canvas id="qrcode"></canvas>
       <div>请使用手机端APP扫码，手机端确认之后，点击“确定”</div>
       <div :style="{ color: 'crimson' }">{{ qrCodeLoginErrorMessage }}</div>
     </Modal>
 
-    <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
+    <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer
+      :styles="{ height: '70%', overflow: 'auto' }">
       <template v-for="(medal, i) in medals" :key="i">
         <Row align="middle" class-name="medal-list-container disable-user-select">
           <i-col span="4">
@@ -185,7 +195,8 @@
           </i-col>
           <i-col span="7">
             <span :style="{ cursor: 'pointer' }" @click="openBiliLiveRoom(medal.roomId)">{{ medal.uname }}</span>
-            <Icon v-if="medal.liveStatus === 1" :style="{ color: 'green', 'font-size': '16px', margin: '3px 0 0 2px' }" type="ios-radio-button-on" />
+            <Icon v-if="medal.liveStatus === 1" :style="{ color: 'green', 'font-size': '16px', margin: '3px 0 0 2px' }"
+              type="ios-radio-button-on" />
           </i-col>
           <i-col span="8">
             <span>亲密度:{{ medal.todayFeed }}/{{ medal.dayLimit }}</span>
@@ -201,6 +212,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { uniq } from 'lodash'
 import { reactive } from 'vue'
 import { ipcRenderer, shell } from 'electron'
@@ -259,37 +271,37 @@ export default {
   // },
   computed: {
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     isAutoRecord() {
-      return this.$store.state.Config.isAutoRecord
+      return useConfigStore().isAutoRecord
     },
     isWatchLottery() {
-      return this.$store.state.Config.isWatchLottery
+      return useConfigStore().isWatchLottery
     },
     autoReplyRules() {
-      return this.$store.state.Config.autoReplyRules
+      return useConfigStore().autoReplyRules
     },
     autoReplyText() {
-      return this.$store.state.Config.autoReplyRules[0].text
+      return useConfigStore().autoReplyRules[0].text
     },
     onlyGold() {
-      return this.$store.state.Config.autoReplyRules[0].onlyGold
+      return useConfigStore().autoReplyRules[0].onlyGold
     },
     onlyMyselfRoom() {
-      return this.$store.state.Config.onlyMyselfRoom
+      return useConfigStore().onlyMyselfRoom
     },
     isAutoReply() {
-      return this.$store.state.Config.isAutoReply
+      return useConfigStore().isAutoReply
     },
     isTextReply() {
-      return this.$store.state.Config.autoReplyRules[0].isTextReply
+      return useConfigStore().autoReplyRules[0].isTextReply
     },
     isSpeakReply() {
-      return this.$store.state.Config.autoReplyRules[0].isSpeakReply
+      return useConfigStore().autoReplyRules[0].isSpeakReply
     },
     colors() {
-      return this.$store.state.Config.colors.length ? this.$store.state.Config.colors : COLORS
+      return useConfigStore().colors.length ? useConfigStore().colors : COLORS
     },
     colorOptions() {
       const color = uniq([...COLORS, ...this.colors])
@@ -302,31 +314,31 @@ export default {
       })
     },
     userInfoFrequencyLimit() {
-      return this.$store.state.Config.userInfoFrequencyLimit
+      return useConfigStore().userInfoFrequencyLimit
     },
     onTopLevel() {
-      return this.$store.state.Config.onTopLevel
+      return useConfigStore().onTopLevel
     },
     isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
+      return useConfigStore().isOnTopForce
     },
     disableIgnoreMouseEvent() {
-      return this.$store.state.Config.disableIgnoreMouseEvent
+      return useConfigStore().disableIgnoreMouseEvent
     },
     signInMessage() {
-      return this.$store.state.Config.signInMessage
+      return useConfigStore().signInMessage
     },
     onlyTodayZeroIntimacy() {
-      return this.$store.state.Config.onlyTodayZeroIntimacy
+      return useConfigStore().onlyTodayZeroIntimacy
     },
     waitingSpeakerCount() {
-      return this.$store.state.Config.waitingSpeakerCount
+      return useConfigStore().waitingSpeakerCount
     },
     isNeedRefreshCookieCache() {
-      return this.$store.state.Config.isNeedRefreshCookieCache
+      return useConfigStore().isNeedRefreshCookieCache
     },
     refreshToken() {
-      return this.$store.state.Config.refreshToken
+      return useConfigStore().refreshToken
     },
   },
   async mounted() {
@@ -353,7 +365,7 @@ export default {
           console.log(data)
 
           if (!data.refresh) {
-            this.$store.dispatch('UPDATE_CONFIG', {
+            useConfigStore().UPDATE_CONFIG({
               isNeedRefreshCookieCache: Date.now(),
             })
             return
@@ -374,12 +386,12 @@ export default {
         refreshToken: refreshToken,
       }
       await updateSetting(setting)
-      this.$store.dispatch('UPDATE_CONFIG', setting)
+      useConfigStore().UPDATE_CONFIG(setting)
     },
 
     async restoreDefaultStyleSetting() {
       await updateSetting(DEFAULT_STYLE)
-      this.$store.dispatch('UPDATE_CONFIG', DEFAULT_STYLE)
+      useConfigStore().UPDATE_CONFIG(DEFAULT_STYLE)
       location.reload()
     },
 
@@ -401,11 +413,11 @@ export default {
         userCookie: e.target.value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeAutoRecord(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isAutoRecord: status,
       })
     },
@@ -428,7 +440,7 @@ export default {
         colors: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async onChangeUserInfoFrequencyLimit(value) {
@@ -436,42 +448,42 @@ export default {
         userInfoFrequencyLimit: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onChangeOnTopLevel(value) {
       const data = {
         onTopLevel: value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onChangeIsOnTopForce(value) {
       const data = {
         isOnTopForce: value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onChangeSignInMessage(e) {
       const data = {
         signInMessage: e.target.value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onChangeDisableIgnoreMouseEvent(value) {
       const data = {
         disableIgnoreMouseEvent: value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     onChangeWaitingSpeakerCount(value) {
       const data = {
         waitingSpeakerCount: value,
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showSignInModal() {
@@ -656,7 +668,7 @@ export default {
         refreshToken: data.refresh_token,
       }
       await updateSetting(setting)
-      this.$store.dispatch('UPDATE_CONFIG', setting)
+      useConfigStore().UPDATE_CONFIG(setting)
       this.loginFromQrCodeLoading = false
       this.isShowQRCodeLoginModal = false
     },
@@ -668,10 +680,12 @@ export default {
 .config-item-container {
   padding: 10px 5px 0px 10px;
 }
+
 .config-item {
   width: 150px;
   margin: 0 5px;
 }
+
 .close-icon {
   color: crimson;
   font-size: 16px;
@@ -691,10 +705,12 @@ export default {
 .color-selector {
   width: 700px;
 }
+
 .space-left-5px {
   margin-left: 5px;
 }
-.medal-list-container > div {
+
+.medal-list-container>div {
   margin: 2px 0;
 }
 </style>

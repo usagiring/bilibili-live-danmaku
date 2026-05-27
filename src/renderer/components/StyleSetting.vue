@@ -474,6 +474,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { Container, Draggable } from 'vue3-smooth-dnd'
 import FontList from 'font-list'
 
@@ -1017,75 +1018,75 @@ export default {
   },
   computed: {
     background() {
-      return this.$store.state.Config.background
+      return useConfigStore().background
     },
     danmakuFont() {
-      return this.$store.state.Config.danmakuFont
+      return useConfigStore().danmakuFont
     },
     isShowAvatar() {
-      const settings = this.$store.state.Config.messageSettings
+      const settings = useConfigStore().messageSettings
       return settings.find((setting) => setting.type === 'avatar').isShow
     },
     isShowMemberShipIcon() {
-      const settings = this.$store.state.Config.messageSettings
+      const settings = useConfigStore().messageSettings
       return settings.find((setting) => setting.type === 'guard').isShow
     },
     isShowInteractInfo() {
-      return this.$store.state.Config.isShowInteractInfo
+      return useConfigStore().isShowInteractInfo
     },
     isShowFanMedal() {
-      const settings = this.$store.state.Config.messageSettings
+      const settings = useConfigStore().messageSettings
       return settings.find((setting) => setting.type === 'medal').isShow
     },
     avatarSize() {
-      const settings = this.$store.state.Config.messageSettings
+      const settings = useConfigStore().messageSettings
       return settings.find((setting) => setting.type === 'avatar').size
     },
     combineSimilarTime() {
-      return this.$store.state.Config.combineSimilarTime
+      return useConfigStore().combineSimilarTime
     },
     hiddenExpiredTime() {
-      return this.$store.state.Config.hiddenExpiredTime
+      return useConfigStore().hiddenExpiredTime
     },
     showHeadlineThreshold() {
-      return this.$store.state.Config.showHeadlineThreshold
+      return useConfigStore().showHeadlineThreshold
     },
     showGiftCardThreshold() {
-      return this.$store.state.Config.showGiftCardThreshold
+      return useConfigStore().showGiftCardThreshold
     },
     isShowSilverGift() {
-      return this.$store.state.Config.isShowSilverGift
+      return useConfigStore().isShowSilverGift
     },
     isUseMiniGiftCard() {
-      return this.$store.state.Config.isUseMiniGiftCard
+      return useConfigStore().isUseMiniGiftCard
     },
     isShowColon() {
-      const settings = this.$store.state.Config.messageSettings
+      const settings = useConfigStore().messageSettings
       return settings.find((setting) => setting.type === 'colon').isShow
     },
     isShowHeadline() {
-      return this.$store.state.Config.isShowHeadline
+      return useConfigStore().isShowHeadline
     },
     isShowType1() {
-      return this.$store.state.Config.isShowType1
+      return useConfigStore().isShowType1
     },
     isShowType2() {
-      return this.$store.state.Config.isShowType2
+      return useConfigStore().isShowType2
     },
     isShowSuperChatJPN() {
-      return this.$store.state.Config.isShowSuperChatJPN
+      return useConfigStore().isShowSuperChatJPN
     },
     fontWeight() {
-      return this.$store.state.Config.fontWeight
+      return useConfigStore().fontWeight
     },
     opacity() {
-      return this.$store.state.Config.opacity * 100
+      return useConfigStore().opacity * 100
     },
     messageSettings() {
-      return this.$store.state.Config.messageSettings
+      return useConfigStore().messageSettings
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     avatarSizeStyle() {
       return {
@@ -1095,7 +1096,7 @@ export default {
       }
     },
     borderImages() {
-      return this.$store.state.Config.borderImages
+      return useConfigStore().borderImages
     },
     borderImageStyle() {
       const image = this.borderImages.find((image) => image.isSelected)
@@ -1140,13 +1141,13 @@ export default {
       return image['border-image-outset']
     },
     message_lv3() {
-      return this.$store.state.Config.message_lv3
+      return useConfigStore().message_lv3
     },
     name_lv3() {
-      return this.$store.state.Config.name_lv3
+      return useConfigStore().name_lv3
     },
     comment_lv3() {
-      return this.$store.state.Config.comment_lv3
+      return useConfigStore().comment_lv3
     },
     fontStyle() {
       return {
@@ -1155,22 +1156,22 @@ export default {
       }
     },
     emojiSize() {
-      return this.$store.state.Config.emojiSize
+      return useConfigStore().emojiSize
     },
     adminIcon() {
-      return this.$store.state.Config.adminIcon
+      return useConfigStore().adminIcon
     },
     isShowAdminIcon() {
-      return this.$store.state.Config.isShowAdminIcon
+      return useConfigStore().isShowAdminIcon
     },
     adminIconColor() {
-      return this.$store.state.Config.adminIconColor
+      return useConfigStore().adminIconColor
     },
     danmakuChannel() {
-      return this.$store.state.Config.danmakuChannel
+      return useConfigStore().danmakuChannel
     },
     channelDelayTime() {
-      return this.$store.state.Config.channelDelayTime
+      return useConfigStore().channelDelayTime
     },
   },
   created() {
@@ -1195,7 +1196,7 @@ export default {
 
       const data = { messageSettings: settings }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async showFanMedal(status) {
       const settings = cloneDeep(this.messageSettings)
@@ -1207,12 +1208,12 @@ export default {
         isShowFanMedal: status,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
@@ -1228,7 +1229,7 @@ export default {
         // scrollDanmakuBackground: color,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async changeAvatarSize(size) {
       // const data = {
@@ -1249,13 +1250,13 @@ export default {
       data.messageSettings = settings
 
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async changeOpacity(number) {
       const data = {
         opacity: Number((number / 100).toFixed(2)),
       }
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
       await updateSetting(data)
     },
 
@@ -1264,7 +1265,7 @@ export default {
         combineSimilarTime: number,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeHiddenExpiredTime(number) {
@@ -1272,7 +1273,7 @@ export default {
         hiddenExpiredTime: number,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeShowHeadlineThreshold(number) {
@@ -1280,14 +1281,14 @@ export default {
         showHeadlineThreshold: number,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showSilverGift(status) {
@@ -1295,7 +1296,7 @@ export default {
         isShowSilverGift: status,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     randomMessageGenerator() {
@@ -1418,7 +1419,7 @@ export default {
         danmakuFont: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async useMiniGiftCard(value) {
@@ -1426,7 +1427,7 @@ export default {
         isUseMiniGiftCard: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     getGuardIcon(level) {
@@ -1443,7 +1444,7 @@ export default {
       const reader = new FileReader()
       reader.onloadend = function () {
         const dataUrl = reader.result
-        self.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           borderImages: [
             ...self.borderImages,
             {
@@ -1469,7 +1470,7 @@ export default {
         item.isSelected = false
       })
       borderImages[index].isSelected = !preStatus
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1478,7 +1479,7 @@ export default {
       const borderImages = this.borderImages.filter((_, i) => {
         return i !== index
       })
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1488,7 +1489,7 @@ export default {
         emojiSize: number,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     setBorderImageSliceValue(e) {
@@ -1496,7 +1497,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-slice'] = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1506,7 +1507,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-width'] = number
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1516,7 +1517,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-width'] = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1526,7 +1527,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-repeat'] = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1536,7 +1537,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-outset'] = e.target.value
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1587,7 +1588,7 @@ export default {
         messageSettings: displayItems,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeFontWeight(value) {
@@ -1595,7 +1596,7 @@ export default {
         fontWeight: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showHeadLine(value) {
@@ -1603,7 +1604,7 @@ export default {
         isShowHeadline: value,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showColon(status) {
@@ -1613,7 +1614,7 @@ export default {
 
       const data = { messageSettings: settings }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async changeBorderAdaptContent(status) {
@@ -1621,7 +1622,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image.isAdaptContent = status
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         borderImages: borderImages,
       })
     },
@@ -1631,7 +1632,7 @@ export default {
         isShowType1: status,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showType2(status) {
@@ -1639,7 +1640,7 @@ export default {
         isShowType2: status,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     async showSuperChatJPN(status) {
@@ -1647,7 +1648,7 @@ export default {
         isShowSuperChatJPN: status,
       }
       await updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeAdminIcon(icon) {
@@ -1656,7 +1657,7 @@ export default {
         adminIcon: icon,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     showAdminIcon(status) {
@@ -1664,7 +1665,7 @@ export default {
         isShowAdminIcon: status,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeAdminIconColor(color) {
@@ -1672,7 +1673,7 @@ export default {
         adminIconColor: color,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     searchAdminIcon(value) {
@@ -1692,7 +1693,7 @@ export default {
         danmakuChannel: number,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
 
     changeChannelDelayTime(number) {
@@ -1700,7 +1701,7 @@ export default {
         channelDelayTime: number,
       }
       updateSetting(data)
-      this.$store.dispatch('UPDATE_CONFIG', data)
+      useConfigStore().UPDATE_CONFIG(data)
     },
   },
 }

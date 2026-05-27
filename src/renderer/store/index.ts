@@ -1,34 +1,74 @@
-import { createStore  } from 'vuex'
-import { createPersistedState, createSharedMutations } from 'vuex-electron'
-import Config from './modules/Config'
+import { createPinia, defineStore } from 'pinia'
+import { DEFAULT_CONFIG, DEFAULT_STYLE } from '../../service/const'
 
-// const { context, modules } = loadModules()
+export const useConfigStore = defineStore('config', {
+  state: () => ({
+    ...DEFAULT_CONFIG,
+    ...DEFAULT_STYLE,
+  }),
 
-const store = createStore({
-  modules: {
-    Config: Config
+  actions: {
+    UPDATE_STYLE(payload) {
+      const objKey = `${payload.prop}_lv${payload.role}`
+      this[objKey] = { ...this[objKey], ...payload.style }
+    },
+
+    UPDATE_CONFIG(payload) {
+      for (const key in payload) {
+        this[key] = payload[key]
+      }
+    },
+
+    CLEAR_TEXT_STROKE_VERSION_0_4_8() {
+      const array = [
+        { prop: 'name', role: '0' },
+        { prop: 'comment', role: '0' },
+        { prop: 'name', role: '1' },
+        { prop: 'comment', role: '1' },
+        { prop: 'name', role: '2' },
+        { prop: 'comment', role: '2' },
+        { prop: 'name', role: '3' },
+        { prop: 'comment', role: '3' },
+        { prop: 'name', role: 'admin' },
+        { prop: 'comment', role: 'admin' },
+      ]
+      array.forEach((i) => {
+        const objKey = `${i.prop}_lv${i.role}`
+        const newData = { ...this[objKey] }
+        delete newData['-webkit-text-stroke-width']
+        delete newData['-webkit-text-stroke-color']
+        this[objKey] = newData
+      })
+    },
   },
-  plugins: [
-    createPersistedState({
-      whitelist: [
-        'UPDATE_STYLE',
-        'UPDATE_CONFIG',
-      ],
-    }),
-    createSharedMutations()  // vuex-electron 引入了一个用于多进程间共享 Vuex Store 的状态的插件。如果没有多进程交互的需求，完全可以不引入这个插件。
-  ],
-  strict: !import.meta.env.PROD
 })
 
-export default store
+// 简单的 localStorage 持久化插件（替代 vuex-electron 的持久化）
+function persistPlugin({ store }) {
+  const STORAGE_KEY = 'bilibili-config'
 
-// if (module.hot) {
-//   // 在任何模块发生改变时进行热重载。
-//   module.hot.accept(context.id, () => {
-//     const { modules } = loadModules()
+  // 恢复状态
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const data = JSON.parse(saved)
+      store.UPDATE_CONFIG(data)
+    }
+  } catch {
+    // ignore
+  }
 
-//     store.hotUpdate({
-//       modules
-//     })
-//   })
-// }
+  // 监听变化并保存
+  store.$subscribe(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store.$state))
+    } catch {
+      // ignore
+    }
+  })
+}
+
+const pinia = createPinia()
+pinia.use(persistPlugin)
+
+export default pinia

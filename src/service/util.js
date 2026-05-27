@@ -1,4 +1,4 @@
-import moment from "moment";
+import dayjs from "dayjs";
 import { PRICE_PROPERTIES, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
 
 // TODO 设置一些更小的粒度？ < 1
@@ -43,7 +43,7 @@ export function parseHexColor(colorNumber) {
 }
 
 export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
-  return moment(date).format(formatter);
+  return dayjs(date).format(formatter);
 }
 
 export async function wait(ms = 1000) {

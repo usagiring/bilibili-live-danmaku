@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
@@ -38,25 +39,25 @@ export default {
   },
   computed: {
     liveWindowOpacity() {
-      return this.$store.state.Config.liveWindowOpacity
+      return useConfigStore().liveWindowOpacity
     },
     isOnTopForce() {
-      return this.$store.state.Config.isOnTopForce
+      return useConfigStore().isOnTopForce
     },
     disableIgnoreMouseEvent() {
-      return this.$store.state.Config.disableIgnoreMouseEvent
+      return useConfigStore().disableIgnoreMouseEvent
     },
     onTopLevel() {
-      return this.$store.state.Config.onTopLevel
+      return useConfigStore().onTopLevel
     },
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
     liveVolume() {
-      return this.$store.state.Config.liveVolume
+      return useConfigStore().liveVolume
     },
   },
   watch: {
@@ -77,7 +78,7 @@ export default {
       'resize',
       debounce(() => {
         const [width, height] = win.getSize()
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           liveWindowHeight: height,
         })
         this.videoHeight = height
@@ -88,7 +89,7 @@ export default {
       'move',
       debounce(() => {
         const [x, y] = win.getPosition()
-        this.$store.dispatch('UPDATE_CONFIG', {
+        useConfigStore().UPDATE_CONFIG({
           liveWindowX: x,
           liveWindowY: y,
         })
@@ -177,7 +178,7 @@ export default {
       if (!this.disableIgnoreMouseEvent || !status) {
         win.setIgnoreMouseEvents(status, { forward: true })
       }
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isLiveWindowAlwaysOnTop: status,
       })
     },
@@ -190,7 +191,7 @@ export default {
         this.flvPlayer = null
       }
 
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         liveWindowId: null,
         isLiveWindowAlwaysOnTop: false,
       })

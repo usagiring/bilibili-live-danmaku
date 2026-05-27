@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../../service/util'
@@ -122,19 +123,19 @@ export default {
   },
   computed: {
     enableMessageListenMode() {
-      return this.$store.state.Config.enableMessageListenMode
+      return useConfigStore().enableMessageListenMode
     },
     isShowSilverGift() {
-      return this.$store.state.Config.isShowSilverGift
+      return useConfigStore().isShowSilverGift
     },
     isShowUserSpaceLink() {
-      return this.$store.state.Config.isShowUserSpaceLink
+      return useConfigStore().isShowUserSpaceLink
     },
   },
   created() {
-    this.roomId = this.$store.state.Config.realRoomId
+    this.roomId = useConfigStore().realRoomId
     // const startTime =
-    // new Date(this.$store.state.Config.connectedAt) ||
+    // new Date(useConfigStore().connectedAt) ||
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
     // this.dateRange = [startTime, new Date(Date.now() + 15 * 60 * 1000)];
     this.searchAll()
@@ -330,7 +331,7 @@ export default {
       })
     },
     showUserSpaceLink(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isShowUserSpaceLink: status,
       })
     },
@@ -422,7 +423,7 @@ export default {
       })
     },
     async showSilverGift(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         isShowSilverGift: status,
       })
       let gifts = await this.searchGift({
@@ -448,7 +449,7 @@ export default {
     },
 
     async changeEnableMessageListenMode(status) {
-      this.$store.dispatch('UPDATE_CONFIG', {
+      useConfigStore().UPDATE_CONFIG({
         enableMessageListenMode: status,
       })
       if (status) {

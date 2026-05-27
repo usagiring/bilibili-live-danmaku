@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { useConfigStore } from '../store'
 import ws from '../../service/ws'
 import { speechToText, sendComment } from '../../service/api'
 
@@ -52,22 +52,22 @@ const processorUrl = new URL('../../service/processor.worklet.js', import.meta.u
 let isVoiceActive = false
 
 export default {
-  setup() {
-    return reactive({
+  data() {
+    return {
       message: '',
       isLoading: false,
-    })
+    }
   },
 
   computed: {
     aliAppKey() {
-      return this.$store.state.Config.aliAppKey
+      return useConfigStore().aliAppKey
     },
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
     userCookie() {
-      return this.$store.state.Config.userCookie
+      return useConfigStore().userCookie
     },
   },
 

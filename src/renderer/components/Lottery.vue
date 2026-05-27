@@ -78,6 +78,7 @@
 </template>
 
 <script>
+import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { getRandomItem, dateFormat } from '../../service/util'
 import { DEFAULT_AVATAR } from '../../service/const'
@@ -124,7 +125,7 @@ export default {
       }, 0)
     },
     realRoomId() {
-      return this.$store.state.Config.realRoomId
+      return useConfigStore().realRoomId
     },
   },
   async mounted() {
