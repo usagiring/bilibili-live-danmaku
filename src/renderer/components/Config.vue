@@ -220,7 +220,6 @@ import {
   getQrCode,
   loginFromQrCode as loginFromQrCodeApi,
   refreshCookie as refreshCookieApi,
-  refreshCookieStep1 as refreshCookieStep1Api,
 } from '../../service/api'
 import { wait } from '../../service/util'
 import QRCode from 'qrcode'

@@ -685,7 +685,7 @@ export default {
         //     ? `http://localhost:9080/#/danmaku-window`
         //     : `file://${__dirname}/index.html#danmaku-window`;
 
-        const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}` : `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`
+        const winURL = `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`
         win.setIcon(nativeImage.createFromDataURL(icon))
         win.loadURL(winURL)
         this.win = win

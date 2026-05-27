@@ -47,12 +47,8 @@
 
 <script type="module">
 import moment from 'moment'
-import fs from 'fs'
-import path from 'path'
-import { strict as assert } from 'assert'
-import * as remote from '@electron/remote'
-const { dialog } = remote
-import { statistic as statisticAPI, commentWordExtract, exportFile } from '../../service/api'
+import { ipcRenderer } from 'electron'
+import { statistic as statisticAPI, commentWordExtract } from '../../service/api'
 import { dateFormat } from '../../service/util'
 import * as echarts from 'echarts'
 import 'echarts-wordcloud/dist/echarts-wordcloud.min.js'
@@ -335,40 +331,16 @@ export default {
 
     async download() {
       try {
-        const filePath = await this.choosePath()
-        console.log(filePath)
+        const filePath = await ipcRenderer.invoke('IPC_CHOOSE_DIRECTORY')
         if (!filePath) return
         const [start, end] = this.dateRange
-        const data = await exportFile({
-          roomId: this.roomId,
-          start,
-          end,
-        })
-        try {
-          const stat = fs.statSync(filePath)
-          assert.ok(stat.isDirectory())
-        } catch (e) {
-          console.log(e)
-          fs.mkdirSync(filePath)
-        }
-        const output = path.join(filePath, `./${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}_.csv`)
-        const ws = fs.createWriteStream(output)
-        // data.pipe(ws)
-        ws.write(data)
-        ws.end()
+        const fileName = `${this.roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.csv`
+        // 主进程直接请求 API 并写入文件，数据不经过 IPC
+        await ipcRenderer.invoke('IPC_SAVE_FILE', { filePath, roomId: this.roomId, start, end, fileName })
         this.$Message.success('导出成功')
       } catch (e) {
+        console.error(e)
         this.$Message.error('导出失败')
-      }
-    },
-
-    async choosePath() {
-      const result = await dialog.showOpenDialog({
-        properties: ['openDirectory'],
-      })
-      if (!result.canceled) {
-        const path = result.filePaths[0]
-        return path
       }
     },
   },

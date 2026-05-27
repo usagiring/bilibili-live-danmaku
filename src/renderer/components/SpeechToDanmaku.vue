@@ -41,7 +41,7 @@ import { speechToText, sendComment } from '../../service/api'
 // import * as vad from '@ricky0123/vad'
 // import vad2 from 'voice-activity-detection'
 import vad3 from '../../service/vad'
-import processor from 'worklet-loader!../../service/processor.worklet'
+const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)
 
 /**
  * @description 开发环境开启以下配置
@@ -159,7 +159,7 @@ export default {
 
         // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
         // await context.audioWorklet.addModule(AudioWorklet(new URL("../../service/processor.worklet.js", import.meta.url)))
-        await context.audioWorklet.addModule(processor)
+        await context.audioWorklet.addModule(processorUrl)
         const worklet = new AudioWorkletNode(context, 'worklet-processor')
 
         // let count = 0

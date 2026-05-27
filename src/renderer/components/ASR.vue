@@ -171,7 +171,7 @@ import {
 } from '../../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS } from '../../service/const'
 import icon from '../assets/logo.png'
-import processor from 'worklet-loader!../../service/processor.worklet'
+const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)
 // import { AudioWorklet } from '../../service/audio-worklet'
 // const { AudioWorklet } = require('../../service/audio-worklet/index.js')
 import global from '../../service/global'
@@ -538,7 +538,7 @@ export default {
 
       // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
       // await context.audioWorklet.addModule(AudioWorklet(new URL("../../service/processor.worklet.js", import.meta.url)))
-      await context.audioWorklet.addModule(processor)
+      await context.audioWorklet.addModule(processorUrl)
       const worklet = new AudioWorkletNode(context, 'worklet-processor')
 
       // let count = 0

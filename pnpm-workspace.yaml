@@ -1,10 +1,11 @@
 allowBuilds:
   '@alicloud/openapi-core': false
   bufferutil: false
-  electron: set this to true or false
+  electron: true
   electron-winstaller: false
+  esbuild: true
   highlight.js: false
   koa: true
-  protobufjs: false
+  protobufjs: true
   utf-8-validate: false
 blockExoticSubdeps: false

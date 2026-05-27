@@ -1,11 +1,12 @@
 import { app, BrowserWindow, ipcMain, nativeImage, session, Menu, Tray } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
-import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_ENABLE_WEB_CONTENTS, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_GET_VERSION, IPC_GET_EXE_PATH, IPC_GET_USER_PATH, IPC_LIVE_WINDOW_ON_TOP } from '../service/const'
+import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
 import '../renderer/store'
 import bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main'
 import { PORT, SAVE_ALL_BILI_MESSAGE, DANMAKU_RENDER_PATH } from '../service/config-loader'
+import { registerIpcHandlers } from './ipc'
 
 initialize()
 
@@ -18,21 +19,20 @@ bilibiliBridge({
   USER_DATA_PATH: app.getPath('userData'),
   PORT,
   SAVE_ALL_BILI_MESSAGE,
-  HTML_PATH: process.env.NODE_ENV === 'development' ? path.join(__dirname, '../../danmaku-dist') : DANMAKU_RENDER_PATH || path.join(__dirname, 'danmaku'),
+  HTML_PATH: import.meta.env.DEV ? path.join(__dirname, '../../danmaku-dist') : DANMAKU_RENDER_PATH || path.join(__dirname, '../danmaku-dist'),
 })
 
 /**
  * Set `__static` path to static files in production
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
-if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+if (!import.meta.env.DEV) {
+  global.__static = path.join(__dirname, '../static').replace(/\\/g, '\\\\')
 }
 
 let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+const winURL = import.meta.env.DEV
+  ? process.env.ELECTRON_RENDERER_URL
+  : `file://${path.join(__dirname, '../renderer/index.html')}`
 
 function createWindow() {
   /**
@@ -83,57 +83,8 @@ app.on('ready', () => {
 
   createWindow()
 
-
-  // const tray = new Tray(path.join(__dirname, '../renderer/assets/logo.png'))
-  // const contextMenu = Menu.buildFromTemplate([
-  //   { label: 'Item1', type: 'radio' },
-  //   { label: 'Item2', type: 'radio' },
-  //   { label: 'Item3', type: 'radio', checked: true },
-  //   { label: 'Item4', type: 'radio' }
-  // ])
-  // tray.setToolTip('bilibili-danmaku')
-  // tray.setContextMenu(contextMenu)
-  // tray.on('click', async () => {
-  //   mainWindow.show()
-  // })
-
-  ipcMain.handle(IPC_GET_USER_PATH, async () => {
-    return app.getPath('userData');
-  })
-
-  ipcMain.handle(IPC_GET_EXE_PATH, async () => {
-    return app.getPath('exe');
-  })
-
-  ipcMain.handle(IPC_GET_VERSION, async () => {
-    return app.getVersion()
-  })
-
-  ipcMain.handle(IPC_ENABLE_WEB_CONTENTS, async (event, data) => {
-    if (data.windowId) {
-      enable(BrowserWindow.fromId(data.windowId).webContents)
-    }
-  })
-
-  ipcMain.on(IPC_LIVE_WINDOW_PLAY, (event, data) => {
-    if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_PLAY, data)
-    }
-  })
-
-  ipcMain.on(IPC_LIVE_WINDOW_ON_TOP, (event, data) => {
-    if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_ON_TOP, data)
-    }
-  })
-
-  ipcMain.on(IPC_LIVE_WINDOW_CLOSE, (event, data) => {
-    if (data.windowId) {
-      BrowserWindow.fromId(data.windowId).webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
-    } else {
-      mainWindow.webContents.send(IPC_LIVE_WINDOW_CLOSE, data)
-    }
-  })
+  // 注册所有 IPC 处理器
+  registerIpcHandlers(mainWindow)
 
   /**
    * Auto Updater
@@ -142,7 +93,7 @@ app.on('ready', () => {
    * support auto updating. Code Signing with a valid certificate is required.
    * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
    */
-  if (process.env.NODE_ENV === 'production') {
+  if (!import.meta.env.DEV) {
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = false
     // autoUpdater.checkForUpdatesAndNotify()
