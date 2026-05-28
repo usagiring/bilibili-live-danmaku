@@ -288,10 +288,10 @@ export default {
       return useConfigStore().audioFrom
     },
     mtFromLang() {
-      return useConfigStore().mtFromLang
+      return useConfigStore().MTFromLang
     },
     mtToLang() {
-      return useConfigStore().mtToLang
+      return useConfigStore().MTToLang
     },
     disableMircrophotoNoticeMessage() {
       return useConfigStore().disableMircrophotoNoticeMessage
