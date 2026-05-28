@@ -2,7 +2,6 @@ import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent } from 
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
-import '../renderer/store'
 import bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main'
 import { port, saveAllBiliMessage } from '../service/config-loader'

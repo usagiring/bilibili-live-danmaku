@@ -196,11 +196,12 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
 import { isProxy, toRaw } from 'vue'
 import { debounce } from 'lodash'
-import { ipcRenderer, shell } from 'electron'
+import { ipcRenderer, shell, BrowserWindow } from 'electron'
 import icon from '../assets/logo.png'
 
 import { parseDownloadRate, dateFormat } from '../../service/util'
@@ -216,7 +217,6 @@ import {
   IPC_CREATE_CHILD_WINDOW,
   IPC_WINDOW_ACTION,
 } from '../../service/const'
-import ws from '../../service/ws'
 import {
   getRoomStatus,
   disconnect,
@@ -230,7 +230,7 @@ import {
   // getGiftConfig,
   addLike,
 } from '../../service/api'
-import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
+import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH, DEFAULT_AVATAR } from '../../service/const'
 
 const synth = window.speechSynthesis
 
@@ -239,7 +239,7 @@ const synth = window.speechSynthesis
 // 2 直播中（obs开始推流）
 let LIVE_STATUS = 0
 
-export default {
+export default defineComponent({
   data() {
     return {
       displayRoomId: 0,
@@ -257,10 +257,14 @@ export default {
       topPhoto: '',
       downloadRate: '0 KB/s',
       percent: 0,
-      selfHistoryRooms: [],
-      waitingSpeakers: [],
+      selfHistoryRooms: [] as Array<{ roomId: number; uname: string; face: string; liveStatus?: number }>,
+      waitingSpeakers: [] as Array<{ text: string; voice?: string; speed?: number }>,
       showLikeConfirm: false,
       addlikeNumber: 1,
+      DEFAULT_AVATAR,
+      win: null as BrowserWindow | null,
+      checkOnTopInterval: null as ReturnType<typeof setInterval> | null,
+      guardNumberTimer: null as ReturnType<typeof setInterval> | null,
 
       username: '',
       avatar: null,
@@ -284,16 +288,16 @@ export default {
       return useConfigStore().isConnected || false
     },
     windowWidth() {
-      return useConfigStore().windowWidth
+      return (useConfigStore() as any).windowWidth
     },
     windowHeight() {
-      return useConfigStore().windowHeight
+      return (useConfigStore() as any).windowHeight
     },
     windowX() {
-      return useConfigStore().windowX
+      return (useConfigStore() as any).windowX
     },
     windowY() {
-      return useConfigStore().windowY
+      return (useConfigStore() as any).windowY
     },
     realRoomId() {
       return useConfigStore().realRoomId
@@ -302,7 +306,7 @@ export default {
       return useConfigStore().recordDir
     },
     userCookie() {
-      return useConfigStore().userCookie
+      return (useConfigStore() as any).userCookie
     },
     isWithCookie() {
       return useConfigStore().isWithCookie
@@ -311,7 +315,7 @@ export default {
       return useConfigStore().isAutoRecord
     },
     historyRooms() {
-      return useConfigStore().historyRooms
+      return (useConfigStore() as any).historyRooms
     },
     // filteredRooms() {
     //   return this.historyRooms.filter(room => {
@@ -340,7 +344,7 @@ export default {
       return useConfigStore().waitingSpeakerCount
     },
     isRecording() {
-      return useConfigStore().isRecording
+      return (useConfigStore() as any).isRecording
     },
   },
   watch: {
@@ -356,6 +360,8 @@ export default {
 
     await this.initRoomInfo()
 
+    // TODO: ws 模块已移除，需重新实现 WebSocket 连接
+    /*
     ws.addEventListener('message', (msg) => {
       const payload = JSON.parse(msg.data)
 
@@ -458,6 +464,7 @@ export default {
       //   this.$Message.error('检测到B站用户名显示异常，尝试重新连接弹幕系统...')
       // }
     })
+    */
 
     ipcRenderer.once(IPC_UPDATE_AVAILABLE, () => {
       this.hasNewVersion = true
@@ -491,7 +498,7 @@ export default {
     await this.fillRoomLiveStatus(this.historyRooms)
 
     setTimeout(() => {
-      this.$global.voices = synth.getVoices()
+      (this as any).$global.voices = synth.getVoices()
     }, 500)
   },
   beforeUnmount() {
@@ -551,7 +558,7 @@ export default {
       this.isConnecting = false
     },
 
-    async initRoomInfo(status) {
+    async initRoomInfo(status?: boolean) {
       let isConnected
 
       let win
@@ -669,7 +676,7 @@ export default {
 
       if (status) {
         const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
-          url: `http://localhost:${this.$global.port}?port=${this.$global.port}&roomId=${this.realRoomId}`,
+          url: `http://localhost:${(this as any).$global.port}?port=${(this as any).$global.port}&roomId=${this.realRoomId}`,
           width: this.windowWidth || 480,
           height: this.windowHeight || 540,
           iconDataUrl: icon,
@@ -717,7 +724,7 @@ export default {
       this.win.on(
         'resize',
         debounce(() => {
-          const [width, height] = this.win.getSize()
+          const [width, height] = this.win!.getSize()
           useConfigStore().UPDATE_CONFIG({
             windowWidth: width,
             windowHeight: height,
@@ -728,7 +735,7 @@ export default {
       this.win.on(
         'move',
         debounce(() => {
-          const [x, y] = this.win.getPosition()
+          const [x, y] = this.win!.getPosition()
           useConfigStore().UPDATE_CONFIG({
             windowX: x,
             windowY: y,
@@ -752,7 +759,7 @@ export default {
     },
 
     alwaysOnTop(status) {
-      this.win.setFocusable(!status)
+      this.win!.setFocusable(!status)
       // this.win.setVisibleOnAllWorkspaces(true)
       if (this.isOnTopForce && status) {
         this.checkOnTopInterval = setInterval(() => {
@@ -763,12 +770,12 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.setAlwaysOnTop(status, this.onTopLevel)
+      this.win!.setAlwaysOnTop(status, this.onTopLevel as 'floating')
       // this.win.setFullScreenable(false)
 
       // 如果鼠标穿透 或者 取消置顶时，设置ignore
       if (!this.disableIgnoreMouseEvent || !status) {
-        this.win.setIgnoreMouseEvents(status, { forward: true })
+        this.win!.setIgnoreMouseEvents(status, { forward: true })
       }
       useConfigStore().UPDATE_CONFIG({
         isAlwaysOnTop: status,
@@ -811,7 +818,7 @@ export default {
         // transferred: 10591575
         const { bytesPerSecond, delta, percent, total, transferred } = args.progress
         this.downloadRate = parseDownloadRate(bytesPerSecond)
-        this.percent = Number(percent).toFixed(0)
+        this.percent = Number(Number(percent).toFixed(0))
       })
 
       // 更新会退出应用，不监听也可以
@@ -829,19 +836,20 @@ export default {
         }
 
         const recordDir = this.recordDir || (await ipcRenderer.invoke(IPC_GET_EXE_PATH)) + '/record'
-        const output = `${recordDir}/${roomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
+        const output = `${recordDir}/${this.realRoomId}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
         console.log(`record: OUTPUT: ${output}`)
 
         const { data } = await record({
           roomId: this.realRoomId,
           output: output,
           qn: 10000,
+          platform: 'web',
           withCookie: this.isWithCookie,
         })
         useConfigStore().UPDATE_CONFIG({
           isRecording: true,
         })
-      } catch (e) {
+      } catch (e: any) {
         this.$Message.error(`录制失败: ${e.message}`)
       }
     },
@@ -897,7 +905,7 @@ export default {
       const utterThis = new SpeechSynthesisUtterance()
       utterThis.text = text
       if (voice) {
-        const voiceInstance = this.$global.voices.find((v) => v.name === voice)
+        const voiceInstance = (this as any).$global.voices.find((v) => v.name === voice)
         utterThis.voice = voiceInstance
       }
       if (speed) {
@@ -914,7 +922,7 @@ export default {
       const utterThis = new SpeechSynthesisUtterance()
       utterThis.text = text
       if (voice) {
-        const voiceInstance = this.$global.voices.find((v) => v.name === voice)
+        const voiceInstance = (this as any).$global.voices.find((v) => v.name === voice)
         utterThis.voice = voiceInstance
       }
       if (speed) {
