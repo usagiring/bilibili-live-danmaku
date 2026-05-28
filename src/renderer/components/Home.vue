@@ -231,7 +231,6 @@ import {
   addLike,
 } from '../../service/api'
 import { IPC_CHECK_FOR_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_UPDATE, IPC_DOWNLOAD_PROGRESS, IPC_UPDATE_DOWNLOADED, MAX_HISTORY_ROOM, IPC_GET_EXE_PATH } from '../../service/const'
-import { PORT } from '../../service/config-loader'
 
 const synth = window.speechSynthesis
 
@@ -670,7 +669,7 @@ export default {
 
       if (status) {
         const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
-          url: `http://localhost:${PORT}?port=${PORT}&roomId=${this.realRoomId}`,
+          url: `http://localhost:${this.$global.port}?port=${this.$global.port}&roomId=${this.realRoomId}`,
           width: this.windowWidth || 480,
           height: this.windowHeight || 540,
           iconDataUrl: icon,

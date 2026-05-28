@@ -1,7 +1,7 @@
 // 全局变量
 const globalVar = {
     name: 'bilibili-live-danmaku',
-    voices: []
+    voices: [],
 };
 
 export default globalVar

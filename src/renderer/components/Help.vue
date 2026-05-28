@@ -1,8 +1,8 @@
 <template>
   <div class="help-container">
     <p>CTRL + R 刷新</p>
-    <p>OBS浏览器捕获URL：http://127.0.0.1:8081</p>
-    <!-- <p>OBS浏览器滚动弹幕捕获URL：http://127.0.0.1:8081/danmaku-scroll</p> -->
+    <p>OBS浏览器捕获URL：{{ obsUrl }}</p>
+    <!-- <p>OBS浏览器滚动弹幕捕获URL：{{ obsUrl }}/danmaku-scroll</p> -->
 
     <p>关于 bug / feature：请向<span :style="{ color: 'crimson', cursor: 'pointer', padding: '0 3px' }" @click="openBiliSpace">@其妙</span>反馈</p>
     <p :style="{ 'padding-top': '64px' }">
@@ -20,6 +20,11 @@ export default {
     return {
       version: 0,
     }
+  },
+  computed: {
+    obsUrl() {
+      return `http://127.0.0.1:${this.$global.port}`
+    },
   },
   async mounted() {
     this.version = await ipcRenderer.invoke(IPC_GET_VERSION)

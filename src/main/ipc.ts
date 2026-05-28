@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
 import { enable } from '@electron/remote/main'
-import { BASE_URL } from '../service/config-loader'
+import globalVar from '../service/global'
 import {
   IPC_GET_USER_PATH,
   IPC_GET_EXE_PATH,
@@ -171,7 +171,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   // ---- 文件保存 ----
 
   ipcMain.handle(IPC_SAVE_FILE, async (_event, { filePath, roomId, start, end, fileName }) => {
-    const res = await axios.post(`${BASE_URL}/api/statistic/gift/export`, {
+    const res = await axios.post(`${globalVar.baseUrl}/api/statistic/gift/export`, {
       roomId, start, end,
     }, {
       responseType: 'text',

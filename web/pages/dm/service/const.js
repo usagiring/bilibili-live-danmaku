@@ -49,22 +49,10 @@ export const GUARD_ICON_MAP = {
   3: GUARD_ICON_3,
 }
 
-export const GUARD_LEVEL_MAP = {
-  0: "normal",
-  1: "governor",
-  2: "admiral",
-  3: "captain",
-};
-
 export const INTERACT_TYPE = {
   1: '进入',
   2: '关注',
   3: '分享'
-}
-
-export const ENTER_ROOM_TYPE = {
-  1: '进入',
-  2: '光临'
 }
 
 export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']

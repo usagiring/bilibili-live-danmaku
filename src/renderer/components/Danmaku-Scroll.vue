@@ -73,7 +73,6 @@
 import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
-import { PORT } from '../../service/config-loader'
 import { updateSetting } from '../../service/api'
 import { IPC_CREATE_CHILD_WINDOW } from '../../service/const'
 import icon from '../assets/logo.png'
@@ -152,7 +151,7 @@ export default {
 
       if (status) {
         const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
-          url: `http://localhost:${PORT}/danmaku-scroll?port=${PORT}`,
+          url: `http://localhost:${this.$global.port}/danmaku-scroll?port=${this.$global.port}`,
           width: this.scrollDanmakuWidth || 480,
           height: this.scrollDanmakuHeight || 540,
           iconDataUrl: icon,
