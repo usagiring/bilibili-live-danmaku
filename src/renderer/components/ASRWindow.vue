@@ -11,14 +11,20 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
-import ws from '../../service/ws'
 
-export default {
+interface AsrText {
+  id?: string
+  text: string
+  translate?: string
+}
+
+export default defineComponent({
   data() {
     return {
-      texts: [],
+      texts: [] as AsrText[],
       currentTextIndex: 0,
     }
   },
@@ -37,11 +43,11 @@ export default {
   },
 
   created() {
-    ws.addEventListener('message', this.onMessage)
+    // ws.addEventListener('message', this.onMessage)
   },
 
   beforeUnmount() {
-    ws.removeEventListener('message', this.onMessage)
+    // ws.removeEventListener('message', this.onMessage)
   },
 
   methods: {
@@ -82,7 +88,7 @@ export default {
       }
     },
   },
-}
+})
 </script>
 
 <style scoped>

@@ -69,7 +69,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'

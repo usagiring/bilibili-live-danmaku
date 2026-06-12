@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ipcRenderer, shell } from 'electron'
 import { IPC_GET_VERSION } from '../../service/const'
 export default {

@@ -9,3 +9,5 @@ allowBuilds:
   protobufjs: true
   utf-8-validate: false
 blockExoticSubdeps: false
+overrides:
+  '@tokine/bilibili-bridge': link:../bilibili-bridge

@@ -77,7 +77,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { getRandomItem, dateFormat } from '../../service/util'

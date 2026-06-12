@@ -32,7 +32,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'],
 }

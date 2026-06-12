@@ -2,11 +2,11 @@ import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent } from 
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
-import bilibiliBridge from '../service/bilibili-bridge'
 import { initialize, enable } from '@electron/remote/main'
 import { port, saveAllBiliMessage } from '../service/config-loader'
 import { registerIpcHandlers } from './ipc'
 import globalVar from '../service/global'
+import bridge from '@tokine/bilibili-bridge'
 
 declare global {
   // eslint-disable-next-line no-var
@@ -38,11 +38,7 @@ function startBilibiliBridge(maxRetries = 3): number {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      bilibiliBridge({
-        userDataPath: app.getPath('userData'),
-        port: currentPort,
-        saveAllBiliMessage,
-      })
+      bridge(currentPort)
       console.log(`[Bridge] 服务已启动，端口: ${currentPort}`)
       return currentPort
     } catch (err: any) {

@@ -211,7 +211,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import { uniq } from 'lodash'
 import { reactive } from 'vue'

@@ -10,9 +10,15 @@
         <span v-if="isRecording">录制中...</span>
       </div>
       <div id="title-bar-controller">
-        <div id="tray" @click="hideToTray"><Icon type="logo-windows" /></div>
-        <div id="minimize" @click="minimize"><Icon type="md-remove" /></div>
-        <div id="close" @click="close"><Icon type="md-close" /></div>
+        <div id="tray" @click="hideToTray">
+          <Icon type="logo-windows" />
+        </div>
+        <div id="minimize" @click="minimize">
+          <Icon type="md-remove" />
+        </div>
+        <div id="close" @click="close">
+          <Icon type="md-close" />
+        </div>
       </div>
     </div>
 
@@ -27,20 +33,17 @@
           </button>
         </div>
         <div class="room-list">
-          <div
-            v-for="(room, index) in store.rooms"
-            :key="index"
-            class="room-card"
-            :class="{ active: store.activeRoomIndex === index }"
-            @click="store.SET_ACTIVE_ROOM(index)"
-          >
+          <div v-for="(room, index) in store.rooms" :key="index" class="room-card"
+            :class="{ active: store.activeRoomIndex === index }" @click="store.SET_ACTIVE_ROOM(index)">
             <Avatar :src="room.avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="small" />
             <div class="room-info">
               <div class="room-name">{{ room.username || '未连接' }}</div>
               <div class="room-id">房间号 {{ room.displayRoomId }}</div>
             </div>
             <span class="status-dot" :class="room.liveStatus === 1 ? 'live' : 'offline'"></span>
-            <button class="delete-btn" @click.stop="store.REMOVE_ROOM(index)"><Icon type="md-close" /></button>
+            <button class="delete-btn" @click.stop="store.REMOVE_ROOM(index)">
+              <Icon type="md-close" />
+            </button>
           </div>
 
           <!-- 空状态 -->
@@ -73,7 +76,8 @@
           <div class="room-tab" :class="{ active: activeTab === 'autoReply' }" @click="activeTab = 'autoReply'">
             <Icon type="md-repeat" /> 回复
           </div>
-          <div class="room-tab" style="margin-left:auto" :class="{ active: activeTab === 'config' }" @click="activeTab = 'config'">
+          <div class="room-tab" style="margin-left:auto" :class="{ active: activeTab === 'config' }"
+            @click="activeTab = 'config'">
             <Icon type="md-settings" /> 设置
           </div>
         </div>
@@ -166,51 +170,281 @@ export default defineComponent({
 </script>
 
 <style scoped>
-#home { height: 100%; display: flex; flex-direction: column; overflow: hidden; background: #f5f7fa; }
+#home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f5f7fa;
+}
 
 /* ── 标题栏 ── */
-#title-bar { height: 35px; display: flex; align-items: center; -webkit-app-region: drag; background: #fff; border-bottom: 1px solid #e8eaec; padding: 0 8px; flex-shrink: 0; }
-#title-bar-title { display: flex; align-items: center; gap: 8px; }
-#title-bar-logo { width: 22px; height: 22px; }
-#title-bar-text { font-size: 13px; color: #999; }
-#title-bar-status { flex: 1; text-align: center; font-size: 12px; color: #19be6b; }
-#title-bar-controller { display: flex; -webkit-app-region: no-drag; }
-#title-bar-controller > div { width: 36px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; color: #999; font-size: 16px; }
-#title-bar-controller > div:hover { background: #f0f2f5; }
-#close:hover { background: #ed4014 !important; color: #fff !important; }
+#title-bar {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: drag;
+  background: #fff;
+  border-bottom: 1px solid #e8eaec;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+#title-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#title-bar-logo {
+  width: 22px;
+  height: 22px;
+}
+
+#title-bar-text {
+  font-size: 13px;
+  color: #999;
+}
+
+#title-bar-status {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: #19be6b;
+}
+
+#title-bar-controller {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+#title-bar-controller>div {
+  width: 36px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #999;
+  font-size: 16px;
+}
+
+#title-bar-controller>div:hover {
+  background: #f0f2f5;
+}
+
+#close:hover {
+  background: #ed4014 !important;
+  color: #fff !important;
+}
 
 /* ── 主体 ── */
-.main-body { flex: 1; display: flex; overflow: hidden; }
+.main-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
 
 /* ── 房间面板 ── */
-.room-panel { width: 230px; background: #fff; border-right: 1px solid #e8eaec; display: flex; flex-direction: column; flex-shrink: 0; }
-.room-panel-header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8eaec; }
-.room-panel-header h3 { font-size: 14px; font-weight: 600; color: #333; margin: 0; }
-.add-room-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px dashed #ddd; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #999; }
-.add-room-btn:hover { border-color: #2d8cf0; color: #2d8cf0; background: rgba(45,140,240,0.06); }
-.room-list { flex: 1; overflow-y: auto; padding: 4px; }
-.room-list::-webkit-scrollbar { width: 3px; }
-.room-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-.room-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: .15s; position: relative; }
-.room-card:hover { background: #f0f2f5; }
-.room-card.active { background: rgba(45,140,240,0.06); }
-.room-info { flex: 1; min-width: 0; }
-.room-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.room-id { font-size: 11px; color: #999; margin-top: 2px; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.status-dot.live { background: #19be6b; }
-.status-dot.offline { background: #ddd; }
-.delete-btn { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 10px; transition: .15s; }
-.room-card:hover .delete-btn { color: #999; }
-.delete-btn:hover { color: #ed4014 !important; background: rgba(237,64,20,0.08); }
-.empty-rooms { padding: 40px 20px; text-align: center; color: #ccc; font-size: 13px; }
+.room-panel {
+  width: 230px;
+  background: #fff;
+  border-right: 1px solid #e8eaec;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.room-panel-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e8eaec;
+}
+
+.room-panel-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.add-room-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px dashed #ddd;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.add-room-btn:hover {
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+  background: rgba(45, 140, 240, 0.06);
+}
+
+.room-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.room-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.room-list::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+}
+
+.room-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: .15s;
+  position: relative;
+}
+
+.room-card:hover {
+  background: #f0f2f5;
+}
+
+.room-card.active {
+  background: rgba(45, 140, 240, 0.06);
+}
+
+.room-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.room-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-id {
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.live {
+  background: #19be6b;
+}
+
+.status-dot.offline {
+  background: #ddd;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 10px;
+  transition: .15s;
+}
+
+.room-card:hover .delete-btn {
+  color: #999;
+}
+
+.delete-btn:hover {
+  color: #ed4014 !important;
+  background: rgba(237, 64, 20, 0.08);
+}
+
+.empty-rooms {
+  padding: 40px 20px;
+  text-align: center;
+  color: #ccc;
+  font-size: 13px;
+}
 
 /* ── 详情面板 ── */
-.detail-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.room-tabs { display: flex; gap: 0; padding: 0 16px; background: #fff; border-bottom: 1px solid #e8eaec; flex-shrink: 0; }
-.room-tab { padding: 10px 14px; font-size: 12px; color: #999; cursor: pointer; border-bottom: 2px solid transparent; transition: .15s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-.room-tab:hover { color: #333; }
-.room-tab.active { color: #2d8cf0; border-bottom-color: #2d8cf0; font-weight: 600; }
-.tab-content { flex: 1; overflow: hidden; }
-.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ccc; gap: 10px; font-size: 14px; }
+.detail-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.room-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8eaec;
+  flex-shrink: 0;
+}
+
+.room-tab {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: .15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.room-tab:hover {
+  color: #333;
+}
+
+.room-tab.active {
+  color: #2d8cf0;
+  border-bottom-color: #2d8cf0;
+  font-weight: 600;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  gap: 10px;
+  font-size: 14px;
+}
 </style>

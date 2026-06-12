@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { DEFAULT_AVATAR } from '../../service/const'
 import { dateFormat } from '../../service/util'
 

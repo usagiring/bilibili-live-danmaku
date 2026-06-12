@@ -86,7 +86,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import * as flvjs from 'flv.js'
 import { ipcRenderer } from 'electron'

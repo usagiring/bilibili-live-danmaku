@@ -68,7 +68,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import { toRaw } from 'vue'
 import * as echarts from 'echarts'

@@ -32,7 +32,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 import ws from '../../service/ws'
 import { speechToText, sendComment } from '../../service/api'

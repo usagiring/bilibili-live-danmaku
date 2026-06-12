@@ -146,15 +146,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from '../store'
 // 结果
 // 1 输出文件
 // 2 实时显示(独立窗口)
 // 3 聊天机器人
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, BrowserWindow } from 'electron'
 import { uniq } from 'lodash'
-import ws from '../../service/ws'
+// import ws from '../../service/ws' // TODO: ws 模块已移除，需重新实现
 import {
   initialASR,
   closeASR,
@@ -179,7 +179,7 @@ export default {
   data() {
     return {
       playQuality: '高清',
-      checkOnTopInterval: null,
+      checkOnTopInterval: null as ReturnType<typeof setInterval> | null,
       isStarting: false,
       isStarted: false,
       isShowASRWindowLoading: false,
@@ -189,6 +189,8 @@ export default {
       isStartingSpeechToDanmaku: false,
       isDisableMircrophotoNoticeMessagePersistent: false,
       disableMircrophotoNoticeMessageTemp: false,
+      win: null as BrowserWindow | null,
+      liveWindowHeight: 480,
       fromLangs: [
         {
           value: 'auto',
@@ -236,9 +238,9 @@ export default {
       //     label: '深圳',
       //   },
       // ],
-      texts: [],
+      texts: [] as Array<{ id?: string; text: string; translate?: string }>,
       currentTextIndex: 0,
-      audioDevices: [],
+      audioDevices: [] as Array<{ value: string; label: string }>,
       audioDeviceId: '',
       isMicrophoneNoticeModalOpen: false,
     }
@@ -246,13 +248,13 @@ export default {
 
   computed: {
     realRoomId() {
-      return useConfigStore().realRoomId
+      return (useConfigStore() as any).activeRoom?.realRoomId || 1
     },
     isWithCookie() {
       return useConfigStore().isWithCookie
     },
     userCookie() {
-      return useConfigStore().userCookie
+      return (useConfigStore() as any).userCookie
     },
     aliAccessKeyId() {
       return useConfigStore().aliAccessKeyId
@@ -311,7 +313,7 @@ export default {
       }
     })
 
-    ws.addEventListener('message', this.onMessage)
+    // ws.addEventListener('message', this.onMessage)
   },
 
   mounted() {
@@ -322,7 +324,7 @@ export default {
   },
 
   beforeUnmount() {
-    ws.removeEventListener('message', this.onMessage)
+    // ws.removeEventListener('message', this.onMessage)
   },
 
   methods: {
@@ -460,7 +462,7 @@ export default {
         appKey: this.aliAppKey,
       })
 
-      const { data } = await getRandomPlayUrl({
+      const { data } = await (getRandomPlayUrl as any)({
         roomId: this.realRoomId,
         qn: 150,
         cookie: this.isWithCookie ? this.userCookie : undefined,
@@ -474,7 +476,7 @@ export default {
       this.isStarted = true
       this.isStarting = false
 
-      let aliAppKeys = []
+      let aliAppKeys: string[] = []
       if (this.aliAppKeys.length >= 9) {
         aliAppKeys = this.aliAppKeys.slice(-this.aliAppKeys.length)
         aliAppKeys = [...aliAppKeys, this.aliAppKey]
@@ -512,19 +514,19 @@ export default {
         appKey: this.aliAppKey,
       })
 
-      const option = {
+      const option: MediaStreamConstraints = {
         audio: true,
         video: false,
       }
       if (!this.audioDeviceId) {
         option.audio = {
           deviceId: this.audioDeviceId,
-        }
+        } as any
       }
       const stream = await navigator.mediaDevices.getUserMedia(option)
       global.microphoneStream = stream
       const context = new AudioContext({
-        sampleRate: '16000',
+        sampleRate: 16000,
       })
       global.microphoneAudioContext = context
       const source = context.createMediaStreamSource(stream)
@@ -546,7 +548,7 @@ export default {
             data: JSON.stringify(sample8192),
           }
           sample8192 = []
-          ws.send(JSON.stringify(payload))
+          // ws.send(JSON.stringify(payload))
         }
       }
 
@@ -663,21 +665,21 @@ export default {
     },
 
     changeAlwaysOnTop(status) {
-      this.win.setFocusable(!status)
+      this.win!.setFocusable(!status)
       // this.win.setVisibleOnAllWorkspaces(true)
       if (this.isOnTopForce && status) {
         this.checkOnTopInterval = setInterval(() => {
           if (!this.win) return
-          this.win.moveTop()
+          this.win!.moveTop()
         }, 1000)
       } else if (this.checkOnTopInterval) {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      this.win.setAlwaysOnTop(status, this.onTopLevel)
+      this.win!.setAlwaysOnTop(status, this.onTopLevel as 'floating')
       // 如果鼠标穿透 或者 取消置顶时，设置ignore
       if (!this.disableIgnoreMouseEvent || !status) {
-        this.win.setIgnoreMouseEvents(status, { forward: true })
+        this.win!.setIgnoreMouseEvents(status, { forward: true })
       }
       //   this.$store.dispatch("UPDATE_CONFIG", {
       //     isScrollDanmakuWindowAlwaysOnTop: status,
@@ -714,7 +716,7 @@ export default {
           toLang: this.mtToLang,
         })
       } else {
-        await translateClose()
+        await translateClose({})
       }
       this.enableTranslate = status
     },
