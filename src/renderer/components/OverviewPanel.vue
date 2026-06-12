@@ -75,13 +75,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
+import { sse } from '../../service/sse-client'
 import {
   connect as connectRoom,
   disconnect as disconnectRoom,
   getRoomInfoV2,
   getGuardInfo,
   updateSetting,
-  getRoomStatus,
 } from '../../service/api'
 
 export default defineComponent({
@@ -105,6 +105,26 @@ export default defineComponent({
         }
       },
     },
+  },
+  mounted() {
+    // 注册全局 SSE 消息监听
+    sse.on('NINKI', this.onNinki)
+    sse.on('LIVE', this.onLive)
+    sse.on('PREPARING', this.onPreparing)
+    sse.on('WATCHED_CHANGE', this.onWatchedChange)
+    sse.on('LIKE_CHANGE', this.onLikeChange)
+    sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', this.onFansUpdate)
+    sse.on('ONLINE_COUNT', this.onOnlineCount)
+  },
+  beforeUnmount() {
+    // 移除监听
+    sse.off('NINKI', this.onNinki)
+    sse.off('LIVE', this.onLive)
+    sse.off('PREPARING', this.onPreparing)
+    sse.off('WATCHED_CHANGE', this.onWatchedChange)
+    sse.off('LIKE_CHANGE', this.onLikeChange)
+    sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', this.onFansUpdate)
+    sse.off('ONLINE_COUNT', this.onOnlineCount)
   },
   methods: {
     formatNumber(n: number): string {
@@ -184,6 +204,22 @@ export default defineComponent({
       this.store.UPDATE_ACTIVE_ROOM({ isConnected: false, liveStatus: 0 })
       this.$emit('connect', false)
     },
+
+    // ── SSE 回调（由全局 SSE 推送触发）──
+
+    onNinki(data: any) { this.store.UPDATE_ACTIVE_ROOM({ ninkiNumber: data.payload?.ninkiNumber ?? 0 }) },
+    onLive() { this.store.UPDATE_ACTIVE_ROOM({ liveStatus: 1 }) },
+    onPreparing() { this.store.UPDATE_ACTIVE_ROOM({ liveStatus: 0 }) },
+    onWatchedChange(data: any) { this.store.UPDATE_ACTIVE_ROOM({ watchedNumber: data.payload?.watchedNumber ?? 0 }) },
+    onLikeChange(data: any) { this.store.UPDATE_ACTIVE_ROOM({ likeNumber: data.payload?.likeNumber ?? 0 }) },
+    onFansUpdate(data: any) {
+      const p = data.payload || {}
+      this.store.UPDATE_ACTIVE_ROOM({
+        fansNumber: p.fansNumber ?? this.activeRoom?.fansNumber ?? 0,
+        fansClubNumber: p.fansClubNumber ?? this.activeRoom?.fansClubNumber ?? 0,
+      })
+    },
+    onOnlineCount(data: any) { this.store.UPDATE_ACTIVE_ROOM({ onlineNumber: data.payload?.onlineNumber ?? 0 }) },
   },
 })
 </script>

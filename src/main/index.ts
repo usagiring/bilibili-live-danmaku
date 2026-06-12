@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
+import Store from 'electron-store'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
 import { initialize, enable } from '@electron/remote/main'
 import { port, saveAllBiliMessage } from '../service/config-loader'
@@ -59,6 +60,43 @@ function startBilibiliBridge(maxRetries = 3): number {
 const actualPort = startBilibiliBridge()
 globalVar.port = actualPort
 globalVar.baseUrl = `http://127.0.0.1:${actualPort}`
+
+const store = new Store<{ clientId: string }>({ defaults: { clientId: '' } })
+
+// 恢复持久化的 clientId 到全局变量
+globalVar.clientId = store.get('clientId', '')
+
+/**
+ * 向 bridge 注册/获取 clientId
+ * - 优先从本地持久化存储中读取已有 clientId
+ * - 若没有则 bridge 会创建新的，并持久化到本地
+ */
+async function registerClient() {
+  const baseUrl = globalVar.baseUrl
+  try {
+    const clientId = store.get('clientId', '')
+    const body: Record<string, string> = {}
+    if (clientId) {
+      body.clientId = clientId
+    }
+
+    const res = await fetch(`${baseUrl}/api/client/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const json = await res.json()
+    if (json.data?.id) {
+      globalVar.clientId = json.data.id
+      store.set('clientId', json.data.id) // 持久化到磁盘
+      console.log(`[Bridge] clientId: ${globalVar.clientId} (已持久化)`)
+    }
+  } catch (err) {
+    console.warn('[Bridge] client 注册失败:', err)
+  }
+}
+
+registerClient()
 
 /**
  * Set `__static` path to static files in production

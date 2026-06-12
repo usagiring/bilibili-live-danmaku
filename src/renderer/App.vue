@@ -13,6 +13,7 @@
 <script>
 import { useConfigStore } from './store'
 import { touch } from '../service/api'
+import { sse } from '../service/sse-client'
 
 export default {
   name: 'bilibili-danmaku',
@@ -28,12 +29,18 @@ export default {
         await touch()
         this.isLoading = false
         clearInterval(this.healthChecker)
+
+        // bridge 就绪后建立全局 SSE 连接
+        sse.connect()
       } catch (e) {
         //
       }
     }, 300)
 
     useConfigStore().CLEAR_TEXT_STROKE_VERSION_0_4_8()
+  },
+  beforeUnmount() {
+    sse.disconnect()
   },
 }
 </script>
