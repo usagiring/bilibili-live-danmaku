@@ -92,21 +92,19 @@ export default {
       isDanmaku: true,
       isGift: false,
       historyModal: false,
-      histories: [],
-      // giftSelectors: [],
+      histories: [] as any[],
       medalLevel: 0,
       danmakuText: '',
-      selectedGiftIds: [],
-      userGiftMap: {},
-      // gifts: [],
-      userCommentMap: {},
-      userComments: [],
+      selectedGiftIds: [] as string[],
+      userGiftMap: {} as Record<string, any>,
+      userCommentMap: {} as Record<string, any>,
+      userComments: [] as any[],
       isShowProbability: false,
       // userGiftsSorted: [],
       // count: 0,
       // totalPrice: 0,
       isRunning: false,
-      aTaRi: {},
+      aTaRi: {} as Record<string, any>,
     }
   },
   computed: {
@@ -125,7 +123,7 @@ export default {
       }, 0)
     },
     realRoomId() {
-      return useConfigStore().realRoomId
+      return useConfigStore().activeRoom?.realRoomId
     },
   },
   async mounted() {
@@ -164,74 +162,72 @@ export default {
     onLotteryComment(data: any) {
       if (!this.isDanmaku) return
       const comment = data.payload
-        // 已经记录过的用户不再重复统计
-        if (this.userCommentMap[comment.uid]) return
-        // 当前房间粉丝牌等级过滤
-        if (this.medalLevel) {
-          if (comment.medal?.rid !== this.realRoomId || comment.medal?.level < this.medalLevel) return
-        }
-        const regexp = new RegExp(this.danmakuText, 'i')
-        const isMatch = regexp.test(comment.content)
-        if (!isMatch) return
-
-        // 记录统计
-        const history = {
-          uid: comment.uid,
-          uname: comment.uname,
-          content: comment.content,
-          avatar: comment.avatar || DEFAULT_AVATAR,
-        }
-        this.userCommentMap[comment.uid] = history
-        this.userComments = [history, ...this.userComments]
+      // 已经记录过的用户不再重复统计
+      if (this.userCommentMap[comment.uid]) return
+      // 当前房间粉丝牌等级过滤
+      if (this.medalLevel) {
+        if (comment.medal?.rid !== this.realRoomId || comment.medal?.level < this.medalLevel) return
       }
+      const regexp = new RegExp(this.danmakuText, 'i')
+      const isMatch = regexp.test(comment.content)
+      if (!isMatch) return
+
+      // 记录统计
+      const history = {
+        uid: comment.uid,
+        uname: comment.uname,
+        content: comment.content,
+        avatar: comment.avatar || DEFAULT_AVATAR,
+      }
+      this.userCommentMap[comment.uid] = history
+      this.userComments = [history, ...this.userComments]
     },
     onLotteryGift(data: any) {
       if (!this.isGift) return
       const gift = data.payload
-        if (!this.selectedGiftIds.includes(`${gift.id}`)) return
+      if (!this.selectedGiftIds.includes(`${gift.id}`)) return
 
-        const { uid, uname, id, name, count = 1, singleCount = 1, price = 0, avatar = DEFAULT_AVATAR } = gift
-        const key = `${uid}:${id}`
-        const userGift = this.userGiftMap[key]
-        // test: 小心心
-        // if (giftId === 30607) {
-        //   price = 1
-        // }
-        if (!userGift) {
-          // 计算属性需要完全替换
-          this.userGiftMap = {
-            ...this.userGiftMap,
-            [key]: {
-              uid,
-              id,
-              uname,
-              avatar,
-              name,
-              count: count,
-              price: count * price,
-            },
-          }
-        } else {
-          userGift.count = userGift.count + singleCount
-          userGift.price = userGift.price + singleCount * price
-          this.userGiftMap = Object.assign(this.userGiftMap, {
-            [key]: userGift,
-          })
+      const { uid, uname, id, name, count = 1, singleCount = 1, price = 0, avatar = DEFAULT_AVATAR } = gift
+      const key = `${uid}:${id}`
+      const userGift = this.userGiftMap[key]
+      // test: 小心心
+      // if (giftId === 30607) {
+      //   price = 1
+      // }
+      if (!userGift) {
+        // 计算属性需要完全替换
+        this.userGiftMap = {
+          ...this.userGiftMap,
+          [key]: {
+            uid,
+            id,
+            uname,
+            avatar,
+            name,
+            count: count,
+            price: count * price,
+          },
         }
-
-        // this.userGiftMap = {
-        //   ...this.userGiftMap,
-        //   [key]: {
-        //     uid,
-        //     id,
-        //     uname,
-        //     avatar,
-        //     name,
-        //     count: count,
-        //     price: count * price,
-        //   },
-        // }
+      } else {
+        userGift.count = userGift.count + singleCount
+        userGift.price = userGift.price + singleCount * price
+        this.userGiftMap = Object.assign(this.userGiftMap, {
+          [key]: userGift,
+        })
       }
+
+      // this.userGiftMap = {
+      //   ...this.userGiftMap,
+      //   [key]: {
+      //     uid,
+      //     id,
+      //     uname,
+      //     avatar,
+      //     name,
+      //     count: count,
+      //     price: count * price,
+      //   },
+      // }
     },
 
     selectDanmakuOrGift() {
@@ -326,6 +322,7 @@ export default {
     },
   },
 }
+</script>
 
 <style scoped>
 .selector-wrapper {

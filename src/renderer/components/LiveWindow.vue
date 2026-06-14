@@ -31,10 +31,11 @@ const win = getCurrentWindow()
 export default {
   data() {
     return {
-      flvPlayer: null,
+      flvPlayer: null as any,
       videoHeight: 0,
-      checkOnTopInterval: null,
+      checkOnTopInterval: null as ReturnType<typeof setInterval> | null,
       message: '',
+      isSending: false,
     }
   },
   computed: {
@@ -56,14 +57,17 @@ export default {
     userCookie() {
       return useConfigStore().userCookie
     },
+    isWithCookie() {
+      return useConfigStore().isWithCookie
+    },
     liveVolume() {
       return useConfigStore().liveVolume
     },
   },
   watch: {
     liveVolume(newValue) {
-      const videoDOM = document.getElementById('live-player')
-      videoDOM.volume = newValue
+      const videoDOM = document.getElementById('live-player') as HTMLVideoElement | null
+      if (videoDOM) videoDOM.volume = newValue
     },
   },
   beforeCreate() {
@@ -96,9 +100,10 @@ export default {
       }, 500)
     )
 
+    const self = this
     document.addEventListener('keyup', function (e) {
       if (e.key === 'Escape') {
-        this.closeLiveWindow()
+        self.closeLiveWindow()
         ipcRenderer.send(IPC_LIVE_WINDOW_CLOSE)
       }
     })
@@ -117,10 +122,10 @@ export default {
   },
   methods: {
     async play({ playUrl }) {
-      const livePlayer = document.getElementById('live-player')
+      const livePlayer = document.getElementById('live-player') as HTMLVideoElement | null
 
       if (this.flvPlayer) {
-        this.flvPlayer.destroy()
+        this.flvPlayer!.destroy()
         this.flvPlayer = null
       }
 
@@ -130,7 +135,7 @@ export default {
           cookie: this.userCookie,
         }
       }
-      this.flvPlayer = flvjs.createPlayer(
+      this.flvPlayer = (flvjs as any).createPlayer(
         {
           type: 'flv',
           isLive: true,
@@ -142,16 +147,16 @@ export default {
         }
       )
 
-      this.flvPlayer.on(flvjs.Events.ERROR, (e) => {
+      this.flvPlayer!.on((flvjs as any).Events.ERROR, (e) => {
         this.$Message.error(`播放失败: ${e}`)
       })
 
-      livePlayer.volume = this.liveVolume
-      this.flvPlayer.attachMediaElement(livePlayer)
-      this.flvPlayer.load()
-      await this.flvPlayer.play()
+      (livePlayer as HTMLVideoElement).volume = this.liveVolume
+      this.flvPlayer!.attachMediaElement(livePlayer)
+      this.flvPlayer!.load()
+      await this.flvPlayer!.play()
 
-      this.resize(livePlayer.offsetWidth, livePlayer.offsetHeight)
+      this.resize((livePlayer as HTMLVideoElement).offsetWidth, (livePlayer as HTMLVideoElement).offsetHeight)
     },
 
     resize(width, height) {
@@ -172,7 +177,7 @@ export default {
         clearInterval(this.checkOnTopInterval)
         this.checkOnTopInterval = null
       }
-      win.setAlwaysOnTop(status, this.onTopLevel)
+      win.setAlwaysOnTop(status, this.onTopLevel as any)
       // this.win.setFullScreenable(false)
       // 如果鼠标穿透 或者 取消置顶时，设置ignore
       if (!this.disableIgnoreMouseEvent || !status) {
@@ -187,7 +192,7 @@ export default {
       if (!win) return
 
       if (this.flvPlayer) {
-        this.flvPlayer.destroy()
+        this.flvPlayer!.destroy()
         this.flvPlayer = null
       }
 
@@ -208,19 +213,16 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendComment(
-          {
-            message: this.message,
-            roomId: this.realRoomId,
-          },
-          this.userCookie
-        )
+        const result = await sendComment({
+          roomId: this.realRoomId,
+          comment: this.message,
+        })
         if (result.data.message) {
           this.$Message.warning(`发送未成功: ${result.data.message}`)
           return
         }
         this.message = ''
-      } catch (e) {
+      } catch (e: any) {
         this.$Message.error(`发送失败: ${e.message}`)
       } finally {
         this.isSending = false

@@ -1,5 +1,5 @@
 import { createPinia, defineStore } from 'pinia'
-import { DEFAULT_STYLE } from '../../service/const'
+import type { RoomState } from './store-types'
 
 function createRoom(roomId: number): RoomState {
   return {
@@ -24,177 +24,216 @@ function createRoom(roomId: number): RoomState {
   }
 }
 
+interface Provider {
+  type: string
+  service: string
+  appKey: string
+  accessKeyId: string
+  accessKeySecret: string
+
+}
+
+interface Room {
+  id: string
+  userId: string
+  liveStatus: number
+  liveStream: string
+
+  isAutoReply: boolean
+  autoReplyRules: any[]
+
+  voteOptions: Array<{ keyword: string; value: string }>
+}
+
+interface User {
+  id: string
+  face: string
+  cookie: string
+}
+
+// ── 样式值 ──
+type StyleValue = Record<string, string>
+
+// ── Config 子类型 ──
+
+export interface DmStyle {
+  isShowFace: boolean
+  isShowAnchorIcon: boolean
+  isShowFanMedal: boolean
+  isShowHeadline: boolean
+  faceSize: number
+  combineSimilarTime: number
+  hiddenExpiredTime: number
+  showHeadlineThreshold: number
+  isShowInteractInfo: boolean
+  showGiftCardThreshold: number
+  isShowSilverGift: boolean
+  font: string
+  fontWeight: string
+  isUseMiniGiftCard: boolean
+  adminIcon: string
+  isShowAdminIcon: boolean
+  adminIconColor: string
+  isShowType1: boolean
+  isShowType2: boolean
+  channelCount: number
+  channelDelayTime: number
+  isShowSuperChatJPN: boolean
+  windowOpacity: number
+  windowBackground: string
+  isWindowAlwaysOnTop: boolean
+  messageSettings: any[]
+  borderImages: any[]
+  messageContainer0: StyleValue
+  messageUsername0: StyleValue
+  messageComment0: StyleValue
+  messageContainer1: StyleValue
+  messageUsername1: StyleValue
+  messageComment1: StyleValue
+  messageContainer2: StyleValue
+  messageUsername2: StyleValue
+  messageComment2: StyleValue
+  messageContainer3: StyleValue
+  messageUsername3: StyleValue
+  messageComment3: StyleValue
+  messageContainer99: StyleValue
+  messageUsername99: StyleValue
+  messageComment99: StyleValue
+  messageContainerInteract: StyleValue
+  messageCommentInteract: StyleValue
+}
+
+export interface DmRawStyle {
+  isWindowAlwaysOnTop: boolean
+  windowOpacity: number
+  windowBackground: string
+  direction: 'RL' | 'LR'
+  emojiSize: number
+  styleExtend: 'bilibili' | 'self'
+  duration: number
+  windowOnTopLevel: string
+  isWindowOnTopForce: boolean
+  ignoreMouseEvent: boolean
+}
+
+export interface LiveConfig {
+  isWindowAlwaysOnTop: boolean
+  windowOpacity: number
+  windowBackground: string
+  isWithCookie: boolean
+  volume: number
+}
+
+export interface MessageConfig {
+  isRealTimeMode: boolean
+  isShowUserSpaceLink: boolean
+}
+
+export interface AsrConfig {
+  showLineCount: number
+  audioFrom: string
+}
+
+export interface MtConfig {
+  fromLang: string
+  toLang: string
+  disableMircrophotoNoticeMessage: boolean
+}
+
+export interface ChartConfig {
+  colors: string[]
+}
+
+export interface RecordConfig {
+  savePath: string
+  quality: string
+  isAutoRecord: boolean
+}
+
+export interface Config {
+  // 全局设置
+  signInMessage: string
+  isNeedRefreshCookieCache?: number
+  refreshToken?: string
+  waitingSpeakerCount?: number
+
+  user?: User,
+  rooms: Room[],
+  windows: Window[],
+  providers: Provider[],
+
+  dmStyle: DmStyle,
+  dmRawStyle: DmRawStyle,
+  liveConfig: LiveConfig,
+  messageConfig: MessageConfig,
+  recordConfig: RecordConfig,
+  asrConfig: AsrConfig,
+  mtConfig: MtConfig,
+  chartConfig: ChartConfig,
+}
+
 export const useConfigStore = defineStore('config', {
-  state: () => ({
-    // ── 多房间支持 ──
-    rooms: [] as RoomState[],
-    activeRoomIndex: 0,
-
-    // ── 全局设置（所有房间共享） ──
-    recordDir: '',
-    isWithCookie: false,
-    isAutoRecord: false,
-    onlyMyselfRoom: true,
-    isWatchLottery: false,
-    isShowHeadline: true,
-    fontWeight: 'normal',
-    signInMessage: '',
-    onlyTodayZeroIntimacy: true,
-    isLiveWindowAlwaysOnTop: false,
-    isScrollDanmakuWindowAlwaysOnTop: false,
-    liveWindowOpacity: 1,
-    liveWindowId: null as number | null,
-    danmakuWindowId: null as number | null,
-    isShowType1: true,
-    isShowType2: true,
-    isShowSuperChatJPN: true,
-    liveWindowX: 600,
-    liveWindowY: 600,
-    liveWindowHeight: 480,
-    enableMessageListenMode: false,
-    scrollDanmakuFontSize: 22,
-    scrollDanmakuDuration: 10000,
-    scrollDanmakuDirection: 'RL',
-    scrollDanmakuWindowId: null as number | null,
-    scrollDanmakuWidth: 600,
-    scrollDanmakuHeight: 600,
-    scrollDanmakuX: 600,
-    scrollDanmakuY: 600,
-    scrollDanmakuBackground: 'rgba(0, 0, 0, 0.3)',
-    scrollDanmakuOpacity: 100,
-    scrollDanmakuStyleExtend: 'self',
-    scrollDanmakuEmojiSize: 60,
-    ASRWindowId: null as number | null,
-    ASRLineCount: 5,
-    emojiSize: 24,
-    liveVolume: 1,
-    ffmpegExe: '',
-    aliAppKeys: [] as string[],
-    autoReplyRules: [] as any[],
-    borderImages: [
-      {
-        isAdaptContent: false,
-        dataUrl: '',
-        isSelected: false,
-        'border-width': 15,
-        'border-image-width': '1.5',
-        'border-image-slice': '50',
-        'border-image-repeat': 'stretch',
-        'border-image-outset': '0',
-      },
-    ],
-    colors: [] as string[],
-    userInfoFrequencyLimit: 1000,
-    waitingSpeakerCount: 0,
-    onTopLevel: 'floating' as string,
-    isOnTopForce: false,
-    disableIgnoreMouseEvent: false,
-    audioFrom: 'livestream',
-    MTFromLang: '',
-    MTToLang: '',
-    disableMircrophotoNoticeMessage: false,
-    messageSettings: [
-      { type: 'avatar', isShow: true, size: 24 },
-      { type: 'guard', isShow: true },
-      { type: 'medal', isShow: true },
-      { type: 'name', isShow: true },
-      { type: 'colon', isShow: true },
-      { type: 'comment', isShow: true },
-    ],
-    aliAccessKeyId: '',
-    aliAccessKeySecret: '',
-    aliAppKey: '',
-
-    // 投票
-    optionstring: '{A}\n{B}\n{C}',
-    voteOptions: [] as string[],
-    historyRooms: [] as Array<{ roomId: number; uname: string; face: string }>,
-    isAutoReply: false,
-    isRecording: false,
-
-    ...DEFAULT_STYLE,
-  }),
+  state: (): Config => ({
+  } as Config),
 
   getters: {
-    activeRoom(state): RoomState | null {
-      if (state.rooms.length === 0) return null
-      return state.rooms[state.activeRoomIndex] || null
-    },
+    // activeRoom(state): RoomState | null {
+    //   if (state.rooms.length === 0) return null
+    //   return state.rooms[state.activeRoomIndex] || null
+    // },
 
-    hasConnectedRoom(state): boolean {
-      return state.rooms.some((r) => r.isConnected)
-    },
+    // hasConnectedRoom(state): boolean {
+    //   return state.rooms.some((r) => r.isConnected)
+    // },
 
-    isActiveRoomConnected(state): boolean {
-      const room = state.rooms[state.activeRoomIndex]
-      return room?.isConnected ?? false
-    },
+    // isActiveRoomConnected(state): boolean {
+    //   const room = state.rooms[state.activeRoomIndex]
+    //   return room?.isConnected ?? false
+    // },
   },
 
   actions: {
     // ── 房间管理 ──
-    ADD_ROOM(roomId: number) {
-      if (this.rooms.find((r) => r.displayRoomId === roomId)) return
-      this.rooms.push(createRoom(roomId))
-      this.activeRoomIndex = this.rooms.length - 1
-    },
+    // ADD_ROOM(roomId: number) {
+    //   if (this.rooms.find((r) => r.displayRoomId === roomId)) return
+    //   this.rooms.push(createRoom(roomId))
+    //   this.activeRoomIndex = this.rooms.length - 1
+    // },
 
-    REMOVE_ROOM(index: number) {
-      this.rooms.splice(index, 1)
-      if (this.activeRoomIndex >= this.rooms.length) {
-        this.activeRoomIndex = Math.max(0, this.rooms.length - 1)
-      }
-    },
+    // REMOVE_ROOM(index: number) {
+    //   this.rooms.splice(index, 1)
+    //   if (this.activeRoomIndex >= this.rooms.length) {
+    //     this.activeRoomIndex = Math.max(0, this.rooms.length - 1)
+    //   }
+    // },
 
-    SET_ACTIVE_ROOM(index: number) {
-      if (index >= 0 && index < this.rooms.length) {
-        this.activeRoomIndex = index
-      }
-    },
+    // SET_ACTIVE_ROOM(index: number) {
+    //   if (index >= 0 && index < this.rooms.length) {
+    //     this.activeRoomIndex = index
+    //   }
+    // },
 
-    UPDATE_ACTIVE_ROOM(payload: Partial<RoomState>) {
-      const room = this.rooms[this.activeRoomIndex]
-      if (room) Object.assign(room, payload)
-    },
+    // UPDATE_ACTIVE_ROOM(payload: Partial<RoomState>) {
+    //   const room = this.rooms[this.activeRoomIndex]
+    //   if (room) Object.assign(room, payload)
+    // },
 
-    UPDATE_ROOM(index: number, payload: Partial<RoomState>) {
-      const room = this.rooms[index]
-      if (room) Object.assign(room, payload)
-    },
+    // UPDATE_ROOM(index: number, payload: Partial<RoomState>) {
+    //   const room = this.rooms[index]
+    //   if (room) Object.assign(room, payload)
+    // },
 
-    // ── 全局设置 ──
-    UPDATE_STYLE(payload: any) {
-      const objKey = `${payload.prop}_lv${payload.role}`
-      ;(this as any)[objKey] = { ...(this as any)[objKey], ...payload.style }
-    },
+    // // ── 全局设置 ──
+    // UPDATE_STYLE(payload: any) {
+    //   const objKey = `${payload.prop}_lv${payload.role}`
+    //   ;(this as any)[objKey] = { ...(this as any)[objKey], ...payload.style }
+    // },
 
-    UPDATE_CONFIG(payload: Record<string, any>) {
-      for (const key in payload) {
-        ;(this as any)[key] = payload[key]
-      }
-    },
-
-    CLEAR_TEXT_STROKE_VERSION_0_4_8() {
-      const array = [
-        { prop: 'name', role: '0' },
-        { prop: 'comment', role: '0' },
-        { prop: 'name', role: '1' },
-        { prop: 'comment', role: '1' },
-        { prop: 'name', role: '2' },
-        { prop: 'comment', role: '2' },
-        { prop: 'name', role: '3' },
-        { prop: 'comment', role: '3' },
-        { prop: 'name', role: 'admin' },
-        { prop: 'comment', role: 'admin' },
-      ]
-      array.forEach((i) => {
-        const objKey = `${i.prop}_lv${i.role}`
-        const newData = { ...(this as any)[objKey] }
-        delete newData['-webkit-text-stroke-width']
-        delete newData['-webkit-text-stroke-color']
-        ;(this as any)[objKey] = newData
-      })
-    },
+    // UPDATE_CONFIG(payload: Record<string, any>) {
+    //   for (const key in payload) {
+    //     ;(this as any)[key] = payload[key]
+    //   }
+    // },
   },
 })
 

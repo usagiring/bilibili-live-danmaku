@@ -13,12 +13,14 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
-import { updateSetting } from '../../service/api'
+import { updateClientConfig } from '../../service/api'
 
 export default {
   props: ['type', 'name', 'role', 'prop', 'styleName', 'numberStep'],
   data() {
-    return {}
+    return {
+      debouncedUpdateStyle: null as any,
+    }
   },
   computed: {
     value() {
@@ -54,10 +56,17 @@ export default {
         // [objKey]: { [this.styleName]: this.type === 'InputNumber' ? this.pxFormatter(value) : value },
         [`${objKey}.${[this.styleName]}`]:  this.type === 'InputNumber' ? this.pxFormatter(value) : value
       }
-      await updateSetting(data)
+      await updateClientConfig((this as any).$global?.clientId, Object.entries(data).map(([key, value]: [string, any]) => ({ key, value: String(value) })))
+      useConfigStore().UPDATE_STYLE({
+        role: this.role,
+        prop: this.prop,
+        style: {
+          [this.styleName]: this.type === 'InputNumber' ? this.pxFormatter(value) : value,
+        },
+      })
     },
-    pxFormatter: (value) => `${value}px`,
-    pxParser: (value) => Number(value.replace('px', '')),
+    pxFormatter: (value: any) => `${value}px`,
+    pxParser: (value: any) => Number(value.replace('px', '')),
   },
 }
 </script>

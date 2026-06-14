@@ -146,7 +146,7 @@ export default defineComponent({
   },
   computed: {
     store() { return useConfigStore() },
-    isRecording() { return (useConfigStore() as any).isRecording },
+    isRecording() { return useConfigStore().isRecording },
   },
   methods: {
     handleAddRoom() {

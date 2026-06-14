@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import { useConfigStore } from '../store'
+import { defineComponent } from 'vue'
 import { sse } from '../../service/sse-client'
 import { speechToText, sendComment } from '../../service/api'
 
@@ -51,11 +52,12 @@ const processorUrl = new URL('../../service/processor.worklet.js', import.meta.u
 
 let isVoiceActive = false
 
-export default {
+export default defineComponent({
   data() {
     return {
       message: '',
       isLoading: false,
+      isSending: false,
     }
   },
 
@@ -136,7 +138,7 @@ export default {
         //   }
         // }
         const context = new AudioContext({
-          sampleRate: '16000',
+          sampleRate: 16000,
         })
         const stream = await navigator.mediaDevices.getUserMedia(option)
         // this.startUserMedia(context, stream)
@@ -231,6 +233,7 @@ export default {
         },
         onUpdate: function (val) {},
       }
+      // @ts-ignore
       vad2(audioContext, stream, options)
     },
 
@@ -252,19 +255,16 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendComment(
-          {
-            message: this.message,
-            roomId: this.realRoomId,
-          },
-          this.userCookie
-        )
+        const result = await sendComment({
+          roomId: this.realRoomId,
+          comment: this.message,
+        })
         if (result.data.message) {
           this.$Message.warning(`发送未成功: ${result.data.message}`)
           return
         }
         this.message = ''
-      } catch (e) {
+      } catch (e: any) {
         this.$Message.error(`发送失败: ${e.message}`)
       } finally {
         this.isSending = false
@@ -275,7 +275,7 @@ export default {
       this.message = ''
     },
   },
-}
+})
 </script>
 
 <style scoped>

@@ -10,25 +10,26 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useConfigStore } from './store'
 import { touch } from '../service/api'
 import { sse } from '../service/sse-client'
+
+let healthChecker = 0
 
 export default {
   name: 'bilibili-danmaku',
   data() {
     return {
       isLoading: true,
-      healthChecker: null,
     }
   },
   async mounted() {
-    this.healthChecker = setInterval(async () => {
+    healthChecker = window.setInterval(async () => {
       try {
         await touch()
         this.isLoading = false
-        clearInterval(this.healthChecker)
+        clearInterval(healthChecker)
 
         // bridge 就绪后建立全局 SSE 连接
         sse.connect()

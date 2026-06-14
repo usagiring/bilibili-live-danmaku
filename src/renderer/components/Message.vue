@@ -87,19 +87,22 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../../service/util'
 import { queryMessages } from '../../service/api'
+// @ts-ignore - Volar known issue: cannot resolve .vue module types
 import GiftCardMini from './GiftCardMini'
+// @ts-ignore
 import FanMedal from './FanMedal'
 import { sse } from '../../service/sse-client'
 const COMMENTS_LIMIT = 200
 const GIFTS_LIMIT = 200
 const INTERACTS_LIMIT = 200
 
-export default {
+export default defineComponent({
   components: {
     GiftCardMini,
     FanMedal,
@@ -110,12 +113,12 @@ export default {
       split1: 0.6,
       split2: 0.7,
       roomId: 0,
-      userId: null,
+      userId: null as number | null,
       userName: '',
-      dateRange: [],
-      comments: [],
-      interacts: [],
-      gifts: [],
+      dateRange: [] as Date[],
+      comments: [] as any[],
+      interacts: [] as any[],
+      gifts: [] as any[],
       scrollHeightLeftTop: 300,
       scrollHeightLeftBottom: 100,
       scrollHeightRight: 1000,
@@ -133,7 +136,7 @@ export default {
     },
   },
   created() {
-    this.roomId = useConfigStore().realRoomId
+    this.roomId = useConfigStore().activeRoom?.realRoomId || 0
     // const startTime =
     // new Date(useConfigStore().connectedAt) ||
     // new Date(Date.now() - 15 * 60 * 1000); // 15 min ago
@@ -155,10 +158,10 @@ export default {
     }, 0)
   },
   methods: {
-    changeDateRange([startTime, endTime]) {
+    changeDateRange([startTime, endTime]: string[]) {
       this.dateRange = [new Date(startTime), new Date(endTime)]
     },
-    async searchAll(options) {
+    async searchAll(options?: any) {
       const comments = await this.searchComment(options)
       this.comments = comments
       const interacts = await this.searchInteract(options)
@@ -168,13 +171,13 @@ export default {
       gifts = gifts.map(this.formatGift)
       this.gifts = gifts
     },
-    async searchComment(options = {}) {
+    async searchComment(options: any = {}) {
       const { sort, skip, limit, scrollToken } = options
       if (scrollToken) {
       }
-      const query = {}
+      const query: any = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId)
+        query.roomId = this.roomId
       }
       if (this.dateRange.length) {
         query.sendAt = {
@@ -197,7 +200,7 @@ export default {
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}
+        query.sendAt = query.sendAt || {}; query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: comments } = await queryMessages({
@@ -216,13 +219,13 @@ export default {
       // });
       return comments
     },
-    async searchInteract(options = {}) {
+    async searchInteract(options: any = {}) {
       const { sort, skip, limit, scrollToken } = options
       if (scrollToken) {
       }
-      const query = {}
+      const query: any = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId)
+        query.roomId = this.roomId
       }
       if (this.dateRange.length) {
         query.sendAt = {
@@ -242,7 +245,7 @@ export default {
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}
+        query.sendAt = query.sendAt || {}; query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: interacts } = await queryMessages({
@@ -258,11 +261,11 @@ export default {
       return interacts
     },
 
-    async searchGift(options = {}) {
+    async searchGift(options: any = {}) {
       const { sort, skip, limit, scrollToken, isShowSilverGift } = options
-      const query = {}
+      const query: any = {}
       if (this.roomId) {
-        query.roomId = parseInt(this.roomId)
+        query.roomId = this.roomId
       }
       if (this.dateRange.length) {
         query.sendAt = {
@@ -285,7 +288,7 @@ export default {
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}
+        query.sendAt = query.sendAt || {}; query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
 
@@ -330,7 +333,7 @@ export default {
             this.comments = [...this.comments, ...comments]
           }, 700)
         }
-        resolve()
+        resolve(undefined)
       })
     },
     showUserSpaceLink(status) {
@@ -338,15 +341,15 @@ export default {
         isShowUserSpaceLink: status,
       })
     },
-    splitLeftMoving(e) {
+    splitLeftMoving() {
       const leftTop = document.getElementById('split-left-top')
-      this.scrollHeightLeftTop = leftTop.clientHeight
+      this.scrollHeightLeftTop = leftTop?.clientHeight || 300
       const leftBottom = document.getElementById('split-left-bottom')
-      this.scrollHeightLeftBottom = leftBottom.clientHeight
+      this.scrollHeightLeftBottom = leftBottom?.clientHeight || 100
     },
-    splitMoving(e) {
+    splitMoving() {
       const right = document.getElementById('split-right')
-      this.scrollHeightRight = right.clientHeight
+      this.scrollHeightRight = right?.clientHeight || 1000
     },
     clearDateRange() {
       setTimeout(() => {
@@ -378,7 +381,7 @@ export default {
             this.interacts = [...this.interacts, ...interacts]
           }, 700)
         }
-        resolve()
+        resolve(undefined)
       })
     },
 
@@ -409,7 +412,7 @@ export default {
             this.gifts = [...this.gifts, ...gifts]
           }, 700)
         }
-        resolve()
+        resolve(undefined)
       })
     },
     openBiliUserSpace(userId) {
@@ -511,7 +514,7 @@ export default {
       }
     },
   },
-}
+})
 </script>
 
 <style scoped>

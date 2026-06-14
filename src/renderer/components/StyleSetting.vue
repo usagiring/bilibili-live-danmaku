@@ -477,7 +477,9 @@ import { useConfigStore } from '../store'
 import draggable from 'vuedraggable'
 import FontList from 'font-list'
 
+// @ts-ignore
 import StyleEditor from './StyleEditor'
+// @ts-ignore
 import FanMedal from './FanMedal'
 import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../../service/util'
@@ -1012,6 +1014,8 @@ export default {
       ],
 
       icons: [],
+      debouncedUpdateBackground: null as any,
+      debouncedChangeAdminIconColor: null as any,
     }
   },
   computed: {
@@ -1023,22 +1027,22 @@ export default {
     },
     isShowAvatar() {
       const settings = useConfigStore().messageSettings
-      return settings.find((setting) => setting.type === 'avatar').isShow
+      return settings.find((setting) => setting.type === 'avatar')!.isShow
     },
     isShowMemberShipIcon() {
       const settings = useConfigStore().messageSettings
-      return settings.find((setting) => setting.type === 'guard').isShow
+      return settings.find((setting) => setting.type === 'guard')!.isShow
     },
     isShowInteractInfo() {
       return useConfigStore().isShowInteractInfo
     },
     isShowFanMedal() {
       const settings = useConfigStore().messageSettings
-      return settings.find((setting) => setting.type === 'medal').isShow
+      return settings.find((setting) => setting.type === 'medal')!.isShow
     },
     avatarSize() {
       const settings = useConfigStore().messageSettings
-      return settings.find((setting) => setting.type === 'avatar').size
+      return settings.find((setting) => setting.type === 'avatar')!.size
     },
     combineSimilarTime() {
       return useConfigStore().combineSimilarTime
@@ -1060,7 +1064,7 @@ export default {
     },
     isShowColon() {
       const settings = useConfigStore().messageSettings
-      return settings.find((setting) => setting.type === 'colon').isShow
+      return settings.find((setting) => setting.type === 'colon')!.isShow
     },
     isShowHeadline() {
       return useConfigStore().isShowHeadline
@@ -1218,10 +1222,8 @@ export default {
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
-      await sendDM({
-        category: randomMessage.category,
-        data: randomMessage,
-      })
+      if (!randomMessage) return
+      await sendDM(randomMessage.category, randomMessage)
     },
 
     async updateBackground(color) {
@@ -1489,7 +1491,7 @@ export default {
       const data = {
         emojiSize: number,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1583,7 +1585,7 @@ export default {
       const data = {
         messageSettings: displayItems,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1652,7 +1654,7 @@ export default {
       const data = {
         adminIcon: icon,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1660,7 +1662,7 @@ export default {
       const data = {
         isShowAdminIcon: status,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1668,7 +1670,7 @@ export default {
       const data = {
         adminIconColor: color,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1681,14 +1683,14 @@ export default {
         }
         if (result.length > 6) break
       }
-      this.icons = result
+      this.icons = result as any
     },
 
     changeDanmakuChannel(number) {
       const data = {
         danmakuChannel: number,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1696,7 +1698,7 @@ export default {
       const data = {
         channelDelayTime: number,
       }
-      updateSetting(data)
+      useConfigStore().UPDATE_CONFIG(data)
       useConfigStore().UPDATE_CONFIG(data)
     },
   },

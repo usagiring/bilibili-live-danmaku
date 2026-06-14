@@ -15,6 +15,7 @@
 <script lang="ts">
 import { ipcRenderer, shell } from 'electron'
 import { IPC_GET_VERSION } from '../../service/const'
+import globalVar from '../../service/global'
 export default {
   data() {
     return {
@@ -23,7 +24,7 @@ export default {
   },
   computed: {
     obsUrl() {
-      return `http://127.0.0.1:${this.$global.port}`
+      return `http://127.0.0.1:${(globalVar as any).port}`
     },
   },
   async mounted() {

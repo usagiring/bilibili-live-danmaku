@@ -71,18 +71,21 @@
 
 <script lang="ts">
 import { useConfigStore } from '../store'
+import { defineComponent } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { updateClientConfig } from '../../service/api'
 import { IPC_CREATE_CHILD_WINDOW } from '../../service/const'
 import icon from '../assets/logo.png'
 
-export default {
+export default defineComponent({
   data() {
     return {
       isShowDanmakuWindow: false,
       isShowDanmakuWindowLoading: false,
-      checkOnTopInterval: null,
+      win: null as any,
+      debouncedUpdateBackground: null as any,
+      checkOnTopInterval: null as ReturnType<typeof setInterval> | null,
     }
   },
   computed: {
@@ -151,7 +154,7 @@ export default {
 
       if (status) {
         const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
-          url: `http://localhost:${this.$global.port}/danmaku-scroll?port=${this.$global.port}`,
+          url: `http://localhost:${(this as any).$global.port}/danmaku-scroll?port=${(this as any).$global.port}`,
           width: this.scrollDanmakuWidth || 480,
           height: this.scrollDanmakuHeight || 540,
           iconDataUrl: icon,
@@ -270,7 +273,7 @@ export default {
       useConfigStore().UPDATE_CONFIG(data)
     },
   },
-}
+})
 </script>
 
 <style scoped>

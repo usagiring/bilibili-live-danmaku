@@ -248,13 +248,13 @@ export default {
 
   computed: {
     realRoomId() {
-      return (useConfigStore() as any).activeRoom?.realRoomId || 1
+      return useConfigStore().activeRoom?.realRoomId || 1
     },
     isWithCookie() {
       return useConfigStore().isWithCookie
     },
     userCookie() {
-      return (useConfigStore() as any).userCookie
+      return useConfigStore().userCookie
     },
     aliAccessKeyId() {
       return useConfigStore().aliAccessKeyId

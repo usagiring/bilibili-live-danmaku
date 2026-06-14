@@ -93,12 +93,18 @@ import * as echarts from 'echarts'
 //   CanvasRenderer,
 // ]);
 
+// Module-level state for vue-tsc 3.x compat
+let chartData: any[] = []
+let keywords: string[] = []
+let optionRegexps: RegExp[] = []
+let colorPool: string[] = []
+
 import { shuffle, cloneDeep } from 'lodash'
 import { sse } from '../../service/sse-client'
 import { COLORS } from '../../service/const'
 import { dateFormat } from '../../service/util'
 
-let chart = null
+const chartRef: any = { current: null }
 
 export default {
   data() {
@@ -107,9 +113,6 @@ export default {
       type: 'bar',
       isShowVoteRecord: false,
       userMap: {},
-      keywords: [],
-      optionRegexps: [],
-      colorPool: [],
     }
   },
   computed: {
@@ -130,30 +133,30 @@ export default {
     },
   },
   beforeMount() {
-    this.colorPool = shuffle(this.colors)
+    colorPool = shuffle(this.colors)
   },
   beforeUnmount() {
     this.stop()
-    if (chart) {
-      chart.clear()
-      chart = null
+    if (chartRef.current) {
+      chartRef.current.clear()
+      chartRef.current = null
     }
   },
   methods: {
     initChart() {
       this.userMap = {}
       const chartDOM = document.getElementById('chart')
-      if (!chart) {
-        chart = echarts.init(chartDOM)
+      if (!chartRef.current) {
+        chartRef.current = echarts.init(chartDOM)
       }
       this.type === 'bar' ? this.makeBarChart() : this.makePieChart()
     },
 
     start() {
       this.isWatching = true
-      this.keywords = this.options.map((option) => option.keyword).filter(Boolean)
-      this.optionRegexps = this.keywords.map((keyword) => new RegExp(keyword, 'i'))
-      this.data = this.keywords.map((keyword, index) => {
+      keywords = this.options.map((option) => option.keyword).filter(Boolean)
+      optionRegexps = keywords.map((keyword) => new RegExp(keyword, 'i'))
+      chartData = keywords.map((keyword, index) => {
         return {
           name: keyword,
           value: 0,
@@ -169,8 +172,8 @@ export default {
       // emitter.on("message", this.onVoteMessage);
 
       // setInterval(() => {
-      //   for (let i = 0; i < this.data.length; i++) {
-      //     this.data[i].value = this.data[i].value + Math.floor(Math.random() * 10)
+      //   for (let i = 0; i < chartData.length; i++) {
+      //     chartData[i].value = chartData[i].value + Math.floor(Math.random() * 10)
       //   }
       //   this.updateChartData()
       // }, 3000)
@@ -182,7 +185,7 @@ export default {
 
     makePieChart() {
       this.type = 'pie'
-      chart.clear()
+      chartRef.current.clear()
 
       const option = {
         tooltip: {
@@ -221,19 +224,19 @@ export default {
             labelLine: {
               show: false,
             },
-            data: this.data,
+            data: chartData,
           },
         ],
       }
 
-      chart.setOption(option)
+      chartRef.current.setOption(option)
     },
 
     makeBarChart() {
       this.type = 'bar'
-      chart.clear()
+      chartRef.current.clear()
       // this.chart.resize({
-      //   height: 160 + this.keywords.length * 30,
+      //   height: 160 + keywords.length * 30,
       // })
 
       const option = {
@@ -242,7 +245,7 @@ export default {
         },
         yAxis: {
           type: 'category',
-          data: this.keywords,
+          data: keywords,
           // data: ['A', 'B', 'C', 'D', 'E'],
           inverse: true,
           animationDuration: 300,
@@ -254,7 +257,7 @@ export default {
             realtimeSort: true,
             // name: 'X',
             type: 'bar',
-            data: this.data,
+            data: chartData,
             label: {
               show: true,
               position: 'right',
@@ -271,14 +274,14 @@ export default {
         animationEasingUpdate: 'linear',
       }
 
-      chart.setOption(option)
+      chartRef.current.setOption(option)
     },
 
     updateChartData() {
-      chart.setOption({
+      chartRef.current.setOption({
         series: [
           {
-            data: this.data,
+            data: chartData,
           },
         ],
       })
@@ -288,8 +291,8 @@ export default {
       this.isShowVoteRecord = true
     },
     randomPickColor() {
-      const color = this.colorPool.shift()
-      this.colorPool.push(color)
+      const color = colorPool.shift()!
+      colorPool.push(color)
       return color
     },
     onVoteMessage: async function (data: any) {
@@ -304,7 +307,7 @@ export default {
           // 如果允许改票...
           if (this.allowReVote) {
             const index = this.userMap[comment.uid].index
-            this.data[index].value--
+            chartData[index].value--
           } else {
             // 已经记录过的用户不再重复统计
             return
@@ -314,11 +317,11 @@ export default {
 
       let index
       if (this.isAccurateMatch) {
-        index = this.keywords.findIndex((keyword) => {
+        index = keywords.findIndex((keyword) => {
           return keyword === comment.content
         })
       } else {
-        index = this.optionRegexps.findIndex((regexp) => {
+        index = optionRegexps.findIndex((regexp) => {
           return regexp.test(comment.content)
         })
       }
@@ -328,10 +331,10 @@ export default {
       // 如果未登录时，以 _id 为 key
       this.userMap[comment.uid || comment._id] = {
         index,
-        message: `${this.keywords[index]} | ${comment.uname}:${comment.content} | ${dateFormat(comment.sendAt)} `,
+        message: `${keywords[index]} | ${comment.uname}:${comment.content} | ${dateFormat(comment.sendAt)} `,
       }
       // 输入图表
-      this.data[index].value++
+      chartData[index].value++
       this.updateChartData()
     },
 

@@ -5,9 +5,9 @@
         <Button class="config-item">还原默认弹幕样式</Button>
       </Poptip>
       <Tooltip placement="top" max-width="300" transfer>
-        <Poptip confirm title="确认备份并清理数据库？" placement="bottom" width="400" word-wrap @on-ok="backupAndClearDB">
+        <!-- <Poptip confirm title="确认备份并清理数据库？" placement="bottom" width="400" word-wrap @on-ok="backupAndClearDB">
           <Button class="config-item">备份并清理数据库</Button>
-        </Poptip>
+        </Poptip> -->
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
             <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{ userDataPath }}</p>
@@ -15,9 +15,9 @@
         </template>
       </Tooltip>
       <Tooltip placement="top" max-width="300" transfer>
-        <Poptip confirm title="确认清理用户头像缓存？" placement="bottom" width="400" @on-ok="clearUserDB">
+        <!-- <Poptip confirm title="确认清理用户头像缓存？" placement="bottom" width="400" @on-ok="clearUserDB">
           <Button class="config-item">清理用户头像缓存</Button>
-        </Poptip>
+        </Poptip> -->
         <template #content>
           <div :style="{ 'white-space': 'normal' }">
             <p>为了防止触发B站限流，用户头像会缓存，可以清理并重新获取最新数据。</p>
@@ -217,20 +217,19 @@ import { uniq } from 'lodash'
 import { reactive } from 'vue'
 import { ipcRenderer, shell } from 'electron'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
+// @ts-ignore
 import FanMedal from './FanMedal'
 import { parseHexColor } from '../../service/util'
 import {
-  clearDB,
-  backupDB,
-  updateSetting,
   needRefreshCookie,
   sendComment,
   getMedalList,
   getRoomInfoV2,
   getRoomInfoByIds,
-  getQrCode,
-  loginFromQrCode as loginFromQrCodeApi,
+  generateQRCode,
+  pollQRCode,
   refreshCookie as refreshCookieApi,
+  updateClientConfig,
 } from '../../service/api'
 import { wait } from '../../service/util'
 import QRCode from 'qrcode'
@@ -246,23 +245,24 @@ export default {
     const state = reactive({
       userDataPath: '',
       isShowSignInModal: false,
-      selectedGiftIds: [],
-      advancedAutoReplyRules: [],
-      voices: [],
-      currentVoice: '',
+      selectedGiftIds: [] as string[],
+      advancedAutoReplyRules: [] as any[],
+      voices: [] as any[],
+      currentVoice: '' as any,
       text: '',
       voiceSpeed: 1.0,
       opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver'],
       signInCount: 0,
       signInTotalCount: 0,
       isLightMedal: true,
-      displayVoices: [],
+      displayVoices: [] as any[],
       medalTotal: 0,
-      medals: [],
+      medals: [] as any[],
       needRefreshCookie: false,
       qrCodeKey: '',
       isShowQRCodeLoginModal: false,
       loginFromQrCodeLoading: true,
+      qrCodeLoginErrorMessage: '',
     })
     return state
   },
@@ -276,23 +276,8 @@ export default {
     isAutoRecord() {
       return useConfigStore().isAutoRecord
     },
-    isWatchLottery() {
-      return useConfigStore().isWatchLottery
-    },
     autoReplyRules() {
       return useConfigStore().autoReplyRules
-    },
-    autoReplyText() {
-      return useConfigStore().autoReplyRules[0].text
-    },
-    onlyGold() {
-      return useConfigStore().autoReplyRules[0].onlyGold
-    },
-    onlyMyselfRoom() {
-      return useConfigStore().onlyMyselfRoom
-    },
-    isAutoReply() {
-      return useConfigStore().isAutoReply
     },
     isTextReply() {
       return useConfigStore().autoReplyRules[0].isTextReply
@@ -313,9 +298,6 @@ export default {
         }
       })
     },
-    userInfoFrequencyLimit() {
-      return useConfigStore().userInfoFrequencyLimit
-    },
     onTopLevel() {
       return useConfigStore().onTopLevel
     },
@@ -327,9 +309,6 @@ export default {
     },
     signInMessage() {
       return useConfigStore().signInMessage
-    },
-    onlyTodayZeroIntimacy() {
-      return useConfigStore().onlyTodayZeroIntimacy
     },
     waitingSpeakerCount() {
       return useConfigStore().waitingSpeakerCount
@@ -345,13 +324,13 @@ export default {
     this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
 
     setTimeout(() => {
-      this.voices = this.$global?.voices || []
+      this.voices = (this as any).$global?.voices || []
 
-      this.displayVoices = this.voices.map((voice) => {
+      this.displayVoices = this.voices.map((voice: any) => {
         return {
-          key: voice.name,
-          value: voice.name,
-          label: voice.name,
+          key: voice.name as string,
+          value: voice.name as string,
+          label: voice.name as string,
         }
       })
     }, 500)
@@ -380,7 +359,7 @@ export default {
   methods: {
     async refreshCookie() {
       const { data } = await refreshCookieApi({ refreshToken: this.refreshToken })
-      const { refreshToken, userCookie } = data
+      const { refreshToken, userCookie } = data as any
       const setting = {
         userCookie: userCookie,
         refreshToken: refreshToken,
@@ -392,19 +371,6 @@ export default {
     async restoreDefaultStyleSetting() {
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(DEFAULT_STYLE).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(DEFAULT_STYLE)
-      location.reload()
-    },
-
-    async backupAndClearDB() {
-      // 从 ./data 里备份 comment gift interact, 并 removeall
-      await backupDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      await clearDB({ names: ['comment', 'gift', 'interact', 'lottery'] })
-      location.reload()
-    },
-
-    async clearUserDB() {
-      // 清空用户数据缓存
-      await clearDB({ names: ['user'] })
       location.reload()
     },
 
@@ -423,7 +389,7 @@ export default {
     },
 
     speak() {
-      const voice = this.voices.find((voice) => voice.name === this.currentVoice)
+      const voice = this.voices.find((voice: any) => voice.name === this.currentVoice) as any
       const utterThis = new SpeechSynthesisUtterance()
       utterThis.text = this.text
       utterThis.voice = voice
@@ -531,11 +497,11 @@ export default {
         }
       })
 
-      const { data: roomMap } = await getRoomInfoByIds(this.medals.map((medal) => medal.roomId))
+      const { data: roomMap } = await getRoomInfoByIds(this.medals.map((medal: any) => medal.roomId)) as any
 
-      const roomMapByUid = Object.values(roomMap).reduce((map, room) => {
+      const roomMapByUid = Object.values(roomMap).reduce((map: any, room: any) => {
         return Object.assign(map, { [room.uid]: room })
-      }, {})
+      }, {}) as Record<string, any>
 
       this.medals.forEach((medal) => {
         medal.liveStatus = roomMapByUid[medal.uid]?.live_status // 1 直播中 2 轮播中？
@@ -580,13 +546,10 @@ export default {
 
             const { data } = await getRoomInfoV2(roomId)
             const { room_id: realRoomId } = data.room_info
-            const result = await sendComment(
-              {
-                message: signInMessage,
-                roomId: realRoomId,
-              },
-              userCookie
-            )
+            const result = await sendComment({
+              roomId: realRoomId,
+              comment: signInMessage,
+            })
             if (result.data.message) {
               this.$Message.error({
                 content: `签到未成功: ${result.data.message}, 用户名: ${uname}, 粉丝牌: ${medalName}, ${this.signInCount}/${this.signInTotalCount}`,
@@ -601,7 +564,7 @@ export default {
             }
             await wait(1000)
           }
-        } catch (e) {
+        } catch (e: any) {
           this.$Message.error(`${e.message}`)
           console.log(e)
         }
@@ -618,13 +581,10 @@ export default {
 
       const { data } = await getRoomInfoV2(roomId)
       const { room_id: realRoomId } = data.room_info
-      const result = await sendComment(
-        {
-          message: signInMessage,
-          roomId: realRoomId,
-        },
-        this.userCookie
-      )
+      const result = await sendComment({
+        roomId: realRoomId,
+        comment: signInMessage,
+      })
       if (result.data.message) {
         this.$Message.error({
           content: `签到未成功: ${result.data.message}`,
@@ -646,7 +606,7 @@ export default {
     },
 
     async showQrCode() {
-      const res = await getQrCode()
+      const res = await generateQRCode()
       const { url, qrcode_key } = res.data
       this.qrCodeKey = qrcode_key
       const qrcode = document.getElementById('qrcode')
@@ -657,7 +617,7 @@ export default {
 
     async loginFromQrCode() {
       this.loginFromQrCodeLoading = true
-      const data = await loginFromQrCodeApi(this.qrCodeKey)
+      const data = await pollQRCode(this.qrCodeKey)
       if (data.code) {
         this.loginFromQrCodeLoading = false
         this.qrCodeLoginErrorMessage = data.message

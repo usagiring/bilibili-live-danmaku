@@ -57,7 +57,7 @@
     <video id="live-player" controls :style="{ height: `${resolution}px` }" />
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
-        <FanMedal :medal="medalData" :role="medalData.guard" />
+        <FanMedal :medal="medalData" :role="(medalData as any).guard" />
       </template>
       <template v-else>
         <Tooltip transfer placement="top">
@@ -89,11 +89,14 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import * as flvjs from 'flv.js'
+import { defineComponent } from "vue"
 import { ipcRenderer } from 'electron'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_CHOOSE_DIRECTORY } from '../../service/const'
+// @ts-ignore
 import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
+// @ts-ignore
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
 import { sse } from '../../service/sse-client'
@@ -106,19 +109,19 @@ const qualityMap = {
   流畅: 80,
 }
 
-export default {
+export default defineComponent({
   components: {
     FanMedal,
   },
   data() {
     return {
-      flvPlayer: null,
+      flvPlayer: null as any,
       message: '',
       isSending: false,
       isWearing: false,
       recordDuring: 0,
-      recordTimer: null,
-      medalData: null,
+      recordTimer: null as ReturnType<typeof setInterval> | null,
+      medalData: null as Record<string, any> | null,
       downloadRate: '0 KB/s',
       recordQuality: '原画',
       playQuality: '超清',
@@ -126,7 +129,7 @@ export default {
       getMedalDataLoading: false,
       isShowLiveWindow: false,
       isShowLiveWindowLoading: false,
-      checkOnTopInterval: null,
+      checkOnTopInterval: null as ReturnType<typeof setInterval> | null,
       win: null,
       qualities: [
         {
@@ -285,7 +288,7 @@ export default {
         this.recordTimer = setInterval(() => {
           this.recordDuring = Date.now() - recordStartTime
         }, 1000)
-      } catch (e) {
+      } catch (e: any) {
         console.log(e)
         this.$Message.error(`录制失败: ${e.message}`)
       }
@@ -302,7 +305,7 @@ export default {
           roomId: this.realRoomId,
           recordId,
         })
-      } catch (e) {
+      } catch (e: any) {
         console.warn(e)
       }
 
@@ -317,7 +320,7 @@ export default {
       // })
 
       // emitter.removeAllListeners(`${recordId}-download-rate`)
-      clearInterval(this.recordTimer)
+      if (this.recordTimer) clearInterval(this.recordTimer)
       // emitter.emit('record-cancel')
     },
     async play() {
@@ -334,11 +337,11 @@ export default {
         return
       }
 
-      if (flvjs.isSupported()) {
+      if ((flvjs as any).isSupported()) {
         const livePlayer = document.getElementById('live-player')
 
         if (this.flvPlayer) {
-          this.flvPlayer.destroy()
+          this.flvPlayer!.destroy()
           this.flvPlayer = null
         }
 
@@ -348,7 +351,7 @@ export default {
             cookie: this.userCookie,
           }
         }
-        this.flvPlayer = flvjs.createPlayer(
+        this.flvPlayer = (flvjs as any).createPlayer(
           {
             type: 'flv',
             isLive: true,
@@ -362,16 +365,16 @@ export default {
           }
         )
 
-        this.flvPlayer.on(flvjs.Events.ERROR, (e) => {
+        this.flvPlayer!.on((flvjs as any).Events.ERROR, (e) => {
           this.$Message.error(`播放失败: ${e}`)
           console.log(e)
         })
 
-        livePlayer.volume = (Number(this.liveVolume) || 100) / 100
+        (livePlayer as HTMLVideoElement).volume = (Number(this.liveVolume) || 100) / 100
 
-        this.flvPlayer.attachMediaElement(livePlayer)
-        this.flvPlayer.load()
-        await this.flvPlayer.play()
+        this.flvPlayer!.attachMediaElement(livePlayer)
+        this.flvPlayer!.load()
+        await this.flvPlayer!.play()
       } else {
         console.error('flvjs not support')
       }
@@ -415,7 +418,7 @@ export default {
       if (!this.userCookie || !this.realRoomId || !this.message) return
       this.isSending = true
       try {
-        const result = await sendComment(
+        const result = await (sendComment as any)(
           {
             message: this.message,
             roomId: this.realRoomId,
@@ -427,7 +430,7 @@ export default {
           return
         }
         this.message = ''
-      } catch (e) {
+      } catch (e: any) {
         this.$Message.error(`发送失败: ${e.message}`)
       } finally {
         this.isSending = false
@@ -483,7 +486,7 @@ export default {
         if (result.data.code === -1) {
           this.$Message.error('佩戴失败')
         }
-      } catch (e) {
+      } catch (e: any) {
         this.$Message.error(`${e.message}`)
       } finally {
         this.isWearing = false
@@ -523,8 +526,8 @@ export default {
       }
       useConfigStore().UPDATE_CONFIG(data)
 
-      const videoDOM = document.getElementById('live-player')
-      videoDOM.volume = liveVolume
+      const videoDOM = document.getElementById('live-player') as HTMLVideoElement
+      if (videoDOM) videoDOM.volume = liveVolume
     },
 
     async showLiveWindow(status) {
@@ -563,7 +566,7 @@ export default {
     //   this.videoHeight = liveWrapper.clientHeight - 70
     // },
   },
-}
+})
 </script>
 
 <style scoped>
