@@ -32,10 +32,23 @@ export default {
 
         // bridge 就绪后建立全局 SSE 连接
         sse.connect()
-      } catch (e) {
-        //
-      }
-    }, 300)
+
+        // 主进程注册 client 时已把配置写入 $global，直接同步到 Pinia
+        const config = (this as any).$global?.clientConfig
+        if (config) {
+          const store = useConfigStore()
+          if (config.style) store.UPDATE_CONFIG(config.style)
+          if (config.rooms?.length) {
+            config.rooms.forEach((r: any) => {
+              if (!store.rooms.find((sr) => sr.displayRoomId === r.roomId)) {
+                store.ADD_ROOM(r.roomId)
+                store.UPDATE_ACTIVE_ROOM(r)
+              }
+            })
+          }
+        }
+      } catch (e) { /* retry */ }
+    }, 500)
 
     useConfigStore().CLEAR_TEXT_STROKE_VERSION_0_4_8()
   },

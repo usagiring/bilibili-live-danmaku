@@ -91,10 +91,10 @@ import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../../service/util'
-import { queryGifts, queryInteracts, queryComments } from '../../service/api'
+import { queryMessages } from '../../service/api'
 import GiftCardMini from './GiftCardMini'
 import FanMedal from './FanMedal'
-import ws from '../../service/ws'
+import { sse } from '../../service/sse-client'
 const COMMENTS_LIMIT = 200
 const GIFTS_LIMIT = 200
 const INTERACTS_LIMIT = 200
@@ -200,8 +200,9 @@ export default {
         query.sendAt = query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
-      const { data: comments } = await queryComments({
-        query,
+      const { data: comments } = await queryMessages({
+        ...query,
+        category: 'danmaku',
         sort: sort || { sendAt: -1 },
         limit: 40,
       })
@@ -244,8 +245,9 @@ export default {
         query.sendAt = query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
-      const { data: interacts } = await queryInteracts({
-        query,
+      const { data: interacts } = await queryMessages({
+        ...query,
+        category: 'interact',
         sort: sort || { sendAt: -1 },
         limit: 20,
       })
@@ -290,8 +292,9 @@ export default {
       if (!(isShowSilverGift !== undefined ? isShowSilverGift : this.isShowSilverGift)) {
         query.coinType = 1
       }
-      const { data: gifts } = await queryGifts({
-        query,
+      const { data: gifts } = await queryMessages({
+        ...query,
+        category: 'gift',
         sort: sort || { sendAt: -1 },
         limit: 20,
       })
@@ -461,27 +464,21 @@ export default {
     },
 
     async listenStart() {
-      ws.addEventListener('message', this.onMessage)
+      sse.on('COMMENT', this.onCommentMsg)
+      sse.on('GIFT', this.onGiftMsg)
+      sse.on('INTERACT', this.onInteractMsg)
+      sse.on('SUPER_CHAT', this.onGiftMsg)
     },
     listenStop() {
-      ws.removeEventListener('message', this.onMessage)
+      sse.off('COMMENT', this.onCommentMsg)
+      sse.off('GIFT', this.onGiftMsg)
+      sse.off('INTERACT', this.onInteractMsg)
+      sse.off('SUPER_CHAT', this.onGiftMsg)
     },
 
-    onMessage(msg) {
-      const payload = JSON.parse(msg.data)
-      if (payload.cmd === 'COMMENT') {
-        this.onComment(payload.payload)
-      }
-      if (payload.cmd === 'GIFT') {
-        this.onGift(payload.payload)
-      }
-      if (payload.cmd === 'INTERACT') {
-        this.onInteract(payload.payload)
-      }
-      if (payload.cmd === 'SUPER_CHAT') {
-        this.onGift(payload.payload)
-      }
-    },
+    onCommentMsg(data: any) { this.onComment(data.payload) },
+    onGiftMsg(data: any) { this.onGift(data.payload) },
+    onInteractMsg(data: any) { this.onInteract(data.payload) },
 
     onComment(payload) {
       if (this.comments.length > COMMENTS_LIMIT) {

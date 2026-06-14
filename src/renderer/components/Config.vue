@@ -385,12 +385,12 @@ export default {
         userCookie: userCookie,
         refreshToken: refreshToken,
       }
-      await updateSetting(setting)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(setting)
     },
 
     async restoreDefaultStyleSetting() {
-      await updateSetting(DEFAULT_STYLE)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(DEFAULT_STYLE).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(DEFAULT_STYLE)
       location.reload()
     },
@@ -412,7 +412,7 @@ export default {
       const data = {
         userCookie: e.target.value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -439,7 +439,7 @@ export default {
       const data = {
         colors: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -447,7 +447,7 @@ export default {
       const data = {
         userInfoFrequencyLimit: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -667,7 +667,7 @@ export default {
         userCookie: data.cookie,
         refreshToken: data.refresh_token,
       }
-      await updateSetting(setting)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(setting)
       this.loginFromQrCodeLoading = false
       this.isShowQRCodeLoginModal = false

@@ -88,7 +88,9 @@ async function registerClient() {
     const json = await res.json()
     if (json.data?.id) {
       globalVar.clientId = json.data.id
-      store.set('clientId', json.data.id) // 持久化到磁盘
+      store.set('clientId', json.data.id)
+      // 保存 bridge 返回的完整配置数据
+      globalVar.clientConfig = json.data
       console.log(`[Bridge] clientId: ${globalVar.clientId} (已持久化)`)
     }
   } catch (err) {

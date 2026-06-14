@@ -482,7 +482,7 @@ import FanMedal from './FanMedal'
 import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../../service/util'
 import { cloneDeep, debounce } from 'lodash'
-import { updateSetting, clearMessage, sendMessages } from '../../service/api'
+import { updateClientConfig, clearDM, sendDM } from '../../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,
@@ -1196,7 +1196,7 @@ export default {
       setting.isShow = status
 
       const data = { messageSettings: settings }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async showFanMedal(status) {
@@ -1208,17 +1208,17 @@ export default {
         messageSettings: settings,
         isShowFanMedal: status,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
-      await sendMessages({
+      await sendDM({
         category: randomMessage.category,
         data: randomMessage,
       })
@@ -1229,7 +1229,7 @@ export default {
         background: color,
         // scrollDanmakuBackground: color,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async changeAvatarSize(size) {
@@ -1250,7 +1250,7 @@ export default {
 
       data.messageSettings = settings
 
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async changeOpacity(number) {
@@ -1258,14 +1258,14 @@ export default {
         opacity: Number((number / 100).toFixed(2)),
       }
       useConfigStore().UPDATE_CONFIG(data)
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
     },
 
     async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1273,7 +1273,7 @@ export default {
       const data = {
         hiddenExpiredTime: number,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1281,14 +1281,14 @@ export default {
       const data = {
         showHeadlineThreshold: number,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1296,7 +1296,7 @@ export default {
       const data = {
         isShowSilverGift: status,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1400,7 +1400,7 @@ export default {
     },
 
     async clearDanmaku() {
-      await clearMessage()
+      await clearDM()
       // this.$store.dispatch("CLEAR_MESSAGE");
     },
 
@@ -1419,7 +1419,7 @@ export default {
       const data = {
         danmakuFont: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1427,7 +1427,7 @@ export default {
       const data = {
         isUseMiniGiftCard: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1547,7 +1547,7 @@ export default {
       const data = {
         borderImages: this.borderImages,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
     },
 
     changeCollapse(index) {
@@ -1591,7 +1591,7 @@ export default {
       const data = {
         fontWeight: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1599,7 +1599,7 @@ export default {
       const data = {
         isShowHeadline: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1609,7 +1609,7 @@ export default {
       setting.isShow = status
 
       const data = { messageSettings: settings }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1627,7 +1627,7 @@ export default {
       const data = {
         isShowType1: status,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1635,7 +1635,7 @@ export default {
       const data = {
         isShowType2: status,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -1643,7 +1643,7 @@ export default {
       const data = {
         isShowSuperChatJPN: status,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 

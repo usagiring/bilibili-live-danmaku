@@ -73,7 +73,7 @@
 import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
-import { updateSetting } from '../../service/api'
+import { updateClientConfig } from '../../service/api'
 import { IPC_CREATE_CHILD_WINDOW } from '../../service/const'
 import icon from '../assets/logo.png'
 
@@ -175,7 +175,7 @@ export default {
       const data = {
         scrollDanmakuFontSize: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -183,7 +183,7 @@ export default {
       const data = {
         scrollDanmakuDuration: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -234,7 +234,7 @@ export default {
       const data = {
         scrollDanmakuBackground: color,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -242,7 +242,7 @@ export default {
       const data = {
         scrollDanmakuOpacity: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -250,7 +250,7 @@ export default {
       const data = {
         scrollDanmakuDirection: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -258,7 +258,7 @@ export default {
       const data = {
         scrollDanmakuStyleExtend: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -266,7 +266,7 @@ export default {
       const data = {
         scrollDanmakuEmojiSize: value,
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
   },

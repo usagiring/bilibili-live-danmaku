@@ -94,7 +94,7 @@ import * as echarts from 'echarts'
 // ]);
 
 import { shuffle, cloneDeep } from 'lodash'
-import ws from '../../service/ws'
+import { sse } from '../../service/sse-client'
 import { COLORS } from '../../service/const'
 import { dateFormat } from '../../service/util'
 
@@ -165,7 +165,7 @@ export default {
 
       this.initChart()
 
-      ws.addEventListener('message', this.onVoteMessage)
+      sse.on('COMMENT', this.onVoteMessage)
       // emitter.on("message", this.onVoteMessage);
 
       // setInterval(() => {
@@ -177,7 +177,7 @@ export default {
     },
     stop() {
       this.isWatching = false
-      ws.removeEventListener('message', this.onVoteMessage)
+      sse.off('COMMENT', this.onVoteMessage)
     },
 
     makePieChart() {
@@ -292,10 +292,8 @@ export default {
       this.colorPool.push(color)
       return color
     },
-    onVoteMessage: async function (msg) {
-      const message = JSON.parse(msg.data)
-      if (message.cmd !== 'COMMENT') return
-      const comment = message.payload
+    onVoteMessage: async function (data: any) {
+      const comment = data.payload
 
       // 未登录时
       if (!comment.uid) {

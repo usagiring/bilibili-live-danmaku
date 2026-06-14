@@ -1,188 +1,161 @@
 import axios from 'axios'
 import globalVar from './global'
 
-export async function connect({ roomId, uid }) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/room/${roomId}/connect`, {
-    roomId,
-    uid,
-  })
+// ==================== Room ====================
+
+export async function getRoomInfoV2(roomId: number) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/room/info`, { params: { roomId } })
   return res.data
 }
 
-export async function disconnect({ roomId }) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/room/${roomId}/disconnect`)
+export async function getRoomInfoByIds(roomIds: number[]) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/info`, { roomIds: roomIds.map(String) })
   return res.data
 }
 
-export async function touch() {
-  const res = await axios.get(`${globalVar.baseUrl}/api/touch`)
+export async function connect({ roomId, uid }: { roomId: number; uid?: number }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/room/connect`, { roomId: String(roomId), uid })
   return res.data
 }
 
-export async function getRealTimeViewersCount({ roomId }) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/room/${roomId}/real-time/viewer/count`)
+export async function disconnect({ roomId }: { roomId: number }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/room/disconnect`, { roomId: String(roomId) })
   return res.data
 }
 
-export async function getRoomStatus({ roomId }) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/room/${roomId}/status`)
+export async function getRealTimeViewersCount({ roomId, startedAt }: { roomId: number; startedAt?: number }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/room/real-time/viewer/count`, { params: { roomId: String(roomId), startedAt } })
   return res.data
 }
 
-export async function clearDB({ names }) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/db/clear`, {
-    names
-  })
+export async function getRoomStatus({ roomId }: { roomId?: number }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/room/status`, { params: { roomId: roomId ? String(roomId) : undefined } })
   return res.data
 }
 
-export async function backupDB({ names }) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/db/backup`, {
-    names
-  })
+// ==================== Record ====================
+
+export async function record(body: { roomId: number; output?: string; qn?: number; platform?: string; withCookie?: boolean }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/room/record/start`, { ...body, roomId: String(body.roomId) })
   return res.data
 }
 
-export async function updateSetting(settings) {
-  const res = await axios.put(`${globalVar.baseUrl}/api/setting`, {
-    upsert: settings
-  })
+export async function cancelRecord(body: { roomId: number; recordId: string }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/room/record/cancel`, { ...body, roomId: String(body.roomId) })
   return res.data
 }
 
-export async function clearMessage() {
-  const res = await axios.post(`${globalVar.baseUrl}/api/message/clear`)
+export async function getRecordState(body: { roomId?: number }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/room/record/status`, { params: { roomId: body.roomId ? String(body.roomId) : undefined } })
   return res.data
 }
 
-export async function queryGifts(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/gift/query`, body)
+// ==================== Message ====================
+
+export async function queryMessages(body: { category?: string; roomId?: number; userId?: string; skip?: number; limit?: number; sort?: any }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/message/query`, { params: body })
   return res.data
 }
 
-export async function queryInteracts(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/interact/query`, body)
+export async function countMessages(body: { roomId?: number; userId?: string; category?: string }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/message/count`, { params: body })
   return res.data
 }
 
-export async function queryComments(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/comment/query`, body)
+// ==================== DM (弹幕/礼物广播) ====================
+
+export async function clearDM() {
+  const res = await axios.post(`${globalVar.baseUrl}/api/dm/clear`)
   return res.data
 }
 
-export async function queryLotteryHistories(body) {
+export async function sendDM(category: string, data: any) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/dm/send`, { category, data })
+  return res.data
+}
+
+// ==================== Lottery ====================
+
+export async function queryLotteryHistories(body: { roomId?: number; skip?: number; limit?: number; sort?: any }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/lottery/history/query`, body)
   return res.data
 }
 
-export async function deleteLotteryHistories(body) {
-  const res = await axios.delete(`${globalVar.baseUrl}/api/lottery/history`, body)
+export async function deleteLotteryHistories(body: { roomId?: number }) {
+  const res = await axios.delete(`${globalVar.baseUrl}/api/lottery/history`, { data: body })
   return res.data
 }
 
-export async function addLotteryHistory(body) {
+export async function addLotteryHistory(body: any) {
   const res = await axios.post(`${globalVar.baseUrl}/api/lottery/history`, body)
   return res.data
 }
 
-export async function countComments(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/comment/count`, body)
-  return res.data
-}
+// ==================== Statistic ====================
 
-export async function countInteracts(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/interact/count`, body)
-  return res.data
-}
-
-export async function countGifts(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/gift/count`, body)
-  return res.data
-}
-
-export async function sendMessages(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/message/send`, body)
-  return res.data
-}
-
-// export async function sendExampleMessages(body) {
-//   const res = await axios.post(`${globalVar.baseUrl}/api/messages/examples/send`, body)
-//   return res.data
-// }
-
-export async function getGiftConfig(roomId: string) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/room/${roomId}/gift/map`)
-  return res.data
-}
-
-// export async function getVoices() {
-//   const res = await axios.get(`${globalVar.baseUrl}/api/voices`)
-//   return res.data
-// }
-
-// export async function speak(body) {
-//   const res = await axios.post(`${globalVar.baseUrl}/api/speak`, body)
-//   return res.data
-// }
-
-export async function statistic(body) {
+export async function statistic(body: { roomId: number; start: string; end: string }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/statistic`, body)
   return res.data
 }
 
-export async function commentWordExtract(body) {
+export async function commentWordExtract(body: { roomId: number; start: string; end: string }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/statistic/comment/keyword-extract`, body)
   return res.data
 }
 
-export async function exportFile(body) {
+export async function exportFile(body: { roomId: number; start: string; end: string }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/statistic/gift/export`, body, {
-    // responseType: 'stream', // ?????
-    // decompress: false,
-    transitional: {
-      forcedJSONParsing: false,
-    }
+    transitional: { forcedJSONParsing: false },
   })
   return res.data
 }
 
-export async function initialASR(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/asr/initial`, body)
+// ==================== ASR ====================
+
+export async function initialASR(body: { appKey: string; accessKeyId: string; accessKeySecret: string }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/automatic-speech-recognition/initial`, body)
   return res.data
 }
 
-export async function startLiveStreamASR(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/asr/live/start`, body)
+export async function startLiveStreamASR(body: { playUrl: string; ffmpegPath?: string }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/automatic-speech-recognition/live/start`, body)
   return res.data
 }
 
-export async function closeLiveStreamASR(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/asr/live/close`, body)
+export async function closeLiveStreamASR() {
+  const res = await axios.post(`${globalVar.baseUrl}/api/automatic-speech-recognition/live/close`)
   return res.data
 }
 
-export async function closeASR(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/asr/close`, body)
+export async function closeASR() {
+  const res = await axios.post(`${globalVar.baseUrl}/api/automatic-speech-recognition/close`)
   return res.data
 }
 
 export async function getASRStatus() {
-  const res = await axios.get(`${globalVar.baseUrl}/api/asr/status`)
+  const res = await axios.get(`${globalVar.baseUrl}/api/automatic-speech-recognition/status`)
   return res.data
 }
 
-export async function translateSentence(body) {
+export async function sendAudio(data: Int16Array) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/automatic-speech-recognition/audio`, { data })
+  return res.data
+}
+
+// ==================== Translate ====================
+
+export async function translateSentence(body: { text: string; from?: string; to?: string; accessKeyId: string; accessKeySecret: string; payload?: any }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/translate/sentence`, body)
   return res.data
 }
 
-export async function translateOpen(body) {
+export async function translateOpen(body: { accessKeyId: string; accessKeySecret: string; fromLang: string; toLang: string }) {
   const res = await axios.post(`${globalVar.baseUrl}/api/translate/open`, body)
   return res.data
 }
 
-export async function translateClose(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/translate/close`, body)
+export async function translateClose() {
+  const res = await axios.post(`${globalVar.baseUrl}/api/translate/close`)
   return res.data
 }
 
@@ -190,6 +163,20 @@ export async function getTranslateStatus() {
   const res = await axios.get(`${globalVar.baseUrl}/api/translate/status`)
   return res.data
 }
+
+// ==================== Speech Recognition ====================
+
+export async function initialSpeechRecognition(body: { accessKeyId: string; accessKeySecret: string }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/speech-recognition/initial`, body)
+  return res.data
+}
+
+export async function speechToText(body: { appKey: string; payload?: any }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/speech-recognition/speech-to-text`, body)
+  return res.data
+}
+
+// ==================== Cookie / Auth ====================
 
 export async function needRefreshCookie() {
   const res = await axios.get(`${globalVar.baseUrl}/api/cookie/refresh/check`)
@@ -201,122 +188,73 @@ export async function refreshCookie(body: { refreshToken: string }) {
   return res.data
 }
 
-export async function initialSpeechRegcognition(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/speech-recognition/initial`, body)
-  return res.data
-}
-
-export async function speechToText(body) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/speech-recognition/speech-to-text`, body)
-  return res.data
-}
-
-export async function sendComment({ message, roomId }) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/comment/send`, {
-    comment: message
-  })
-  return res.data
-}
-
-export async function getMedalList({ page, pageSize }) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/medal/list?page=${page}&pageSize=${pageSize}`)
-  return res.data
-}
-
-export async function getRoomInfoV2(roomId) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/info`)
-  return res.data
-}
-
-export async function getRoomInfoByIds(roomIds) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/info`, {
-    roomIds: roomIds
-  })
-  return res.data
-}
-
-export async function getGuardInfo(roomId, uid) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/guard?uid=${uid}`)
-  return res.data
-}
-
-export async function getUserInfoV2(uid) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/user/${uid}/info`)
-  return res.data
-}
-
-export async function getUserInfoInRoom(roomId) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/user/info`)
-  return res.data
-}
-
-export async function wearMedal(medalId) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/medal/wear`, {
-    medalId
-  })
-  return res.data
-}
-
-export async function getRandomPlayUrl({
-  roomId,
-  qn,
-  withCookie = false,
-}) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/playurl?qn=${qn}&withCookie=${withCookie}`)
-  return res.data
-}
-
-export async function record({
-  roomId,
-  output,
-  qn,
-  platform,
-  withCookie
-}) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/room/${roomId}/record/start`, {
-    output,
-    qn,
-    platform,
-    withCookie
-  })
-  return res.data
-}
-
-export async function cancelRecord({
-  roomId,
-  recordId,
-}) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/room/${roomId}/record/cancel`, {
-    recordId
-  })
-  return res.data
-}
-
-export async function getRecordState({
-  roomId
-}) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/room/${roomId}/record/status`)
-  return res.data
-}
-
-export async function getQrCode() {
+export async function generateQRCode() {
   const res = await axios.get(`${globalVar.baseUrl}/api/login/qr-code/generate`)
   return res.data
 }
 
-export async function loginFromQrCode(qrCodeKey) {
-  const res = await axios.get(`${globalVar.baseUrl}/api/login/qr-code/poll?qrCodeKey=${qrCodeKey}`)
+export async function pollQRCode(qrCodeKey: string) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/login/qr-code/poll`, { params: { qrCodeKey } })
   return res.data
 }
 
-export async function addLike({
-  roomId,
-  ruid,
-  count
-}) {
-  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/${roomId}/like`, {
-    ruid,
-    count,
-  })
+// ==================== Bilibili Proxy ====================
+
+export async function getUserInfoInRoom(roomId: number) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/user/info`, { params: { roomId: String(roomId) } })
+  return res.data
+}
+
+export async function getGuardInfo(roomId: number, uid?: number) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/guard`, { params: { roomId: String(roomId), uid } })
+  return res.data
+}
+
+export async function sendComment({ roomId, comment }: { roomId: number; comment: string }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/comment/send`, { roomId: String(roomId), comment })
+  return res.data
+}
+
+export async function getRandomPlayUrl(body: { roomId: number; qn?: number; withCookie?: boolean }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/room/playurl`, { params: { roomId: String(body.roomId), qn: body.qn, withCookie: body.withCookie ? 'true' : undefined } })
+  return res.data
+}
+
+export async function getUserInfoV2(userId: number) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/user/info`, { params: { userId } })
+  return res.data
+}
+
+export async function wearMedal(medalId: number) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/medal/wear`, { medalId: String(medalId) })
+  return res.data
+}
+
+export async function getMedalList({ page, pageSize }: { page?: number; pageSize?: number }) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/bilibili/medal/list`, { params: { page, pageSize } })
+  return res.data
+}
+
+export async function addLike({ roomId, ruid, count }: { roomId: number; ruid: number; count: number }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/bilibili/room/like`, { roomId: String(roomId), ruid: String(ruid), count })
+  return res.data
+}
+
+// ==================== Client Config ====================
+
+export async function getClientConfig(clientId: string) {
+  const res = await axios.get(`${globalVar.baseUrl}/api/client/config/info`, { params: { clientId } })
+  return res.data
+}
+
+export async function updateClientConfig(clientId: string, KVs: Array<{ key: string; value: string }>) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/client/config/update`, { clientId, KVs })
+  return res.data
+}
+
+// ==================== Health ====================
+
+export async function touch() {
+  const res = await axios.get(`${globalVar.baseUrl}/api/touch`)
   return res.data
 }

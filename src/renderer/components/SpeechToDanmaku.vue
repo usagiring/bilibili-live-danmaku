@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { useConfigStore } from '../store'
-import ws from '../../service/ws'
+import { sse } from '../../service/sse-client'
 import { speechToText, sendComment } from '../../service/api'
 
 // 依赖过大50mb 放弃使用
@@ -76,7 +76,8 @@ export default {
   },
 
   created() {
-    ws.addEventListener('message', this.onMessage)
+    sse.on('SR_STARTED', this.onSRStarted)
+    sse.on('SR_COMPLETED', this.onSRCompleted)
   },
 
   async mounted() {
@@ -110,7 +111,8 @@ export default {
   },
 
   beforeUnmount() {
-    ws.removeEventListener('message', this.onMessage)
+    sse.off('SR_STARTED', this.onSRStarted)
+    sse.off('SR_COMPLETED', this.onSRCompleted)
   },
 
   methods: {
@@ -232,25 +234,18 @@ export default {
       vad2(audioContext, stream, options)
     },
 
-    onMessage(msg) {
-      const payload = JSON.parse(msg.data)
-
-      if (payload.cmd === 'SR_STARTED') {
+    onSRStarted() {},
+    onSRCompleted(data: any) {
+      if (data.payload?.payload?.result === 'Confirm') {
+        this.sendMessage()
+        return
       }
-
-      if (payload.cmd === 'SR_COMPLETED') {
-        if (payload.payload?.payload?.result === 'Confirm') {
-          this.sendMessage()
-          return
-        }
-        if (payload.payload?.payload?.result === 'Cancel') {
-          this.cancel()
-          return
-        }
-
-        this.message = this.message + payload.payload?.payload?.result
-        this.message = this.message.slice(0, 30)
+      if (data.payload?.payload?.result === 'Cancel') {
+        this.cancel()
+        return
       }
+      this.message = this.message + data.payload?.payload?.result
+      this.message = this.message.slice(0, 30)
     },
 
     async sendMessage() {

@@ -1,28 +1,6 @@
 import { createPinia, defineStore } from 'pinia'
 import { DEFAULT_STYLE } from '../../service/const'
 
-// 单个房间的数据结构
-interface RoomState {
-  roomId: number
-  realRoomId: number
-  displayRoomId: number
-  isConnected: boolean
-  guardNumber: number
-  username: string
-  avatar: string | null
-  ninkiNumber: number
-  fansNumber: number
-  fansClubNumber: number
-  liveStatus: number
-  onlineNumber: number
-  roomUserId: number
-  watchedNumber: number
-  likeNumber: number
-  topPhoto: string
-  medalId: number | null
-  medalName: string
-}
-
 function createRoom(roomId: number): RoomState {
   return {
     roomId,

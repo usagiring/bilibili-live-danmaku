@@ -81,7 +81,7 @@ import {
   disconnect as disconnectRoom,
   getRoomInfoV2,
   getGuardInfo,
-  updateSetting,
+  updateClientConfig,
 } from '../../service/api'
 
 export default defineComponent({
@@ -187,7 +187,10 @@ export default defineComponent({
           this.store.UPDATE_ACTIVE_ROOM({ guardNumber: guardResult.data.info.num })
         } catch { /* ignore */ }
 
-        await updateSetting({ roomUserId: uid })
+        const clientId = (this as any).$global?.clientId
+        if (clientId) {
+          await updateClientConfig(clientId, [{ key: 'roomUserId', value: String(uid) }])
+        }
         this.$emit('connect', true)
       } catch (e: any) {
         this.$Message.error(`连接失败: ${e.message}`)

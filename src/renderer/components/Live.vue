@@ -93,10 +93,10 @@ import { ipcRenderer } from 'electron'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_CHOOSE_DIRECTORY } from '../../service/const'
 import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
-import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState, backupDB } from '../../service/api'
+import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
-import ws from '../../service/ws'
+import { sse } from '../../service/sse-client'
 
 const qualityMap = {
   原画: 10000,
@@ -232,7 +232,8 @@ export default {
       }, 1000)
     }
 
-    ws.addEventListener('message', this.onRecordMessage)
+    sse.on('RECORD_RATE', this.onRecordRate)
+    sse.on('RECORD_END', this.onRecordEnd)
 
     if (this.liveWindowId) {
       this.isShowLiveWindow = true
@@ -243,18 +244,15 @@ export default {
     })
   },
   beforeUnmount() {
-    ws.removeEventListener('message', this.onRecordMessage)
+    sse.off('RECORD_RATE', this.onRecordRate)
+    sse.off('RECORD_END', this.onRecordEnd)
   },
   methods: {
-    onRecordMessage(msg) {
-      const data = JSON.parse(msg.data)
-      if (data.cmd === 'RECORD_RATE') {
-        const { bps, totalSize } = data.payload
-        this.downloadRate = parseDownloadRate(bps)
-      }
-      if (data.cmd === 'RECORD_END') {
-      }
+    onRecordRate(data: any) {
+      const { bps, totalSize } = data.payload
+      this.downloadRate = parseDownloadRate(bps)
     },
+    onRecordEnd() {},
 
     async startRecord() {
       try {

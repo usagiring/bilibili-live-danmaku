@@ -165,7 +165,7 @@ import {
   getTranslateStatus,
   startLiveStreamASR,
   closeLiveStreamASR,
-  initialSpeechRegcognition,
+  initialSpeechRecognition,
   speechToText,
   getRandomPlayUrl,
 } from '../../service/api'
@@ -501,9 +501,9 @@ export default {
           global.microphoneAudioContext = null
         }
       } else {
-        await closeLiveStreamASR({})
+        await closeLiveStreamASR()
       }
-      await closeASR({})
+      await closeASR()
       this.isStarted = false
     },
 
@@ -580,10 +580,9 @@ export default {
         return
       }
 
-      await initialSpeechRegcognition({
+      await initialSpeechRecognition({
         accessKeyId: this.aliAccessKeyId,
         accessKeySecret: this.aliAccessKeySecret,
-        appKey: this.aliAppKey,
       })
 
       const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
@@ -716,7 +715,7 @@ export default {
           toLang: this.mtToLang,
         })
       } else {
-        await translateClose({})
+        await translateClose()
       }
       this.enableTranslate = status
     },

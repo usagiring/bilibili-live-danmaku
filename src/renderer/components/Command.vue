@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import { useConfigStore } from '../store'
-import { updateSetting } from '../../service/api'
+import { updateClientConfig } from '../../service/api'
 
 export default {
   data() {
@@ -80,7 +80,7 @@ export default {
           enable: status,
         },
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -91,7 +91,7 @@ export default {
           roles: values,
         },
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -102,7 +102,7 @@ export default {
           keyword: e.target.value,
         },
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -113,7 +113,7 @@ export default {
           count: number,
         },
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
 
@@ -125,7 +125,7 @@ export default {
           useHintText: status,
         },
       }
-      await updateSetting(data)
+      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().UPDATE_CONFIG(data)
     },
   },

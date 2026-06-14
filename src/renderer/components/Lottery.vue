@@ -82,8 +82,8 @@ import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { getRandomItem, dateFormat } from '../../service/util'
 import { DEFAULT_AVATAR } from '../../service/const'
-import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories, getGiftConfig } from '../../service/api'
-import ws from '../../service/ws'
+import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
+import { sse } from '../../service/sse-client'
 
 export default {
   data() {
@@ -152,18 +152,18 @@ export default {
     },
     start() {
       this.init()
-      // emitter.on("message", this.onLotteryMessage)
-      ws.addEventListener('message', this.onLotteryMessage)
+      sse.on('COMMENT', this.onLotteryComment)
+      sse.on('GIFT', this.onLotteryGift)
       this.isRunning = true
     },
     async stop() {
-      ws.removeEventListener('message', this.onLotteryMessage)
+      sse.off('COMMENT', this.onLotteryComment)
+      sse.off('GIFT', this.onLotteryGift)
     },
 
-    async onLotteryMessage(msg) {
-      const data = JSON.parse(msg.data)
-      if (this.isDanmaku && data.cmd === 'COMMENT') {
-        const comment = data.payload
+    onLotteryComment(data: any) {
+      if (!this.isDanmaku) return
+      const comment = data.payload
         // 已经记录过的用户不再重复统计
         if (this.userCommentMap[comment.uid]) return
         // 当前房间粉丝牌等级过滤
@@ -184,8 +184,10 @@ export default {
         this.userCommentMap[comment.uid] = history
         this.userComments = [history, ...this.userComments]
       }
-      if (this.isGift && data.cmd === 'GIFT') {
-        const gift = data.payload
+    },
+    onLotteryGift(data: any) {
+      if (!this.isGift) return
+      const gift = data.payload
         if (!this.selectedGiftIds.includes(`${gift.id}`)) return
 
         const { uid, uname, id, name, count = 1, singleCount = 1, price = 0, avatar = DEFAULT_AVATAR } = gift
@@ -322,13 +324,8 @@ export default {
       // await lotteryDB.deleteMany({})
       this.histories = []
     },
-
-    async autoWatchLottery() {
-      ws.addEventListener('message', this.onLotteryMessage)
-    },
   },
 }
-</script>
 
 <style scoped>
 .selector-wrapper {
