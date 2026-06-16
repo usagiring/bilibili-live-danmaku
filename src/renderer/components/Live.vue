@@ -94,12 +94,12 @@ import { ipcRenderer } from 'electron'
 import emitter from '../../service/event'
 import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_CHOOSE_DIRECTORY } from '../../service/const'
 // @ts-ignore
-import { parseDownloadRate, parseHexColor, dateFormat } from '../../service/util'
+import { parseDownloadRate, parseHexColor, dateFormat } from '../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../../service/api'
 // @ts-ignore
 import FanMedal from './FanMedal'
 import icon from '../assets/logo.png'
-import { sse } from '../../service/sse-client'
+import { sse } from '../service/sse-client'
 
 const qualityMap = {
   原画: 10000,

@@ -35,13 +35,13 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import { defineComponent } from 'vue'
-import { sse } from '../../service/sse-client'
+import { sse } from '../service/sse-client'
 import { speechToText, sendComment } from '../../service/api'
 
 // 依赖过大50mb 放弃使用
 // import * as vad from '@ricky0123/vad'
 // import vad2 from 'voice-activity-detection'
-import vad3 from '../../service/vad'
+import vad3 from '../service/vad'
 const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)
 
 /**

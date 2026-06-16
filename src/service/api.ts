@@ -255,6 +255,14 @@ export async function updateClientConfig(clientId: string, KVs: Array<{ key: str
 // ==================== Health ====================
 
 export async function touch() {
+  console.log(globalVar.baseUrl)
   const res = await axios.get(`${globalVar.baseUrl}/api/touch`)
+  return res.data
+}
+
+export async function registryClient({ clientId }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/client/register`, {
+    clientId
+  })
   return res.data
 }

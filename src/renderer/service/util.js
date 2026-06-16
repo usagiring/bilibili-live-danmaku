@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { PRICE_PROPERTIES, GUARD_ICON_MAP, INTERACT_TYPE } from './const'
+import { PRICE_PROPERTIES, GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 
 // TODO 设置一些更小的粒度？ < 1
 export function getPriceProperties(price) {

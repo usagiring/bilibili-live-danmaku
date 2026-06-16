@@ -75,7 +75,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
-import { sse } from '../../service/sse-client'
+import { sse } from '../service/sse-client'
 import {
   connect as connectRoom,
   disconnect as disconnectRoom,

@@ -91,13 +91,13 @@ import { defineComponent } from 'vue'
 import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
-import { getPriceProperties, dateFormat, wait } from '../../service/util'
+import { getPriceProperties, dateFormat, wait } from '../service/util'
 import { queryMessages } from '../../service/api'
 // @ts-ignore - Volar known issue: cannot resolve .vue module types
 import GiftCardMini from './GiftCardMini'
 // @ts-ignore
 import FanMedal from './FanMedal'
-import { sse } from '../../service/sse-client'
+import { sse } from '../service/sse-client'
 const COMMENTS_LIMIT = 200
 const GIFTS_LIMIT = 200
 const INTERACTS_LIMIT = 200

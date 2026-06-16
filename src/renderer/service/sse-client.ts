@@ -1,6 +1,7 @@
-import globalVar from './global'
-
 type Handler = (data: any) => void
+
+// preload 暴露的全局变量访问器
+const { getBaseUrl, getClientId } = (window as any).electronAPI
 
 class GlobalSSE {
   private es: EventSource | null = null
@@ -15,9 +16,9 @@ class GlobalSSE {
     return this.es?.readyState === EventSource.OPEN
   }
 
-  /** 使用 globalVar.clientId 建立 SSE 连接 */
+  /** 建立 SSE 连接，直接从 window 读取 baseUrl 和 clientId */
   connect(): void {
-    const clientId = globalVar.clientId
+    const clientId = getClientId()
     if (!clientId) {
       console.warn('[SSE] clientId 未注册，延迟连接...')
       this.scheduleReconnect()
@@ -28,7 +29,7 @@ class GlobalSSE {
       this.es.close()
     }
 
-    const url = `${globalVar.baseUrl}/api/sse/connect?clientId=${encodeURIComponent(clientId)}`
+    const url = `${getBaseUrl()}/api/sse/connect?clientId=${encodeURIComponent(clientId)}`
     this.es = new EventSource(url)
 
     this.es.onopen = () => {

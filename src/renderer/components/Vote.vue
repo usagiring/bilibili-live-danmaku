@@ -100,9 +100,9 @@ let optionRegexps: RegExp[] = []
 let colorPool: string[] = []
 
 import { shuffle, cloneDeep } from 'lodash'
-import { sse } from '../../service/sse-client'
+import { sse } from '../service/sse-client'
 import { COLORS } from '../../service/const'
-import { dateFormat } from '../../service/util'
+import { dateFormat } from '../service/util'
 
 const chartRef: any = { current: null }
 

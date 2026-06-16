@@ -49,7 +49,7 @@
 import dayjs from 'dayjs'
 import { ipcRenderer } from 'electron'
 import { statistic as statisticAPI, commentWordExtract } from '../../service/api'
-import { dateFormat } from '../../service/util'
+import { dateFormat } from '../service/util'
 import * as echarts from 'echarts'
 import 'echarts-wordcloud/dist/echarts-wordcloud.min.js'
 // import 'echarts-wordcloud';
