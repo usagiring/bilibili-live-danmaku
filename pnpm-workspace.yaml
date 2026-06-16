@@ -1,8 +1,11 @@
+packages:
+  - 'web'
 allowBuilds:
   '@alicloud/openapi-core': false
   bufferutil: false
+  core-js: true
   electron: true
-  electron-winstaller: false
+  electron-winstaller: true
   esbuild: true
   highlight.js: false
   koa: true
