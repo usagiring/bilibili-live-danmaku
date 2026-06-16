@@ -1,69 +1,71 @@
 <template>
   <div class="overview-panel">
-    <!-- 信息卡片 -->
-    <div class="profile-card">
-      <Avatar :src="activeRoom.face || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
-      <div class="p-info">
-        <div class="p-name">
-          {{ activeRoom.username || '未连接' }}
-          <Tag v-if="activeRoom.isConnected" color="blue" style="vertical-align:middle">连接中</Tag>
+    <template v-if="activeRoom">
+      <!-- 信息卡片 -->
+      <div class="profile-card">
+        <Avatar :src="activeRoom.face || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
+        <div class="p-info">
+          <div class="p-name">
+            {{ activeRoom.username || '未连接' }}
+            <Tag v-if="activeRoom.isConnected" color="blue" style="vertical-align:middle">连接中</Tag>
+          </div>
+          <div class="p-id">房间号 {{ activeRoom?.displayId }} · UID {{ activeRoom?.userId || '-' }}</div>
+          <Tag :color="activeRoom.liveStatus === 1 ? 'success' : 'default'" style="margin-top:4px">
+            {{ activeRoom.isConnected ? (activeRoom.liveStatus === 1 ? '● 直播中' : '未开播') : '未连接' }}
+          </Tag>
         </div>
-        <div class="p-id">房间号 {{ activeRoom?.displayId }} · UID {{ activeRoom?.userId || '-' }}</div>
-        <Tag :color="activeRoom.liveStatus === 1 ? 'success' : 'default'" style="margin-top:4px">
-          {{ activeRoom.isConnected ? (activeRoom.liveStatus === 1 ? '● 直播中' : '未开播') : '未连接' }}
-        </Tag>
+        <div class="p-actions">
+          <Button v-if="!activeRoom.isConnected" type="primary" size="small" :loading="connecting"
+            @click="connect">连接</Button>
+          <Button v-if="activeRoom.isConnected" size="small" @click="disconnect">断开</Button>
+          <Button type="primary" size="small" @click="$emit('showDanmaku', true)">弹幕窗</Button>
+        </div>
       </div>
-      <div class="p-actions">
-        <Button v-if="!activeRoom.isConnected" type="primary" size="small" :loading="connecting"
-          @click="connect">连接</Button>
-        <Button v-if="activeRoom.isConnected" size="small" @click="disconnect">断开</Button>
-        <Button type="primary" size="small" @click="$emit('showDanmaku', true)">弹幕窗</Button>
-      </div>
-    </div>
 
-    <!-- 统计条 -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value">{{ formatNumber(activeRoom.ninkiNumber) }}</div>
-        <div class="stat-label">
-          <Icon type="md-eye" /> 热度
+      <!-- 统计条 -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.ninkiNumber) }}</div>
+          <div class="stat-label">
+            <Icon type="md-eye" /> 热度
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.fansNumber) }}</div>
+          <div class="stat-label">
+            <Icon type="md-heart" /> 关注
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.fansclubNumber) }}</div>
+          <div class="stat-label">
+            <Icon type="md-star" /> 粉丝团
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ activeRoom?.anchorNumber }}</div>
+          <div class="stat-label">
+            <Icon type="md-flag" /> 舰队
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ formatNumber(activeRoom.fansNumber) }}</div>
-        <div class="stat-label">
-          <Icon type="md-heart" /> 关注
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ formatNumber(activeRoom.fansclubNumber) }}</div>
-        <div class="stat-label">
-          <Icon type="md-star" /> 粉丝团
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ activeRoom?.anchorNumber }}</div>
-        <div class="stat-label">
-          <Icon type="md-flag" /> 舰队
-        </div>
-      </div>
-    </div>
 
-    <!-- 观看/点赞 -->
-    <div class="stats-row" style="grid-template-columns: repeat(2, 1fr)">
-      <div class="stat-card">
-        <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
-        <div class="stat-label">
-          <Icon type="md-person" /> 看过
+      <!-- 观看/点赞 -->
+      <div class="stats-row" style="grid-template-columns: repeat(2, 1fr)">
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
+          <div class="stat-label">
+            <Icon type="md-person" /> 看过
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
+          <div class="stat-label">
+            <Icon type="md-thumbs-up" /> 点赞
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
-        <div class="stat-label">
-          <Icon type="md-thumbs-up" /> 点赞
-        </div>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -90,14 +92,31 @@ const activeRoom = computed(() => store.activeRoom)
 const initializing = ref(false)
 const connecting = ref(false)
 
-function formatNumber(n?: number): string {
-  if (!n) return '0'
-  if (n >= 10000) return (n / 10000).toFixed(1) + '万'
-  return n.toLocaleString()
-}
+onMounted(() => {
+  sse.on('NINKI', onNinki)
+  sse.on('LIVE', onLive)
+  sse.on('PREPARING', onPreparing)
+  sse.on('WATCHED_CHANGE', onWatchedChange)
+  sse.on('LIKE_CHANGE', onLikeChange)
+  sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
+  sse.on('ONLINE_COUNT', onOnlineCount)
+})
+onMounted(() => {
+  initialize()
+})
+
+onBeforeUnmount(() => {
+  // sse.off('NINKI', onNinki)
+  // sse.off('LIVE', onLive)
+  // sse.off('PREPARING', onPreparing)
+  // sse.off('WATCHED_CHANGE', onWatchedChange)
+  // sse.off('LIKE_CHANGE', onLikeChange)
+  // sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
+  // sse.off('ONLINE_COUNT', onOnlineCount)
+})
+
 
 // ── SSE 回调 ──
-
 function onNinki(data: any) {
   const { roomId, ninkiNumber } = data.payload
   const room = store.rooms.find(room => room.id === roomId)
@@ -139,8 +158,6 @@ function onOnlineCount(data: any) {
   room.onlineNumber = onlineNumber
 }
 
-// ── 连接 / 断开 ──
-
 async function initialize() {
   if (!activeRoom?.value) return
 
@@ -149,7 +166,7 @@ async function initialize() {
   // TODO initialized
   try {
     const roomId = activeRoom.value?.displayId || activeRoom.value?.id
-    const { data } = await getRoomInfoV2(roomId)
+    const { data } = await getRoomInfoV2({ roomId })
 
     if (!data) {
       Message.error('连接失败：无法获取房间信息')
@@ -223,25 +240,12 @@ async function disconnect({ roomId }) {
   room.isConnected = false
 }
 
-onMounted(() => {
-  sse.on('NINKI', onNinki)
-  sse.on('LIVE', onLive)
-  sse.on('PREPARING', onPreparing)
-  sse.on('WATCHED_CHANGE', onWatchedChange)
-  sse.on('LIKE_CHANGE', onLikeChange)
-  sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
-  sse.on('ONLINE_COUNT', onOnlineCount)
-})
+function formatNumber(n?: number): string {
+  if (!n) return '0'
+  if (n >= 10000) return (n / 10000).toFixed(1) + '万'
+  return n.toLocaleString()
+}
 
-onBeforeUnmount(() => {
-  // sse.off('NINKI', onNinki)
-  // sse.off('LIVE', onLive)
-  // sse.off('PREPARING', onPreparing)
-  // sse.off('WATCHED_CHANGE', onWatchedChange)
-  // sse.off('LIKE_CHANGE', onLikeChange)
-  // sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
-  // sse.off('ONLINE_COUNT', onOnlineCount)
-})
 </script>
 
 <style scoped>

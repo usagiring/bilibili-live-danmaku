@@ -4,7 +4,7 @@ const baseUrl: string = await window.getBaseUrl()
 
 // ==================== Room ====================
 
-export async function getRoomInfoV2(roomId: string) {
+export async function getRoomInfoV2({ roomId }: { roomId: string }) {
   const res = await axios.get(`${baseUrl}/api/room/info`, { params: { roomId } })
   return res.data
 }
