@@ -13,6 +13,11 @@ declare global {
   var __static: string
 }
 
+// 开发模式下禁用硬件加速
+if (import.meta.env.DEV) {
+  app.disableHardwareAcceleration()
+}
+
 initialize()
 
 process.on('uncaughtException', (error) => {
