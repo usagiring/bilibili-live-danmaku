@@ -74,7 +74,7 @@ import { useConfigStore } from '../store'
 import { defineComponent } from 'vue'
 import { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
-import { updateClientConfig } from '../../service/api'
+import { updateClientConfig } from '../service/api'
 import { IPC_CREATE_CHILD_WINDOW } from '../../service/const'
 import icon from '../assets/logo.png'
 

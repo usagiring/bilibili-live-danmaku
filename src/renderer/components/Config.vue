@@ -219,7 +219,7 @@ import { ipcRenderer, shell } from 'electron'
 import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
 // @ts-ignore
 import FanMedal from './FanMedal'
-import { parseHexColor } from '../../service/util'
+import { parseHexColor } from '../service/util'
 import {
   needRefreshCookie,
   sendComment,
@@ -230,8 +230,8 @@ import {
   pollQRCode,
   refreshCookie as refreshCookieApi,
   updateClientConfig,
-} from '../../service/api'
-import { wait } from '../../service/util'
+} from '../service/api'
+import { wait } from '../service/util'
 import QRCode from 'qrcode'
 
 const synth = window.speechSynthesis

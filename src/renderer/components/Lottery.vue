@@ -80,10 +80,10 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import { shell } from 'electron'
-import { getRandomItem, dateFormat } from '../../service/util'
+import { getRandomItem, dateFormat } from '../service/util'
 import { DEFAULT_AVATAR } from '../../service/const'
-import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../../service/api'
-import { sse } from '../../service/sse-client'
+import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../service/api'
+import { sse } from '../service/sse-client'
 
 export default {
   data() {

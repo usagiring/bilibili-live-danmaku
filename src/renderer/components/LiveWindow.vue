@@ -25,7 +25,7 @@ import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
 import * as flvjs from 'flv.js'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_ON_TOP } from '../../service/const'
-import { sendComment } from '../../service/api'
+import { sendComment } from '../service/api'
 const win = getCurrentWindow()
 
 export default {

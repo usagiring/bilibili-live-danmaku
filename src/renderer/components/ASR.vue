@@ -168,7 +168,7 @@ import {
   initialSpeechRecognition,
   speechToText,
   getRandomPlayUrl,
-} from '../../service/api'
+} from '../service/api'
 import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_SHOW_OPEN_DIALOG } from '../../service/const'
 import icon from '../assets/logo.png'
 const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)

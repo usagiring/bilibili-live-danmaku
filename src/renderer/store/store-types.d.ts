@@ -11,7 +11,7 @@ export interface RoomState {
   realRoomId: number
   displayRoomId: number
   isConnected: boolean
-  guardNumber: number
+  anchorNumber: number
   username: string
   avatar: string | null
   ninkiNumber: number

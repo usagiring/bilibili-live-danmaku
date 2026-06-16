@@ -1,12 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import path from 'path'
 
-// 暴露 static 路径给渲染进程
-contextBridge.exposeInMainWorld('electronAPI', {
-  staticPath: path.join(__dirname, '../static')
-})
+contextBridge.exposeInMainWorld('getBaseUrl', () => ipcRenderer.invoke('get-base-url'))
+contextBridge.exposeInMainWorld('getClientId', () => ipcRenderer.invoke('get-client-id'))
 
-// 暴露 ipcRenderer 方法给渲染进程（按需添加）
+// 暴露 ipcRenderer 方法给渲染进程
 contextBridge.exposeInMainWorld('ipcRenderer', {
   send: (channel: string, ...args: unknown[]) => ipcRenderer.send(channel, ...args),
   on: (channel: string, func: (...args: unknown[]) => void) => {

@@ -7,7 +7,7 @@ function createRoom(roomId: number): RoomState {
     realRoomId: roomId,
     displayRoomId: roomId,
     isConnected: false,
-    guardNumber: 0,
+    anchorNumber: 0,
     username: '',
     avatar: null,
     ninkiNumber: 0,
@@ -33,7 +33,7 @@ interface Provider {
 
 }
 
-interface Room {
+export interface Room {
   id: string
   userId: string
   liveStatus: number
@@ -43,6 +43,21 @@ interface Room {
   autoReplyRules: any[]
 
   voteOptions: Array<{ keyword: string; value: string }>
+
+  // Render
+  realId?: string
+  isConnected?: boolean
+  isActive?: boolean
+  username?: string
+  face?: string
+  displayId?: string
+  anchorNumber?: number
+  fansNumber?: number
+  fansclubNumber?: number
+  ninkiNumber?: number
+  watchedNumber?: number
+  likeNumber?: number
+  onlineNumber?: number
 }
 
 interface User {
@@ -157,21 +172,20 @@ export interface Config {
   refreshToken?: string
   waitingSpeakerCount?: number
 
-  user?: User,
-  rooms: Room[],
-  activeRoomIndex: number,
-  isRecording: boolean,
-  windows: Window[],
-  providers: Provider[],
+  user?: User
+  rooms: Room[]
+  isRecording: boolean
+  windows: Window[]
+  providers: Provider[]
 
-  dmStyle: DmStyle,
-  dmRawStyle: DmRawStyle,
-  liveConfig: LiveConfig,
-  messageConfig: MessageConfig,
-  recordConfig: RecordConfig,
-  asrConfig: AsrConfig,
-  mtConfig: MtConfig,
-  chartConfig: ChartConfig,
+  dmStyle: DmStyle
+  dmRawStyle: DmRawStyle
+  liveConfig: LiveConfig
+  messageConfig: MessageConfig
+  recordConfig: RecordConfig
+  asrConfig: AsrConfig
+  mtConfig: MtConfig
+  chartConfig: ChartConfig
 }
 
 export const useConfigStore = defineStore('config', {
@@ -183,8 +197,7 @@ export const useConfigStore = defineStore('config', {
 
   getters: {
     activeRoom(state): Room | null {
-      if (state.rooms.length === 0) return null
-      return state.rooms[state.activeRoomIndex] || null
+      return state.rooms?.find(room => room.isActive) || null
     },
 
     // hasConnectedRoom(state): boolean {
@@ -236,7 +249,7 @@ export const useConfigStore = defineStore('config', {
 
     UPDATE_CONFIG(payload: Record<string, any>) {
       for (const key in payload) {
-        ;(this as any)[key] = payload[key]
+        ; (this as any)[key] = payload[key]
       }
     },
   },

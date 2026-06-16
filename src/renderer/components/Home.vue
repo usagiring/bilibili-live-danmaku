@@ -7,7 +7,7 @@
         <span id="title-bar-text">bilibili-danmaku</span>
       </div>
       <div id="title-bar-status">
-        <span v-if="isRecording">录制中...</span>
+        <!-- <span v-if="isRecording">录制中...</span> -->
       </div>
       <div id="title-bar-controller">
         <div id="tray" @click="hideToTray">
@@ -33,8 +33,8 @@
           </button>
         </div>
         <div class="room-list">
-          <div v-for="(room, index) in store.rooms" :key="index" class="room-card"
-            :class="{ active: store.activeRoomIndex === index }" @click="selectRoom(index)">
+          <div v-for="(room, index) in store.rooms" :key="index" class="room-card" :class="{ active: room.isActive }"
+            @click="selectRoom(index)">
             <div class="room-info">
               <div class="room-name">直播间 {{ room.id }}</div>
               <div class="room-id">用户 {{ room.userId || '未连接' }}</div>
@@ -86,7 +86,7 @@
         <!-- Tab 内容区 -->
         <div class="tab-content" v-if="store.activeRoom">
           <!-- 概览 -->
-          <!-- <OverviewPanel v-if="activeTab === 'overview'" @connect="handleConnect" @show-danmaku="handleShowDanmaku" /> -->
+          <OverviewPanel v-if="activeTab === 'overview'" @connect="handleConnect" @show-danmaku="handleShowDanmaku" />
           <!-- TODO: 逐模块重构，暂时注释
           <StyleSetting v-if="activeTab === 'style'" />
           <Vote v-if="activeTab === 'vote'" />
@@ -120,11 +120,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 // import { ipcRenderer } from 'electron'
-import { useConfigStore } from '../store'
+import { Room, useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION } from '../../service/const'
-// import OverviewPanel from './OverviewPanel.vue'
+import OverviewPanel from './OverviewPanel.vue'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -138,21 +138,26 @@ const activeTab = ref('overview')
 const showAddRoom = ref(false)
 const newRoomId = ref('')
 
-const isRecording = computed(() => store.isRecording)
+// const isRecording = computed(() => store.isRecording)
 
 function selectRoom(index: number) {
-  store.activeRoomIndex = index
+  store.rooms.forEach((room, i) => {
+    room.isActive = i === index
+  })
 }
+
 function removeRoom(index: number) {
   store.rooms.splice(index, 1)
-  if (store.activeRoomIndex >= store.rooms.length) {
-    store.activeRoomIndex = Math.max(0, store.rooms.length - 1)
-  }
 }
 
 function handleAddRoom() {
   const roomId = newRoomId.value
   if (!roomId) return
+
+  store.rooms.forEach((room, i) => {
+    room.isActive = false
+  })
+
   store.rooms.push({
     id: roomId,
     userId: '',
@@ -161,24 +166,26 @@ function handleAddRoom() {
     isAutoReply: false,
     autoReplyRules: [],
     voteOptions: [],
+    isActive: true
   })
-  store.activeRoomIndex = store.rooms.length - 1
+
   showAddRoom.value = false
   newRoomId.value = ''
 }
 
 function handleConnect(_status: boolean) {
   // 由 OverviewPanel emit 上来触发连接
+  // TODO 状态变化
 }
 function handleShowDanmaku(_status: boolean) {
   // 由 OverviewPanel emit 上来触发弹幕窗
 }
 
 function close() {
-  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })
+  window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })
 }
 function minimize() {
-  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' }) 
+  window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' })
 }
 function hideToTray() {
   // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) 

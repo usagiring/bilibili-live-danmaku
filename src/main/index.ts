@@ -13,6 +13,11 @@ declare global {
   var __static: string
 }
 
+// 开发模式下禁用硬件加速
+if (import.meta.env.DEV) {
+  app.disableHardwareAcceleration()
+}
+
 initialize()
 
 process.on('uncaughtException', (error) => {
@@ -25,7 +30,7 @@ const store = new Store<{ clientId: string }>({ defaults: { clientId: '' } })
 // 恢复持久化的 clientId 到全局变量
 globalVar.clientId = store.get('clientId', '');
 
-(async () => {
+async function initApp() {
   if (!import.meta.env.DEV) {
     await startBiliBridge()
   } else {
@@ -34,8 +39,10 @@ globalVar.clientId = store.get('clientId', '');
   }
 
   await registerClient(globalVar.clientId)
+
+  console.log('clientId: ' + globalVar.clientId)
   store.set('clientId', globalVar.clientId)
-})()
+}
 
 /**
  * Set `__static` path to static files in production
@@ -49,6 +56,8 @@ const winURL = import.meta.env.DEV
   ? process.env.ELECTRON_RENDERER_URL!
   : `file://${path.join(__dirname, '../renderer/index.html')}`
 
+const preloadPath = path.join(__dirname, '../preload/index.js')
+
 function createWindow() {
   /**
    * Initial window options
@@ -59,9 +68,8 @@ function createWindow() {
     width: 1200,
     titleBarStyle: 'hidden',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,      // 开发模式降低后台限制，减少卡顿
-      backgroundThrottling: false,    },
+      preload: preloadPath,
+    },
     // icon: path.join(__dirname, '../../build/icons/icon.ico')
   })
   mainWindow.setIcon(nativeImage.createFromPath(path.join(__dirname, '../../build/icons/icon.ico')))
@@ -77,7 +85,14 @@ function createWindow() {
   enable(mainWindow.webContents)
 }
 
-app.on('ready', () => {
+app.on('ready', async () => {
+
+  // 等待 bridge / 初始化完成
+  await initApp()
+
+  // 注册渲染进程需要的 IPC handlers（必须在 createWindow 之前，避免 invoke 时无 handler）
+  ipcMain.handle('get-client-id', () => globalVar.clientId)
+  ipcMain.handle('get-base-url', () => globalVar.baseUrl)
 
   // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启
   // if (import.meta.env.DEV) {
