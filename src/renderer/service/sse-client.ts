@@ -1,8 +1,8 @@
 type Handler = (data: any) => void
 
-// preload 暴露的全局变量访问器
-const getBaseUrl = (window as any).getBaseUrl
-const getClientId = (window as any).getClientId
+// preload 暴露的全局变量访问器（通过 IPC 异步获取）
+const getBaseUrl = (window as any).getBaseUrl as () => Promise<string>
+const getClientId = (window as any).getClientId as () => Promise<string>
 
 
 class GlobalSSE {
@@ -18,11 +18,10 @@ class GlobalSSE {
     return this.es?.readyState === EventSource.OPEN
   }
 
-  /** 建立 SSE 连接，直接从 window 读取 baseUrl 和 clientId */
-  connect(): void {
-    const clientId = getClientId()
+  /** 建立 SSE 连接，通过 IPC 获取 baseUrl 和 clientId */
+  async connect(): Promise<void> {
+    const clientId = await getClientId()
 
-    console.log('clientId' + clientId)
     if (!clientId) {
       console.warn('[SSE] clientId 未注册，延迟连接...')
       this.scheduleReconnect()
@@ -33,7 +32,8 @@ class GlobalSSE {
       this.es.close()
     }
 
-    const url = `${getBaseUrl()}/api/sse/connect?clientId=${encodeURIComponent(clientId)}`
+    const baseUrl = await getBaseUrl()
+    const url = `${baseUrl}/api/sse/connect?clientId=${encodeURIComponent(clientId)}`
     this.es = new EventSource(url)
 
     this.es.onopen = () => {
@@ -50,11 +50,17 @@ class GlobalSSE {
           if (list) list.forEach((fn) => fn(payload))
         }
         this.onAny?.(payload)
-      } catch { /* ignore */ }
+      } catch(e) { 
+        console.log(e)
+        /* ignore */ }
     }
 
-    this.es.onerror = () => {
-      this.scheduleReconnect()
+    this.es.onerror = (e) => {
+      console.log('[SSE] 连接错误，等待 EventSource 自动重连...')
+      // 如果到达 CLOSED 状态（不会自动重连），才手动干预
+      if (this.es?.readyState === EventSource.CLOSED) {
+        // this.scheduleReconnect()
+      }
     }
   }
 

@@ -1,8 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import globalVar from '../service/global'
 
-contextBridge.exposeInMainWorld('getBaseUrl', () => globalVar.baseUrl)
-contextBridge.exposeInMainWorld('getClientId', () => globalVar.clientId)
+contextBridge.exposeInMainWorld('getBaseUrl', () => ipcRenderer.invoke('get-base-url'))
+contextBridge.exposeInMainWorld('getClientId', () => ipcRenderer.invoke('get-client-id'))
 
 // 暴露 ipcRenderer 方法给渲染进程
 contextBridge.exposeInMainWorld('ipcRenderer', {

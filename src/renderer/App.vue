@@ -31,7 +31,7 @@ onMounted(async () => {
   }
 
   // bridge 就绪后建立全局 SSE 连接
-  sse.connect()
+  await sse.connect()
 })
 
 onBeforeUnmount(() => {

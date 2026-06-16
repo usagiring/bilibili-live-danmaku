@@ -90,6 +90,10 @@ app.on('ready', async () => {
   // 等待 bridge / 初始化完成
   await initApp()
 
+  // 注册渲染进程需要的 IPC handlers（必须在 createWindow 之前，避免 invoke 时无 handler）
+  ipcMain.handle('get-client-id', () => globalVar.clientId)
+  ipcMain.handle('get-base-url', () => globalVar.baseUrl)
+
   // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启
   // if (import.meta.env.DEV) {
   //   mainWindow?.webContents.openDevTools()
