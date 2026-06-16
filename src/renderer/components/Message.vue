@@ -92,7 +92,7 @@ import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../service/util'
-import { queryMessages } from '../../service/api'
+import { queryMessages } from '../service/api'
 // @ts-ignore - Volar known issue: cannot resolve .vue module types
 import GiftCardMini from './GiftCardMini'
 // @ts-ignore

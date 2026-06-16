@@ -136,7 +136,7 @@ const globalValue = inject('globalValue')
 
 import draggable from 'vuedraggable'
 import TagContent from './TagContent.vue'
-import { updateSetting, getGiftConfig } from '../../service/api'
+import { updateSetting, getGiftConfig } from '../service/api'
 
 const synth = window.speechSynthesis
 

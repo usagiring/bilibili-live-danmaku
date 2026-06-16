@@ -66,7 +66,6 @@ function createWindow() {
     width: 1200,
     titleBarStyle: 'hidden',
     webPreferences: {
-      sandbox: false,
       preload: preloadPath,
     },
     // icon: path.join(__dirname, '../../build/icons/icon.ico')

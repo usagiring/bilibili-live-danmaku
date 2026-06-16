@@ -484,7 +484,7 @@ import FanMedal from './FanMedal'
 import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../service/util'
 import { cloneDeep, debounce } from 'lodash'
-import { updateClientConfig, clearDM, sendDM } from '../../service/api'
+import { updateClientConfig, clearDM, sendDM } from '../service/api'
 const defaultFonts = [
   ...DEFAULT_FONTS.map((font) => ({
     key: font,

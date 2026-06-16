@@ -1,7 +1,7 @@
 import bridge from '@tokine/bilibili-bridge'
 import globalVar from './global'
 import { port } from './config-loader'
-import { registryClient } from './api'
+import axios from 'axios'
 
 /**
  * 启动 bilibili-bridge 服务
@@ -71,4 +71,11 @@ export async function registerClient(clientId?: string) {
  */
 function getRandomPort(): number {
   return Math.floor(Math.random() * 20001) + 30000
+}
+
+async function registryClient({ clientId }) {
+  const res = await axios.post(`${globalVar.baseUrl}/api/client/register`, {
+    clientId
+  })
+  return res.data
 }

@@ -230,7 +230,7 @@ import {
   pollQRCode,
   refreshCookie as refreshCookieApi,
   updateClientConfig,
-} from '../../service/api'
+} from '../service/api'
 import { wait } from '../service/util'
 import QRCode from 'qrcode'
 

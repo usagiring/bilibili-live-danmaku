@@ -82,7 +82,7 @@ import {
   getRoomInfoV2,
   getGuardInfo,
   updateClientConfig,
-} from '../../service/api'
+} from '../service/api'
 
 export default defineComponent({
   emits: ['connect', 'showDanmaku'],

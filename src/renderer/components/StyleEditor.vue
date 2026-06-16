@@ -13,7 +13,7 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import { debounce } from 'lodash'
-import { updateClientConfig } from '../../service/api'
+import { updateClientConfig } from '../service/api'
 
 export default {
   props: ['type', 'name', 'role', 'prop', 'styleName', 'numberStep'],

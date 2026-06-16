@@ -36,7 +36,7 @@
 import { useConfigStore } from '../store'
 import { defineComponent } from 'vue'
 import { sse } from '../service/sse-client'
-import { speechToText, sendComment } from '../../service/api'
+import { speechToText, sendComment } from '../service/api'
 
 // 依赖过大50mb 放弃使用
 // import * as vad from '@ricky0123/vad'
