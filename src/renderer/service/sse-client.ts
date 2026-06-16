@@ -1,8 +1,8 @@
 type Handler = (data: any) => void
 
 // preload 暴露的全局变量访问器（通过 IPC 异步获取）
-const getBaseUrl = (window as any).getBaseUrl as () => Promise<string>
-const getClientId = (window as any).getClientId as () => Promise<string>
+const getBaseUrl = window.getBaseUrl
+const getClientId = window.getClientId
 
 
 class GlobalSSE {

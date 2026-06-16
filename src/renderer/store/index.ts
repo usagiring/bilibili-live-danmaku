@@ -33,7 +33,7 @@ interface Provider {
 
 }
 
-interface Room {
+export interface Room {
   id: string
   userId: string
   liveStatus: number
@@ -43,6 +43,10 @@ interface Room {
   autoReplyRules: any[]
 
   voteOptions: Array<{ keyword: string; value: string }>
+
+  // Render
+  isConnect?: boolean
+  isActive?: boolean
 }
 
 interface User {
@@ -157,21 +161,20 @@ export interface Config {
   refreshToken?: string
   waitingSpeakerCount?: number
 
-  user?: User,
-  rooms: Room[],
-  activeRoomIndex: number,
-  isRecording: boolean,
-  windows: Window[],
-  providers: Provider[],
+  user?: User
+  rooms: Room[]
+  isRecording: boolean
+  windows: Window[]
+  providers: Provider[]
 
-  dmStyle: DmStyle,
-  dmRawStyle: DmRawStyle,
-  liveConfig: LiveConfig,
-  messageConfig: MessageConfig,
-  recordConfig: RecordConfig,
-  asrConfig: AsrConfig,
-  mtConfig: MtConfig,
-  chartConfig: ChartConfig,
+  dmStyle: DmStyle
+  dmRawStyle: DmRawStyle
+  liveConfig: LiveConfig
+  messageConfig: MessageConfig
+  recordConfig: RecordConfig
+  asrConfig: AsrConfig
+  mtConfig: MtConfig
+  chartConfig: ChartConfig
 }
 
 export const useConfigStore = defineStore('config', {
@@ -183,8 +186,7 @@ export const useConfigStore = defineStore('config', {
 
   getters: {
     activeRoom(state): Room | null {
-      if (state.rooms.length === 0) return null
-      return state.rooms[state.activeRoomIndex] || null
+      return state.rooms?.find(room => room.isActive) || null
     },
 
     // hasConnectedRoom(state): boolean {

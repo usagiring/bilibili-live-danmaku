@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseUrl: string = await (window as any).getBaseUrl()
+const baseUrl: string = await window.getBaseUrl()
 
 // ==================== Room ====================
 
