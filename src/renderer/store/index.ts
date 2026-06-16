@@ -7,7 +7,7 @@ function createRoom(roomId: number): RoomState {
     realRoomId: roomId,
     displayRoomId: roomId,
     isConnected: false,
-    guardNumber: 0,
+    anchorNumber: 0,
     username: '',
     avatar: null,
     ninkiNumber: 0,
@@ -45,8 +45,19 @@ export interface Room {
   voteOptions: Array<{ keyword: string; value: string }>
 
   // Render
-  isConnect?: boolean
+  realId?: string
+  isConnected?: boolean
   isActive?: boolean
+  username?: string
+  face?: string
+  displayId?: string
+  anchorNumber?: number
+  fansNumber?: number
+  fansclubNumber?: number
+  ninkiNumber?: number
+  watchedNumber?: number
+  likeNumber?: number
+  onlineNumber?: number
 }
 
 interface User {
@@ -238,7 +249,7 @@ export const useConfigStore = defineStore('config', {
 
     UPDATE_CONFIG(payload: Record<string, any>) {
       for (const key in payload) {
-        ;(this as any)[key] = payload[key]
+        ; (this as any)[key] = payload[key]
       }
     },
   },

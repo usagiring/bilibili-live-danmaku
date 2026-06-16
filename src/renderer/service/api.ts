@@ -4,23 +4,23 @@ const baseUrl: string = await window.getBaseUrl()
 
 // ==================== Room ====================
 
-export async function getRoomInfoV2(roomId: number) {
+export async function getRoomInfoV2(roomId: string) {
   const res = await axios.get(`${baseUrl}/api/room/info`, { params: { roomId } })
   return res.data
 }
 
-export async function getRoomInfoByIds(roomIds: number[]) {
-  const res = await axios.post(`${baseUrl}/api/bilibili/room/info`, { roomIds: roomIds.map(String) })
+export async function getRoomInfoByIds(roomIds: string[]) {
+  const res = await axios.post(`${baseUrl}/api/bilibili/room/info`, { roomIds })
   return res.data
 }
 
-export async function connect({ roomId, uid }: { roomId: number; uid?: number }) {
-  const res = await axios.post(`${baseUrl}/api/room/connect`, { roomId: String(roomId), uid })
+export async function connect({ roomId, userId }: { roomId: string; userId?: string }) {
+  const res = await axios.post(`${baseUrl}/api/room/connect`, { roomId, userId })
   return res.data
 }
 
-export async function disconnect({ roomId }: { roomId: number }) {
-  const res = await axios.post(`${baseUrl}/api/room/disconnect`, { roomId: String(roomId) })
+export async function disconnect({ roomId }: { roomId: string }) {
+  const res = await axios.post(`${baseUrl}/api/room/disconnect`, { roomId })
   return res.data
 }
 
@@ -206,8 +206,8 @@ export async function getUserInfoInRoom(roomId: number) {
   return res.data
 }
 
-export async function getGuardInfo(roomId: number, uid?: number) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/room/guard`, { params: { roomId: String(roomId), uid } })
+export async function getGuardInfo({ roomId, userId }: { roomId: string; userId: string }) {
+  const res = await axios.get(`${baseUrl}/api/bilibili/room/guard`, { params: { roomId, uid: userId } })
   return res.data
 }
 
