@@ -39,6 +39,8 @@ async function initApp() {
   }
 
   await registerClient(globalVar.clientId)
+
+  console.log('clientId: ' + globalVar.clientId)
   store.set('clientId', globalVar.clientId)
 }
 

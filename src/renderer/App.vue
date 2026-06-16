@@ -12,11 +12,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useConfigStore } from './store'
-import { touch } from './service/api-bridge'
+import { touch } from './service/api'
 import { sse } from './service/sse-client'
+import { wait } from './service/util'
 
-let healthChecker = 0
 const isLoading = ref(true)
 
 onMounted(async () => {
@@ -26,12 +25,13 @@ onMounted(async () => {
     try {
       await touch()
       isLoading.value = false
-      clearInterval(healthChecker)
-
-      // bridge 就绪后建立全局 SSE 连接
-      sse.connect()
     } catch (e) { /* retry */ }
+
+    await wait(500)
   }
+
+  // bridge 就绪后建立全局 SSE 连接
+  sse.connect()
 })
 
 onBeforeUnmount(() => {

@@ -47,9 +47,8 @@ export async function start(maxRetries = 3): Promise<{ port: number }> {
  */
 export async function registerClient(clientId?: string) {
   try {
-    const data = await registryClient({ clientId })
+    const { data } = await registryClient({ clientId })
 
-    console.log(data)
     if (data?.id) {
       globalVar.clientId = data.id
 
