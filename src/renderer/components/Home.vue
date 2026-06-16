@@ -86,7 +86,7 @@
         <!-- Tab 内容区 -->
         <div class="tab-content" v-if="store.activeRoom">
           <!-- 概览 -->
-          <OverviewPanel v-if="activeTab === 'overview'" @connect="handleConnect" @show-danmaku="handleShowDanmaku" />
+          <!-- <OverviewPanel v-if="activeTab === 'overview'" @connect="handleConnect" @show-danmaku="handleShowDanmaku" /> -->
           <!-- TODO: 逐模块重构，暂时注释
           <StyleSetting v-if="activeTab === 'style'" />
           <Vote v-if="activeTab === 'vote'" />
@@ -121,10 +121,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ipcRenderer } from 'electron'
+// import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION } from '../../service/const'
-import OverviewPanel from './OverviewPanel.vue'
+// import OverviewPanel from './OverviewPanel.vue'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -174,9 +174,15 @@ function handleShowDanmaku(_status: boolean) {
   // 由 OverviewPanel emit 上来触发弹幕窗
 }
 
-function close() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' }) }
-function minimize() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' }) }
-function hideToTray() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) }
+function close() {
+  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })
+}
+function minimize() {
+  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' }) 
+}
+function hideToTray() {
+  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) 
+}
 </script>
 
 <style scoped>

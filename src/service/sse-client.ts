@@ -20,7 +20,7 @@ class GlobalSSE {
     const clientId = globalVar.clientId
     if (!clientId) {
       console.warn('[SSE] clientId 未注册，延迟连接...')
-      setTimeout(() => this.connect(), 1000)
+      this.scheduleReconnect()
       return
     }
 

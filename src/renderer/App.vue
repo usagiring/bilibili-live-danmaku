@@ -1,62 +1,40 @@
 <template>
   <div id="app">
-    <Spin fix v-if="isLoading">
+    <!-- <Spin fix v-if="isLoading">
       <Icon type="ios-loading" size="18" class="demo-spin-icon-load"></Icon>
       <div>Loading</div>
-    </Spin>
+    </Spin> -->
     <div id="main-container">
-      <router-view></router-view>
+      <!-- <router-view></router-view> -->
     </div>
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useConfigStore } from './store'
 import { touch } from '../service/api'
-import { sse } from '../service/sse-client'
+// import { sse } from '../service/sse-client'
 
 let healthChecker = 0
+const isLoading = ref(true)
 
-export default {
-  name: 'bilibili-danmaku',
-  data() {
-    return {
-      isLoading: true,
-    }
-  },
-  async mounted() {
-    healthChecker = window.setInterval(async () => {
-      try {
-        await touch()
-        this.isLoading = false
-        clearInterval(healthChecker)
+onMounted(() => {
+  // healthChecker = window.setInterval(async () => {
+  //   try {
+  //     await touch()
+  //     isLoading.value = false
+  //     clearInterval(healthChecker)
 
-        // bridge 就绪后建立全局 SSE 连接
-        sse.connect()
+  //     // bridge 就绪后建立全局 SSE 连接
+  //     sse.connect()
+  //   } catch (e) { /* retry */ }
+  // }, 5000)
+})
 
-        // 主进程注册 client 时已把配置写入 $global，直接同步到 Pinia
-        const config = (this as any).$global?.clientConfig
-        if (config) {
-          const store = useConfigStore()
-          if (config.style) store.UPDATE_CONFIG(config.style)
-          if (config.rooms?.length) {
-            config.rooms.forEach((r: any) => {
-              if (!store.rooms.find((sr) => sr.displayRoomId === r.roomId)) {
-                store.ADD_ROOM(r.roomId)
-                store.UPDATE_ACTIVE_ROOM(r)
-              }
-            })
-          }
-        }
-      } catch (e) { /* retry */ }
-    }, 500)
-
-    useConfigStore().CLEAR_TEXT_STROKE_VERSION_0_4_8()
-  },
-  beforeUnmount() {
-    sse.disconnect()
-  },
-}
+onBeforeUnmount(() => {
+  // sse.disconnect()
+})
 </script>
 
 <style>

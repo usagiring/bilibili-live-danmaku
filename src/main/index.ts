@@ -60,8 +60,8 @@ function createWindow() {
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false,
-    },
+      contextIsolation: false,      // 开发模式降低后台限制，减少卡顿
+      backgroundThrottling: false,    },
     // icon: path.join(__dirname, '../../build/icons/icon.ico')
   })
   mainWindow.setIcon(nativeImage.createFromPath(path.join(__dirname, '../../build/icons/icon.ico')))
@@ -78,6 +78,11 @@ function createWindow() {
 }
 
 app.on('ready', () => {
+
+  // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启
+  // if (import.meta.env.DEV) {
+  //   mainWindow?.webContents.openDevTools()
+  // }
 
   // 视频流需要加上referer
   // Modify the user agent for all requests to the following urls.
