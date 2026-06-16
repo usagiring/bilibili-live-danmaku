@@ -159,6 +159,8 @@ export interface Config {
 
   user?: User,
   rooms: Room[],
+  activeRoomIndex: number,
+  isRecording: boolean,
   windows: Window[],
   providers: Provider[],
 
@@ -174,13 +176,16 @@ export interface Config {
 
 export const useConfigStore = defineStore('config', {
   state: (): Config => ({
-  } as Config),
+    rooms: [],
+    activeRoomIndex: 0,
+    isRecording: false,
+  } as unknown as Config),
 
   getters: {
-    // activeRoom(state): RoomState | null {
-    //   if (state.rooms.length === 0) return null
-    //   return state.rooms[state.activeRoomIndex] || null
-    // },
+    activeRoom(state): Room | null {
+      if (state.rooms.length === 0) return null
+      return state.rooms[state.activeRoomIndex] || null
+    },
 
     // hasConnectedRoom(state): boolean {
     //   return state.rooms.some((r) => r.isConnected)
@@ -229,11 +234,11 @@ export const useConfigStore = defineStore('config', {
     //   ;(this as any)[objKey] = { ...(this as any)[objKey], ...payload.style }
     // },
 
-    // UPDATE_CONFIG(payload: Record<string, any>) {
-    //   for (const key in payload) {
-    //     ;(this as any)[key] = payload[key]
-    //   }
-    // },
+    UPDATE_CONFIG(payload: Record<string, any>) {
+      for (const key in payload) {
+        ;(this as any)[key] = payload[key]
+      }
+    },
   },
 })
 

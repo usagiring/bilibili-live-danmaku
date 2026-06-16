@@ -34,14 +34,13 @@
         </div>
         <div class="room-list">
           <div v-for="(room, index) in store.rooms" :key="index" class="room-card"
-            :class="{ active: store.activeRoomIndex === index }" @click="store.SET_ACTIVE_ROOM(index)">
-            <Avatar :src="room.avatar || 'https://static.hdslb.com/images/member/noface.gif'" size="small" />
+            :class="{ active: store.activeRoomIndex === index }" @click="selectRoom(index)">
             <div class="room-info">
-              <div class="room-name">{{ room.username || '未连接' }}</div>
-              <div class="room-id">房间号 {{ room.displayRoomId }}</div>
+              <div class="room-name">直播间 {{ room.id }}</div>
+              <div class="room-id">用户 {{ room.userId || '未连接' }}</div>
             </div>
             <span class="status-dot" :class="room.liveStatus === 1 ? 'live' : 'offline'"></span>
-            <button class="delete-btn" @click.stop="store.REMOVE_ROOM(index)">
+            <button class="delete-btn" @click.stop="removeRoom(index)">
               <Icon type="md-close" />
             </button>
           </div>
@@ -61,6 +60,7 @@
           <div class="room-tab" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">
             <Icon type="md-home" /> 概览
           </div>
+          <!-- TODO: 逐模块重构，暂时注释
           <div class="room-tab" :class="{ active: activeTab === 'style' }" @click="activeTab = 'style'">
             <Icon type="md-color-palette" /> 样式
           </div>
@@ -80,24 +80,21 @@
             @click="activeTab = 'config'">
             <Icon type="md-settings" /> 设置
           </div>
+          -->
         </div>
 
         <!-- Tab 内容区 -->
         <div class="tab-content" v-if="store.activeRoom">
           <!-- 概览 -->
           <OverviewPanel v-if="activeTab === 'overview'" @connect="handleConnect" @show-danmaku="handleShowDanmaku" />
-          <!-- 样式 -->
+          <!-- TODO: 逐模块重构，暂时注释
           <StyleSetting v-if="activeTab === 'style'" />
-          <!-- 投票 -->
           <Vote v-if="activeTab === 'vote'" />
-          <!-- 祈愿 -->
           <Lottery v-if="activeTab === 'lottery'" />
-          <!-- 直播 -->
           <Live v-if="activeTab === 'live'" />
-          <!-- 自动回复 -->
           <AutoReply v-if="activeTab === 'autoReply'" />
-          <!-- 设置 -->
           <Config v-if="activeTab === 'config'" />
+          -->
         </div>
 
         <!-- 空状态（无房间时） -->
@@ -122,51 +119,64 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { ipcRenderer, shell, BrowserWindow } from 'electron'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
-import StyleSetting from './StyleSetting.vue'
-import Vote from './Vote.vue'
-import Lottery from './Lottery.vue'
-import Live from './Live.vue'
-import AutoReply from './AutoReply.vue'
-import Config from './Config.vue'
+// TODO: 逐模块重构，暂时注释
+// import StyleSetting from './StyleSetting.vue'
+// import Vote from './Vote.vue'
+// import Lottery from './Lottery.vue'
+// import Live from './Live.vue'
+// import AutoReply from './AutoReply.vue'
+// import Config from './Config.vue'
 
-export default defineComponent({
-  components: { OverviewPanel, StyleSetting, Vote, Lottery, Live, AutoReply, Config },
-  data() {
-    return {
-      activeTab: 'overview' as string,
-      showAddRoom: false,
-      newRoomId: '',
-    }
-  },
-  computed: {
-    store() { return useConfigStore() },
-    isRecording() { return useConfigStore().isRecording },
-  },
-  methods: {
-    handleAddRoom() {
-      const roomId = parseInt(this.newRoomId)
-      if (!roomId || roomId <= 0) return
-      this.store.ADD_ROOM(roomId)
-      this.showAddRoom = false
-      this.newRoomId = ''
-    },
-    handleConnect(status: boolean) {
-      // 由 OverviewPanel emit 上来触发连接
-    },
-    handleShowDanmaku(status: boolean) {
-      // 由 OverviewPanel emit 上来触发弹幕窗
-    },
-    close() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' }) },
-    minimize() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' }) },
-    hideToTray() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) },
-  },
-})
+const store = useConfigStore()
+const activeTab = ref('overview')
+const showAddRoom = ref(false)
+const newRoomId = ref('')
+
+const isRecording = computed(() => store.isRecording)
+
+function selectRoom(index: number) {
+  store.activeRoomIndex = index
+}
+function removeRoom(index: number) {
+  store.rooms.splice(index, 1)
+  if (store.activeRoomIndex >= store.rooms.length) {
+    store.activeRoomIndex = Math.max(0, store.rooms.length - 1)
+  }
+}
+
+function handleAddRoom() {
+  const roomId = newRoomId.value
+  if (!roomId) return
+  store.rooms.push({
+    id: roomId,
+    userId: '',
+    liveStatus: 0,
+    liveStream: '',
+    isAutoReply: false,
+    autoReplyRules: [],
+    voteOptions: [],
+  })
+  store.activeRoomIndex = store.rooms.length - 1
+  showAddRoom.value = false
+  newRoomId.value = ''
+}
+
+function handleConnect(_status: boolean) {
+  // 由 OverviewPanel emit 上来触发连接
+}
+function handleShowDanmaku(_status: boolean) {
+  // 由 OverviewPanel emit 上来触发弹幕窗
+}
+
+function close() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' }) }
+function minimize() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' }) }
+function hideToTray() { ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) }
 </script>
 
 <style scoped>
