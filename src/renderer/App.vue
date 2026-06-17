@@ -25,7 +25,9 @@ onMounted(async () => {
     try {
       await touch()
       isLoading.value = false
-    } catch (e) { /* retry */ }
+    } catch (e) {
+      /* retry */
+    }
 
     await wait(500)
   }

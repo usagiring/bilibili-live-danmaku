@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent, netLog } from 'electron'
 import path from 'path'
 import { autoUpdater } from 'electron-updater'
 import Store from 'electron-store'
@@ -28,7 +28,7 @@ process.on('uncaughtException', (error) => {
 const store = new Store<{ clientId: string }>({ defaults: { clientId: '' } })
 
 // 恢复持久化的 clientId 到全局变量
-globalVar.clientId = store.get('clientId', '');
+globalVar.clientId = store.get('clientId', '')
 
 async function initApp() {
   if (!import.meta.env.DEV) {
@@ -101,15 +101,40 @@ app.on('ready', async () => {
 
   // 视频流需要加上referer
   // Modify the user agent for all requests to the following urls.
-  const filter = {
-    urls: ['https://*.bilivideo.com/*']
-  }
+  // const filter = {
+  //   urls: [
+  //     'https://*.bilivideo.com/*',
+  //     'https://*.bilibili.com/*',
+  //     "https://*.com/*"
+  //   ]
+  // }
 
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36'
-    details.requestHeaders['Referer'] = 'https://api.live.bilibili.com/'
-    callback({ requestHeaders: details.requestHeaders })
-  })
+  // session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+  //   // 模拟真实浏览器请求头（与 HAR 一致）
+  //   details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+  //   details.requestHeaders['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+  //   details.requestHeaders['Accept-Language'] = "zh-CN,zh;q=0.9"
+  //   details.requestHeaders['sec-ch-ua'] = "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\""
+  //   details.requestHeaders['sec-ch-ua-mobile'] = "?0"
+  //   details.requestHeaders['sec-ch-ua-platform'] = "\"Windows\""
+  //   details.requestHeaders['sec-fetch-dest'] = "document"
+  //   details.requestHeaders['sec-fetch-mode'] = "navigate"
+  //   details.requestHeaders['sec-fetch-site'] = "none"
+  //   details.requestHeaders['sec-fetch-user'] = "?1"
+  //   details.requestHeaders['Referer'] = 'https://www.bilibili.com/'
+  //   details.requestHeaders['upgrade-insecure-requests'] = '1'
+  //   delete details.requestHeaders['Origin']
+
+  //   callback({ requestHeaders: details.requestHeaders })
+  // })
+
+  // // 拦截响应头，注入 CORS 头以绕过浏览器的跨域限制
+  // session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
+  //   details.responseHeaders!['Access-Control-Allow-Origin'] = ['*']
+  //   details.responseHeaders!['Access-Control-Allow-Methods'] = ['GET, POST, PUT, DELETE, OPTIONS']
+  //   details.responseHeaders!['Access-Control-Allow-Headers'] = ['*']
+  //   callback({ responseHeaders: details.responseHeaders })
+  // })
 
   createWindow()
 
