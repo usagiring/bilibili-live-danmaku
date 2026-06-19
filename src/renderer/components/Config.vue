@@ -344,7 +344,7 @@ export default {
           console.log(data)
 
           if (!data.refresh) {
-            useConfigStore().UPDATE_CONFIG({
+            useConfigStore().updateConfig({
               isNeedRefreshCookieCache: Date.now(),
             })
             return
@@ -365,12 +365,12 @@ export default {
         refreshToken: refreshToken,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(setting)
+      useConfigStore().updateConfig(setting)
     },
 
     async restoreDefaultStyleSetting() {
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(DEFAULT_STYLE).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(DEFAULT_STYLE)
+      useConfigStore().updateConfig(DEFAULT_STYLE)
       location.reload()
     },
 
@@ -379,11 +379,11 @@ export default {
         userCookie: e.target.value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeAutoRecord(status) {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isAutoRecord: status,
       })
     },
@@ -406,7 +406,7 @@ export default {
         colors: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async onChangeUserInfoFrequencyLimit(value) {
@@ -414,42 +414,42 @@ export default {
         userInfoFrequencyLimit: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onChangeOnTopLevel(value) {
       const data = {
         onTopLevel: value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onChangeIsOnTopForce(value) {
       const data = {
         isOnTopForce: value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onChangeSignInMessage(e) {
       const data = {
         signInMessage: e.target.value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onChangeDisableIgnoreMouseEvent(value) {
       const data = {
         disableIgnoreMouseEvent: value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onChangeWaitingSpeakerCount(value) {
       const data = {
         waitingSpeakerCount: value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showSignInModal() {
@@ -628,7 +628,7 @@ export default {
         refreshToken: data.refresh_token,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(setting)
+      useConfigStore().updateConfig(setting)
       this.loginFromQrCodeLoading = false
       this.isShowQRCodeLoginModal = false
     },

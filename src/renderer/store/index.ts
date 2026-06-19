@@ -1,28 +1,6 @@
 import { createPinia, defineStore } from 'pinia'
-import type { RoomState } from './store-types'
-
-function createRoom(roomId: number): RoomState {
-  return {
-    roomId,
-    realRoomId: roomId,
-    displayRoomId: roomId,
-    isConnected: false,
-    anchorNumber: 0,
-    username: '',
-    avatar: null,
-    ninkiNumber: 0,
-    fansNumber: 0,
-    fansClubNumber: 0,
-    liveStatus: 0,
-    onlineNumber: 0,
-    roomUserId: 0,
-    watchedNumber: 0,
-    likeNumber: 0,
-    topPhoto: '',
-    medalId: null,
-    medalName: '',
-  }
-}
+import { ref, computed, reactive, toRefs, toRaw } from 'vue'
+import { updateClientConfig } from '../service/api'
 
 interface Provider {
   type: string
@@ -169,124 +147,133 @@ export interface Config {
   clientId: string
   // 全局设置
   signInMessage: string
-  isNeedRefreshCookieCache?: number
-  refreshToken?: string
-  waitingSpeakerCount?: number
+  isNeedRefreshCookieCache: boolean
+  refreshToken: string
+  waitingSpeakerCount: number
 
   user?: User
   rooms: Room[]
-  isRecording: boolean
+  isRecording?: boolean
   windows: Window[]
   providers: Provider[]
 
-  dmStyle: DmStyle
-  dmRawStyle: DmRawStyle
-  liveConfig: LiveConfig
-  messageConfig: MessageConfig
-  recordConfig: RecordConfig
-  asrConfig: AsrConfig
-  mtConfig: MtConfig
-  chartConfig: ChartConfig
+  dmStyle?: DmStyle
+  dmRawStyle?: DmRawStyle
+  liveConfig?: LiveConfig
+  messageConfig?: MessageConfig
+  recordConfig?: RecordConfig
+  asrConfig?: AsrConfig
+  mtConfig?: MtConfig
+  chartConfig?: ChartConfig
 }
 
-export const useConfigStore = defineStore('config', {
-  state: (): Config => ({
+export const useConfigStore = defineStore('config', () => {
+  // ── State ──
+  const state = reactive<Config>({
+    clientId: '',
     rooms: [],
-    activeRoomIndex: 0,
-    isRecording: false,
-  } as unknown as Config),
+    windows: [],
+    providers: [],
 
-  getters: {
-    activeRoom(state): Room | null {
-      return state.rooms?.find(room => room.isActive) || null
-    },
+    signInMessage: '...',
+    isNeedRefreshCookieCache: false,
+    refreshToken: '',
+    waitingSpeakerCount: 0,
+  })
 
-    // hasConnectedRoom(state): boolean {
-    //   return state.rooms.some((r) => r.isConnected)
-    // },
+  // ── Getters ──
+  const activeRoom = computed((): Room | null => {
+    return (state.rooms as Room[])?.find(room => room.isActive) || null
+  })
 
-    // isActiveRoomConnected(state): boolean {
-    //   const room = state.rooms[state.activeRoomIndex]
-    //   return room?.isConnected ?? false
-    // },
-  },
+  // ── Actions ──
+  // function replaceState(payload: Record<string, any>) {
+  //   // 先清空再整体替换，确保引用类型完全刷新
+  //   const keys = Object.keys(state)
+  //   for (const key of keys) {
+  //     delete (state as any)[key]
+  //   }
+  //   Object.assign(state, payload)
+  // }
 
-  actions: {
-    // ── 房间管理 ──
-    // ADD_ROOM(roomId: number) {
-    //   if (this.rooms.find((r) => r.displayRoomId === roomId)) return
-    //   this.rooms.push(createRoom(roomId))
-    //   this.activeRoomIndex = this.rooms.length - 1
-    // },
+  function updateConfig(payload: Record<string, any>) {
+    Object.assign(state, payload)
+  }
 
-    // REMOVE_ROOM(index: number) {
-    //   this.rooms.splice(index, 1)
-    //   if (this.activeRoomIndex >= this.rooms.length) {
-    //     this.activeRoomIndex = Math.max(0, this.rooms.length - 1)
-    //   }
-    // },
-
-    // SET_ACTIVE_ROOM(index: number) {
-    //   if (index >= 0 && index < this.rooms.length) {
-    //     this.activeRoomIndex = index
-    //   }
-    // },
-
-    // UPDATE_ACTIVE_ROOM(payload: Partial<RoomState>) {
-    //   const room = this.rooms[this.activeRoomIndex]
-    //   if (room) Object.assign(room, payload)
-    // },
-
-    // UPDATE_ROOM(index: number, payload: Partial<RoomState>) {
-    //   const room = this.rooms[index]
-    //   if (room) Object.assign(room, payload)
-    // },
-
-    // // ── 全局设置 ──
-    // UPDATE_STYLE(payload: any) {
-    //   const objKey = `${payload.prop}_lv${payload.role}`
-    //   ;(this as any)[objKey] = { ...(this as any)[objKey], ...payload.style }
-    // },
-
-    REPLACE_STATE(payload: Record<string, any>) {
-      // 先清空再整体替换，确保引用类型完全刷新
-      const keys = Object.keys(this.$state)
-      for (const key of keys) {
-        delete (this as any)[key]
-      }
-      for (const key in payload) {
-        ; (this as any)[key] = payload[key]
-      }
-    },
-
-    UPDATE_CONFIG(payload: Record<string, any>) {
-      for (const key in payload) {
-        ; (this as any)[key] = payload[key]
-      }
-    },
-  },
+  return {
+    ...toRefs(state),
+    activeRoom,
+    // replaceState,
+    updateConfig,
+  }
 })
 
-// localStorage 持久化
-// function persistPlugin({ store }: { store: any }) {
-//   const STORAGE_KEY = 'bilibili-config'
+// ── 持久化 Plugin：防抖增量同步到桥接后端 ──
+let syncTimer: ReturnType<typeof setTimeout> | null = null
+const changedKeys = new Set<string>()
+const SYNC_DEBOUNCE = 800  // ms
+const immediateKeys = new Set(['dmStyle', 'dmRawStyle'])
 
-//   try {
-//     const saved = localStorage.getItem(STORAGE_KEY)
-//     if (saved) {
-//       const data = JSON.parse(saved)
-//       store.UPDATE_CONFIG(data)
-//     }
-//   } catch { /* ignore */ }
+function findRootKey(state: Record<string, any>, event: any): string | null {
+  const target = toRaw(event.target)
+  for (const key of Object.keys(state)) {
+    const raw = toRaw(state[key])
+    // 直接匹配
+    if (raw === target) return key
+    // 数组内元素变化：target 可能是数组的某一项
+    if (Array.isArray(raw) && raw.includes(target)) return key
+  }
+  // 回退：event.key 本身可能就是根 key
+  const k = event.key as string
+  if (k in state) return k
+  return null
+}
 
-//   store.$subscribe(() => {
-//     try {
-//       localStorage.setItem(STORAGE_KEY, JSON.stringify(store.$state))
-//     } catch { /* ignore */ }
-//   })
-// }
+async function flushSync(state: Config) {
+  const keys = [...changedKeys]
+  changedKeys.clear()
+  if (keys.length === 0) return
+
+  const kvs = keys.map(key => ({ key, value: state[key] }))
+  try {
+    await updateClientConfig({ clientId: state.clientId, kvs })
+  } catch { /* 忽略同步失败 */ }
+}
+
+function syncPlugin({ store }: { store: any }) {
+  store.$subscribe((mutation: any) => {
+    const state = store.$state as Config
+    if (!state.clientId) return
+
+    const raw = mutation.events
+    if (!raw) return
+    const events = Array.isArray(raw) ? raw : [raw]
+
+    let isImmediate = false
+    for (const event of events) {
+      // 通过 target 反查根 key：对比 toRaw(state[k]) === toRaw(event.target)
+      const rootKey = findRootKey(state, event) || (event.key as string)
+      changedKeys.add(rootKey)
+      if (immediateKeys.has(rootKey)) isImmediate = true
+    }
+
+
+    console.log(changedKeys)
+
+    if (isImmediate) {
+      // 立刻同步：取消防抖，合并当前积累的 key 一起发
+      if (syncTimer) clearTimeout(syncTimer)
+      flushSync(state)
+      return
+    }
+
+    // 普通 key：防抖同步
+    if (syncTimer) clearTimeout(syncTimer)
+    syncTimer = setTimeout(() => flushSync(state), SYNC_DEBOUNCE)
+  }, { detached: true })
+}
 
 const pinia = createPinia()
-// pinia.use(persistPlugin)
+// pinia.use(syncPlugin)
 
 export default pinia

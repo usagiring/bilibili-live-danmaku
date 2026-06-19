@@ -45,10 +45,12 @@ onMounted(async () => {
 
   console.log('clientId: ' + clientId)
 
+  store.updateConfig({ clientId })
+
   // 从 bridge 后端拉取完整配置并整体替换 store 状态
   const { data: remoteConfig } = await getClientConfig(clientId)
   if (remoteConfig) {
-    store.UPDATE_CONFIG(remoteConfig)
+    store.updateConfig(remoteConfig)
   }
 
   // bridge 就绪后建立全局 SSE 连接

@@ -345,7 +345,7 @@ export default {
         audioFrom: value,
       }
       // await updateSetting(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeFromLang(value) {
@@ -353,7 +353,7 @@ export default {
         mtFromLang: value,
       }
       // await updateSetting(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeToLang(value) {
@@ -361,7 +361,7 @@ export default {
         mtToLang: value,
       }
       // await updateSetting(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     onMessage(msg) {
@@ -424,7 +424,7 @@ export default {
     microphoneNoticeOk() {
       this.disableMircrophotoNoticeMessageTemp = true
       if (this.isDisableMircrophotoNoticeMessagePersistent) {
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           disableMircrophotoNoticeMessage: true,
         })
       }
@@ -483,7 +483,7 @@ export default {
       } else {
         aliAppKeys = [...this.aliAppKeys, this.aliAppKey]
       }
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         aliAppKeys: uniq(aliAppKeys),
       })
     },
@@ -563,14 +563,14 @@ export default {
       const data = {
         aliAccessKeyId: e.target.value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeAliAccessKeySecret(e) {
       const data = {
         aliAccessKeySecret: e.target.value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showSpeechToDanmaku() {
@@ -600,7 +600,7 @@ export default {
       const data = {
         aliAppKey: value,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async openFFmpegSelector() {
@@ -609,7 +609,7 @@ export default {
       })
       if (!result.canceled) {
         const ffmpegExe = result.filePaths[0]
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           ffmpegExe,
         })
         await this.$nextTick()
@@ -632,7 +632,7 @@ export default {
           windowId,
         })
 
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           ASRWindowId: windowId,
         })
 
@@ -650,7 +650,7 @@ export default {
     },
 
     async clearDanmakuWindowInfo() {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         ASRWindowId: null,
       })
       // clear
@@ -690,18 +690,18 @@ export default {
       const data = {
         ASRLineCount: number,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     clearFFmpegPath() {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         ffmpegExe: null,
       })
     },
 
     removeHistoryAppkey(appKey) {
       const aliAppKeys = this.aliAppKeys.filter((__appKey) => __appKey !== appKey)
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         aliAppKeys,
       })
     },

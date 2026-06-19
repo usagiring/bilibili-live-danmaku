@@ -255,7 +255,7 @@ async function toggleConnect() {
   if (!room) return
   connecting.value = true
   try {
-    if (room.isConnected) {
+  if (room.isConnected) {
       await disconnectApi({ roomId: room.id })
       room.isConnected = false
     } else {

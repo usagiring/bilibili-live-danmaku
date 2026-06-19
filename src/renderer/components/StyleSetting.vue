@@ -1201,7 +1201,7 @@ export default {
 
       const data = { messageSettings: settings }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async showFanMedal(status) {
       const settings = cloneDeep(this.messageSettings)
@@ -1213,12 +1213,12 @@ export default {
         isShowFanMedal: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async sendTestMessage() {
       const randomMessage = this.randomMessageGenerator()
@@ -1232,7 +1232,7 @@ export default {
         // scrollDanmakuBackground: color,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async changeAvatarSize(size) {
       // const data = {
@@ -1253,13 +1253,13 @@ export default {
       data.messageSettings = settings
 
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async changeOpacity(number) {
       const data = {
         opacity: Number((number / 100).toFixed(2)),
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
     },
 
@@ -1268,7 +1268,7 @@ export default {
         combineSimilarTime: number,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeHiddenExpiredTime(number) {
@@ -1276,7 +1276,7 @@ export default {
         hiddenExpiredTime: number,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeShowHeadlineThreshold(number) {
@@ -1284,14 +1284,14 @@ export default {
         showHeadlineThreshold: number,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showSilverGift(status) {
@@ -1299,7 +1299,7 @@ export default {
         isShowSilverGift: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     randomMessageGenerator() {
@@ -1422,7 +1422,7 @@ export default {
         danmakuFont: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async useMiniGiftCard(value) {
@@ -1430,7 +1430,7 @@ export default {
         isUseMiniGiftCard: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     getGuardIcon(level) {
@@ -1447,7 +1447,7 @@ export default {
       const reader = new FileReader()
       reader.onloadend = function () {
         const dataUrl = reader.result
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           borderImages: [
             ...self.borderImages,
             {
@@ -1473,7 +1473,7 @@ export default {
         item.isSelected = false
       })
       borderImages[index].isSelected = !preStatus
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1482,7 +1482,7 @@ export default {
       const borderImages = this.borderImages.filter((_, i) => {
         return i !== index
       })
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1491,8 +1491,8 @@ export default {
       const data = {
         emojiSize: number,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     setBorderImageSliceValue(e) {
@@ -1500,7 +1500,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-slice'] = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1510,7 +1510,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-width'] = number
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1520,7 +1520,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-width'] = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1530,7 +1530,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-repeat'] = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1540,7 +1540,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image['border-image-outset'] = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1585,8 +1585,8 @@ export default {
       const data = {
         messageSettings: displayItems,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeFontWeight(value) {
@@ -1594,7 +1594,7 @@ export default {
         fontWeight: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showHeadLine(value) {
@@ -1602,7 +1602,7 @@ export default {
         isShowHeadline: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showColon(status) {
@@ -1612,7 +1612,7 @@ export default {
 
       const data = { messageSettings: settings }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeBorderAdaptContent(status) {
@@ -1620,7 +1620,7 @@ export default {
       const image = borderImages.find((image) => image.isSelected)
       if (!image) return
       image.isAdaptContent = status
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         borderImages: borderImages,
       })
     },
@@ -1630,7 +1630,7 @@ export default {
         isShowType1: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showType2(status) {
@@ -1638,7 +1638,7 @@ export default {
         isShowType2: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async showSuperChatJPN(status) {
@@ -1646,7 +1646,7 @@ export default {
         isShowSuperChatJPN: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeAdminIcon(icon) {
@@ -1654,24 +1654,24 @@ export default {
       const data = {
         adminIcon: icon,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     showAdminIcon(status) {
       const data = {
         isShowAdminIcon: status,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeAdminIconColor(color) {
       const data = {
         adminIconColor: color,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     searchAdminIcon(value) {
@@ -1690,16 +1690,16 @@ export default {
       const data = {
         danmakuChannel: number,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeChannelDelayTime(number) {
       const data = {
         channelDelayTime: number,
       }
-      useConfigStore().UPDATE_CONFIG(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
+      useConfigStore().updateConfig(data)
     },
   },
 }

@@ -346,7 +346,7 @@ export default {
           value: '',
         },
       ]
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         voteOptions: options,
       })
     },
@@ -355,7 +355,7 @@ export default {
       if (this.isWatching) return
       const options = [...this.options.map(toRaw)]
       options.splice(index, 1)
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         voteOptions: options,
       })
     },
@@ -363,7 +363,7 @@ export default {
     changeOptionKeyword(index, e) {
       const options = cloneDeep(this.options)
       options[index].keyword = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         voteOptions: options,
       })
     },
@@ -371,7 +371,7 @@ export default {
     changeOptionContent(index, e) {
       const options = cloneDeep(this.options)
       options[index].content = e.target.value
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         voteOptions: options,
       })
     },
@@ -381,7 +381,7 @@ export default {
         isAccurateMatch: value,
       }
       // updateSetting(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeAllowReVote(value) {
@@ -389,7 +389,7 @@ export default {
         allowReVote: value,
       }
       // updateSetting(data)
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
   },
 }

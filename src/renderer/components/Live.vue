@@ -224,7 +224,7 @@ export default defineComponent({
   async mounted() {
     const { data } = await getRecordState({ roomId: this.realRoomId })
     const { startAt, recordId, isRecording } = data
-    useConfigStore().UPDATE_CONFIG({
+    useConfigStore().updateConfig({
       isRecording: isRecording,
     })
 
@@ -274,7 +274,7 @@ export default defineComponent({
         //   this.downloadRate = parseDownloadRate(bps)
         // })
 
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           isRecording: true,
         })
         const recordStartTime = Date.now()
@@ -309,7 +309,7 @@ export default defineComponent({
         console.warn(e)
       }
 
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isRecording: false,
       })
 
@@ -407,7 +407,7 @@ export default defineComponent({
     async openRecordSaveFolderSelector() {
       const recordDir = await ipcRenderer.invoke(IPC_CHOOSE_DIRECTORY)
       if (recordDir) {
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           recordDir,
         })
         await this.$nextTick()
@@ -494,7 +494,7 @@ export default defineComponent({
     },
 
     async withCookie(status) {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isWithCookie: status,
       })
     },
@@ -516,7 +516,7 @@ export default defineComponent({
       const data = {
         liveWindowOpacity: Number((number / 100).toFixed(2)),
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     changeLiveVolume(number) {
@@ -524,7 +524,7 @@ export default defineComponent({
       const data = {
         liveVolume: liveVolume,
       }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
 
       const videoDOM = document.getElementById('live-player') as HTMLVideoElement
       if (videoDOM) videoDOM.volume = liveVolume
@@ -546,7 +546,7 @@ export default defineComponent({
           windowId,
         })
 
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           liveWindowId: windowId,
         })
 

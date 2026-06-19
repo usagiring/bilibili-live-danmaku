@@ -248,8 +248,8 @@ export async function getClientConfig(clientId: string) {
   return res.data
 }
 
-export async function updateClientConfig(clientId: string, KVs: Array<{ key: string; value: string }>) {
-  const res = await axios.post(`${baseUrl}/api/client/config/update`, { clientId, KVs })
+export async function updateClientConfig({ clientId, kvs }: { clientId: string, kvs: Array<{ key: string; value: string }> }) {
+  const res = await axios.post(`${baseUrl}/api/client/config/update`, { clientId, kvs })
   return res.data
 }
 

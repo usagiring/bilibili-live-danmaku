@@ -164,7 +164,7 @@ export default defineComponent({
           resizable: true,
         })
 
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           scrollDanmakuWindowId: windowId,
         })
 
@@ -179,7 +179,7 @@ export default defineComponent({
         scrollDanmakuFontSize: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeScrollDanmakuDuration(value) {
@@ -187,12 +187,12 @@ export default defineComponent({
         scrollDanmakuDuration: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     closeDanmakuWindow() {
       if (!this.win) return
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         scrollDanmakuWindowId: null,
       })
       // clear
@@ -205,7 +205,7 @@ export default defineComponent({
       this.isShowDanmakuWindow = false
       this.isShowDanmakuWindowLoading = false
       // this.isScrollDanmakuWindowAlwaysOnTop = false
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isScrollDanmakuWindowAlwaysOnTop: false,
       })
     },
@@ -227,7 +227,7 @@ export default defineComponent({
       if (!this.disableIgnoreMouseEvent || !status) {
         this.win.setIgnoreMouseEvents(status, { forward: true })
       }
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isScrollDanmakuWindowAlwaysOnTop: status,
       })
       // this.isScrollDanmakuWindowAlwaysOnTop = status
@@ -238,7 +238,7 @@ export default defineComponent({
         scrollDanmakuBackground: color,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeScrollDanmakuOpacity(value) {
@@ -246,7 +246,7 @@ export default defineComponent({
         scrollDanmakuOpacity: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeScrollDanmakuDirection(value) {
@@ -254,7 +254,7 @@ export default defineComponent({
         scrollDanmakuDirection: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeScrollDanmakuStyleExtend(value) {
@@ -262,7 +262,7 @@ export default defineComponent({
         scrollDanmakuStyleExtend: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
 
     async changeScrollDanmakuEmojiSize(value) {
@@ -270,7 +270,7 @@ export default defineComponent({
         scrollDanmakuEmojiSize: value,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().UPDATE_CONFIG(data)
+      useConfigStore().updateConfig(data)
     },
   },
 })

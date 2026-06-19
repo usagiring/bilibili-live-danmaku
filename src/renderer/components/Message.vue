@@ -337,7 +337,7 @@ export default defineComponent({
       })
     },
     showUserSpaceLink(status) {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isShowUserSpaceLink: status,
       })
     },
@@ -429,7 +429,7 @@ export default defineComponent({
       })
     },
     async showSilverGift(status) {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isShowSilverGift: status,
       })
       let gifts = await this.searchGift({
@@ -455,7 +455,7 @@ export default defineComponent({
     },
 
     async changeEnableMessageListenMode(status) {
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         enableMessageListenMode: status,
       })
       if (status) {

@@ -82,7 +82,7 @@ export default {
       'resize',
       debounce(() => {
         const [width, height] = win.getSize()
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           liveWindowHeight: height,
         })
         this.videoHeight = height
@@ -93,7 +93,7 @@ export default {
       'move',
       debounce(() => {
         const [x, y] = win.getPosition()
-        useConfigStore().UPDATE_CONFIG({
+        useConfigStore().updateConfig({
           liveWindowX: x,
           liveWindowY: y,
         })
@@ -183,7 +183,7 @@ export default {
       if (!this.disableIgnoreMouseEvent || !status) {
         win.setIgnoreMouseEvents(status, { forward: true })
       }
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         isLiveWindowAlwaysOnTop: status,
       })
     },
@@ -196,7 +196,7 @@ export default {
         this.flvPlayer = null
       }
 
-      useConfigStore().UPDATE_CONFIG({
+      useConfigStore().updateConfig({
         liveWindowId: null,
         isLiveWindowAlwaysOnTop: false,
       })

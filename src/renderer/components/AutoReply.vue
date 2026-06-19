@@ -409,7 +409,7 @@ async function onTagChange(ruleIndex, evt) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function onRuleDragChange(evt) {
@@ -427,7 +427,7 @@ function onRuleDragChange(evt) {
   }
   console.log(data)
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function cloneTag(tag) {
@@ -485,7 +485,7 @@ function removeTag(ruleIndex, tagIndex) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function removeRule(ruleIndex) {
@@ -495,7 +495,7 @@ function removeRule(ruleIndex) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function addRule() {
@@ -512,7 +512,7 @@ function addRule() {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function changeEnable(index, status) {
@@ -523,7 +523,7 @@ function changeEnable(index, status) {
   }
   console.log(data)
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function onChangeRuleType(index, type) {
@@ -533,7 +533,7 @@ function onChangeRuleType(index, type) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 // tag 里发出的数据变更事件
@@ -546,7 +546,7 @@ function onDataChange(ruleIndex, tagIndex, payload) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 function changeText(ruleIndex, e) {
@@ -556,7 +556,7 @@ function changeText(ruleIndex, e) {
     autoReplyRules: _rules,
   }
   updateSetting(data)
-  store.UPDATE_CONFIG(data)
+  store.updateConfig(data)
 }
 
 
