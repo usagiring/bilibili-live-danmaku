@@ -6,7 +6,7 @@ import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DO
 import { initialize, enable } from '@electron/remote/main'
 import { registerIpcHandlers } from './ipc'
 import globalVar from '../service/global'
-import { start as startBiliBridge, registerClient } from '../service/bilibili-bridge'
+import { start as startBiliBridge } from '../service/bilibili-bridge'
 
 declare global {
   // eslint-disable-next-line no-var
@@ -37,11 +37,6 @@ async function initApp() {
     globalVar.port = 3000
     globalVar.baseUrl = `http://127.0.0.1:3000`
   }
-
-  await registerClient(globalVar.clientId)
-
-  console.log('clientId: ' + globalVar.clientId)
-  store.set('clientId', globalVar.clientId)
 }
 
 /**
@@ -92,6 +87,10 @@ app.on('ready', async () => {
 
   // 注册渲染进程需要的 IPC handlers（必须在 createWindow 之前，避免 invoke 时无 handler）
   ipcMain.handle('get-client-id', () => globalVar.clientId)
+  ipcMain.handle('set-client-id', (_event, clientId: string) => {
+    globalVar.clientId = clientId
+    store.set('clientId', clientId)
+  })
   ipcMain.handle('get-base-url', () => globalVar.baseUrl)
 
   // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启

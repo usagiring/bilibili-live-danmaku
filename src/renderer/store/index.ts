@@ -166,6 +166,7 @@ export interface RecordConfig {
 }
 
 export interface Config {
+  clientId: string
   // 全局设置
   signInMessage: string
   isNeedRefreshCookieCache?: number
@@ -247,6 +248,17 @@ export const useConfigStore = defineStore('config', {
     //   ;(this as any)[objKey] = { ...(this as any)[objKey], ...payload.style }
     // },
 
+    REPLACE_STATE(payload: Record<string, any>) {
+      // 先清空再整体替换，确保引用类型完全刷新
+      const keys = Object.keys(this.$state)
+      for (const key of keys) {
+        delete (this as any)[key]
+      }
+      for (const key in payload) {
+        ; (this as any)[key] = payload[key]
+      }
+    },
+
     UPDATE_CONFIG(payload: Record<string, any>) {
       for (const key in payload) {
         ; (this as any)[key] = payload[key]
@@ -256,25 +268,25 @@ export const useConfigStore = defineStore('config', {
 })
 
 // localStorage 持久化
-function persistPlugin({ store }: { store: any }) {
-  const STORAGE_KEY = 'bilibili-config'
+// function persistPlugin({ store }: { store: any }) {
+//   const STORAGE_KEY = 'bilibili-config'
 
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const data = JSON.parse(saved)
-      store.UPDATE_CONFIG(data)
-    }
-  } catch { /* ignore */ }
+//   try {
+//     const saved = localStorage.getItem(STORAGE_KEY)
+//     if (saved) {
+//       const data = JSON.parse(saved)
+//       store.UPDATE_CONFIG(data)
+//     }
+//   } catch { /* ignore */ }
 
-  store.$subscribe(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store.$state))
-    } catch { /* ignore */ }
-  })
-}
+//   store.$subscribe(() => {
+//     try {
+//       localStorage.setItem(STORAGE_KEY, JSON.stringify(store.$state))
+//     } catch { /* ignore */ }
+//   })
+// }
 
 const pinia = createPinia()
-pinia.use(persistPlugin)
+// pinia.use(persistPlugin)
 
 export default pinia

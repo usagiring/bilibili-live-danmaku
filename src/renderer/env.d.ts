@@ -7,6 +7,7 @@ declare module '*.vue' {
 interface Window {
   getBaseUrl(): Promise<string>
   getClientId(): Promise<string>
+  setClientId(clientId: string): Promise<void>
   ipcRenderer: {
     send(channel: string, ...args: unknown[]): void
     on(channel: string, func: (...args: unknown[]) => void): void

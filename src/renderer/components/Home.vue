@@ -119,7 +119,9 @@
                     <span class="slider-text off">未连接</span>
                   </span>
                 </label>
-                <Button type="primary" size="small" @click="handleShowDanmaku(true)">弹幕窗</Button>
+                <Button class="btn-danmaku" size="small" @click="handleShowDanmaku(true)">
+                  <Icon type="md-chatboxes" size="13" /> 弹幕窗
+                </Button>
               </div>
             </div>
           </div>
@@ -149,8 +151,8 @@ import { Room, useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import {
-  connect as connectRoom,
-  disconnect as disconnectRoom,
+  connect as connectApi,
+  disconnect as disconnectApi,
 } from '../service/api'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
@@ -169,6 +171,7 @@ const isRoomPanelCollapsed = ref(false)
 const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
+const clientId = store.clientId
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
@@ -253,10 +256,10 @@ async function toggleConnect() {
   connecting.value = true
   try {
     if (room.isConnected) {
-      await disconnectRoom({ roomId: room.id })
+      await disconnectApi({ roomId: room.id })
       room.isConnected = false
     } else {
-      await connectRoom({ roomId: room.id, userId: room.userId })
+      await connectApi({ roomId: room.id, userId: room.userId, clientId })
     }
   } catch { /* ignore */ }
   connecting.value = false
@@ -728,6 +731,21 @@ function hideToTray() {
   margin-bottom: -2px;
 }
 
+.btn-danmaku {
+  border: 2px solid rgba(255,255,255,1) !important;
+  background: rgba(0,0,0,0.1) !important;
+  color: rgba(0,0,0,0.8) !important;
+  font-size: 11px !important;
+  border-radius: 14px !important;
+  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+}
+
+.btn-danmaku:hover {
+  border-color: #fff !important;
+  color: #222 !important;
+  background: rgba(0,0,0,0.1) !important;
+}
+
 /* ── Switch 滑块 ── */
 .switch {
   position: relative;
@@ -746,9 +764,10 @@ function hideToTray() {
 .slider {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.1);
+  border: 2px solid rgba(255,255,255,0.8);
   border-radius: 24px;
-  transition: background 0.25s;
+  transition: background 0.25s, border-color 0.25s;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -759,8 +778,8 @@ function hideToTray() {
   position: absolute;
   left: 2px;
   top: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   background: #fff;
   border-radius: 50%;
   transition: transform 0.25s;
@@ -771,7 +790,6 @@ function hideToTray() {
 .slider-text {
   position: absolute;
   font-size: 10px;
-  font-weight: 600;
   transition: opacity 0.2s;
   white-space: nowrap;
   text-shadow: 0 0 4px rgba(255,255,255,0.6);
@@ -784,13 +802,14 @@ function hideToTray() {
 }
 
 .slider-text.off {
-  right: 6px;
-  color: rgba(0,0,0,0.5);
+  right: 8px;
+  color: rgba(0,0,0,0.9);
   opacity: 1;
 }
 
 .switch input:checked + .slider {
   background: #19be6b;
+  border-color: rgba(255,255,255,0.8);
 }
 
 .switch input:checked + .slider::before {

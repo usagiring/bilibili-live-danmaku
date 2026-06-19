@@ -14,8 +14,8 @@ export async function getRoomInfoByIds(roomIds: string[]) {
   return res.data
 }
 
-export async function connect({ roomId, userId }: { roomId: string; userId?: string }) {
-  const res = await axios.post(`${baseUrl}/api/room/connect`, { roomId, userId })
+export async function connect({ roomId, userId, clientId }: { roomId: string; userId?: string; clientId: string }) {
+  const res = await axios.post(`${baseUrl}/api/room/connect`, { roomId, userId, clientId })
   return res.data
 }
 
@@ -253,9 +253,17 @@ export async function updateClientConfig(clientId: string, KVs: Array<{ key: str
   return res.data
 }
 
+export async function registryClient({ clientId }) {
+  const res = await axios.post(`${baseUrl}/api/client/register`, {
+    clientId
+  })
+  return res.data
+}
+
 // ==================== Health ====================
 
 export async function touch() {
   const res = await axios.get(`${baseUrl}/api/touch`)
   return res.data
 }
+
