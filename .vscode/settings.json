@@ -1,20 +1,27 @@
-// {
-//   "editor.tabSize": 2,
-//   "editor.insertSpaces": true,
-//   "editor.detectIndentation": false,
-//   "[vue]": {
-//     "editor.tabSize": 2
-//   },
-//   "[typescript]": {
-//     "editor.tabSize": 2
-//   },
-//   "[javascript]": {
-//     "editor.tabSize": 2
-//   },
-//   "[json]": {
-//     "editor.tabSize": 2
-//   },
-//   "[css]": {
-//     "editor.tabSize": 2
-//   }
-// }
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[vue]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[css]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "typescript.format.semicolons": "remove",
+  "javascript.format.semicolons": "remove"
+}
