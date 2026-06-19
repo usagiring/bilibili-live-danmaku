@@ -1,5 +1,6 @@
 import { createPinia, defineStore } from 'pinia'
 import { ref, computed, reactive, toRefs, toRaw } from 'vue'
+import { set as _set } from 'lodash'
 import { updateClientConfig } from '../service/api'
 import { ClientConfig, Room } from '../types'
 
@@ -32,15 +33,16 @@ export const useConfigStore = defineStore('config', () => {
   //   Object.assign(state, payload)
   // }
 
-  function updateConfig(payload: Record<string, any>) {
-    Object.assign(state, payload)
+  function set(path, value: any) {
+    console.log(path, value)
+    _set(state, path, value)
   }
 
   return {
     ...toRefs(state),
     activeRoom,
     // replaceState,
-    updateConfig,
+    set,
   }
 })
 
@@ -107,7 +109,7 @@ export const useConfigStore = defineStore('config', () => {
 //     if (syncTimer) clearTimeout(syncTimer)
 //     syncTimer = setTimeout(() => flushSync(state), SYNC_DEBOUNCE)
 //   }, { detached: true })
-}
+// }
 
 const pinia = createPinia()
 // pinia.use(syncPlugin)

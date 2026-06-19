@@ -11,8 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { pick } from 'lodash'
+import { ref, onBeforeMount, onBeforeUnmount } from 'vue'
 import { touch, registryClient, getClientConfig } from './service/api'
 import { sse } from './service/sse-client'
 import { wait } from './service/util'
@@ -22,15 +21,16 @@ import config from './service/config'
 const store = useConfigStore()
 const isLoading = ref(true)
 
-onMounted(async () => {
-  while (isLoading.value) {
+onBeforeMount(async () => {
+  let touching = true
+  while (touching) {
     try {
       await touch()
-      isLoading.value = false
+      touching = false
     } catch (e) {
       /* retry */
+      await wait(500)
     }
-    await wait(500)
   }
 
   // 从主进程 electron-store 读取持久化的 clientId
@@ -48,7 +48,7 @@ onMounted(async () => {
   console.log('clientId: ' + clientId)
 
   config.id = clientId
-  store.updateConfig({ id: clientId })
+  store.set('id', clientId)
 
   // 从 bridge 后端拉取完整配置
   const { data: remoteConfig } = await getClientConfig(clientId)
@@ -58,8 +58,10 @@ onMounted(async () => {
     Object.assign(config, remoteConfig)
 
     // 需要 Pinia 持久化的字段同步到 store
-    store.updateConfig(pick(remoteConfig, ['rooms']))
+    store.set('rooms', remoteConfig.rooms)
   }
+
+  isLoading.value = false
 
   // bridge 就绪后建立全局 SSE 连接
   await sse.connect()

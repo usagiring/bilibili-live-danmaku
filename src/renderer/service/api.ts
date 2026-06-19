@@ -19,8 +19,8 @@ export async function connect({ roomId, userId, clientId }: { roomId: string; us
   return res.data
 }
 
-export async function disconnect({ roomId }: { roomId: string }) {
-  const res = await axios.post(`${baseUrl}/api/room/disconnect`, { roomId })
+export async function disconnect({ roomId, clientId }: { roomId: string; clientId: string }) {
+  const res = await axios.post(`${baseUrl}/api/room/disconnect`, { roomId, clientId })
   return res.data
 }
 

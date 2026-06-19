@@ -173,7 +173,7 @@ const isRoomPanelCollapsed = ref(false)
 const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
-const clientId = store.id
+const clientId = computed(() => store.id)
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
@@ -220,13 +220,13 @@ async function selectRoom(index: number) {
     room.isActive = i === index
   })
 
-  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
 async function removeRoom(index: number) {
   store.rooms.splice(index, 1)
 
-  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
 async function handleAddRoom() {
@@ -251,7 +251,7 @@ async function handleAddRoom() {
   showAddRoom.value = false
   newRoomId.value = ''
 
-  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
 function handleAvatarError(e: Event) {
@@ -264,10 +264,10 @@ async function toggleConnect() {
   connecting.value = true
   try {
   if (room.isConnected) {
-      await disconnectApi({ roomId: room.id })
+      await disconnectApi({ roomId: room.id, clientId: clientId.value })
       room.isConnected = false
     } else {
-      await connectApi({ roomId: room.id, userId: room.userId, clientId })
+      await connectApi({ roomId: room.id, userId: room.userId, clientId: clientId.value })
     }
   } catch { /* ignore */ }
   connecting.value = false
