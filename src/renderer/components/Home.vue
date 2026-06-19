@@ -214,11 +214,12 @@ onMounted(() => {
 })
 
 // 等 rooms 有值后拉取连接状态（只执行一次）
-watch(() => store.id, async () => {
+watch(() => store.rooms.length, async () => {
   const roomIds = store.rooms.map(room => room.id)
-  const { data } = await getRoomStatus({ roomIds })
+  const { data } = await getRoomStatus({ roomIds, clientId: store.id })
   data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
     const room = store.rooms.find(room => room.id === roomId)
+    console.log(room, 'room')
     if (!room) return
     room.isConnected = isConnected
   })
@@ -796,7 +797,7 @@ function hideToTray() {
 .btn-danmaku:hover {
   border-color: #fff !important;
   color: #222 !important;
-  background: rgba(0, 0, 0, 0.1) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
 }
 
 /* ── Switch 滑块 ── */

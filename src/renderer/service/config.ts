@@ -1,8 +1,9 @@
 import { set as _set } from 'lodash'
 import { reactive } from 'vue'
+import { ClientConfig } from '../types'
 
 // 全局共享的客户端配置（响应式，任何组件 import 后读写即生效）
-const config = reactive({
+const config: ClientConfig = reactive({
   id: '',
   rooms: [],
   windows: [],

@@ -29,8 +29,8 @@ export async function getRealTimeViewersCount({ roomId, startedAt }: { roomId: n
   return res.data
 }
 
-export async function getRoomStatus({ roomIds }: { roomIds: string[] }) {
-  const res = await axios.get(`${baseUrl}/api/room/status`, { params: { roomIds: roomIds.join(',') } })
+export async function getRoomStatus({ roomIds, clientId }: { roomIds: string[]; clientId: string }) {
+  const res = await axios.get(`${baseUrl}/api/room/status`, { params: { roomIds: roomIds.join(','), clientId } })
   return res.data
 }
 

@@ -168,13 +168,12 @@ async function initialize() {
 
     const room = store.rooms.find(room => room.id === roomId)
     if (!room) throw new Error('房间未找到')
-    room.id = realRoomId
-    room.realId = realRoomId
+    room.id = String(realRoomId)
+    room.realId = String(realRoomId)
 
 
-    room.realId = realRoomId
-    room.userId = userId
-    room.isConnected = false
+    room.realId = String(realRoomId)
+    room.userId = String(userId)
     room.username = username
     room.face = face
     room.fansNumber = fansNumber || 0
