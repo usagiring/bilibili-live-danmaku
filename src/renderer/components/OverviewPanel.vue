@@ -1,27 +1,6 @@
 <template>
   <div class="overview-panel">
     <template v-if="activeRoom">
-      <!-- 信息卡片 -->
-      <div class="profile-card">
-        <Avatar :src="activeRoom.face || 'https://static.hdslb.com/images/member/noface.gif'" size="large" />
-        <div class="p-info">
-          <div class="p-name">
-            {{ activeRoom.username || '未连接' }}
-            <Tag v-if="activeRoom.isConnected" color="blue" style="vertical-align:middle">连接中</Tag>
-          </div>
-          <div class="p-id">房间号 {{ activeRoom?.displayId }} · UID {{ activeRoom?.userId || '-' }}</div>
-          <Tag :color="activeRoom.liveStatus === 1 ? 'success' : 'default'" style="margin-top:4px">
-            {{ activeRoom.isConnected ? (activeRoom.liveStatus === 1 ? '● 直播中' : '未开播') : '未连接' }}
-          </Tag>
-        </div>
-        <div class="p-actions">
-          <Button v-if="!activeRoom.isConnected" type="primary" size="small" :loading="connecting"
-            @click="connect">连接</Button>
-          <Button v-if="activeRoom.isConnected" size="small" @click="disconnect">断开</Button>
-          <Button type="primary" size="small" @click="$emit('showDanmaku', true)">弹幕窗</Button>
-        </div>
-      </div>
-
       <!-- 统计条 -->
       <div class="stats-row">
         <div class="stat-card">
@@ -75,16 +54,10 @@ import { Message } from 'view-ui-plus'
 import { useConfigStore } from '../store'
 import { sse } from '../service/sse-client'
 import {
-  connect as connectRoom,
-  disconnect as disconnectRoom,
   getRoomInfoV2,
   getGuardInfo,
   updateClientConfig,
 } from '../service/api'
-
-const emit = defineEmits<{
-  showDanmaku: [status: boolean]
-}>()
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -194,7 +167,7 @@ async function initialize() {
 
     room.realId = realRoomId
     room.userId = userId
-    room.isConnected = true
+    room.isConnected = false
     room.username = username
     room.face = face
     room.fansNumber = fansNumber || 0
@@ -221,25 +194,6 @@ async function initialize() {
   connecting.value = false
 }
 
-async function connect({ roomId, userId }) {
-  const room = activeRoom.value
-  if (!room) return
-  connecting.value = true
-  await connectRoom({ roomId, userId })
-  connecting.value = false
-}
-
-async function disconnect({ roomId }) {
-  if (!activeRoom?.value) return
-  try {
-    await disconnectRoom({ roomId })
-  } catch { /* ignore */ }
-
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.isConnected = false
-}
-
 function formatNumber(n?: number): string {
   if (!n) return '0'
   if (n >= 10000) return (n / 10000).toFixed(1) + '万'
@@ -250,10 +204,10 @@ function formatNumber(n?: number): string {
 
 <style scoped>
 .overview-panel {
-  padding: 16px 20px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   overflow-y: auto;
   height: 100%;
 }
@@ -280,44 +234,14 @@ function formatNumber(n?: number): string {
   font-size: 13px;
 }
 
-.profile-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
-}
-
-.p-info {
-  flex: 1;
-}
-
-.p-name {
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.p-id {
-  font-size: 12px;
-  color: #999;
-  margin-top: 2px;
-}
-
-.p-actions {
-  display: flex;
-  gap: 8px;
-}
-
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .stat-card {
-  padding: 14px 16px;
+  padding: 12px 10px;
   background: #fff;
   border-radius: 8px;
   text-align: center;
@@ -329,7 +253,7 @@ function formatNumber(n?: number): string {
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #333;
 }
