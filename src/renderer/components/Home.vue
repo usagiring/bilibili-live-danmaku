@@ -147,12 +147,14 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 // import { ipcRenderer } from 'electron'
-import { Room, useConfigStore } from '../store'
+import { useConfigStore } from '../store'
+// import { Room } from '../types'
 import { IPC_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import {
   connect as connectApi,
   disconnect as disconnectApi,
+  updateClientConfig,
 } from '../service/api'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
@@ -171,7 +173,7 @@ const isRoomPanelCollapsed = ref(false)
 const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
-const clientId = store.clientId
+const clientId = store.id
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
@@ -213,17 +215,21 @@ onUnmounted(() => {
 
 // const isRecording = computed(() => store.isRecording)
 
-function selectRoom(index: number) {
+async function selectRoom(index: number) {
   store.rooms.forEach((room, i) => {
     room.isActive = i === index
   })
+
+  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
-function removeRoom(index: number) {
+async function removeRoom(index: number) {
   store.rooms.splice(index, 1)
+
+  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
-function handleAddRoom() {
+async function handleAddRoom() {
   const roomId = newRoomId.value.trim()
   if (!roomId) return
 
@@ -244,6 +250,8 @@ function handleAddRoom() {
 
   showAddRoom.value = false
   newRoomId.value = ''
+
+  await updateClientConfig({ clientId, kvs: [{ key: 'rooms', value: store.rooms }]})
 }
 
 function handleAvatarError(e: Event) {

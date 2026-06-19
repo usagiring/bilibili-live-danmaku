@@ -12,10 +12,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { pick } from 'lodash'
 import { touch, registryClient, getClientConfig } from './service/api'
 import { sse } from './service/sse-client'
 import { wait } from './service/util'
 import { useConfigStore } from './store'
+import config from './service/config'
 
 const store = useConfigStore()
 const isLoading = ref(true)
@@ -45,12 +47,18 @@ onMounted(async () => {
 
   console.log('clientId: ' + clientId)
 
-  store.updateConfig({ clientId })
+  config.id = clientId
+  store.updateConfig({ id: clientId })
 
-  // 从 bridge 后端拉取完整配置并整体替换 store 状态
+  // 从 bridge 后端拉取完整配置
   const { data: remoteConfig } = await getClientConfig(clientId)
   if (remoteConfig) {
-    store.updateConfig(remoteConfig)
+    // 写入全局 config
+    // Object.assign(config, pick(remoteConfig, Object.keys(config)))
+    Object.assign(config, remoteConfig)
+
+    // 需要 Pinia 持久化的字段同步到 store
+    store.updateConfig(pick(remoteConfig, ['rooms']))
   }
 
   // bridge 就绪后建立全局 SSE 连接
