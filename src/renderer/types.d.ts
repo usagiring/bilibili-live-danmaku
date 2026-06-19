@@ -30,6 +30,7 @@ interface Room {
   watchedNumber?: number
   likeNumber?: number
   onlineNumber?: number
+  userSpaceBanner?: string
 }
 
 interface User {

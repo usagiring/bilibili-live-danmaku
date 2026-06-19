@@ -221,7 +221,7 @@ export async function getRandomPlayUrl(body: { roomId: number; qn?: number; with
   return res.data
 }
 
-export async function getUserInfoV2(userId: number) {
+export async function getUserInfoV2({ userId }: { userId: string }) {
   const res = await axios.get(`${baseUrl}/api/bilibili/user/info`, { params: { userId } })
   return res.data
 }

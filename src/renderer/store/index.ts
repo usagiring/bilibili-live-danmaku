@@ -20,7 +20,7 @@ export const useConfigStore = defineStore('config', () => {
 
   // ── Getters ──
   const activeRoom = computed((): Room | null => {
-    return (state.rooms as Room[])?.find(room => room.isActive) || null
+    return state.rooms?.find(room => room.isActive) || null
   })
 
   // ── Actions ──

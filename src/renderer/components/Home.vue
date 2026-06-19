@@ -51,7 +51,7 @@
           <div v-for="(room, index) in store.rooms" :key="index" class="room-card"
             :class="{ active: room.isActive, connect: room.isConnected }"
             @click="selectRoom(index)">
-            <img class="room-avatar" :src="room.face || ''" @error="handleAvatarError" />
+            <img class="room-avatar" :src="room.face || DEFAULT_AVATAR"/>
             <div class="room-info">
               <div class="room-name">{{ room.username || '未连接' }}</div>
               <div class="room-id">
@@ -91,7 +91,8 @@
         <template v-if="store.activeRoom">
         <!-- Banner 包裹区：路由 + 用户信息 + 连接 -->
         <div class="detail-banner">
-          <img class="banner-bg" src="https://i0.hdslb.com/bfs/activity-plat/static/0977767b2e79d8ad0a36a731068a83d7/1sz3p8w2Sk.png" />
+          <!-- 默认banner "https://i0.hdslb.com/bfs/activity-plat/static/0977767b2e79d8ad0a36a731068a83d7/1sz3p8w2Sk.png" -->
+          <img class="banner-bg" :src="activeRoom?.userSpaceBanner || ''" />
           <div class="banner-overlay">
             <!-- Tab 导航 -->
             <div class="room-tabs">
@@ -101,7 +102,7 @@
             </div>
             <!-- 用户信息 + 连接 -->
             <div class="banner-profile">
-              <img class="banner-avatar" :src="activeRoom?.face || ''" @error="handleAvatarError" />
+              <img class="banner-avatar" :src="activeRoom?.face || DEFAULT_AVATAR"/>
               <div class="banner-info">
                 <div class="banner-name">{{ activeRoom?.username || '未连接' }}</div>
                 <div class="banner-id">
@@ -145,7 +146,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 // import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
 // import { Room } from '../types'
@@ -156,6 +157,7 @@ import {
   disconnect as disconnectApi,
   updateClientConfig,
 } from '../service/api'
+import { DEFAULT_AVATAR } from '../../service/const'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -245,17 +247,26 @@ async function handleAddRoom() {
     isAutoReply: false,
     autoReplyRules: [],
     voteOptions: [],
-    isActive: true
+    isActive: true,
+    // 预填所有 Render 字段，确保 Vue 响应式追踪
+    realId: '',
+    isConnected: false,
+    username: '',
+    face: '',
+    displayId: '',
+    anchorNumber: 0,
+    fansNumber: 0,
+    fansclubNumber: 0,
+    ninkiNumber: 0,
+    watchedNumber: 0,
+    likeNumber: 0,
+    onlineNumber: 0,
   })
 
   showAddRoom.value = false
   newRoomId.value = ''
 
   await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }]})
-}
-
-function handleAvatarError(e: Event) {
-  (e.target as HTMLElement).style.display = 'none'
 }
 
 async function toggleConnect() {
@@ -741,11 +752,11 @@ function hideToTray() {
 
 .btn-danmaku {
   border: 2px solid rgba(255,255,255,1) !important;
-  background: rgba(0,0,0,0.1) !important;
+  background: rgba(255,255,255,0.6) !important;
   color: rgba(0,0,0,0.8) !important;
   font-size: 11px !important;
   border-radius: 14px !important;
-  text-shadow: 0 0 4px rgba(255,255,255,0.5);
+  /* text-shadow: 0 0 4px rgba(255,255,255,0.5); */
 }
 
 .btn-danmaku:hover {
@@ -772,7 +783,7 @@ function hideToTray() {
 .slider {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.6);
   border: 2px solid rgba(255,255,255,0.8);
   border-radius: 24px;
   transition: background 0.25s, border-color 0.25s;
@@ -800,7 +811,7 @@ function hideToTray() {
   font-size: 10px;
   transition: opacity 0.2s;
   white-space: nowrap;
-  text-shadow: 0 0 4px rgba(255,255,255,0.6);
+  /* text-shadow: 0 0 4px rgba(255,255,255,0.6); */
 }
 
 .slider-text.on {
@@ -816,7 +827,7 @@ function hideToTray() {
 }
 
 .switch input:checked + .slider {
-  background: #19be6b;
+  background: rgba(25,190,107,0.8);
   border-color: rgba(255,255,255,0.8);
 }
 

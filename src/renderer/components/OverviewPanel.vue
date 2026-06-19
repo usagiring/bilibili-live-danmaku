@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Message } from 'view-ui-plus'
 import { useConfigStore } from '../store'
 import { sse } from '../service/sse-client'
@@ -57,13 +57,15 @@ import {
   getRoomInfoV2,
   getGuardInfo,
   updateClientConfig,
+  getUserInfoV2,
 } from '../service/api'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
 
-const initializing = ref(false)
+// const initializing = ref(false)
 const connecting = ref(false)
+const clientId = computed(() => store.id)
 
 onMounted(() => {
   sse.on('NINKI', onNinki)
@@ -76,6 +78,13 @@ onMounted(() => {
 })
 onMounted(() => {
   initialize()
+})
+
+// 切换房间时重新初始化（跳过已初始化的房间）
+watch(() => activeRoom.value?.id, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    initialize()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -134,9 +143,6 @@ function onOnlineCount(data: any) {
 async function initialize() {
   if (!activeRoom?.value) return
 
-  initializing.value = true
-
-  // TODO initialized
   try {
     const roomId = activeRoom.value?.displayId || activeRoom.value?.id
     const { data } = await getRoomInfoV2({ roomId })
@@ -158,6 +164,7 @@ async function initialize() {
     const likeNumber = data.like_info_v3?.total_likes
     const ninkiNumber = data.room_info?.online
     const onlineNumber = data.room_rank_info?.user_rank_entry?.user_contribution_rank_entry?.count
+    const anchorNumber = data.guard_info?.count
 
     const room = store.rooms.find(room => room.id === roomId)
     if (!room) throw new Error('房间未找到')
@@ -177,21 +184,20 @@ async function initialize() {
     room.onlineNumber = onlineNumber || 0
     room.watchedNumber = watchedNumber || 0
     room.likeNumber = likeNumber || 0
+    room.anchorNumber = anchorNumber
 
-    // 获取舰队信息
-    try {
-      const guardResult = await getGuardInfo({ roomId: realRoomId, userId })
-      room.anchorNumber = guardResult.data.info.num
-    } catch { /* ignore */ }
-
-    const clientId = await window.getClientId()
-    if (clientId) {
-      // await updateClientConfig(clientId, [{ key: 'roomUserId', value: String(uid) }])
+    if (!room.userSpaceBanner) {
+      const { data } = await getUserInfoV2({ userId })
+      const userSpaceBanner = data.top_photo_v2.l_img
+      room.userSpaceBanner = userSpaceBanner
     }
+
+    await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
+
   } catch (e: any) {
     Message.error(`连接失败: ${e.message}`)
   }
-  connecting.value = false
+
 }
 
 function formatNumber(n?: number): string {
