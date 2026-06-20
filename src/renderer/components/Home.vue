@@ -87,7 +87,11 @@
 
       <!-- 右侧：详情区 -->
       <div class="detail-panel">
-        <template v-if="store.activeRoom">
+        <!-- 配置页占满整个右侧 -->
+        <Config v-if="activeTab === 'config'" />
+
+        <!-- 概览：需要活动房间 -->
+        <template v-else-if="store.activeRoom">
           <!-- Banner 包裹区：路由 + 用户信息 + 连接 -->
           <div class="detail-banner">
             <!-- 默认banner "https://i0.hdslb.com/bfs/activity-plat/static/0977767b2e79d8ad0a36a731068a83d7/1sz3p8w2Sk.png" -->
@@ -152,6 +156,7 @@ import { useConfigStore } from '../store'
 // import { Room } from '../types'
 import { IPC_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
+import Config from './Config.vue'
 import {
   connect as connectApi,
   disconnect as disconnectApi,
@@ -235,6 +240,8 @@ async function selectRoom(index: number) {
   store.rooms.forEach((room, i) => {
     room.isActive = i === index
   })
+
+  activeTab.value = 'overview'
 
   await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
 }

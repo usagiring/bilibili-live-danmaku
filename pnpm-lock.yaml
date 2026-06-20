@@ -38,9 +38,6 @@ importers:
       flv.js:
         specifier: ^1.6.2
         version: 1.6.2
-      follow-redirects:
-        specifier: ^1.16.0
-        version: 1.16.0
       font-list:
         specifier: ^2.1.0
         version: 2.1.0

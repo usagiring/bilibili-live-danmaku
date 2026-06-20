@@ -1,676 +1,822 @@
 <template>
-  <div>
-    <div class="config-item-container">
-      <Poptip confirm title="确认还原弹幕样式？" placement="bottom" width="300" @on-ok="restoreDefaultStyleSetting">
-        <Button class="config-item">还原默认弹幕样式</Button>
-      </Poptip>
-      <Tooltip placement="top" max-width="300" transfer>
-        <!-- <Poptip confirm title="确认备份并清理数据库？" placement="bottom" width="400" word-wrap @on-ok="backupAndClearDB">
-          <Button class="config-item">备份并清理数据库</Button>
-        </Poptip> -->
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>弹幕数据留存过多可能会导致启动变慢。可以尝试清理并备份，备份数据自行选择留档或手动删除。数据文件夹: {{ userDataPath }}</p>
-          </div>
-        </template>
-      </Tooltip>
-      <Tooltip placement="top" max-width="300" transfer>
-        <!-- <Poptip confirm title="确认清理用户头像缓存？" placement="bottom" width="400" @on-ok="clearUserDB">
-          <Button class="config-item">清理用户头像缓存</Button>
-        </Poptip> -->
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>为了防止触发B站限流，用户头像会缓存，可以清理并重新获取最新数据。</p>
-          </div>
-        </template>
-      </Tooltip>
+  <div class="page">
+    <!-- ═══ Cookie ═══ -->
+    <div class="divider">Cookie 设置</div>
+    <div class="section">
+      <div class="section-row">
+        <input class="input" v-model="cookieInput" type="password" placeholder="输入 B站 Cookie..."
+          style="width:280px;text-align:left;padding:0 8px" />
+        <button class="btn btn-primary" @click="showQrCodeLoginModal">扫码登录</button>
+      </div>
     </div>
-    <div class="config-item-container">
-      Cookie
-      <Input class="config-item" :style="{ width: '240px' }" :model-value="userCookie" type="password"
-        placeholder="Cookie..." clearable @on-change="changeCookie" />
-      <Button @click="showQrCodeLoginModal">扫码登录</Button>
-      <!-- <Button @click="refreshCookie">刷新Cookie</Button> -->
-      <Tooltip placement="top" transfer>
-        <Icon type="md-alert" :style="{ 'font-size': '20px', 'vertical-align': 'middle' }" />
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>输入Cookie可以使用发送弹幕/更换粉丝牌等功能。</p>
-            <p :style="{ color: 'pink' }">Cookie即为你在Bilibili上的身份信息，请勿泄露你的身份凭证！</p>
-          </div>
-        </template>
-      </Tooltip>
+
+    <!-- ═══ dmStyle — 弹幕窗样式 ═══ -->
+    <div class="divider">弹幕窗样式</div>
+    <div class="preview"
+      :style="{ background: dmStyle?.windowBackground || 'rgba(30,30,40,0.9)', opacity: dmStyle?.windowOpacity ?? 1 }">
+      <img v-if="dmStyle?.isShowFace && activeRoom?.face" class="avatar" :src="activeRoom.face" />
+      <div v-else-if="dmStyle?.isShowFace" class="avatar"></div>
+      <span v-if="dmStyle?.isShowType1 !== false" class="name">{{ activeRoom?.username || '用户名' }}</span>
+      <span v-if="dmStyle?.isShowType2 !== false" class="colon">：</span>
+      <span class="msg">这是一条测试弹幕</span>
     </div>
-    <div class="config-item-container">
-      <Checkbox :model-value="isAutoRecord" :style="{ height: '30px', 'line-height': '30px' }"
-        @on-change="changeAutoRecord"> 自动录制 </Checkbox>
-      <Tooltip transfer placement="top">
-        <Icon type="md-help" />
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>当连接直播间时，如果开播会自动开始录制</p>
-          </div>
-        </template>
-      </Tooltip>
-      <!-- <Tooltip placement="top" content="实验性功能，可能不稳定">
-        <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
-          <Icon type="ios-flask" />
+    <div class="section" style="padding-bottom:8px">
+      <div class="section-row" style="gap:4px">
+        <button class="btn btn-default" style="font-size:10px;height:22px" @click="sendTestDanmaku">生成测试弹幕</button>
+        <button class="btn btn-default" style="font-size:10px;height:22px" @click="clearDanmaku">清空弹幕</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chips">
+        <span class="chip" :class="{ on: dmStyle?.isShowFace !== false }"
+          @click="toggle('dmStyle.isShowFace')">头像</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowFanMedal !== false }"
+          @click="toggle('dmStyle.isShowFanMedal')">粉丝牌</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowType1 !== false }"
+          @click="toggle('dmStyle.isShowType1')">用户名</span>
+        <!-- <span class="chip" :class="{ on: dmStyle?.isShowType2 !== false }"
+          @click="toggle('dmStyle.isShowType2')">冒号</span> -->
+        <span style="color:#ddd;margin:0 2px">│</span>
+        <!-- <span class="chip" :class="{ on: dmStyle?.isShowSuperChatJPN !== false }"
+          @click="toggle('dmStyle.isShowSuperChatJPN')">SC日文</span> -->
+        <span class="chip" :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
+          @click="toggle('dmStyle.isShowAnchorIcon')">舰队标记</span>
+        <!-- <span class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
+          @click="toggle('dmStyle.isShowAdminIcon')">房管标</span> -->
+        <span class="chip" :class="{ on: dmStyle?.isShowInteractInfo === true }"
+          @click="toggle('dmStyle.isShowInteractInfo')">入场消息</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowType1 === true }"
+          @click="toggle('dmStyle.isShowType1')">节奏风暴</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowType2 === true }"
+          @click="toggle('dmStyle.isShowType2')">天选时刻</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowSilverGift === true }"
+          @click="toggle('dmStyle.isShowSilverGift')">银瓜子礼物</span>
+        <span class="chip" :class="{ on: dmStyle?.isShowHeadline !== false }"
+          @click="toggle('dmStyle.isShowHeadline')">礼物栏</span>
+        <span style="color:#ddd;margin:0 2px">│</span>
+        <span class="chip" :class="{ on: dmStyle?.isWindowAlwaysOnTop === true }"
+          @click="toggle('dmStyle.isWindowAlwaysOnTop')">窗口置顶</span>
+        <span class="chip" :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
+          @click="toggle('dmRawStyle.ignoreMouseEvent')">鼠标穿透</span>
+      </div>
+
+      <div class="section-row">
+        <span class="label">透明度</span>
+        <span class="stepper">
+          <span class="stepper-btn" @click="stepDown('dmStyle.windowOpacity', 1, 0, 0.05)">−</span>
+          <input class="stepper-input" :value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
+            @change="setVal('dmStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
+          <span class="stepper-btn" @click="stepUp('dmStyle.windowOpacity', 1, 1, 0.05)">+</span>
         </span>
-      </Tooltip> -->
-    </div>
-
-    <div class="config-item-container">
-      <Input v-model="text" placeholder="让系统说..." :style="{ display: 'inline-block', width: '300px' }" />
-      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-play" @click="speak" />
-      声音
-      <Select v-model="currentVoice" :style="{ width: '100px', display: 'inline-block' }">
-        <Option v-for="voice in displayVoices" :key="voice.key" :value="voice.key" :label="voice.label">
-          <span>{{ voice.value }}</span>
-        </Option>
-      </Select>
-      <span class="space-left-5px">语速</span>
-      <InputNumber v-model="voiceSpeed" :min="0" :step="0.1" :style="{ width: '55px' }" />
-    </div>
-
-    <div class="config-item-container">
-      <Tooltip placement="top" transfer>
-        色彩表
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>控制图表可选色，支持自定义颜色，请输入CSS固有色值或者以#开头的16进制色值，如#66ccff</p>
-          </div>
-        </template>
-      </Tooltip>
-      <Select class="color-selector space-left-5px" :model-value="colors" multiple filterable allow-create
-        @on-change="onChangeColor">
-        <Option v-for="option in colorOptions" :key="option.index" :value="option.value" :label="option.label">
-          <span :style="{ display: 'inline-block', background: option.value, width: '8px', height: '8px' }" />
-          <span>{{ option.label }}</span>
-        </Option>
-      </Select>
-    </div>
-
-    <!-- <div class="config-item-container">
-      <Tooltip placement="top" transfer>
-        获取头像速率限制
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>限制获取头像频率, 单位毫秒。由于频繁调获取头像接口会触发速率限制, 建议 2000 以上为比较安全的值</p>
-            <p>生效需重新启动</p>
-          </div>
-        </template>
-      </Tooltip>
-      <InputNumber class="space-left-5px" :model-value="userInfoFrequencyLimit" :min="0" :step="100" :style="{ width: '100px' }" @on-change="onChangeUserInfoFrequencyLimit" />
-    </div> -->
-
-    <div class="config-item-container">
-      <Tooltip placement="top" transfer>
-        弹幕窗置顶等级
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>从上到下优先级依次升高</p>
-            <p>
-              <span :style="{ color: 'pink' }">screen-saver</span>
-              为最高置顶等级
-            </p>
-          </div>
-        </template>
-      </Tooltip>
-      <Select class="on-top-level-selector space-left-5px" :model-value="onTopLevel" :style="{ width: '200px' }"
-        @on-change="onChangeOnTopLevel">
-        <Option v-for="(option, index) in opTopLevelOptions" :key="index" :value="option" :label="option">
-          <span>{{ option }}</span>
-        </Option>
-      </Select>
-      <Checkbox class="space-left-5px" :model-value="isOnTopForce" @on-change="onChangeIsOnTopForce">
-        <Tooltip placement="top" transfer>
-          强制置顶
-          <template #content>
-            <div :style="{ 'white-space': 'normal' }">
-              <p>如遇到全屏场景下无法展示弹幕窗，可尝试勾选该项</p>
-              <p>该选项将多次尝试置顶弹幕窗口</p>
-              <p><span :style="{ color: 'pink' }">仅在必要时使用</span></p>
-            </div>
-          </template>
-        </Tooltip>
-      </Checkbox>
-      <Checkbox class="space-left-5px" :model-value="disableIgnoreMouseEvent"
-        @on-change="onChangeDisableIgnoreMouseEvent">
-        <Tooltip placement="top" transfer>
-          置顶时鼠标事件不穿透
-          <template #content>
-            <div :style="{ 'white-space': 'normal' }">
-              <p>默认窗口置顶时不响应鼠标事件，窗口重叠时点击等操作会传递到下面的窗口</p>
-              <p>该选项将保留置顶窗口的鼠标事件</p>
-            </div>
-          </template>
-        </Tooltip>
-      </Checkbox>
-      <!-- <Tooltip placement="top" content="实验性功能，可能不稳定">
-        <span :style="{ 'font-size': '12px', color: 'dodgerblue' }">
-          <Icon type="ios-flask" />
+        <span class="label" style="margin-left:8px">背景色</span>
+        <label class="color-pick">
+          <span class="color-dot" :style="{ background: dmStyle?.windowBackground || '#1e1e28' }"></span>
+          <input type="color" :value="dmStyle?.windowBackground || '#1e1e28'"
+            @input="setVal('dmStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
+        </label>
+      </div>
+      <div class="section-row">
+        <span class="label">字体</span>
+        <select class="select" style="width:90px" :value="dmStyle?.font || 'auto'"
+          @change="setVal('dmStyle.font', ($event.target as HTMLSelectElement).value)">
+          <option value="auto">auto</option>
+          <option value="serif">serif</option>
+          <option value="sans-serif">sans-serif</option>
+          <option value="monospace">monospace</option>
+        </select>
+        <span class="label" style="margin-left:8px">字重</span>
+        <select class="select" style="width:70px" :value="dmStyle?.fontWeight || 'normal'"
+          @change="setVal('dmStyle.fontWeight', ($event.target as HTMLSelectElement).value)">
+          <option value="normal">正常</option>
+          <option value="lighter">细体</option>
+          <option value="bold">加粗</option>
+          <option value="bolder">更粗</option>
+        </select>
+      </div>
+      <div class="section-row">
+        <span class="label">头像大小</span>
+        <span class="stepper">
+          <span class="stepper-btn" @click="stepDown('dmStyle.faceSize', 28, 12, 2)">−</span>
+          <input class="stepper-input" :value="dmStyle?.faceSize ?? 28"
+            @change="setVal('dmStyle.faceSize', Number(($event.target as HTMLInputElement).value))" />
+          <span class="stepper-btn" @click="stepUp('dmStyle.faceSize', 28, 64, 2)">+</span>
         </span>
-      </Tooltip> -->
+      </div>
+      <div class="section-row">
+        <span class="label">重复合并</span>
+        <input class="input" style="width:48px" :value="dmStyle?.combineSimilarTime ?? 3000"
+          @change="setVal('dmStyle.combineSimilarTime', Number(($event.target as HTMLInputElement).value))" />
+        <span class="input-unit">ms</span>
+      </div>
+      <div class="section-row">
+        <span class="label">弹幕超时消隐</span>
+        <input class="input" style="width:48px" :value="dmStyle?.hiddenExpiredTime ?? 0"
+          @change="setVal('dmStyle.hiddenExpiredTime', Number(($event.target as HTMLInputElement).value))" />
+        <span class="input-unit">ms</span>
+      </div>
+      <!-- <div class="section-row">
+        <span class="label">输出通道数</span>
+        <input class="input" style="width:32px" :value="dmStyle?.channelCount ?? 1"
+          @change="setVal('dmStyle.channelCount', Number(($event.target as HTMLInputElement).value))" />
+      </div> -->
+      <div class="section-row">
+        <span class="label">弹幕礼物阈值</span>
+        <input class="input" style="width:40px" :value="(dmStyle?.showGiftCardThreshold ?? 0) / 1000"
+          @change="setVal('dmStyle.showGiftCardThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
+        <span class="input-unit">元</span>
+      </div>
+      <div class="section-row">
+        <span class="label">礼物栏阈值</span>
+        <input class="input" style="width:40px" :value="(dmStyle?.showHeadlineThreshold ?? 0) / 1000"
+          @change="setVal('dmStyle.showHeadlineThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
+        <span class="input-unit">元</span>
+      </div>
+
+      <!-- 等级样式 -->
+      <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e8eaec">
+        <div class="lvl-tabs" style="margin-bottom:6px">
+          <span class="lvl-tab" :class="{ on: activeLevel === '0' }" @click="activeLevel = '0'">普通</span>
+          <span class="lvl-tab" :class="{ on: activeLevel === '1' }" @click="activeLevel = '1'">舰长</span>
+          <span class="lvl-tab" :class="{ on: activeLevel === '2' }" @click="activeLevel = '2'">提督</span>
+          <span class="lvl-tab" :class="{ on: activeLevel === '3' }" @click="activeLevel = '3'">总督</span>
+          <span class="lvl-tab" :class="{ on: activeLevel === '99' }" @click="activeLevel = '99'">房管</span>
+          <span class="lvl-tab" :class="{ on: activeLevel === 'Interact' }" @click="activeLevel = 'Interact'">入场</span>
+        </div>
+        <div class="section-row">
+          <span class="label" style="min-width:auto">背景色</span>
+          <label class="color-pick">
+            <span class="color-dot" :style="{ background: currentLevelStyle?.bgColor || '#000' }"></span>
+            <input type="color" :value="currentLevelStyle?.bgColor || '#000000'"
+              @input="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
+          </label>
+          <span v-if="activeLevel === '99'" class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
+            @click="toggle('dmStyle.isShowAdminIcon')">显示</span>
+          <select v-if="activeLevel === '99'" class="select" style="width:100px" :value="dmStyle?.adminIcon || 'md-shield'"
+            @change="setVal('dmStyle.adminIcon', ($event.target as HTMLSelectElement).value)">
+            <option value="md-shield">🛡 盾牌</option>
+            <option value="md-star">⭐ 星星</option>
+            <option value="md-ribbon">🎗 绶带</option>
+            <option value="md-flash">⚡ 闪电</option>
+            <option value="md-hammer">🔨 锤子</option>
+            <option value="md-key">🔑 钥匙</option>
+            <option value="md-lock">🔒 锁</option>
+            <option value="md-flag">🚩 旗帜</option>
+          </select>
+          <label v-if="activeLevel === '99'" class="color-pick">
+            <span class="color-dot" :style="{ background: dmStyle?.adminIconColor || '#ff9900' }"></span>
+            <input type="color" :value="dmStyle?.adminIconColor || '#ff9900'"
+              @input="setVal('dmStyle.adminIconColor', ($event.target as HTMLInputElement).value)" />
+          </label>
+        </div>
+        <div class="section-row">
+          <span class="label" style="min-width:auto">昵称</span>
+          <span class="hint">字号</span>
+          <input class="input" style="width:30px" :value="currentLevelStyle?.usernameFontSize ?? 13"
+            @change="setLevelStyle('userFontSize', ($event.target as HTMLInputElement).value)" />
+          <span class="hint">颜色</span>
+          <label class="color-pick">
+            <span class="color-dot" :style="{ background: currentLevelStyle?.usernameColor || '#66ccff' }"></span>
+            <input type="color" :value="currentLevelStyle?.usernameColor || '#66ccff'"
+              @input="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
+          </label>
+          <span class="hint">边宽</span>
+          <input class="input" style="width:28px" :value="currentLevelStyle?.usernameStrokeWidth ?? 0"
+            @change="setLevelStyle('userStrokeWidth', ($event.target as HTMLInputElement).value)" />
+          <span class="hint">边色</span>
+          <label class="color-pick">
+            <span class="color-dot" :style="{ background: currentLevelStyle?.usernameStrokeColor || '#000' }"></span>
+            <input type="color" :value="currentLevelStyle?.usernameStrokeColor || '#000000'"
+              @input="setLevelStyleColor('userStroke', ($event.target as HTMLInputElement).value)" />
+          </label>
+        </div>
+        <div class="section-row">
+          <span class="label" style="min-width:auto">内容</span>
+          <span class="hint">字号</span>
+          <input class="input" style="width:30px" :value="currentLevelStyle?.commentFontSize ?? 13"
+            @change="setLevelStyle('commentFontSize', ($event.target as HTMLInputElement).value)" />
+          <span class="hint">颜色</span>
+          <label class="color-pick">
+            <span class="color-dot" :style="{ background: currentLevelStyle?.commentColor || '#fff' }"></span>
+            <input type="color" :value="currentLevelStyle?.commentColor || '#ffffff'"
+              @input="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
+          </label>
+          <span class="hint">边宽</span>
+          <input class="input" style="width:28px" :value="currentLevelStyle?.commentStrokeWidth ?? 0"
+            @change="setLevelStyle('commentStrokeWidth', ($event.target as HTMLInputElement).value)" />
+          <span class="hint">边色</span>
+          <label class="color-pick">
+            <span class="color-dot" :style="{ background: currentLevelStyle?.commentStrokeColor || '#000' }"></span>
+            <input type="color" :value="currentLevelStyle?.commentStrokeColor || '#000000'"
+              @input="setLevelStyleColor('commentStroke', ($event.target as HTMLInputElement).value)" />
+          </label>
+        </div>
+      </div>
     </div>
 
-    <div class="config-item-container">
-      <Tooltip placement="top" transfer>
-        最多保留待读语音数
-        <template #content>
-          <div :style="{ 'white-space': 'normal' }">
-            <p>当使用语音播放功能时可设置保留一定数量待读语音，系统按顺序播放</p>
-            <p>触达上限时将清空待读列表，从最新语音开始播放</p>
-          </div>
-        </template>
-        <InputNumber class="space-left-5px" :model-value="waitingSpeakerCount" :min="0" :step="1" :max="50"
-          :style="{ width: '80px' }" @on-change="onChangeWaitingSpeakerCount" />
-      </Tooltip>
+    <!-- ═══ dmRawStyle — 原生弹幕窗样式 ═══ -->
+    <div class="divider">原生弹幕窗样式</div>
+    <div class="section">
+      <div class="section-row">
+        <span class="label">滚动方向</span>
+        <select class="select" style="width:100px" :value="dmRawStyle?.direction || 'RL'"
+          @change="setVal('dmRawStyle.direction', ($event.target as HTMLSelectElement).value)">
+          <option value="RL">← 向左</option>
+          <option value="LR">→ 向右</option>
+        </select>
+      </div>
+      <div class="section-row">
+        <span class="label">表情大小</span>
+        <input class="input" style="width:40px" :value="dmRawStyle?.emojiSize ?? 24"
+          @change="setVal('dmRawStyle.emojiSize', Number(($event.target as HTMLInputElement).value))" />
+        <span class="input-unit">px</span>
+      </div>
+      <div class="section-row">
+        <span class="label">持续时间</span>
+        <input class="input" style="width:40px" :value="dmRawStyle?.duration ?? 15"
+          @change="setVal('dmRawStyle.duration', Number(($event.target as HTMLInputElement).value))" />
+        <span class="input-unit">s</span>
+      </div>
     </div>
 
-    <div class="config-item-container">
-      <Input :model-value="signInMessage" placeholder="打卡" :style="{ display: 'inline-block', width: '120px' }"
-        @on-change="onChangeSignInMessage" />
-      <Poptip confirm title="通过用户身份在有牌子的直播间发送一条弹幕每天可获得100亲密度，弹幕内容可自定义，确定？" placement="right" width="400" word-wrap
-        @on-ok="signIn">
-        <Button class="space-left-5px" type="primary" :disabled="!userCookie">一键签到</Button>
-      </Poptip>
-      <Checkbox v-model="isLightMedal" class="space-left-5px"> 点亮20级以上牌子 </Checkbox>
-      <Button class="space-left-5px" type="primary" :disabled="!userCookie" @click="showSignInModal">手动签到</Button>
-      <span v-if="signInTotalCount" :style="{ color: 'green' }"> {{ signInCount }} / {{ signInTotalCount }} </span>
+    <!-- ═══ recordConfig — 录制配置 ═══ -->
+    <div class="divider">录制配置</div>
+    <div class="section">
+      <div class="section-row">
+        <span class="label">保存路径</span>
+        <input class="input" style="width:230px" :value="recordConfig?.savePath || ''" disabled
+          placeholder="/path/to/save" />
+        <button class="btn btn-default" style="font-size:10px" @click="selectSavePath">选择</button>
+      </div>
+      <div class="section-row">
+        <span class="label">画质</span>
+        <select class="select" style="width:90px" :value="recordConfig?.quality || '原画'"
+          @change="setVal('recordConfig.quality', ($event.target as HTMLSelectElement).value)">
+          <option value="原画">原画</option>
+          <option value="高清">高清</option>
+        </select>
+      </div>
+      <div class="section-row">
+        <span class="label">自动录制</span>
+        <span class="chip" :class="{ on: recordConfig?.isAutoRecord === true }"
+          @click="toggle('recordConfig.isAutoRecord')">自动录制</span>
+      </div>
     </div>
 
-    <Modal v-model="isShowQRCodeLoginModal" title="扫码登录" transfer @on-ok="loginFromQrCode"
-      :loading="loginFromQrCodeLoading" :style="{ 'text-align': 'center' }">
-      <canvas id="qrcode"></canvas>
-      <div>请使用手机端APP扫码，手机端确认之后，点击“确定”</div>
-      <div :style="{ color: 'crimson' }">{{ qrCodeLoginErrorMessage }}</div>
-    </Modal>
+    <!-- ═══ liveConfig — 直播配置 ═══ -->
+    <div class="divider">直播配置</div>
+    <div class="section">
+      <div class="section-row">
+        <span class="label">音量</span>
+        <span class="stepper">
+          <span class="stepper-btn" @click="stepDown('liveConfig.volume', 60, 0, 5)">−</span>
+          <input class="stepper-input" :value="liveConfig?.volume ?? 60"
+            @change="setVal('liveConfig.volume', Number(($event.target as HTMLInputElement).value))" />
+          <span class="stepper-btn" @click="stepUp('liveConfig.volume', 60, 100, 5)">+</span>
+        </span>
+      </div>
+      <div class="section-row">
+        <span class="label">带Cookie</span>
+        <span class="chip" :class="{ on: liveConfig?.isWithCookie === true }"
+          @click="toggle('liveConfig.isWithCookie')">Cookie</span>
+      </div>
+    </div>
 
-    <Modal v-model="isShowSignInModal" title="粉丝牌列表" scrollable footer-hide lock-scroll transfer
-      :styles="{ height: '70%', overflow: 'auto' }">
-      <template v-for="(medal, i) in medals" :key="i">
-        <Row align="middle" class-name="medal-list-container disable-user-select">
-          <i-col span="4">
-            <FanMedal :medal="medal" :role="medal.guard" />
-          </i-col>
-          <i-col span="7">
-            <span :style="{ cursor: 'pointer' }" @click="openBiliLiveRoom(medal.roomId)">{{ medal.uname }}</span>
-            <Icon v-if="medal.liveStatus === 1" :style="{ color: 'green', 'font-size': '16px', margin: '3px 0 0 2px' }"
-              type="ios-radio-button-on" />
-          </i-col>
-          <i-col span="8">
-            <span>亲密度:{{ medal.todayFeed }}/{{ medal.dayLimit }}</span>
-          </i-col>
-          <i-col span="4">
-            <Button @click="signInSingle(medal.roomId)">签到</Button>
-          </i-col>
-        </Row>
-      </template>
-      <Page :total="medalTotal" :page-size="10" @on-change="changeMedalPage" />
+    <!-- ═══ chartConfig — 图表 ═══ -->
+    <div class="divider">图表</div>
+    <div class="section">
+      <div class="section-row">
+        <span class="label">色彩表</span>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <span class="tag" v-for="(c, i) in (chartConfig?.colors || [])" :key="i">
+            <span class="tag-dot" :style="{ background: c }"></span>{{ c }}
+            <span class="tag-close" @click="removeColor(i)">✕</span>
+          </span>
+          <span class="tag" style="border:dashed 1px #ccc;background:transparent;color:#999;cursor:pointer"
+            @click="addColor">+ 添加</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 数据 ═══ -->
+    <div class="divider">数据</div>
+    <div class="section">
+      <div class="section-row">
+        <button class="btn btn-default" @click="restoreDefaults">还原默认弹幕样式</button>
+        <span style="font-size:11px;color:#999">~/Library/Application Support/bilibili-danmaku</span>
+      </div>
+    </div>
+
+    <!-- ═══ 扫码登录弹窗 ═══ -->
+    <Modal v-model="showQrModal" title="扫码登录" width="300">
+      <div style="text-align:center">
+        <canvas id="qrcode" width="200" height="200"></canvas>
+        <p v-if="qrError" style="color:red;margin-top:8px">{{ qrError }}</p>
+      </div>
     </Modal>
   </div>
 </template>
 
-<script lang="ts">
-import { useConfigStore } from '../store'
-import { uniq } from 'lodash'
-import { reactive } from 'vue'
-import { ipcRenderer, shell } from 'electron'
-import { DEFAULT_STYLE, COLORS, IPC_GET_USER_PATH } from '../../service/const'
-// @ts-ignore
-import FanMedal from './FanMedal'
-import { parseHexColor } from '../service/util'
-import {
-  needRefreshCookie,
-  sendComment,
-  getMedalList,
-  getRoomInfoV2,
-  getRoomInfoByIds,
-  generateQRCode,
-  pollQRCode,
-  refreshCookie as refreshCookieApi,
-  updateClientConfig,
-} from '../service/api'
-import { wait } from '../service/util'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { get as _get, set as _set } from 'lodash'
+import config from '../service/config'
+import { generateQRCode, sendDM, clearDM } from '../service/api'
 import QRCode from 'qrcode'
 
-const synth = window.speechSynthesis
+const dmStyle = computed(() => config.dmStyle)
+const dmRawStyle = computed(() => config.dmRawStyle)
+const liveConfig = computed(() => config.liveConfig)
+const recordConfig = computed(() => config.recordConfig)
+const chartConfig = computed(() => config.chartConfig)
+const activeRoom = computed(() => config.rooms?.find(r => r.isActive) || null)
 
-export default {
-  components: {
-    FanMedal,
-  },
+// ── Cookie ──
+const cookieInput = ref('')
+const showQrModal = ref(false)
+const qrError = ref('')
 
-  setup() {
-    const state = reactive({
-      userDataPath: '',
-      isShowSignInModal: false,
-      selectedGiftIds: [] as string[],
-      advancedAutoReplyRules: [] as any[],
-      voices: [] as any[],
-      currentVoice: '' as any,
-      text: '',
-      voiceSpeed: 1.0,
-      opTopLevelOptions: ['normal', 'floating', 'torn-off-menu', 'modal-panel', ' main-menu', 'status', 'pop-up-menu', 'screen-saver'],
-      signInCount: 0,
-      signInTotalCount: 0,
-      isLightMedal: true,
-      displayVoices: [] as any[],
-      medalTotal: 0,
-      medals: [] as any[],
-      needRefreshCookie: false,
-      qrCodeKey: '',
-      isShowQRCodeLoginModal: false,
-      loginFromQrCodeLoading: true,
-      qrCodeLoginErrorMessage: '',
+// ── 等级样式 ──
+const activeLevel = ref('3')
+
+interface LevelStyle {
+  usernameColor?: string
+  usernameFontSize?: number
+  usernameStrokeColor?: string
+  usernameStrokeWidth?: number
+  commentColor?: string
+  commentFontSize?: number
+  commentStrokeColor?: string
+  commentStrokeWidth?: number
+  bgColor?: string
+}
+
+const currentLevelStyle = computed((): LevelStyle => {
+  const lv = activeLevel.value
+  const s = dmStyle.value
+  if (!s) return {}
+  const suffix = lv === 'Interact' ? 'Interact' : lv
+  const container = (s as any)[`messageContainer${suffix}`] || {}
+  const username = (s as any)[`messageUsername${suffix}`] || {}
+  const comment = (s as any)[`messageComment${suffix}`] || {}
+  return {
+    usernameColor: username['color'],
+    usernameFontSize: username['font-size'] ? parseInt(username['font-size']) : undefined,
+    usernameStrokeColor: username['-webkit-text-stroke-color'],
+    usernameStrokeWidth: username['-webkit-text-stroke-width'] ? parseInt(username['-webkit-text-stroke-width']) : 0,
+    commentColor: comment['color'],
+    commentFontSize: comment['font-size'] ? parseInt(comment['font-size']) : undefined,
+    commentStrokeColor: comment['-webkit-text-stroke-color'],
+    commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseInt(comment['-webkit-text-stroke-width']) : 0,
+    bgColor: container['background-color'] || container['background'],
+  }
+})
+
+// ── 工具函数 ──
+function setVal(path: string, value: any) {
+  _set(config, path, value)
+}
+
+function toggle(path: string) {
+  const cur = _get(config, path, false)
+  _set(config, path, !cur)
+}
+
+function stepUp(path: string, defaultVal: number, max: number, step: number) {
+  const cur = _get(config, path, defaultVal)
+  _set(config, path, Math.min(max, cur + step))
+}
+
+function stepDown(path: string, defaultVal: number, min: number, step: number) {
+  const cur = _get(config, path, defaultVal)
+  _set(config, path, Math.max(min, cur - step))
+}
+
+function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke', color: string) {
+  const lv = activeLevel.value
+  const suffix = lv === 'Interact' ? 'Interact' : lv
+  if (target === 'user') {
+    _set(config, `dmStyle.messageUsername${suffix}.color`, color)
+  } else if (target === 'comment') {
+    _set(config, `dmStyle.messageComment${suffix}.color`, color)
+  } else if (target === 'bg') {
+    _set(config, `dmStyle.messageContainer${suffix}.background-color`, color)
+    _set(config, `dmStyle.messageContainer${suffix}.background`, color)
+  } else if (target === 'userStroke') {
+    _set(config, `dmStyle.messageUsername${suffix}.-webkit-text-stroke-color`, color)
+  } else if (target === 'commentStroke') {
+    _set(config, `dmStyle.messageComment${suffix}.-webkit-text-stroke-color`, color)
+  }
+}
+
+function setLevelStyle(key: string, value: any) {
+  const lv = activeLevel.value
+  const suffix = lv === 'Interact' ? 'Interact' : lv
+  if (key === 'userFontSize') {
+    _set(config, `dmStyle.messageUsername${suffix}.font-size`, `${value}px`)
+  } else if (key === 'commentFontSize') {
+    _set(config, `dmStyle.messageComment${suffix}.font-size`, `${value}px`)
+  } else if (key === 'userStrokeWidth') {
+    _set(config, `dmStyle.messageUsername${suffix}.-webkit-text-stroke-width`, `${value}px`)
+  } else if (key === 'commentStrokeWidth') {
+    _set(config, `dmStyle.messageComment${suffix}.-webkit-text-stroke-width`, `${value}px`)
+  }
+}
+
+// ── 色彩表 ──
+function addColor() {
+  const colors = [...(chartConfig.value?.colors || []), '#2d8cf0']
+  _set(config, 'chartConfig.colors', colors)
+}
+
+function removeColor(index: number) {
+  const colors = [...(chartConfig.value?.colors || [])]
+  colors.splice(index, 1)
+  _set(config, 'chartConfig.colors', colors)
+}
+
+// ── 测试弹幕 ──
+async function sendTestDanmaku() {
+  try {
+    await sendDM('danmaku', {
+      username: activeRoom.value?.username || '测试用户',
+      comment: '这是一条测试弹幕 🎉',
     })
-    return state
-  },
-  // data() {
-  //   return {}
-  // },
-  computed: {
-    userCookie() {
-      return useConfigStore().userCookie
-    },
-    isAutoRecord() {
-      return useConfigStore().isAutoRecord
-    },
-    autoReplyRules() {
-      return useConfigStore().autoReplyRules
-    },
-    isTextReply() {
-      return useConfigStore().autoReplyRules[0].isTextReply
-    },
-    isSpeakReply() {
-      return useConfigStore().autoReplyRules[0].isSpeakReply
-    },
-    colors() {
-      return useConfigStore().colors.length ? useConfigStore().colors : COLORS
-    },
-    colorOptions() {
-      const color = uniq([...COLORS, ...this.colors])
-      return color.map((color, index) => {
-        return {
-          key: index,
-          value: color,
-          label: color,
-        }
-      })
-    },
-    onTopLevel() {
-      return useConfigStore().onTopLevel
-    },
-    isOnTopForce() {
-      return useConfigStore().isOnTopForce
-    },
-    disableIgnoreMouseEvent() {
-      return useConfigStore().disableIgnoreMouseEvent
-    },
-    signInMessage() {
-      return useConfigStore().signInMessage
-    },
-    waitingSpeakerCount() {
-      return useConfigStore().waitingSpeakerCount
-    },
-    isNeedRefreshCookieCache() {
-      return useConfigStore().isNeedRefreshCookieCache
-    },
-    refreshToken() {
-      return useConfigStore().refreshToken
-    },
-  },
-  async mounted() {
-    this.advancedAutoReplyRules = this.autoReplyRules.slice(1)
+  } catch { /* ignore */ }
+}
 
+async function clearDanmaku() {
+  try { await clearDM() } catch { /* ignore */ }
+}
+
+// ── 保存路径 ──
+function selectSavePath() {
+  const { ipcRenderer } = (window as any).require('electron')
+  ipcRenderer.invoke('select-directory').then((path: string | null) => {
+    if (path) _set(config, 'recordConfig.savePath', path)
+  })
+}
+
+// ── 扫码登录 ──
+async function showQrCodeLoginModal() {
+  showQrModal.value = true
+  qrError.value = ''
+  try {
+    const res = await generateQRCode()
+    const { url } = res.data
     setTimeout(() => {
-      this.voices = (this as any).$global?.voices || []
+      const canvas = document.getElementById('qrcode') as HTMLCanvasElement
+      if (canvas) QRCode.toCanvas(canvas, url)
+    }, 100)
+  } catch { qrError.value = '二维码加载失败' }
+}
 
-      this.displayVoices = this.voices.map((voice: any) => {
-        return {
-          key: voice.name as string,
-          value: voice.name as string,
-          label: voice.name as string,
-        }
-      })
-    }, 500)
-
-    this.userDataPath = await ipcRenderer.invoke(IPC_GET_USER_PATH)
-
-    if (this.userCookie) {
-      console.log(this.isNeedRefreshCookieCache)
-      if (!this.isNeedRefreshCookieCache || this.isNeedRefreshCookieCache < Date.now() - 1000 * 60 * 60 * 6) {
-        needRefreshCookie().then(({ data }) => {
-          console.log(data)
-
-          if (!data.refresh) {
-            useConfigStore().updateConfig({
-              isNeedRefreshCookieCache: Date.now(),
-            })
-            return
-          }
-
-          this.needRefreshCookie = true
-          this.refreshCookie()
-        })
-      }
-    }
-  },
-  methods: {
-    async refreshCookie() {
-      const { data } = await refreshCookieApi({ refreshToken: this.refreshToken })
-      const { refreshToken, userCookie } = data as any
-      const setting = {
-        userCookie: userCookie,
-        refreshToken: refreshToken,
-      }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(setting)
-    },
-
-    async restoreDefaultStyleSetting() {
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(DEFAULT_STYLE).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(DEFAULT_STYLE)
-      location.reload()
-    },
-
-    async changeCookie(e) {
-      const data = {
-        userCookie: e.target.value,
-      }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(data)
-    },
-
-    async changeAutoRecord(status) {
-      useConfigStore().updateConfig({
-        isAutoRecord: status,
-      })
-    },
-
-    speak() {
-      const voice = this.voices.find((voice: any) => voice.name === this.currentVoice) as any
-      const utterThis = new SpeechSynthesisUtterance()
-      utterThis.text = this.text
-      utterThis.voice = voice
-      utterThis.rate = this.voiceSpeed
-      synth.speak(utterThis)
-    },
-
-    async onChangeColor(value) {
-      if (!value.length) {
-        this.$Message.warning('至少需要一个值')
-        return
-      }
-      const data = {
-        colors: value,
-      }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(data)
-    },
-
-    async onChangeUserInfoFrequencyLimit(value) {
-      const data = {
-        userInfoFrequencyLimit: value,
-      }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(data)
-    },
-
-    onChangeOnTopLevel(value) {
-      const data = {
-        onTopLevel: value,
-      }
-      useConfigStore().updateConfig(data)
-    },
-
-    onChangeIsOnTopForce(value) {
-      const data = {
-        isOnTopForce: value,
-      }
-      useConfigStore().updateConfig(data)
-    },
-
-    onChangeSignInMessage(e) {
-      const data = {
-        signInMessage: e.target.value,
-      }
-      useConfigStore().updateConfig(data)
-    },
-
-    onChangeDisableIgnoreMouseEvent(value) {
-      const data = {
-        disableIgnoreMouseEvent: value,
-      }
-      useConfigStore().updateConfig(data)
-    },
-
-    onChangeWaitingSpeakerCount(value) {
-      const data = {
-        waitingSpeakerCount: value,
-      }
-      useConfigStore().updateConfig(data)
-    },
-
-    async showSignInModal() {
-      this.isShowSignInModal = true
-
-      if (!this.medals.length || !this.medalTotal) {
-        this.getMedals({ page: 1, pageSize: 10 })
-      }
-    },
-
-    changeMedalPage(page) {
-      this.getMedals({ page, pageSize: 10 })
-    },
-
-    async getMedals({ page = 1, pageSize = 10 }) {
-      const userCookie = this.userCookie
-      if (!userCookie) return
-
-      const signInMessage = this.signInMessage || '打卡'
-
-      const { data } = await getMedalList({ page, pageSize })
-      const { count, items } = data
-
-      console.log(data)
-      this.medalTotal = count
-      this.medals = items
-
-      this.medals = items.map((item) => {
-        const { medal_color_start, medal_color_end, medal_color_border, medal_name, level, today_feed, uname, day_limit, roomid, target_id, guard_level } = item
-        return {
-          name: medal_name,
-          level: level,
-          guard: guard_level,
-          color: {
-            background: parseHexColor(medal_color_start),
-            border: parseHexColor(medal_color_border),
-            text: '#FFFFFF',
-            level: parseHexColor(medal_color_start),
-          },
-          todayFeed: today_feed,
-          dayLimit: day_limit,
-          uname: uname,
-          roomId: roomid,
-          uid: target_id,
-        }
-      })
-
-      const { data: roomMap } = await getRoomInfoByIds(this.medals.map((medal: any) => medal.roomId)) as any
-
-      const roomMapByUid = Object.values(roomMap).reduce((map: any, room: any) => {
-        return Object.assign(map, { [room.uid]: room })
-      }, {}) as Record<string, any>
-
-      this.medals.forEach((medal) => {
-        medal.liveStatus = roomMapByUid[medal.uid]?.live_status // 1 直播中 2 轮播中？
-      })
-    },
-
-    openBiliLiveRoom(roomId) {
-      if (!roomId) return
-      shell.openExternal(`https://live.bilibili.com/${roomId}`)
-    },
-
-    async signIn() {
-      const userCookie = this.userCookie
-      if (!userCookie) return
-      const signInMessage = this.signInMessage || '打卡'
-
-      const pageSize = 10
-      let total = 0
-      let page = 1
-      this.signInCount = 0
-
-      do {
-        try {
-          const { data } = await getMedalList({ page, pageSize })
-          const { count, items } = data
-          total = count
-          this.signInTotalCount = total
-
-          for (const medal of items) {
-            const { roomid: roomId, medal_name: medalName, uname, level, today_feed: todayFeed, is_lighted: isLighted } = medal
-            // 今天有亲密度不需要签到
-            if (Number(todayFeed)) {
-              this.signInCount++
-              continue
-            }
-
-            // 20级以上牌子不需要签到
-            if (level > 20 && (isLighted || !this.isLightMedal)) {
-              this.signInCount++
-              continue
-            }
-
-            const { data } = await getRoomInfoV2(roomId)
-            const { room_id: realRoomId } = data.room_info
-            const result = await sendComment({
-              roomId: realRoomId,
-              comment: signInMessage,
-            })
-            if (result.data.message) {
-              this.$Message.error({
-                content: `签到未成功: ${result.data.message}, 用户名: ${uname}, 粉丝牌: ${medalName}, ${this.signInCount}/${this.signInTotalCount}`,
-                duration: 10,
-              })
-            } else {
-              this.signInCount++
-              this.$Message.success({
-                content: `签到成功, 用户名: ${uname}, 粉丝牌: ${medalName}, ${this.signInCount}/${this.signInTotalCount}`,
-                duration: 1,
-              })
-            }
-            await wait(1000)
-          }
-        } catch (e: any) {
-          this.$Message.error(`${e.message}`)
-          console.log(e)
-        }
-
-        page++
-      } while (page <= Math.ceil(total / pageSize))
-
-      this.$Message.success('签到完成！')
-    },
-
-    async signInSingle(roomId) {
-      if (!this.userCookie) return
-      const signInMessage = this.signInMessage || '打卡'
-
-      const { data } = await getRoomInfoV2(roomId)
-      const { room_id: realRoomId } = data.room_info
-      const result = await sendComment({
-        roomId: realRoomId,
-        comment: signInMessage,
-      })
-      if (result.data.message) {
-        this.$Message.error({
-          content: `签到未成功: ${result.data.message}`,
-          duration: 1,
-        })
-      } else {
-        this.signInCount++
-        this.$Message.success({
-          content: `签到成功`,
-          duration: 1,
-        })
-      }
-    },
-
-    showQrCodeLoginModal() {
-      this.isShowQRCodeLoginModal = true
-
-      this.showQrCode()
-    },
-
-    async showQrCode() {
-      const res = await generateQRCode()
-      const { url, qrcode_key } = res.data
-      this.qrCodeKey = qrcode_key
-      const qrcode = document.getElementById('qrcode')
-      QRCode.toCanvas(qrcode, url, (error) => {
-        if (error) console.error(error)
-      })
-    },
-
-    async loginFromQrCode() {
-      this.loginFromQrCodeLoading = true
-      const data = await pollQRCode(this.qrCodeKey)
-      if (data.code) {
-        this.loginFromQrCodeLoading = false
-        this.qrCodeLoginErrorMessage = data.message
-        return
-      }
-      const setting = {
-        userCookie: data.cookie,
-        refreshToken: data.refresh_token,
-      }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(setting).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
-      useConfigStore().updateConfig(setting)
-      this.loginFromQrCodeLoading = false
-      this.isShowQRCodeLoginModal = false
-    },
-  },
+// ── 还原默认 ──
+function restoreDefaults() {
+  const defaults: Record<string, any> = {
+    isShowFace: true, isShowFanMedal: true, isShowHeadline: true,
+    isShowType1: true, isShowType2: true,
+    windowOpacity: 1, font: 'auto', fontWeight: 'normal', faceSize: 28,
+    combineSimilarTime: 3000, hiddenExpiredTime: 0,
+    showGiftCardThreshold: 0, showHeadlineThreshold: 0,
+    isShowInteractInfo: false, isShowSilverGift: false,
+    isShowSuperChatJPN: true, isShowAnchorIcon: true, isShowAdminIcon: false,
+    isWindowAlwaysOnTop: false,
+  }
+  const current = dmStyle.value || {}
+  _set(config, 'dmStyle', { ...current, ...defaults })
 }
 </script>
 
 <style scoped>
-.config-item-container {
-  padding: 10px 5px 0px 10px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box
 }
 
-.config-item {
-  width: 150px;
-  margin: 0 5px;
+.page {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 0 20px;
+  background: #fff
 }
 
-.close-icon {
-  color: crimson;
-  font-size: 16px;
+.section {
+  padding: 0 16px
+}
+
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  flex-wrap: wrap
+}
+
+.label {
+  font-size: 12px;
+  color: #666;
+  /* min-width: 54px; */
+  white-space: nowrap;
+  text-align: right
+}
+
+.hint {
+  font-size: 12px;
+  /* color: black; */
+  /* margin: 0 -3px */
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  padding: 18px 16px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333
+}
+
+.divider::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: #2d8cf0;
+  border-radius: 2px;
+  margin-right: 8px
+}
+
+.input {
+  height: 18px;
+  border: none;
+  border-bottom: 1.5px solid #ddd;
+  border-radius: 0;
+  padding: 2px 0px 0;
+  font-size: 12px;
+  line-height: 1;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  transition: border-color .15s;
+  font-family: inherit
+}
+
+.input:focus {
+  border-bottom-color: #2d8cf0
+}
+
+.input-unit {
+  font-size: 11px;
+  color: #999;
+  margin-left: 2px
+}
+
+.btn {
+  height: 26px;
+  border: 1px solid #2d8cf0;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 11px;
+  cursor: pointer
+}
+
+.btn-primary {
+  background: #2d8cf0;
+  color: #fff;
+  border: none
+}
+
+.btn-default {
+  background: #fff;
+  color: #2d8cf0
+}
+
+/* 步进器 */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px
+}
+
+.stepper-btn {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  margin-left: 5px;
+  font-size: 11px;
+  color: #999;
+  line-height: 1;
+  transition: .15s;
+  user-select: none
 }
 
-.settings-icon {
-  font-size: 16px;
+.stepper-btn:hover {
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+  background: #f0f5ff
+}
+
+.stepper-val {
+  font-size: 12px;
+  color: #333;
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums
+}
+
+.stepper-input {
+  width: 36px;
+  height: 18px;
+  border: none;
+  border-bottom: 1.5px solid #ddd;
+  border-radius: 0;
+  padding: 2px 0px 0;
+  font-size: 12px;
+  line-height: 1;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  transition: border-color .15s;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums
+}
+
+.stepper-input:focus {
+  border-bottom-color: #2d8cf0
+}
+
+/* 预览 */
+.preview {
+  margin: 8px 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px
+}
+
+.preview .avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e88
+}
+
+.preview .name {
+  color: #6cf;
+  font-size: 13px
+}
+
+.preview .colon {
+  color: #6cf;
+  font-size: 13px
+}
+
+.preview .msg {
+  color: #ddd;
+  font-size: 13px
+}
+
+/* 芯片切换 */
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 0
+}
+
+.chip {
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  border: 1px solid #ddd;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
+  color: #666;
+  user-select: none
 }
 
-.settings-icon:hover {
-  color: deepskyblue;
+.chip.on {
+  background: rgba(45, 140, 240, 0.08);
+  border-color: #2d8cf0;
+  color: #2d8cf0
 }
 
-.color-selector {
-  width: 700px;
+/* 下拉框 */
+.select {
+  height: 18px;
+  border: none;
+  border-bottom: 1.5px solid #ddd;
+  border-radius: 0;
+  /* padding: 9px 2px 0; */
+  font-size: 12px;
+  line-height: 1;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  color: #333
 }
 
-.space-left-5px {
-  margin-left: 5px;
+.select:focus {
+  border-bottom-color: #2d8cf0
 }
 
-.medal-list-container>div {
-  margin: 2px 0;
+/* 等级分段 */
+.lvl-tabs {
+  display: inline-flex;
+  background: #f0f2f5;
+  border-radius: 6px;
+  padding: 2px 8px;
+  gap: 8px
+}
+
+.lvl-tab {
+  width: 40px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: .15s;
+  user-select: none
+}
+
+.lvl-tab.on {
+  background: #fff;
+  color: #2d8cf0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06)
+}
+
+/* 色彩标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  font-size: 11px
+}
+
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%
+}
+
+.tag-close {
+  cursor: pointer;
+  color: #999;
+  font-size: 10px;
+  margin-left: 2px
+}
+
+/* 颜色选择器 */
+.color-pick {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer
+}
+
+.color-pick input[type=color] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none
+}
+
+/* 颜色圆点 */
+.color-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid #ddd
+}
+
+/* 滚动条 */
+.page::-webkit-scrollbar {
+  width: 3px
+}
+
+.page::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px
 }
 </style>
