@@ -14,9 +14,8 @@
     <div class="divider">弹幕窗样式</div>
     <div class="preview"
       :style="{ background: dmStyle?.windowBackground || 'rgba(30,30,40,0.9)', opacity: dmStyle?.windowOpacity ?? 1 }">
-      <img v-if="dmStyle?.isShowFace && activeRoom?.face" class="avatar" :src="activeRoom.face" />
-      <div v-else-if="dmStyle?.isShowFace" class="avatar"></div>
-      <span v-if="dmStyle?.isShowType1 !== false" class="name">{{ activeRoom?.username || '用户名' }}</span>
+      <img v-if="dmStyle?.isShowFace" class="avatar" :src="DEFAULT_AVATAR" />
+      <span v-if="dmStyle?.isShowType1 !== false" class="name">用户名</span>
       <span v-if="dmStyle?.isShowType2 !== false" class="colon">：</span>
       <span class="msg">这是一条测试弹幕</span>
     </div>
@@ -150,19 +149,24 @@
             <input type="color" :value="currentLevelStyle?.bgColor || '#000000'"
               @input="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
           </label>
-          <span v-if="activeLevel === '99'" class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
-            @click="toggle('dmStyle.isShowAdminIcon')">显示</span>
-          <select v-if="activeLevel === '99'" class="select" style="width:100px" :value="dmStyle?.adminIcon || 'md-shield'"
-            @change="setVal('dmStyle.adminIcon', ($event.target as HTMLSelectElement).value)">
-            <option value="md-shield">🛡 盾牌</option>
-            <option value="md-star">⭐ 星星</option>
-            <option value="md-ribbon">🎗 绶带</option>
-            <option value="md-flash">⚡ 闪电</option>
-            <option value="md-hammer">🔨 锤子</option>
-            <option value="md-key">🔑 钥匙</option>
-            <option value="md-lock">🔒 锁</option>
-            <option value="md-flag">🚩 旗帜</option>
-          </select>
+          <div v-if="activeLevel === '99'" class="icon-dropdown">
+            <div class="icon-trigger" @click="iconOpen = !iconOpen">
+              <span v-if="!dmStyle?.adminIcon" style="font-size:10px;color:#999">无</span>
+              <Icon v-else :type="dmStyle?.adminIcon" :color="dmStyle?.adminIconColor || '#ff9900'" size="16" />
+            </div>
+            <div class="icon-overlay" v-show="iconOpen" @click="iconOpen = false"></div>
+            <div class="icon-menu" v-show="iconOpen">
+              <div class="icon-item" :class="{ on: !dmStyle?.adminIcon }"
+                @click="setVal('dmStyle.adminIcon', ''); iconOpen = false">
+                <span style="font-size:10px;color:#999">无</span>
+              </div>
+              <div v-for="icon in adminIcons" :key="icon" class="icon-item"
+                :class="{ on: dmStyle?.adminIcon === icon }"
+                @click="setVal('dmStyle.adminIcon', icon); iconOpen = false">
+                <Icon :type="icon" :color="dmStyle?.adminIconColor || '#ff9900'" size="18" />
+              </div>
+            </div>
+          </div>
           <label v-if="activeLevel === '99'" class="color-pick">
             <span class="color-dot" :style="{ background: dmStyle?.adminIconColor || '#ff9900' }"></span>
             <input type="color" :value="dmStyle?.adminIconColor || '#ff9900'"
@@ -217,13 +221,41 @@
     <!-- ═══ dmRawStyle — 原生弹幕窗样式 ═══ -->
     <div class="divider">原生弹幕窗样式</div>
     <div class="section">
+      <div class="chips">
+        <span class="chip" :class="{ on: dmRawStyle?.isWindowAlwaysOnTop === true }"
+          @click="toggle('dmRawStyle.isWindowAlwaysOnTop')">窗口置顶</span>
+        <span class="chip" :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
+          @click="toggle('dmRawStyle.ignoreMouseEvent')">鼠标穿透</span>
+      </div>
       <div class="section-row">
-        <span class="label">滚动方向</span>
-        <select class="select" style="width:100px" :value="dmRawStyle?.direction || 'RL'"
-          @change="setVal('dmRawStyle.direction', ($event.target as HTMLSelectElement).value)">
-          <option value="RL">← 向左</option>
-          <option value="LR">→ 向右</option>
-        </select>
+        <span class="label">透明度</span>
+        <span class="stepper">
+          <span class="stepper-btn" @click="stepDown('dmRawStyle.windowOpacity', 1, 0, 0.05)">−</span>
+          <input class="stepper-input" :value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
+            @change="setVal('dmRawStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
+          <span class="stepper-btn" @click="stepUp('dmRawStyle.windowOpacity', 1, 1, 0.05)">+</span>
+        </span>
+        <span class="label" style="margin-left:8px">背景色</span>
+        <label class="color-pick">
+          <span class="color-dot" :style="{ background: dmRawStyle?.windowBackground || '#1e1e28' }"></span>
+          <input type="color" :value="dmRawStyle?.windowBackground || '#1e1e28'"
+            @input="setVal('dmRawStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
+        </label>
+      </div>
+      <div class="section-row">
+        <span class="label">方向</span>
+        <span class="segmented">
+          <span class="seg-item" :class="{ on: (dmRawStyle?.direction || 'RL') === 'LR' }"
+            @click="setVal('dmRawStyle.direction', 'LR')">向左</span>
+          <span class="seg-item" :class="{ on: (dmRawStyle?.direction || 'RL') === 'RL' }"
+            @click="setVal('dmRawStyle.direction', 'RL')">向右</span>
+        </span>
+      </div>
+      <div class="section-row">
+        <span class="label">整体字号</span>
+        <input class="input" style="width:40px" :value="(dmRawStyle as any)?.fontSize ?? 14"
+          @change="setVal('dmRawStyle.fontSize', Number(($event.target as HTMLInputElement).value))" />
+        <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">表情大小</span>
@@ -232,40 +264,20 @@
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
-        <span class="label">持续时间</span>
+        <span class="label">弹幕持续时间</span>
         <input class="input" style="width:40px" :value="dmRawStyle?.duration ?? 15"
           @change="setVal('dmRawStyle.duration', Number(($event.target as HTMLInputElement).value))" />
-        <span class="input-unit">s</span>
+        <span class="input-unit">ms</span>
       </div>
     </div>
 
-    <!-- ═══ recordConfig — 录制配置 ═══ -->
-    <div class="divider">录制配置</div>
+    <!-- ═══ 直播与录制 ═══ -->
+    <div class="divider">直播与录制</div>
     <div class="section">
-      <div class="section-row">
-        <span class="label">保存路径</span>
-        <input class="input" style="width:230px" :value="recordConfig?.savePath || ''" disabled
-          placeholder="/path/to/save" />
-        <button class="btn btn-default" style="font-size:10px" @click="selectSavePath">选择</button>
+      <div class="chips">
+        <span class="chip" :class="{ on: liveConfig?.isWithCookie === true }"
+          @click="toggle('liveConfig.isWithCookie')">携带Cookie</span>
       </div>
-      <div class="section-row">
-        <span class="label">画质</span>
-        <select class="select" style="width:90px" :value="recordConfig?.quality || '原画'"
-          @change="setVal('recordConfig.quality', ($event.target as HTMLSelectElement).value)">
-          <option value="原画">原画</option>
-          <option value="高清">高清</option>
-        </select>
-      </div>
-      <div class="section-row">
-        <span class="label">自动录制</span>
-        <span class="chip" :class="{ on: recordConfig?.isAutoRecord === true }"
-          @click="toggle('recordConfig.isAutoRecord')">自动录制</span>
-      </div>
-    </div>
-
-    <!-- ═══ liveConfig — 直播配置 ═══ -->
-    <div class="divider">直播配置</div>
-    <div class="section">
       <div class="section-row">
         <span class="label">音量</span>
         <span class="stepper">
@@ -276,9 +288,19 @@
         </span>
       </div>
       <div class="section-row">
-        <span class="label">带Cookie</span>
-        <span class="chip" :class="{ on: liveConfig?.isWithCookie === true }"
-          @click="toggle('liveConfig.isWithCookie')">Cookie</span>
+        <span class="label">保存路径</span>
+        <input class="input" style="width:230px" :value="recordConfig?.savePath || ''" disabled
+          placeholder="/path/to/save" />
+        <button class="btn btn-default" style="font-size:10px" @click="selectSavePath">选择</button>
+      </div>
+      <div class="section-row">
+        <span class="label">画质</span>
+        <span class="segmented">
+          <span class="seg-item" :class="{ on: (recordConfig?.quality || '原画') === '原画' }"
+            @click="setVal('recordConfig.quality', '原画')">原画</span>
+          <span class="seg-item" :class="{ on: recordConfig?.quality === '高清' }"
+            @click="setVal('recordConfig.quality', '高清')">高清</span>
+        </span>
       </div>
     </div>
 
@@ -322,6 +344,7 @@ import { ref, computed } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
 import { generateQRCode, sendDM, clearDM } from '../service/api'
+import { DEFAULT_AVATAR } from '../../service/const'
 import QRCode from 'qrcode'
 
 const dmStyle = computed(() => config.dmStyle)
@@ -329,7 +352,6 @@ const dmRawStyle = computed(() => config.dmRawStyle)
 const liveConfig = computed(() => config.liveConfig)
 const recordConfig = computed(() => config.recordConfig)
 const chartConfig = computed(() => config.chartConfig)
-const activeRoom = computed(() => config.rooms?.find(r => r.isActive) || null)
 
 // ── Cookie ──
 const cookieInput = ref('')
@@ -337,7 +359,9 @@ const showQrModal = ref(false)
 const qrError = ref('')
 
 // ── 等级样式 ──
-const activeLevel = ref('3')
+const activeLevel = ref('0')
+const iconOpen = ref(false)
+const adminIcons = ['md-star', 'md-ribbon', 'md-flash', 'md-hammer', 'md-key', 'md-lock', 'md-flag']
 
 interface LevelStyle {
   usernameColor?: string
@@ -439,7 +463,7 @@ function removeColor(index: number) {
 async function sendTestDanmaku() {
   try {
     await sendDM('danmaku', {
-      username: activeRoom.value?.username || '测试用户',
+      username: '测试用户',
       comment: '这是一条测试弹幕 🎉',
     })
   } catch { /* ignore */ }
@@ -728,6 +752,94 @@ function restoreDefaults() {
 
 .select:focus {
   border-bottom-color: #2d8cf0
+}
+
+/* 图标下拉 */
+.icon-dropdown {
+  position: relative;
+  display: inline-flex
+}
+
+.icon-trigger {
+  width: 24px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-bottom: 1.5px solid #ddd;
+  transition: border-color .15s
+}
+
+.icon-trigger:hover {
+  border-bottom-color: #2d8cf0
+}
+
+.icon-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #e8eaec;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 40px
+}
+
+.icon-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .1s
+}
+
+.icon-item:hover {
+  background: #f0f5ff
+}
+
+.icon-item.on {
+  background: rgba(45, 140, 240, .08)
+}
+
+.icon-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9
+}
+
+/* 分段胶囊 */
+.segmented {
+  display: inline-flex;
+  background: #f0f2f5;
+  border-radius: 11px;
+  padding: 2px
+}
+
+.seg-item {
+  height: 22px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #999;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: .15s;
+  user-select: none
+}
+
+.seg-item.on {
+  background: #fff;
+  color: #2d8cf0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .06)
 }
 
 /* 等级分段 */
