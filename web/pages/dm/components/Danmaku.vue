@@ -1,5 +1,6 @@
 <template>
-  <div :style="{ position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px', background: windowBackground }">
+  <div
+    :style="{ position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px', background: windowBackground }">
     <div
       :style="{ position: 'absolute', top: '4px', bottom: '4px', left: '4px', right: '4px', '-webkit-user-select': 'none', opacity: windowOpacity }">
       <!-- @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined" @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined" -->
@@ -116,23 +117,17 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { set } from 'lodash'
-import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../service/const'
-import { getPriceProperties, wait } from '../service/util'
-import PromiseQueue from '../service/promise-queue'
-// import SimilarCommentBadge from './SimilarCommentBadge'
-// import GiftCard from './GiftCard'
-// import GiftCardMini from './GiftCardMini'
-// import FanMedal from './FanMedal'
+import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../../service/const'
+import { getPriceProperties, wait } from '../../service/util'
+import PromiseQueue from '../../service/promise-queue'
 import GiftTag from './GiftTag.vue'
 import GiftTagExpand from './GiftTagExpand.vue'
-import {  getClientConfig } from '../service/api'
-import config from '../service/config'
+import { getClientConfig } from '../../service/api'
+import { sse } from '../../service/sse-client'
+import config from '../../service/config'
 
 defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
-let ws: WebSocket | null = null
-let retryWaitTime = 0
 let promiseQueue: PromiseQueue | null = null
 
 const roomId = ref(0)
@@ -188,19 +183,56 @@ const message_lvinteract = ref<Record<string, any>>({})
 const comment_lvinteract = ref<Record<string, any>>({})
 
 const stateMap: Record<string, any> = {
-  roomId, giftHover, giftGifMap, headlines, port, showGiftCardThreshold,
-  combineSimilarTime, showHeadlineThreshold, isShowFanMedal, isUseMiniGiftCard,
-  isShowFace, isShowAnchorIcon, font, faceSize, windowBackground, windowOpacity,
-  emojiSize, messages, isShowInteractInfo, isShowSilverGift, isShowHeadline,
-  fontWeight, hiddenExpiredTime, messageSettings, borderImages,
-  isShowType1, isShowType2, isShowSuperChatJPN, isShowAdminIcon,
-  adminIcon, adminIconColor, channelDelayTime, channelCount,
-  message_lv0, name_lv0, comment_lv0,
-  message_lv3, name_lv3, comment_lv3,
-  message_lv2, name_lv2, comment_lv2,
-  message_lv1, name_lv1, comment_lv1,
-  message_lvadmin, name_lvadmin, comment_lvadmin,
-  message_lvinteract, comment_lvinteract,
+  roomId,
+  giftHover,
+  giftGifMap,
+  headlines,
+  port,
+  showGiftCardThreshold,
+  combineSimilarTime,
+  showHeadlineThreshold,
+  isShowFanMedal,
+  isUseMiniGiftCard,
+  isShowFace,
+  isShowAnchorIcon,
+  font,
+  faceSize,
+  windowBackground,
+  windowOpacity,
+  emojiSize,
+  messages,
+  isShowInteractInfo,
+  isShowSilverGift,
+  isShowHeadline,
+  fontWeight,
+  hiddenExpiredTime,
+  messageSettings,
+  borderImages,
+  isShowType1,
+  isShowType2,
+  isShowSuperChatJPN,
+  isShowAdminIcon,
+  adminIcon,
+  adminIconColor,
+  channelDelayTime,
+  channelCount,
+  message_lv0,
+  name_lv0,
+  comment_lv0,
+  message_lv3,
+  name_lv3,
+  comment_lv3,
+  message_lv2,
+  name_lv2,
+  comment_lv2,
+  message_lv1,
+  name_lv1,
+  comment_lv1,
+  message_lvadmin,
+  name_lvadmin,
+  comment_lvadmin,
+  message_lvinteract,
+  comment_lvinteract,
 }
 
 const borderImageStyle = computed(() => {
@@ -226,31 +258,17 @@ const fontStyle = computed(() => ({
   'font-weight': fontWeight.value,
 }))
 
-function connectWS() {
-  const WS_URL = 'ws://127.0.0.1:' + port.value
-  if (ws && ws.readyState === WebSocket.OPEN) return
-  if (ws && ws.readyState === WebSocket.CONNECTING) return
-
-  ws = new WebSocket(WS_URL)
-  ws.onopen = () => { retryWaitTime = 0 }
-  ws.onmessage = (msg: any) => {
-    const payload = JSON.parse(msg.data)
-    if (payload.cmd === 'SETTING') onSetting(payload.payload)
-    if (payload.cmd === 'COMMENT') {
-      if (promiseQueue) {
-        promiseQueue.push(async () => { onComment(payload.payload); await wait(channelDelayTime.value) })
-      } else { onComment(payload.payload) }
-    }
-    if (payload.cmd === 'GIFT') onGift(payload.payload)
-    if (payload.cmd === 'INTERACT') onInteract(payload.payload)
-    if (payload.cmd === 'SUPER_CHAT') onSuperChat(payload.payload)
-    if (payload.cmd === 'MESSAGE_CLEAR') clearMessages()
-  }
-  ws.onclose = () => {
-    ws = null
-    setTimeout(() => { connectWS(); retryWaitTime = 3000 }, retryWaitTime)
-  }
-  ws.onerror = (err: any) => { console.error(err) }
+function setupSSE() {
+  sse.on('SETTING', (payload: any) => onSetting(payload.payload || payload))
+  sse.on('COMMENT', (payload: any) => {
+    if (promiseQueue) {
+      promiseQueue.push(async () => { onComment(payload.payload || payload); await wait(channelDelayTime.value) })
+    } else { onComment(payload.payload || payload) }
+  })
+  sse.on('GIFT', (payload: any) => onGift(payload.payload || payload))
+  sse.on('INTERACT', (payload: any) => onInteract(payload.payload || payload))
+  sse.on('SUPER_CHAT', (payload: any) => onSuperChat(payload.payload || payload))
+  sse.on('MESSAGE_CLEAR', () => clearMessages())
 }
 
 function onSetting(payload: Record<string, any>) {
@@ -371,12 +389,15 @@ onMounted(async () => {
   const clientConfig = await getClientConfig({ clientId })
 
   console.log(clientConfig)
-  // await getSetting()
-  // roomId.value = parseInt(params.get('roomId') || '0')
-  // const { data: giftMap } = await getGiftConfig(roomId.value)
-  // giftGifMap.value = giftMap
+
+  for (const key in clientConfig.dmStyle) {
+    const t = stateMap[key]
+    if (t) t.value = clientConfig.dmStyle[key]
+  }
+
   promiseQueue = new PromiseQueue({ limit: channelCount.value })
-  // connectWS()
+  setupSSE()
+  sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {
     headlines.value = headlines.value.map((h: any) => { h.existsTime = (h.existsTime || 0) + 1000; return h }).filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
   }, 1000)

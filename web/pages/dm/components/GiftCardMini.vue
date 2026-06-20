@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { dateFormat } from '../service/util'
+import { dateFormat } from '../../service/util'
 
 export default {
   props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type', 'sendAt', 'showTime'],

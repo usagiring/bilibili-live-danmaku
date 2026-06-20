@@ -6,7 +6,7 @@
 
 <script>
 import { shuffle } from 'lodash'
-import { COLORS } from '../service/const'
+import { COLORS } from '../../service/const'
 const colorPool = shuffle(COLORS)
 
 export default {
