@@ -1,5 +1,6 @@
 packages:
   - 'web'
+  - 'shared'
 allowBuilds:
   '@alicloud/openapi-core': false
   bufferutil: false

@@ -96,7 +96,7 @@ import { queryMessages } from '../service/api'
 // @ts-ignore - Volar known issue: cannot resolve .vue module types
 import GiftCardMini from './GiftCardMini'
 // @ts-ignore
-import FanMedal from './FanMedal'
+import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { sse } from '../service/sse-client'
 const COMMENTS_LIMIT = 200
 const GIFTS_LIMIT = 200

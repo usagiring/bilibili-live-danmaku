@@ -480,7 +480,7 @@ import FontList from 'font-list'
 // @ts-ignore
 import StyleEditor from './StyleEditor'
 // @ts-ignore
-import FanMedal from './FanMedal'
+import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
 import { getRandomItem } from '../service/util'
 import { cloneDeep, debounce } from 'lodash'

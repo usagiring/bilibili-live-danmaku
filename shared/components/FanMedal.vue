@@ -1,20 +1,20 @@
 <template>
   <div :style="{ display: 'inline-block' }">
-    <img v-if="role" class="guard-icon" :src="`${GUARD_ICON_MAP[role]}`" />
+    <img v-if="role" class="guard-icon" :src="`${ANCHOR_ICON_MAP[role]}`" />
 
     <span :style="getStyle()">
       {{ medal.name }}
       <span :style="getLevelStyle()"> {{ medal.level < 10 ? `0${medal.level}` : medal.level }}</span>
-    </span>
+      </span>
   </div>
 </template>
 
 <script setup>
-import { GUARD_ICON_MAP } from '../../service/const'
+import { ANCHOR_ICON_MAP } from '../service/const'
 
 const props = defineProps({
   medal: Object,
-  role: String,
+  role: [String, Number],
 })
 
 function getStyle() {
@@ -47,15 +47,3 @@ function getLevelStyle() {
   vertical-align: middle;
 }
 </style>
-
-<!-- 
-<span
-:style="{
-  'background-image': `linear-gradient(to right, ${medalColorStart}, ${medalColorEnd})`,
-  color: 'white',
-  border: `solid 0.5px ${medalColorBorder}`,
-  padding: '0px 2px',
-}"
->
-{{ `${medalName}${medalLevel}` }}
-</span> -->

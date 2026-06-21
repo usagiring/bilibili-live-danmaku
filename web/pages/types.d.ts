@@ -87,14 +87,16 @@ interface Message {
   isHover?: boolean
   styleSuffix?: string
   anchorIcon?: string
+  isAdmin?: boolean
   similar?: number
-  splitContent?: string[]
+
+  // splitContent?: string[]
   emojiUrl?: string
   voiceUrl?: string
   contentJPN?: string
-  count?: number
-  name?: string
+  // count?: number
+  // name?: string
   fileDuration?: number
   // totalPrice?: number
-  priceProperties?: { time?: number; colors?: string[] }
+  // priceProperties?: { time?: number; colors?: string[] }
 }

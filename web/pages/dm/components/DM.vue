@@ -1,116 +1,105 @@
 <template>
-  <div
-    :style="{ position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px', background: windowBackground }">
-    <div
-      :style="{ position: 'absolute', top: '4px', bottom: '4px', left: '4px', right: '4px', '-webkit-user-select': 'none', opacity: windowOpacity }">
-      <!-- @mouseenter="isSingleWindow ? setUnIgnoreMouseEvent() : undefined" @mouseleave="isSingleWindow ? setIgnoreMouseEvent() : undefined" -->
-      <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper" @wheel.prevent="giftScroll">
-        <transition-group name="fade">
-          <template v-for="(gift, index) of headlines" :key="index">
-            <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))"
-              @mouseleave="unhoverGift(String(gift.id))">
-              <GiftTag v-if="!giftHover.includes(String(gift.id))" :gift="gift" />
-              <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
-            </div>
-          </template>
-        </transition-group>
-      </div>
-      <div class="message-content-wrapper" :style="{ top: `${headlines.length && isShowHeadline ? '36px' : '0px'}` }">
-        <div :style="{ position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag' }" />
-        <div :style="{ position: 'absolute', height: '100%', width: '20%', right: '0' }" />
-        <transition-group name="fade" tag="div" class="message-content">
-          <p v-for="message in messages" :key="message.id">
-            <template v-if="message.category === 'comment'">
-              <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="{
-                ...borderImageStyle,
-                ...getContainerStyle(message),
-              }">
-                <!-- <Space align="center" :size="0"> -->
-                <template v-if="isShowAdminIcon && message.isAdmin">
-                  <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
-                </template>
-                <template v-for="(setting, index) of messageSettings" :key="index">
-                  <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.face"
-                    :style="{ ...getAvatarSizeStyle(setting) }" />
-                  <!-- <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
-                  <FanMedal v-if="setting.type === 'medal' && setting.isShow && message.medal"
-                    class="margin-lr-1px vertical-align-middle" :medal="message.medal" :role="message.role" />
-                  <span v-if="setting.type === 'name'" class="vertical-align-middle"
-                    :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">{{
-                      message.username
-                    }}</span>
-                  <span v-if="setting.type === 'colon' && setting.isShow"
-                    :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }"
-                    class="vertical-align-middle">：</span>
-                  <span v-if="setting.type === 'comment'">
-                    <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle"
-                      :src="message.emojiUrl" />
-                    <span v-else-if="message.emots"
-                      :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
-                      class="vertical-align-middle">
-                      <template v-for="(str, index) of message.splitContent" :key="index">
-                        <template v-if="message.emots[str]">
-                          <img :style="{ height: `${message.emots[str].height || 20}px` }" class="vertical-align-middle"
-                            :src="message.emots[str].url" />
-                        </template>
-                        <template v-else>
-                          {{ str }}
-                        </template>
+  <div :style="($ as any)({
+    position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px',
+    padding: '4px', background: windowBackground, opacity: windowOpacity,
+    '-webkit-user-select': 'none', '-webkit-app-region': 'drag'
+  })">
+    <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper"
+      style="-webkit-app-region: no-drag" @wheel.prevent="giftScroll">
+      <transition-group name="fade">
+        <template v-for="(gift, index) of headlines" :key="index">
+          <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))"
+            @mouseleave="unhoverGift(String(gift.id))">
+            <GiftTag v-if="!giftHover.includes(String(gift.id))" :gift="gift" />
+            <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
+          </div>
+        </template>
+      </transition-group>
+    </div>
+    <div class="message-content-wrapper"
+      :style="($ as any)({ top: `${headlines.length && isShowHeadline ? '36px' : '0px'}`, '-webkit-app-region': 'no-drag' })">
+      <transition-group name="fade" tag="div" class="message-content">
+        <div v-for="message in messages" :key="message.id">
+          <template v-if="message.category === 'comment'">
+            <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="{
+              ...borderImageStyle,
+              ...getContainerStyle(message),
+            }">
+              <template v-if="adminIcon && message.isAdmin">
+                <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
+              </template>
+              <template v-for="(setting, index) of messageSettings" :key="index">
+                <Avatar v-if="setting.type === 'face' && setting.isShow" class="margin-lr-1px" :src="message.face"
+                  :style="{ ...getFaceSizeStyle() }" />
+                <FanMedal v-if="setting.type === 'medal' && setting.isShow && message.medal"
+                  class="margin-lr-1px vertical-align-middle" :medal="message.medal" :role="message.role" />
+                <span v-if="setting.type === 'name'" class="vertical-align-middle"
+                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">{{
+                    message.username
+                  }}</span>
+                <span v-if="setting.type === 'colon' && setting.isShow"
+                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }"
+                  class="vertical-align-middle">：</span>
+                <span v-if="setting.type === 'comment'">
+                  <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle"
+                    :src="message.emojiUrl" />
+                  <span v-else-if="message.emots"
+                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
+                    class="vertical-align-middle">
+                    <template v-for="(str, index) of message.splitContent" :key="index">
+                      <template v-if="message.emots[str]">
+                        <img :style="{ height: `${message.emots[str].height || 20}px` }" class="vertical-align-middle"
+                          :src="message.emots[str].url" />
                       </template>
-                    </span>
-                    <span v-else
-                      :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
-                      class="vertical-align-middle">
-                      {{ message.content }}
-                    </span>
-                    <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
-                      <Icon type="md-play" />
-                      <span>{{ message.fileDuration ? `${message.fileDuration}"` : '' }}</span>
-                    </span>
+                      <template v-else>{{ str }}</template>
+                    </template>
                   </span>
+                  <span v-else
+                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
+                    class="vertical-align-middle">{{ message.content }}</span>
+                  <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
+                    <Icon type="md-play" />
+                    <span>{{ message.fileDuration ? `${message.fileDuration}"` : '' }}</span>
+                  </span>
+                </span>
+              </template>
+              <SimilarCommentBadge v-if="message.similar > 0" class="vertical-align-middle"
+                :style="{ 'margin-left': '5px' }" :number="message.similar" />
+            </span>
+          </template>
+          <template v-else-if="message.category === 'interact'">
+            <p :style="getContainerStyle(message)">
+              <Avatar class="margin-lr-1px" :src="message.face"
+                :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
+              <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
+              <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ message.content }}</span>
+            </p>
+          </template>
+          <template v-else-if="message.category === 'superchat'">
+            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
+              <div :style="{ padding: '10px' }">
+                {{ message.content }}
+                <template v-if="message.contentJPN && isShowSuperChatJPN">
+                  <div class="divider" />
+                  {{ message.contentJPN }}
                 </template>
-                <!-- v-bind="message" -->
-                <SimilarCommentBadge v-if="message.similar > 0" class="vertical-align-middle"
-                  :style="{ 'margin-left': '5px' }" :number="message.similar" />
-                <!-- </Space> -->
-              </span>
-            </template>
-            <template v-if="message.category === 'interact'">
-              <!-- 入场消息设置默认使用普通设置 -->
-              <p :style="getContainerStyle(message)">
-                <Avatar class="margin-lr-1px" :src="message.face"
-                  :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
-                <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
-                <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
-                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ message.content }}</span>
-              </p>
-            </template>
-            <template v-if="message.category === 'superchat'">
-              <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
-                <div :style="{ padding: '10px' }">
-                  {{ message.content }}
-                  <template v-if="message.contentJPN && isShowSuperChatJPN">
-                    <div class="divider" />
-                    {{ message.contentJPN }}
-                  </template>
-                </div>
-              </GiftCard>
-              <GiftCardMini v-else v-bind="message"> {{ `: ${message.content}` }} </GiftCardMini>
-            </template>
-            <template v-if="message.category === 'gift'">
-              <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
-                <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">{{ `${message.username} 赠送了
-                  ${message.count} 个 ${message.name}` }}</span>
-                <img :style="{ 'vertical-align': 'middle', width: '35px' }"
-                  :src="giftGifMap[message.id] && giftGifMap[message.id].webp" />
-              </GiftCard>
-              <GiftCardMini v-else v-bind="message">
-                {{ ` 赠送了 ${message.count}个 ${message.name}` }}
-              </GiftCardMini>
-            </template>
-          </p>
-        </transition-group>
-      </div>
+              </div>
+            </GiftCard>
+            <GiftCardMini v-else v-bind="message"> {{ `: ${message.content}` }} </GiftCardMini>
+          </template>
+          <template v-else-if="message.category === 'gift'">
+            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
+              <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">{{ `${message.username} 赠送了
+                ${message.count} 个 ${message.name}` }}</span>
+              <img :style="{ 'vertical-align': 'middle', width: '35px' }"
+                :src="giftGifMap[message.id] && giftGifMap[message.id].webp" />
+            </GiftCard>
+            <GiftCardMini v-else v-bind="message">
+              {{ ` 赠送了 ${message.count}个 ${message.name}` }}
+            </GiftCardMini>
+          </template>
+        </div>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -122,6 +111,7 @@ import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from './GiftTag.vue'
 import GiftTagExpand from './GiftTagExpand.vue'
+import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { getClientConfig } from '../../service/api'
 import { sse } from '../../service/sse-client'
 import config from '../../service/config'
@@ -303,18 +293,24 @@ function onMessage(msg: Message) {
   msg.anchorIcon = getAnchorIcon(msg)
 
   // comment
-  if (msg.type === 1 && !isShowType1.value) return
-  if (msg.type === 2 && !isShowType2.value) return
-  if (combineSimilarTime.value) {
-    const rev = messages.value.filter((m: any) => m.category === 'comment')
-    for (const m of rev) {
-      if (m.sendAt < Date.now() - combineSimilarTime.value) break
-      if (m.content === msg.content) { m.similar = (m.similar || 0) + 1; return }
+  if (msg.category === 'comment') {
+    msg.isAdmin = getIsAdmin(msg)
+    if (msg.type === 1 && !isShowType1.value) isAddMessage = false
+    if (msg.type === 2 && !isShowType2.value) isAddMessage = false
+    if (combineSimilarTime.value) {
+      const rev = messages.value.filter((m: any) => m.category === 'comment')
+      for (const m of rev) {
+        if (m.sendAt < Date.now() - combineSimilarTime.value) break
+        if (m.content === msg.content) {
+          m.similar = (m.similar || 0) + 1
+          isAddMessage = false
+        }
+      }
     }
-  }
-  if (msg.emots) {
-    const regstr = Object.keys(msg.emots).map((k: string) => k.replace(/\[|\]/g, '')).map((k: string) => '\[' + k + '\]').join('|')
-    msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
+    // if (msg.emots) {
+    //   const regstr = Object.keys(msg.emots).map((k: string) => k.replace(/\[|\]/g, '')).map((k: string) => '\[' + k + '\]').join('|')
+    //   msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
+    // }
   }
 
 
@@ -369,15 +365,12 @@ function addToHeadline(msg: Message) {
   }
 }
 
-
-// async function getSetting() {
-//   const { data } = await fetchSetting()
-//   for (const key in data) { const t = stateMap[key]; if (t) t.value = data[key] }
-// }
-
-function getAvatarSizeStyle(setting: any) {
-  if (setting.type !== 'avatar') return
-  return { width: setting.size + 'px', height: setting.size + 'px', 'line-height': setting.size + 'px' }
+function getFaceSizeStyle() {
+  return {
+    width: faceSize + 'px',
+    height: faceSize + 'px',
+    'line-height': faceSize + 'px'
+  }
 }
 
 function styleBySuffix(suffix?: string) {
@@ -402,7 +395,8 @@ function getTextShadow(msg: Message, type: string) {
   return { textShadow: w + ' 0px ' + w + ' ' + c + ', 0px ' + w + ' ' + w + ' ' + c + ', -' + w + ' 0px ' + w + ' ' + c + ', 0px -' + w + ' ' + w + ' ' + c }
 }
 
-// function getInteractTextShadow() { return getTextShadow({ isAdmin: false, role: 'interact' }, 'comment') }
+function getInteractContentStyle() { return dmStyle.messageCommentInteract }
+function getInteractTextShadow() { return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment') }
 function hoverGift(giftId: string) { giftHover.value = [...giftHover.value, giftId] }
 function unhoverGift(giftId: string) { giftHover.value = giftHover.value.filter((id: string) => id !== giftId) }
 
@@ -411,6 +405,9 @@ function getAnchorIcon(msg: Message): string | undefined {
   for (const role of (msg.roles || [])) {
     if (ANCHOR_ICON_MAP[role]) return ANCHOR_ICON_MAP[role]
   }
+}
+function getIsAdmin(msg: Message) {
+  return msg.roles?.some(role => role >= 99)
 }
 function playAudio(url: string) { new Audio(url).play() }
 

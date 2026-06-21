@@ -97,7 +97,7 @@ import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENAB
 import { parseDownloadRate, parseHexColor, dateFormat } from '../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../service/api'
 // @ts-ignore
-import FanMedal from './FanMedal'
+import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import icon from '../assets/logo.png'
 import { sse } from '../service/sse-client'
 
