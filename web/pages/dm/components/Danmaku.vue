@@ -7,8 +7,8 @@
       <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper" @wheel.prevent="giftScroll">
         <transition-group name="fade">
           <template v-for="(gift, index) of headlines" :key="index">
-            <div class="gift-tag-wrapper" @mouseenter="hoverGift(gift._id)" @mouseleave="unhoverGift(gift._id)">
-              <GiftTag v-if="!giftHover.includes(gift._id)" :gift="gift" />
+            <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))" @mouseleave="unhoverGift(String(gift.id))">
+              <GiftTag v-if="!giftHover.includes(String(gift.id))" :gift="gift" />
               <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
             </div>
           </template>
@@ -18,34 +18,34 @@
         <div :style="{ position: 'absolute', height: '100%', width: '80%', '-webkit-app-region': 'drag' }" />
         <div :style="{ position: 'absolute', height: '100%', width: '20%', right: '0' }" />
         <transition-group name="fade" tag="div" class="message-content">
-          <p v-for="message in messages" :key="message._id">
+          <p v-for="message in messages" :key="message.id">
             <template v-if="message.category === 'comment'">
               <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="{
                 ...borderImageStyle,
-                ...getMessageStyleByRole(message),
+                ...getContainerStyle(message),
               }">
                 <!-- <Space align="center" :size="0"> -->
                 <template v-if="isShowAdminIcon && message.isAdmin">
                   <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
                 </template>
                 <template v-for="(setting, index) of messageSettings" :key="index">
-                  <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.avatar"
+                  <Avatar v-if="setting.type === 'avatar' && setting.isShow" class="margin-lr-1px" :src="message.face"
                     :style="{ ...getAvatarSizeStyle(setting) }" />
                   <!-- <img v-if="setting.type === 'guard' && setting.isShow && message.role" class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
                   <FanMedal v-if="setting.type === 'medal' && setting.isShow && message.medal"
                     class="margin-lr-1px vertical-align-middle" :medal="message.medal" :role="message.role" />
                   <span v-if="setting.type === 'name'" class="vertical-align-middle"
-                    :style="{ ...fontStyle, ...getNameStyleByRole(message), ...getTextShadow(message, 'name') }">{{
-                      message.uname
+                    :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">{{
+                      message.username
                     }}</span>
                   <span v-if="setting.type === 'colon' && setting.isShow"
-                    :style="{ ...fontStyle, ...getNameStyleByRole(message), ...getTextShadow(message, 'name') }"
+                    :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }"
                     class="vertical-align-middle">：</span>
                   <span v-if="setting.type === 'comment'">
                     <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle"
                       :src="message.emojiUrl" />
                     <span v-else-if="message.emots"
-                      :style="{ ...fontStyle, ...getCommentStyleByRole(message), ...getTextShadow(message, 'comment') }"
+                      :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
                       class="vertical-align-middle">
                       <template v-for="(str, index) of message.splitContent" :key="index">
                         <template v-if="message.emots[str]">
@@ -58,13 +58,13 @@
                       </template>
                     </span>
                     <span v-else
-                      :style="{ ...fontStyle, ...getCommentStyleByRole(message), ...getTextShadow(message, 'comment') }"
+                      :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
                       class="vertical-align-middle">
                       {{ message.content }}
                     </span>
                     <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
                       <Icon type="md-play" />
-                      <span>{{ `${comment.fileDuration}"` }}</span>
+                      <span>{{ message.fileDuration ? `${message.fileDuration}"` : '' }}</span>
                     </span>
                   </span>
                 </template>
@@ -74,18 +74,18 @@
                 <!-- </Space> -->
               </span>
             </template>
-            <template v-if="message.category === 'interactWord'">
+            <template v-if="message.category === 'interact'">
               <!-- 入场消息设置默认使用普通设置 -->
-              <p :style="getInteractMessageStyle()">
+              <p :style="getContainerStyle(message)">
                 <Avatar class="margin-lr-1px" :src="message.face"
                   :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
                 <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
                 <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
-                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ `${message.uname}
+                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ `${message.username}
                   ${parseMsgType(message.type)}了直播间` }}</span>
               </p>
             </template>
-            <template v-if="message.category === 'superChat'">
+            <template v-if="message.category === 'superchat'">
               <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
                 <div :style="{ padding: '10px' }">
                   {{ message.content }}
@@ -99,7 +99,7 @@
             </template>
             <template v-if="message.category === 'gift'">
               <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
-                <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">{{ `${message.uname} 赠送了
+                <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">{{ `${message.username} 赠送了
                   ${message.count} 个 ${message.name}` }}</span>
                 <img :style="{ 'vertical-align': 'middle', width: '35px' }"
                   :src="giftGifMap[message.id] && giftGifMap[message.id].webp" />
@@ -116,8 +116,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import { DEFAULT_AVATAR, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../../service/const'
+import { ref, reactive, computed, onMounted, toRefs } from 'vue'
+import { DEFAULT_FACE, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from './GiftTag.vue'
@@ -130,110 +130,230 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 let promiseQueue: PromiseQueue | null = null
 
+type StyleValue = Record<string, string>
+
+interface DmStyle {
+  isShowFace: boolean
+  isShowAnchorIcon: boolean
+  isShowFanMedal: boolean
+  isShowHeadline: boolean
+  faceSize: number
+  combineSimilarTime: number
+  hiddenExpiredTime: number
+  showHeadlineThreshold: number
+  isShowInteractInfo: boolean
+  showGiftCardThreshold: number
+  isShowSilverGift: boolean
+  font: string
+  fontWeight: string
+  isUseMiniGiftCard: boolean
+  adminIcon: string
+  isShowAdminIcon: boolean
+  adminIconColor: string
+  isShowType1: boolean
+  isShowType2: boolean
+  channelCount: number
+  channelDelayTime: number
+  isShowSuperChatJPN: boolean
+  windowOpacity: number
+  windowBackground: string
+  isWindowAlwaysOnTop: boolean
+  messageSettings: any[]
+  borderImages: any[]
+  messageContainer0: StyleValue
+  messageUsername0: StyleValue
+  messageComment0: StyleValue
+  messageContainer1: StyleValue
+  messageUsername1: StyleValue
+  messageComment1: StyleValue
+  messageContainer2: StyleValue
+  messageUsername2: StyleValue
+  messageComment2: StyleValue
+  messageContainer3: StyleValue
+  messageUsername3: StyleValue
+  messageComment3: StyleValue
+  messageContainer99: StyleValue
+  messageUsername99: StyleValue
+  messageComment99: StyleValue
+  messageContainerInteract: StyleValue
+  messageCommentInteract: StyleValue
+}
+
+
 const roomId = ref(0)
 const giftHover = ref<string[]>([])
 const giftGifMap = ref<Record<string, any>>({})
-const headlines = ref<any[]>([])
+const headlines = ref<Message[]>([])
 const port = ref(3000)
-const showGiftCardThreshold = ref(0)
-const combineSimilarTime = ref(3000)
-const showHeadlineThreshold = ref(0)
-const isShowFanMedal = ref(true)
-const isUseMiniGiftCard = ref(false)
-const isShowFace = ref(true)
-const isShowAnchorIcon = ref(true)
-const font = ref('auto')
-const faceSize = ref(12)
-const windowBackground = ref('rgba(0,0,0,0)')
-const windowOpacity = ref(1)
 const emojiSize = ref(24)
-const messages = ref<any[]>([])
-const isShowInteractInfo = ref(false)
-const isShowSilverGift = ref(false)
-const isShowHeadline = ref(true)
-const fontWeight = ref('normal')
-const hiddenExpiredTime = ref(0)
-const messageSettings = ref<any[]>([])
-const borderImages = ref<any[]>([])
-const isShowType1 = ref(true)
-const isShowType2 = ref(true)
-const isShowSuperChatJPN = ref(true)
-const isShowAdminIcon = ref(false)
-const adminIcon = ref('ios-home-outline')
-const adminIconColor = ref('coral')
-const channelDelayTime = ref(20)
-const channelCount = ref(1)
 
-const message_lv0 = ref<Record<string, any>>({})
-const name_lv0 = ref<Record<string, any>>({})
-const comment_lv0 = ref<Record<string, any>>({})
-const message_lv3 = ref<Record<string, any>>({})
-const name_lv3 = ref<Record<string, any>>({})
-const comment_lv3 = ref<Record<string, any>>({})
-const message_lv2 = ref<Record<string, any>>({})
-const name_lv2 = ref<Record<string, any>>({})
-const comment_lv2 = ref<Record<string, any>>({})
-const message_lv1 = ref<Record<string, any>>({})
-const name_lv1 = ref<Record<string, any>>({})
-const comment_lv1 = ref<Record<string, any>>({})
-const message_lvadmin = ref<Record<string, any>>({})
-const name_lvadmin = ref<Record<string, any>>({})
-const comment_lvadmin = ref<Record<string, any>>({})
-const message_lvinteract = ref<Record<string, any>>({})
-const comment_lvinteract = ref<Record<string, any>>({})
+const dmStyle = reactive<DmStyle>({
+  isShowFace: true,
+  isShowAnchorIcon: true,
+  isShowFanMedal: true,
+  isShowHeadline: true,
+  faceSize: 12,
+  combineSimilarTime: 3000,
+  hiddenExpiredTime: 0,
+  showHeadlineThreshold: 0,
+  isShowInteractInfo: true,
+  showGiftCardThreshold: 0,
+  isShowSilverGift: false,
+  font: 'auto',
+  fontWeight: 'normal',
+  isUseMiniGiftCard: false,
+  adminIcon: 'ios-home-outline',
+  isShowAdminIcon: false,
+  adminIconColor: 'coral',
+  isShowType1: true,
+  isShowType2: true,
+  channelCount: 1,
+  channelDelayTime: 20,
+  isShowSuperChatJPN: true,
+  windowOpacity: 1,
+  windowBackground: 'rgba(0,0,0,0)',
+  isWindowAlwaysOnTop: false,
+  messageSettings: [],
+  borderImages: [],
 
-const stateMap: Record<string, any> = {
-  roomId,
-  giftHover,
-  giftGifMap,
-  headlines,
-  port,
-  showGiftCardThreshold,
-  combineSimilarTime,
-  showHeadlineThreshold,
-  isShowFanMedal,
-  isUseMiniGiftCard,
-  isShowFace,
-  isShowAnchorIcon,
-  font,
-  faceSize,
-  windowBackground,
-  windowOpacity,
-  emojiSize,
-  messages,
-  isShowInteractInfo,
-  isShowSilverGift,
-  isShowHeadline,
-  fontWeight,
-  hiddenExpiredTime,
-  messageSettings,
-  borderImages,
-  isShowType1,
-  isShowType2,
-  isShowSuperChatJPN,
-  isShowAdminIcon,
-  adminIcon,
-  adminIconColor,
-  channelDelayTime,
-  channelCount,
-  message_lv0,
-  name_lv0,
-  comment_lv0,
-  message_lv3,
-  name_lv3,
-  comment_lv3,
-  message_lv2,
-  name_lv2,
-  comment_lv2,
-  message_lv1,
-  name_lv1,
-  comment_lv1,
-  message_lvadmin,
-  name_lvadmin,
-  comment_lvadmin,
-  message_lvinteract,
-  comment_lvinteract,
+  messageContainer0: {},
+  messageUsername0: {},
+  messageComment0: {},
+  messageContainer1: {},
+  messageUsername1: {},
+  messageComment1: {},
+  messageContainer2: {},
+  messageUsername2: {},
+  messageComment2: {},
+  messageContainer3: {},
+  messageUsername3: {},
+  messageComment3: {},
+  messageContainer99: {},
+  messageUsername99: {},
+  messageComment99: {},
+  messageContainerInteract: {},
+  messageCommentInteract: {},
+})
+
+const {
+  showGiftCardThreshold, combineSimilarTime, showHeadlineThreshold,
+  isShowFanMedal, isUseMiniGiftCard, isShowFace, isShowAnchorIcon,
+  font, faceSize, windowBackground, windowOpacity,
+  isShowInteractInfo, isShowSilverGift, isShowHeadline,
+  fontWeight, hiddenExpiredTime, messageSettings, borderImages,
+  isShowType1, isShowType2, isShowSuperChatJPN,
+  isShowAdminIcon, adminIcon, adminIconColor,
+  channelDelayTime, channelCount,
+  messageContainer0: message_lv0, messageUsername0: name_lv0, messageComment0: comment_lv0,
+  messageContainer1: message_lv1, messageUsername1: name_lv1, messageComment1: comment_lv1,
+  messageContainer2: message_lv2, messageUsername2: name_lv2, messageComment2: comment_lv2,
+  messageContainer3: message_lv3, messageUsername3: name_lv3, messageComment3: comment_lv3,
+  messageContainer99: message_lvadmin, messageUsername99: name_lvadmin, messageComment99: comment_lvadmin,
+  messageContainerInteract: message_lvinteract, messageCommentInteract: comment_lvinteract,
+} = toRefs(dmStyle)
+
+interface GiftExtra {
+  id: number
+  name: string
+  price: number
+  count: number
+  coinType?: 'gold' | 'silver'
+  priceProperties?: {
+    colors: string[]
+    duration: number
+  }
+  totalPrice?: number
 }
+
+interface Message {
+  id: number
+  content: string                   // 原始消息文本（弹幕文本 / 礼物名称 / 进入房间等）
+  color?: string | null             // 弹幕颜色（十六进制字符串）
+  category: 'comment' | 'gift' | 'guard' | 'superchat' | 'interact'
+  type?: number | null
+  sendAt: number                    // 发送时间戳 (ms)
+  roomId: string
+  clientId?: string | null
+  userId: string
+  username: string                  // 用户名
+  usernameColor?: string | null     // 用户名颜色
+  roles?: string[] | null           // 身份标识数组
+  face?: string | null              // 头像 URL
+  emots?: Record<string, { url: string; height?: number }> // 表情映射
+  gift?: GiftExtra
+  medal?: { name: string; level: number; guard: number }
+  interact?: { type: number }
+  createdAt: number
+  // ── 运行时计算字段 ──
+
+  isHover?: boolean
+  styleKey?: string
+  _id?: string
+  role?: number
+  isAdmin?: boolean
+  similar?: number
+  splitContent?: string[]
+  emojiUrl?: string
+  voiceUrl?: string
+  contentJPN?: string
+  count?: number
+  name?: string
+  fileDuration?: number
+  totalPrice?: number
+  priceProperties?: { time?: number; colors?: string[] }
+}
+
+const messages = ref<Message[]>([
+  // 普通弹幕
+  {
+    id: 1, category: 'comment', content: '哈哈哈太搞笑了', color: '#ffffff',
+    sendAt: Date.now(), roomId: '12345', userId: '1001', username: '吃瓜群众',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 0,
+    createdAt: Date.now(),
+  },
+  // 舰长弹幕（带粉丝勋章）
+  {
+    id: 2, category: 'comment', content: '主播加油！', color: '#66ccff',
+    sendAt: Date.now(), roomId: '12345', userId: '1002', username: '舰长大人',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 1,
+    medal: { name: '粉丝勋章', level: 10, guard: 0 },
+    createdAt: Date.now(),
+  },
+  // 带表情弹幕
+  {
+    id: 3, category: 'comment', content: '恭喜[笑哭]', color: '#ffcc00',
+    sendAt: Date.now(), roomId: '12345', userId: '1003', username: '开心果',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 0,
+    emots: { '[笑哭]': { url: 'https://i0.hdslb.com/bfs/emote/xxx.png', height: 24 } },
+    splitContent: ['恭喜', '[笑哭]'],
+    createdAt: Date.now(),
+  },
+  // 礼物
+  {
+    id: 4, category: 'gift', content: '小花花', totalPrice: 1000,
+    sendAt: Date.now(), roomId: '12345', userId: '1004', username: '大佬',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 2,
+    gift: { id: 1, name: '小花花', price: 1000, count: 1 },
+    count: 1, name: '小花花', priceProperties: { time: 3000 },
+    createdAt: Date.now(),
+  },
+  // SC
+  {
+    id: 5, category: 'superchat', content: '主播点个歌！', color: '#ff6600',
+    sendAt: Date.now(), roomId: '12345', userId: '1005', username: '土豪',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 3,
+    totalPrice: 30000, priceProperties: { time: 60000 },
+    contentJPN: '歌をリクエスト！',
+    createdAt: Date.now(),
+  },
+  // 入场
+  {
+    id: 6, category: 'interact', content: '',
+    sendAt: Date.now(), roomId: '12345', userId: '1006', username: '新朋友',
+    face: 'https://i0.hdslb.com/bfs/face/default.png', type: 1,
+    createdAt: Date.now(),
+  },
+])
 
 const borderImageStyle = computed(() => {
   const img = borderImages.value.find((i: any) => i.isSelected)
@@ -258,89 +378,113 @@ const fontStyle = computed(() => ({
   'font-weight': fontWeight.value,
 }))
 
+interface SSEPayload {
+  cmd: string,
+  payload: any,
+}
 function setupSSE() {
-  sse.on('SETTING', (payload: any) => onSetting(payload.payload || payload))
-  sse.on('COMMENT', (payload: any) => {
+  sse.on('DM_STYLE', (payload: SSEPayload) => onDMStyle(payload.payload || payload))
+  sse.on('MESSAGE', (payload: SSEPayload) => {
     if (promiseQueue) {
-      promiseQueue.push(async () => { onComment(payload.payload || payload); await wait(channelDelayTime.value) })
-    } else { onComment(payload.payload || payload) }
+      promiseQueue.push(async () => { onMessage(payload.payload || payload); await wait(channelDelayTime.value) })
+    } else {
+      onMessage(payload.payload || payload)
+    }
   })
-  sse.on('GIFT', (payload: any) => onGift(payload.payload || payload))
-  sse.on('INTERACT', (payload: any) => onInteract(payload.payload || payload))
-  sse.on('SUPER_CHAT', (payload: any) => onSuperChat(payload.payload || payload))
   sse.on('MESSAGE_CLEAR', () => clearMessages())
 }
 
-function onSetting(payload: Record<string, any>) {
-  for (const key in payload) {
-    const t = stateMap[key]
-    if (t) t.value = payload[key]
-  }
+function onDMStyle(payload: Record<string, any>) {
+  Object.assign(dmStyle, payload)
 }
 
-function onComment(comment: any) {
-  comment.category = 'comment'
-  comment.avatar = comment.avatar ? comment.avatar + '@48w_48h' : DEFAULT_AVATAR
-  comment.role = comment.guard || comment.role
-  comment.sendAt = comment.sendAt || Date.now()
-  if (comment.type === 1 && !isShowType1.value) return
-  if (comment.type === 2 && !isShowType2.value) return
+function getStyleKey(msg: Message) {
+  if (msg.category === 'interact') {
+    return 'interact'
+  }
+
+  if (Array.isArray(msg.roles) && msg.roles.length) {
+    return String(Math.max(...msg.roles.map(Number)))
+  }
+
+  return '0'
+}
+
+function onMessage(msg: Message) {
+  let isAddMessage = true
+
+  // common
+  msg.face = msg.face ? msg.face + '@48w_48h' : DEFAULT_FACE
+  msg.sendAt = msg.sendAt || Date.now()
+  msg.styleKey = getStyleKey(msg)
+
+  // comment
+  if (msg.type === 1 && !isShowType1.value) return
+  if (msg.type === 2 && !isShowType2.value) return
   if (combineSimilarTime.value) {
     const rev = messages.value.filter((m: any) => m.category === 'comment')
     for (const m of rev) {
       if (m.sendAt < Date.now() - combineSimilarTime.value) break
-      if (m.content === comment.content) { m.similar = (m.similar || 0) + 1; return }
+      if (m.content === msg.content) { m.similar = (m.similar || 0) + 1; return }
     }
   }
-  if (comment.emots) {
-    const regstr = Object.keys(comment.emots).map((k: string) => k.replace(/\[|\]/g, '')).map((k: string) => '\[' + k + '\]').join('|')
-    comment.splitContent = comment.content.split(new RegExp('(' + regstr + ')', 'g'))
+  if (msg.emots) {
+    const regstr = Object.keys(msg.emots).map((k: string) => k.replace(/\[|\]/g, '')).map((k: string) => '\[' + k + '\]').join('|')
+    msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
   }
-  if (messages.value.length > MAX_MESSAGE) messages.value.pop()
-  messages.value = [comment, ...messages.value]
+
+
+  // gift
+  if (msg.category === 'gift' && msg.gift) {
+    const totalPrice = msg.gift?.count * msg.gift?.price
+    msg.gift.totalPrice = totalPrice
+
+    if (!isShowSilverGift.value && msg.gift?.coinType !== 'gold') return
+    msg.gift.priceProperties = getPriceProperties(totalPrice)
+
+    addToHeadline(msg)
+
+    const exist = messages.value.find((m: any) => m.id === msg.id)
+    if (exist) {
+      exist.gift = msg.gift
+    }
+
+    if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
+  }
+
+  if (msg.category === 'interact' && msg.interact) {
+    if (!isShowInteractInfo.value) isAddMessage = false
+    msg.content = ''
+  }
+
+  if (msg.category === 'superchat' && msg.gift) {
+    const totalPrice = msg.gift?.count * msg.gift?.price
+    addToHeadline(msg)
+    if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
+  }
+
+  if (isAddMessage) {
+    if (messages.value.length > MAX_MESSAGE) messages.value.pop()
+    messages.value = [msg, ...messages.value]
+  }
 }
 
-function onGift(gift: any) {
-  if (!isShowSilverGift.value && gift.coinType !== 1) return
-  gift.category = 'gift'
-  gift.avatar = gift.avatar ? gift.avatar + '@48w_48h' : DEFAULT_AVATAR
-  gift.sendAt = Date.now()
-  gift.totalPrice = gift.price * gift.count || 0
-  gift.priceProperties = getPriceProperties(gift.totalPrice) || {}
-  addToHeadline(gift)
-  if (gift.totalPrice < showGiftCardThreshold.value) return
-  const exist = messages.value.find((m: any) => m._id === gift._id)
-  if (exist) { exist.count = gift.count; exist.totalPrice = gift.price * (exist.count || 1); exist.priceProperties = gift.priceProperties }
-  else { if (messages.value.length > MAX_MESSAGE) messages.value.pop(); messages.value = [gift, ...messages.value] }
+function addToHeadline(msg: Message) {
+  if (!msg.gift) return
+  if (msg.gift.totalPrice! < showHeadlineThreshold.value) return
+
+  const exist = headlines.value.find((m: any) => m.id === msg.id)
+  if (exist) {
+    exist.gift = msg.gift
+  } else {
+    msg.isHover = true
+    setTimeout(() => {
+      msg.isHover = false
+    }, 5000)
+    headlines.value = [msg, ...headlines.value]
+  }
 }
 
-function onInteract(interact: any) {
-  if (!isShowInteractInfo.value) return
-  interact.category = 'interactWord'
-  if (messages.value.length > MAX_MESSAGE) messages.value.pop()
-  messages.value = [interact, ...messages.value]
-}
-
-function onSuperChat(sc: any) {
-  sc.category = 'superChat'
-  sc.avatar = sc.avatar ? sc.avatar + '@48w_48h' : DEFAULT_AVATAR
-  sc.sendAt = Date.now()
-  sc.totalPrice = sc.price || 0
-  sc.priceProperties = getPriceProperties(sc.totalPrice) || {}
-  addToHeadline(sc)
-  const exists = messages.value.find((m: any) => m._id === sc._id)
-  if (exists) { if (sc.contentJPN) exists.contentJPN = sc.contentJPN; return }
-  if (sc.totalPrice < showGiftCardThreshold.value) return
-  if (messages.value.length > MAX_MESSAGE) messages.value.pop()
-  messages.value = [sc, ...messages.value]
-}
-
-function addToHeadline(item: any) {
-  if (item.totalPrice < showHeadlineThreshold.value) return
-  const exist = headlines.value.find((m: any) => m._id === item._id)
-  if (exist) { exist.count = item.count; exist.totalPrice = item.price * item.count; exist.priceProperties = item.priceProperties; exist.contentJPN = item.contentJPN || exist.contentJPN }
-  else { giftHover.value = [...giftHover.value, item._id]; setTimeout(() => { giftHover.value = giftHover.value.filter((h: string) => h !== item._id) }, 5000); headlines.value = [item, ...headlines.value] }
-}
 
 // async function getSetting() {
 //   const { data } = await fetchSetting()
@@ -352,20 +496,25 @@ function getAvatarSizeStyle(setting: any) {
   return { width: setting.size + 'px', height: setting.size + 'px', 'line-height': setting.size + 'px' }
 }
 
-function getMessageStyleByRole(msg: any) { return stateMap['message_lv' + (msg.isAdmin ? 'admin' : msg.role)]?.value }
-function getNameStyleByRole(msg: any) { return stateMap['name_lv' + (msg.isAdmin ? 'admin' : msg.role)]?.value }
-function getCommentStyleByRole(msg: any) { return stateMap['comment_lv' + (msg.isAdmin ? 'admin' : msg.role)]?.value }
-function getInteractMessageStyle() { return message_lvinteract.value }
-function getInteractContentStyle() { return comment_lvinteract.value }
+function resolveRoleKey(msg: any): string {
+  if (msg.isAdmin) return '99'
+  return String(msg.role ?? 'interact')
+}
+
+function getContainerStyle(msg: Message) { return (dmStyle as any)[`messageContainer${msg.styleKey}`] }
+function getNameStyle(msg: any) { return (dmStyle as any)['messageUsername' + resolveRoleKey(msg)] }
+function getCommentStyle(msg: any) { return (dmStyle as any)['messageComment' + resolveRoleKey(msg)] }
 
 function getTextShadow(msg: any, type: string) {
-  const role = msg.isAdmin ? 'admin' : msg.role
-  const style = stateMap[type + '_lv' + role]?.value || {}
+  const roleKey = resolveRoleKey(msg)
+  const prefix = type === 'name' ? 'messageUsername' : 'messageComment'
+  const style = (dmStyle as any)[prefix + roleKey] || {}
   const w = style['--textStrokeWidth']; const c = style['--textStrokeColor']
   if (!parseFloat(w) || !c) return { textShadow: '' }
   return { textShadow: w + ' 0px ' + w + ' ' + c + ', 0px ' + w + ' ' + w + ' ' + c + ', -' + w + ' 0px ' + w + ' ' + c + ', 0px -' + w + ' ' + w + ' ' + c }
 }
 
+function getInteractContentStyle() { return dmStyle.messageCommentInteract }
 function getInteractTextShadow() { return getTextShadow({ isAdmin: false, role: 'interact' }, 'comment') }
 function parseMsgType(type: number) { return (INTERACT_TYPE as any)[type] }
 function hoverGift(giftId: string) { giftHover.value = [...giftHover.value, giftId] }
@@ -390,12 +539,11 @@ onMounted(async () => {
 
   console.log(clientConfig)
 
-  for (const key in clientConfig.dmStyle) {
-    const t = stateMap[key]
-    if (t) t.value = clientConfig.dmStyle[key]
+  if (clientConfig.dmStyle) {
+    Object.assign(dmStyle, clientConfig.dmStyle)
   }
 
-  promiseQueue = new PromiseQueue({ limit: channelCount.value })
+  // promiseQueue = new PromiseQueue({ limit: channelCount.value })
   setupSSE()
   sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {

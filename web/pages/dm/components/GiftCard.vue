@@ -1,11 +1,9 @@
 <template>
   <div :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }" class="message-super-chat">
-    <div
-      :style="{
-        background: `${priceProperties.backgroundColor}`,
-        padding: '10px',
-      }"
-    >
+    <div :style="{
+      background: `${priceProperties.backgroundColor}`,
+      padding: '10px',
+    }">
       <div :style="{ display: 'inline-block', 'vertical-align': 'top' }">
         <Avatar :src="avatar" size="large" />
       </div>
@@ -21,12 +19,10 @@
         </template>
       </div>
     </div>
-    <div
-      :style="{
-        background: `${priceProperties.backgroundBottomColor}`,
-        color: 'white',
-      }"
-    >
+    <div :style="{
+      background: `${priceProperties.backgroundBottomColor}`,
+      color: 'white',
+    }">
       <slot />
     </div>
   </div>
