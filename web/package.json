@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tokine/shared": "workspace:*",
     "axios": "^1.16.1",
     "core-js": "^3.49.0",
     "dayjs": "^1.11.20",

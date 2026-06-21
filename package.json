@@ -80,6 +80,7 @@
   "dependencies": {
     "@electron/remote": "^2.1.3",
     "@tokine/bilibili-bridge": "0.2.24",
+    "@tokine/shared": "workspace:*",
     "axios": "^1.16.1",
     "dayjs": "^1.11.20",
     "echarts": "^6.1.0",

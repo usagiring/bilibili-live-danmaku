@@ -3,7 +3,9 @@
     <Drawer title="关于弹幕用户名、头像不显示说明" placement="bottom" height="70" :closable="true" v-model="showDrawTip">
       <p>由于B站隐私策略限制，未登录用户无法查看用户名、头像、ID</p>
       <p>未登录会导致投票、统计功能不可用</p>
-      <p>您可以通过<Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
+      <p>您可以通过
+        <Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）
+      </p>
       <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，完整复制粘贴到设置中</p>
       <p>目前已支持APP端扫码登录</p>
       <p :style="{ color: 'crimson' }">Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
@@ -23,9 +25,9 @@
       <span class="divider-text">样式预览</span>
     </Divider>
     <div class="setting-group">
-      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text" :style="{ ...borderImageStyle, ...message_lv3, background }">
-        <draggable :list="displayMessageSettings" group="messages"
-          :style="{ 'z-index': 1, 'min-height': '0px' }"
+      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text"
+        :style="{ ...borderImageStyle, ...message_lv3, background }">
+        <draggable :list="displayMessageSlots" group="messages" :style="{ 'z-index': 1, 'min-height': '0px' }"
           @change="onDragChange">
           <template #item="{ element: setting }">
             <div v-if="setting.type === 'medal'" class="vertical-align-middle padding-lr-1px">
@@ -34,15 +36,18 @@
             <div v-else-if="setting.type === 'avatar'" class="vertical-align-middle padding-lr-1px">
               <Avatar :src="example.avatar" :style="avatarSizeStyle" />
             </div>
-            <div v-else-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle padding-lr-1px message-username">
+            <div v-else-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }"
+              class="vertical-align-middle padding-lr-1px message-username">
               <span>{{ `${example.uname}` }}</span>
             </div>
-            <div v-else-if="setting.type === 'colon'" :style="{ ...name_lv3, ...fontStyle }" class="vertical-align-middle">
+            <div v-else-if="setting.type === 'colon'" :style="{ ...name_lv3, ...fontStyle }"
+              class="vertical-align-middle">
               <span>：</span>
             </div>
             <div v-else-if="setting.type === 'comment'" class="vertical-align-middle">
               <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl" />
-              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment">{{ example.content }}</span>
+              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment">{{ example.content
+              }}</span>
             </div>
           </template>
         </draggable>
@@ -61,7 +66,8 @@
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>窗体背景色</span>
-            <ColorPicker transfer :model-value="background" size="small" alpha @on-active-change="debouncedUpdateBackground" />
+            <ColorPicker transfer :model-value="background" size="small" alpha
+              @on-active-change="debouncedUpdateBackground" />
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
@@ -82,30 +88,30 @@
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>字体</span>
-            <Select
-              class="space-left-2px"
-              :style="{ width: '100px', display: 'inline-block' }"
-              :model-value="danmakuFont"
-              size="small"
-              @on-change="changeDanmakuFont"
-              @on-open-change="onOpenFontSelectChange"
-            >
+            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }"
+              :model-value="danmakuFont" size="small" @on-change="changeDanmakuFont"
+              @on-open-change="onOpenFontSelectChange">
               <OptionGroup label="全局值">
-                <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+                <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key"
+                  :value="item.value">{{ item.value }}</Option>
               </OptionGroup>
               <OptionGroup label="通用字体族">
-                <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+                <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key"
+                  :value="item.value">{{ item.value }}</Option>
               </OptionGroup>
               <OptionGroup label="系统">
-                <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key" :value="item.value">{{ item.value }}</Option>
+                <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key"
+                  :value="item.value">{{ item.value }}</Option>
               </OptionGroup>
             </Select>
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span>粗细</span>
-            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }" :model-value="fontWeight" size="small" @on-change="changeFontWeight">
-              <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key" :label="option.label">
+            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }"
+              :model-value="fontWeight" size="small" @on-change="changeFontWeight">
+              <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key"
+                :label="option.label">
                 <span>{{ option.value }}</span>
               </Option>
             </Select>
@@ -123,7 +129,8 @@
                 </template>
               </Tooltip>
             </span>
-            <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small" @on-change="changeCombineSimilarTime" />
+            <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small"
+              @on-change="changeCombineSimilarTime" />
             {{ ' ms' }}
           </div>
           <Divider type="vertical" />
@@ -138,20 +145,23 @@
                 </template>
               </Tooltip>
             </span>
-            <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small" @on-change="changeHiddenExpiredTime" />
+            <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small"
+              @on-change="changeHiddenExpiredTime" />
             {{ ' ms' }}
           </div>
         </div>
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>礼物栏展示大于</span>
-            <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0" size="small" @on-change="changeShowHeadlineThreshold" />
+            <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0"
+              size="small" @on-change="changeShowHeadlineThreshold" />
             {{ ' 元' }}
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span>弹幕礼物展示大于</span>
-            <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0" size="small" @on-change="changeShowGiftCardThreshold" />
+            <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0"
+              size="small" @on-change="changeShowGiftCardThreshold" />
             {{ ' 元' }}
           </div>
         </div>
@@ -159,7 +169,8 @@
           <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
           <Divider type="vertical" />
           <span>表情大小</span>
-          <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small" @on-change="changeEmojiSize" />
+          <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small"
+            @on-change="changeEmojiSize" />
         </div>
         <div class="setting-group">
           <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
@@ -194,7 +205,8 @@
               </div>
             </template>
           </Tooltip>
-          <InputNumber class="space-left-2px" :model-value="danmakuChannel" :min="1" :step="1" :style="{ width: '50px' }" size="small" @on-change="changeDanmakuChannel" />
+          <InputNumber class="space-left-2px" :model-value="danmakuChannel" :min="1" :step="1"
+            :style="{ width: '50px' }" size="small" @on-change="changeDanmakuChannel" />
           <Tooltip placement="top" transfer>
             <span class="space-left-2px">延时</span>
             <template #content>
@@ -203,7 +215,8 @@
               </div>
             </template>
           </Tooltip>
-          <InputNumber class="space-left-2px" :model-value="channelDelayTime" :min="0" :step="1" :style="{ width: '60px' }" size="small" @on-change="changeChannelDelayTime" /> ms
+          <InputNumber class="space-left-2px" :model-value="channelDelayTime" :min="0" :step="1"
+            :style="{ width: '60px' }" size="small" @on-change="changeChannelDelayTime" /> ms
         </div>
       </div>
     </transition>
@@ -345,11 +358,15 @@
             <StyleEditor v-bind="editors[44]" />
             <Divider type="vertical" />
             <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
-            <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon" @on-change="changeAdminIcon">
-              <Option v-for="icon in icons" :key="icon" :value="icon"> <Icon :type="icon" /> {{ icon }} </Option>
+            <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon"
+              @on-change="changeAdminIcon">
+              <Option v-for="icon in icons" :key="icon" :value="icon">
+                <Icon :type="icon" /> {{ icon }}
+              </Option>
             </AutoComplete>
             <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
-            <ColorPicker :model-value="adminIconColor" size="small" alpha @on-active-change="debouncedChangeAdminIconColor" />
+            <ColorPicker :model-value="adminIconColor" size="small" alpha
+              @on-active-change="debouncedChangeAdminIconColor" />
             <!-- </Space> -->
           </div>
           <div class="danmaku-setting-item-wrapper">
@@ -397,15 +414,18 @@
       </div>
     </transition>
 
-    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
+    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer
+      :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
       <div :style="{ padding: '20px' }">
-        <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
+        <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default"
+          :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
       </div>
       <div>
         <template v-for="(item, index) in borderImages" :key="index">
           <div class="image-container">
             <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
-            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'" @click="selectImageBorder(index)" />
+            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'"
+              @click="selectImageBorder(index)" />
           </div>
         </template>
         <label v-if="borderImages.length < 4" class="upload-file-container">
@@ -452,7 +472,8 @@
             </template>
           </Tooltip>
         </span>
-        <Input :model-value="borderImageRepeatValue" :style="{ width: '180px' }" @on-change="setBorderImageRepeatValue" />
+        <Input :model-value="borderImageRepeatValue" :style="{ width: '180px' }"
+          @on-change="setBorderImageRepeatValue" />
       </div>
       <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
@@ -466,7 +487,8 @@
             </template>
           </Tooltip>
         </span>
-        <Input :model-value="borderImageOutsetValue" :style="{ width: '180px' }" @on-change="setBorderImageOutsetValue" />
+        <Input :model-value="borderImageOutsetValue" :style="{ width: '180px' }"
+          @on-change="setBorderImageOutsetValue" />
       </div>
     </Modal>
   </div>
@@ -1026,22 +1048,22 @@ export default {
       return useConfigStore().danmakuFont
     },
     isShowAvatar() {
-      const settings = useConfigStore().messageSettings
+      const settings = useConfigStore().messageSlots
       return settings.find((setting) => setting.type === 'avatar')!.isShow
     },
     isShowMemberShipIcon() {
-      const settings = useConfigStore().messageSettings
+      const settings = useConfigStore().messageSlots
       return settings.find((setting) => setting.type === 'guard')!.isShow
     },
     isShowInteractInfo() {
       return useConfigStore().isShowInteractInfo
     },
     isShowFanMedal() {
-      const settings = useConfigStore().messageSettings
+      const settings = useConfigStore().messageSlots
       return settings.find((setting) => setting.type === 'medal')!.isShow
     },
     avatarSize() {
-      const settings = useConfigStore().messageSettings
+      const settings = useConfigStore().messageSlots
       return settings.find((setting) => setting.type === 'avatar')!.size
     },
     combineSimilarTime() {
@@ -1063,7 +1085,7 @@ export default {
       return useConfigStore().isUseMiniGiftCard
     },
     isShowColon() {
-      const settings = useConfigStore().messageSettings
+      const settings = useConfigStore().messageSlots
       return settings.find((setting) => setting.type === 'colon')!.isShow
     },
     isShowHeadline() {
@@ -1084,11 +1106,11 @@ export default {
     opacity() {
       return useConfigStore().opacity * 100
     },
-    messageSettings() {
-      return useConfigStore().messageSettings
+    messageSlots() {
+      return useConfigStore().messageSlots
     },
-    displayMessageSettings() {
-      return this.messageSettings.filter(s => s.isShow)
+    displayMessageSlots() {
+      return this.messageSlots.filter(s => s.isShow)
     },
     userCookie() {
       return useConfigStore().userCookie
@@ -1195,21 +1217,21 @@ export default {
   },
   methods: {
     async showMemberShipIcon(status) {
-      const settings = cloneDeep(this.messageSettings)
+      const settings = cloneDeep(this.messageSlots)
       const setting = settings.find((setting) => setting.type === 'guard')
       setting.isShow = status
 
-      const data = { messageSettings: settings }
+      const data = { messageSlots: settings }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().updateConfig(data)
     },
     async showFanMedal(status) {
-      const settings = cloneDeep(this.messageSettings)
+      const settings = cloneDeep(this.messageSlots)
       const setting = settings.find((setting) => setting.type === 'medal')
       setting.isShow = status
 
       const data = {
-        messageSettings: settings,
+        messageSlots: settings,
         isShowFanMedal: status,
       }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
@@ -1238,7 +1260,7 @@ export default {
       // const data = {
       //   avatarSize: size,
       // }
-      const settings = cloneDeep(this.messageSettings)
+      const settings = cloneDeep(this.messageSlots)
       const setting = settings.find((setting) => setting.type === 'avatar')
       setting.size = size
       const data = {}
@@ -1250,7 +1272,7 @@ export default {
         data.isShowAvatar = true
       }
 
-      data.messageSettings = settings
+      data.messageSlots = settings
 
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().updateConfig(data)
@@ -1384,16 +1406,16 @@ export default {
           sendAt: Date.now(),
           color: 'white',
           medal: {
-          name: '测试者',
-          level: 21,
-          rid: 21452505,
-          color: {
-            border: '#5c968e',
-            background: '#5c968e',
-            text: '#FFFFFF',
-            level: '#FFFFFF',
+            name: '测试者',
+            level: 21,
+            rid: 21452505,
+            color: {
+              border: '#5c968e',
+              background: '#5c968e',
+              text: '#FFFFFF',
+              level: '#FFFFFF',
+            },
           },
-        },
           // emojiUrl: 'http://i0.hdslb.com/bfs/live/d23f33fb86a1154fc99d1521a742394e5d94a09b.png'
         }
         comment.role = randomRole
@@ -1562,9 +1584,9 @@ export default {
       if (!evt.moved) return
       const { oldIndex, newIndex } = evt.moved
 
-      const messageSettings = cloneDeep(this.messageSettings)
-      messageSettings.find(s => s.type === 'guard').isShow = false
-      const hiddenItems = messageSettings
+      const messageSlots = cloneDeep(this.messageSlots)
+      messageSlots.find(s => s.type === 'guard').isShow = false
+      const hiddenItems = messageSlots
         .map((setting, index) => {
           if (!setting.isShow) {
             return {
@@ -1574,7 +1596,7 @@ export default {
           }
         })
         .filter(Boolean)
-      const displayItems = messageSettings.filter((setting) => setting.isShow)
+      const displayItems = messageSlots.filter((setting) => setting.isShow)
 
       const itemToAdd = displayItems.splice(oldIndex, 1)[0]
       displayItems.splice(newIndex, 0, itemToAdd)
@@ -1583,7 +1605,7 @@ export default {
         displayItems.splice(item.index, 0, item.data)
       })
       const data = {
-        messageSettings: displayItems,
+        messageSlots: displayItems,
       }
       useConfigStore().updateConfig(data)
       useConfigStore().updateConfig(data)
@@ -1606,11 +1628,11 @@ export default {
     },
 
     async showColon(status) {
-      const settings = cloneDeep(this.messageSettings)
+      const settings = cloneDeep(this.messageSlots)
       const setting = settings.find((setting) => setting.type === 'colon')
       setting.isShow = status
 
-      const data = { messageSettings: settings }
+      const data = { messageSlots: settings }
       const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
       useConfigStore().updateConfig(data)
     },
@@ -1709,10 +1731,12 @@ export default {
 .setting-key {
   padding-top: 5px;
 }
+
 .setting-key-text {
   display: inline-block;
   width: 120px;
 }
+
 .avatar-controller-slider {
   height: 30px;
   display: inline-block;
@@ -1733,9 +1757,11 @@ export default {
   border: solid 1px gray;
   position: relative;
 }
+
 .setting-checkbox {
   vertical-align: top;
 }
+
 .guard-icon {
   width: 22px;
   height: 22px;
@@ -1765,8 +1791,8 @@ export default {
   margin: 0 1em;
 }
 
-.one-line {
-}
+.one-line {}
+
 .one-line:before,
 .one-line:after {
   background: lightgray;
@@ -1849,6 +1875,7 @@ export default {
   -webkit-user-select: none;
   user-select: none;
 }
+
 .operatable-preview-text .smooth-dnd-draggable-wrapper {
   cursor: move;
 }
@@ -1873,12 +1900,15 @@ export default {
 .space-left-2px {
   margin-left: 2px;
 }
+
 .number-input-size {
   width: 60px;
 }
+
 .message-username {
   margin: auto;
 }
+
 .message-username::before {
   content: attr(text);
   position: absolute;
@@ -1886,9 +1916,11 @@ export default {
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
 }
+
 .message-comment {
   margin: auto;
 }
+
 .message-comment::before {
   content: attr(text);
   position: absolute;
@@ -1896,6 +1928,7 @@ export default {
   -webkit-text-stroke-width: var(--textStrokeWidth);
   -webkit-text-stroke-color: var(--textStrokeColor);
 }
+
 .danmaku-setting-wrapper {
   border: 1px solid lightgray;
   margin: 10px 20px;
@@ -1904,6 +1937,7 @@ export default {
   border-end-end-radius: 80px 80px;
   border-start-end-radius: 80px 80px;
 }
+
 .danmaku-setting-item-wrapper {
   padding: 2px;
 }

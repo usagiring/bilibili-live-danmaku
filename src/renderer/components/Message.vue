@@ -1,7 +1,12 @@
 <template>
   <div>
     <div class="searcher-wrapper">
-      <Input v-model="roomId" placeholder="房间号" clearable style="width: 120px" size="small" />
+      <Input
+        v-model="roomId"
+        placeholder="房间号"
+        clearable
+        style="width: 120px"
+        size="small" />
       <DatePicker
         class="space-left-5px"
         type="datetimerange"
@@ -11,36 +16,87 @@
         size="small"
         :model-value="dateRange"
         @on-change="changeDateRange"
-        @on-clear="clearDateRange"
-      />
-      <Input v-model="q" class="space-left-5px" placeholder="ID/名称/评论" clearable style="width: 200px" size="small" />
-      <Button class="space-left-5px" type="primary" shape="circle" icon="ios-search" :disabled="!roomId || enableMessageListenMode" @click="searchAll" />
-      <Checkbox class="space-left-5px" :model-value="isShowUserSpaceLink" @on-change="showUserSpaceLink">查成分</Checkbox>
-      <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">显示银瓜子礼物</Checkbox>
-      <Checkbox :model-value="enableMessageListenMode" @on-change="changeEnableMessageListenMode">实时更新模式</Checkbox>
+        @on-clear="clearDateRange" />
+      <Input
+        v-model="q"
+        class="space-left-5px"
+        placeholder="ID/名称/评论"
+        clearable
+        style="width: 200px"
+        size="small" />
+      <Button
+        class="space-left-5px"
+        type="primary"
+        shape="circle"
+        icon="ios-search"
+        :disabled="!roomId || enableMessageListenMode"
+        @click="searchAll" />
+      <Checkbox
+        class="space-left-5px"
+        :model-value="isShowUserSpaceLink"
+        @on-change="showUserSpaceLink"
+        >查成分</Checkbox
+      >
+      <Checkbox
+        :model-value="isShowSilverGift"
+        @on-change="showSilverGift"
+        >显示银瓜子礼物</Checkbox
+      >
+      <Checkbox
+        :model-value="enableMessageListenMode"
+        @on-change="changeEnableMessageListenMode"
+        >实时更新模式</Checkbox
+      >
     </div>
     <div class="content-wrapper">
-      <Split v-model="split1" @on-moving="splitMoving">
+      <Split
+        v-model="split1"
+        @on-moving="splitMoving">
         <template #left>
           <div class="split-pane">
-            <Split v-model="split2" mode="vertical" @on-moving="splitLeftMoving">
+            <Split
+              v-model="split2"
+              mode="vertical"
+              @on-moving="splitLeftMoving">
               <template #top>
-                <div id="split-left-top" class="split-pane">
-                  <Scroll :on-reach-edge="handleReachEdgeComment" :height="scrollHeightLeftTop" :distance-to-edge="[10, 10]">
-                    <template v-for="(comment, i) in comments" :key="i">
+                <div
+                  id="split-left-top"
+                  class="split-pane">
+                  <Scroll
+                    :on-reach-edge="handleReachEdgeComment"
+                    :height="scrollHeightLeftTop"
+                    :distance-to-edge="[10, 10]">
+                    <template
+                      v-for="(comment, i) in comments"
+                      :key="i">
                       <div class="comment-content">
                         <span class="date-style">{{ dateFormat(comment.sendAt) }}</span>
                         <!-- <img v-if="comment.role" class="guard-icon space-left-2" :src="`${getGuardIcon(comment.role)}`" /> -->
-                        <FanMedal v-if="comment.medal" class="space-left-2" :medal="comment.medal" :role="comment.role" />
+                        <FanMedal
+                          v-if="comment.medal"
+                          class="space-left-2"
+                          :medal="comment.medal"
+                          :role="comment.role" />
                         <span class="space-left-2">{{ `${comment.uname}` }}</span>
-                        <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(comment.uid)">{{ `(${comment.uid})` }}</span>
+                        <span
+                          v-if="isShowUserSpaceLink"
+                          class="user-link"
+                          @click="openBiliUserSpace(comment.uid)"
+                          >{{ `(${comment.uid})` }}</span
+                        >
                         <!-- <span>{{ `: ${comment.comment}` }}</span> -->
                         <span>: </span>
-                        <span v-if="comment.voiceUrl" class="voice-container" @click="playAudio(comment.voiceUrl)">
+                        <span
+                          v-if="comment.voiceUrl"
+                          class="voice-container"
+                          @click="playAudio(comment.voiceUrl)">
                           <Icon type="md-play" />
                           <span>{{ `${comment.fileDuration}"` }}</span>
                         </span>
-                        <img v-if="comment.emojiUrl" :style="{ 'vertical-align': 'middle', height: '20px' }" :src="comment.emojiUrl" />
+                        <img
+                          v-if="comment.emojiUrl"
+                          :style="{ 'vertical-align': 'middle', height: '20px' }"
+                          :src="comment.emojiUrl" />
                         <span v-else>{{ comment.content }}</span>
                       </div>
                     </template>
@@ -48,14 +104,34 @@
                 </div>
               </template>
               <template #bottom>
-                <div id="split-left-bottom" class="split-pane">
-                  <Scroll :on-reach-edge="handleReachEdgeInteract" :height="scrollHeightLeftBottom" :distance-to-edge="[10, 10]">
-                    <template v-for="(interact, i) in interacts" :key="i">
+                <div
+                  id="split-left-bottom"
+                  class="split-pane">
+                  <Scroll
+                    :on-reach-edge="handleReachEdgeInteract"
+                    :height="scrollHeightLeftBottom"
+                    :distance-to-edge="[10, 10]">
+                    <template
+                      v-for="(interact, i) in interacts"
+                      :key="i">
                       <div>
                         <span class="date-style">{{ dateFormat(interact.sendAt) }}</span>
-                        <FanMedal v-if="interact.medal" class="space-left-2" :medal="interact.medal" :role="interact.medal.guard" />
-                        <span class="space-left-2" :style="{ color: interact.unameColor ? interact.unameColor : undefined }">{{ `${interact.uname}` }}</span>
-                        <span v-if="isShowUserSpaceLink" class="user-link" @click="openBiliUserSpace(interact.uid)">{{ `(${interact.uid})` }}</span>
+                        <FanMedal
+                          v-if="interact.medal"
+                          class="space-left-2"
+                          :medal="interact.medal"
+                          :role="interact.medal.guard" />
+                        <span
+                          class="space-left-2"
+                          :style="{ color: interact.unameColor ? interact.unameColor : undefined }"
+                          >{{ `${interact.uname}` }}</span
+                        >
+                        <span
+                          v-if="isShowUserSpaceLink"
+                          class="user-link"
+                          @click="openBiliUserSpace(interact.uid)"
+                          >{{ `(${interact.uid})` }}</span
+                        >
                         <span>{{ getInteractType(interact.type) }}了直播间</span>
                       </div>
                     </template>
@@ -66,15 +142,30 @@
           </div>
         </template>
         <template #right>
-          <div id="split-right" class="split-pane">
-            <Scroll :on-reach-edge="handleReachEdgeGift" :height="scrollHeightRight" :distance-to-edge="[10, 10]">
-              <template v-for="(gift, i) in gifts" :key="i">
+          <div
+            id="split-right"
+            class="split-pane">
+            <Scroll
+              :on-reach-edge="handleReachEdgeGift"
+              :height="scrollHeightRight"
+              :distance-to-edge="[10, 10]">
+              <template
+                v-for="(gift, i) in gifts"
+                :key="i">
                 <div :style="{ padding: '0 10px' }">
                   <template v-if="gift.type === 3">
-                    <GiftCardMini v-bind="gift" :show-time="true">{{ `: ${gift.content}` }}</GiftCardMini>
+                    <GiftCardMini
+                      v-bind="gift"
+                      :show-time="true"
+                      >{{ `: ${gift.content}` }}</GiftCardMini
+                    >
                   </template>
                   <template v-if="gift.type === 1 || gift.type === 2">
-                    <GiftCardMini v-bind="gift" :show-time="true">{{ ` 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini>
+                    <GiftCardMini
+                      v-bind="gift"
+                      :show-time="true"
+                      >{{ ` 赠送了 ${gift.count}个 ${gift.name}` }}</GiftCardMini
+                    >
                   </template>
                 </div>
               </template>
@@ -94,7 +185,7 @@ import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
 import { getPriceProperties, dateFormat, wait } from '../service/util'
 import { queryMessages } from '../service/api'
 // @ts-ignore - Volar known issue: cannot resolve .vue module types
-import GiftCardMini from './GiftCardMini'
+import GiftCardMini from '@tokine/shared/components/GiftCardMini.vue'
 // @ts-ignore
 import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { sse } from '../service/sse-client'
@@ -200,7 +291,8 @@ export default defineComponent({
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}; query.sendAt || {}
+        query.sendAt = query.sendAt || {}
+        query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: comments } = await queryMessages({
@@ -245,7 +337,8 @@ export default defineComponent({
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}; query.sendAt || {}
+        query.sendAt = query.sendAt || {}
+        query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
       const { data: interacts } = await queryMessages({
@@ -288,7 +381,8 @@ export default defineComponent({
       }
       if (scrollToken) {
         const [scrollKey, scrollValue] = scrollToken.split(':')
-        query.sendAt = query.sendAt || {}; query.sendAt || {}
+        query.sendAt = query.sendAt || {}
+        query.sendAt || {}
         query.sendAt[scrollKey] = Number(scrollValue)
       }
 
@@ -479,9 +573,15 @@ export default defineComponent({
       sse.off('SUPER_CHAT', this.onGiftMsg)
     },
 
-    onCommentMsg(data: any) { this.onComment(data.payload) },
-    onGiftMsg(data: any) { this.onGift(data.payload) },
-    onInteractMsg(data: any) { this.onInteract(data.payload) },
+    onCommentMsg(data: any) {
+      this.onComment(data.payload)
+    },
+    onGiftMsg(data: any) {
+      this.onGift(data.payload)
+    },
+    onInteractMsg(data: any) {
+      this.onInteract(data.payload)
+    },
 
     onComment(payload) {
       if (this.comments.length > COMMENTS_LIMIT) {
@@ -501,7 +601,7 @@ export default defineComponent({
       }
       payload = this.formatGift(payload)
       // 已存在的礼物覆盖，不存在的新增
-      const existGift = this.gifts.find((gift) => gift._id === payload._id)
+      const existGift = this.gifts.find(gift => gift._id === payload._id)
       if (existGift) {
         existGift.count = payload.count
         existGift.totalPrice = payload.totalPrice

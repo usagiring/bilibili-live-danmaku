@@ -1,82 +1,164 @@
 <template>
-  <div :style="($ as any)({
-    position: 'absolute', top: '0px', bottom: '0px', left: '0px', right: '0px',
-    padding: '4px', background: windowBackground, opacity: windowOpacity,
-    '-webkit-user-select': 'none', '-webkit-app-region': 'drag'
-  })">
-    <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper"
-      style="-webkit-app-region: no-drag" @wheel.prevent="giftScroll">
+  <div
+    :style="
+      ($ as any)({
+        position: 'absolute',
+        top: '0px',
+        bottom: '0px',
+        left: '0px',
+        right: '0px',
+        padding: '4px',
+        background: windowBackground,
+        opacity: windowOpacity,
+        '-webkit-user-select': 'none',
+        '-webkit-app-region': 'drag',
+      })
+    ">
+    <!-- 礼物头条 -->
+    <div
+      v-if="isShowHeadline"
+      id="gift-headline-wrapper"
+      class="gift-headline-wrapper"
+      style="-webkit-app-region: no-drag"
+      @wheel.prevent="giftScroll">
       <transition-group name="fade">
-        <template v-for="(gift, index) of headlines" :key="index">
-          <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))"
+        <template
+          v-for="(gift, index) of headlines"
+          :key="index">
+          <div
+            class="gift-tag-wrapper"
+            @mouseenter="hoverGift(String(gift.id))"
             @mouseleave="unhoverGift(String(gift.id))">
-            <GiftTag v-if="!giftHover.includes(String(gift.id))" :gift="gift" />
-            <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
+            <GiftTag
+              v-if="!giftHover.includes(String(gift.id))"
+              :gift="gift" />
+            <GiftTagExpand
+              v-else
+              :gift="gift"
+              :is-show-super-chat-jpn="isShowSuperChatJPN" />
           </div>
         </template>
       </transition-group>
     </div>
-    <div class="message-content-wrapper"
-      :style="($ as any)({ top: `${headlines.length && isShowHeadline ? '36px' : '0px'}`, '-webkit-app-region': 'no-drag' })">
-      <transition-group name="fade" tag="div" class="message-content">
-        <div v-for="message in messages" :key="message.id">
+
+    <!-- 消息列表 -->
+    <div
+      class="message-content-wrapper"
+      :style="
+        ($ as any)({
+          top: `${headlines.length && isShowHeadline ? '36px' : '0px'}`,
+          '-webkit-app-region': 'no-drag',
+        })
+      ">
+      <transition-group
+        name="fade"
+        tag="div"
+        class="message-content">
+        <div
+          v-for="message in messages"
+          :key="message.id">
+          <!-- 弹幕评论 -->
           <template v-if="message.category === 'comment'">
-            <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default" :style="{
-              ...borderImageStyle,
-              ...getContainerStyle(message),
-            }">
+            <span
+              :class="!isBorderAdaptContent ? 'max-width' : ''"
+              class="border-image-default"
+              :style="{ ...borderImageStyle, ...getContainerStyle(message) }">
+              <!-- 管理员图标 -->
               <template v-if="adminIcon && message.isAdmin">
-                <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
+                <Icon
+                  :type="adminIcon"
+                  class="admin-icon"
+                  :color="adminIconColor" />
               </template>
-              <template v-for="(setting, index) of messageSettings" :key="index">
-                <Avatar v-if="setting.type === 'face' && setting.isShow" class="margin-lr-1px" :src="message.face"
+
+              <!-- 行内插槽：头像 / 勋章 / 昵称 / 冒号 / 正文 -->
+              <template
+                v-for="(s, index) of messageSlots"
+                :key="index">
+                <Avatar
+                  v-if="s.type === 'face' && s.isShow"
+                  class="margin-lr-1px"
+                  :src="message.face"
                   :style="{ ...getFaceSizeStyle() }" />
-                <FanMedal v-if="setting.type === 'medal' && setting.isShow && message.medal"
-                  class="margin-lr-1px vertical-align-middle" :medal="message.medal" :role="message.role" />
-                <span v-if="setting.type === 'name'" class="vertical-align-middle"
-                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">{{
-                    message.username
-                  }}</span>
-                <span v-if="setting.type === 'colon' && setting.isShow"
-                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }"
-                  class="vertical-align-middle">：</span>
-                <span v-if="setting.type === 'comment'">
-                  <img v-if="message.emojiUrl" :style="{ height: `${emojiSize}px` }" class="vertical-align-middle"
-                    :src="message.emojiUrl" />
-                  <span v-else-if="message.emots"
-                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
-                    class="vertical-align-middle">
-                    <template v-for="(str, index) of message.splitContent" :key="index">
+                <FanMedal
+                  v-if="s.type === 'medal' && s.isShow && message.medal"
+                  class="margin-lr-1px vertical-align-middle"
+                  :medal="message.medal"
+                  :anchorIcon="message.anchorIcon" />
+                <span
+                  v-if="s.type === 'name'"
+                  class="vertical-align-middle"
+                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">
+                  {{ message.username }}
+                </span>
+                <span v-if="s.type === 'comment'">
+                  <img
+                    v-if="message.emojiUrl"
+                    class="vertical-align-middle"
+                    :src="message.emojiUrl"
+                    :style="{ height: `${emojiSize}px` }" />
+                  <span
+                    v-else-if="message.emots"
+                    class="vertical-align-middle"
+                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }">
+                    <template
+                      v-for="(str, index) of message.splitContent"
+                      :key="index">
                       <template v-if="message.emots[str]">
-                        <img :style="{ height: `${message.emots[str].height || 20}px` }" class="vertical-align-middle"
-                          :src="message.emots[str].url" />
+                        <img
+                          class="vertical-align-middle"
+                          :src="message.emots[str].url"
+                          :style="{ height: `${message.emots[str].height || 20}px` }" />
                       </template>
                       <template v-else>{{ str }}</template>
                     </template>
                   </span>
-                  <span v-else
+                  <span
+                    v-else
+                    class="vertical-align-middle"
                     :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
-                    class="vertical-align-middle">{{ message.content }}</span>
-                  <span v-if="message.voiceUrl" class="voice-container" @click="playAudio(message.voiceUrl)">
+                    >{{ message.content }}</span
+                  >
+                  <!-- 语音 -->
+                  <span
+                    v-if="message.voiceUrl"
+                    class="voice-container"
+                    @click="playAudio(message.voiceUrl)">
                     <Icon type="md-play" />
                     <span>{{ message.fileDuration ? `${message.fileDuration}"` : '' }}</span>
                   </span>
                 </span>
               </template>
-              <SimilarCommentBadge v-if="message.similar > 0" class="vertical-align-middle"
-                :style="{ 'margin-left': '5px' }" :number="message.similar" />
+
+              <!-- 相似评论标记 -->
+              <SimilarCommentBadge
+                v-if="message.similar! > 0"
+                class="vertical-align-middle"
+                :number="message.similar"
+                :style="{ 'margin-left': '5px' }" />
             </span>
           </template>
+
+          <!-- 互动消息 -->
           <template v-else-if="message.category === 'interact'">
             <p :style="getContainerStyle(message)">
-              <Avatar class="margin-lr-1px" :src="message.face"
-                :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
-              <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
+              <Avatar
+                class="margin-lr-1px"
+                :src="message.face"
+                :style="{ width: '28px', height: '28px', 'line-height': '28px' }" />
+              <FanMedal
+                v-if="isShowFanMedal && message.medal"
+                :medal="message.medal"
+                :role="message.medal.guard" />
               <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ message.content }}</span>
             </p>
           </template>
+
+          <!-- SuperChat -->
           <template v-else-if="message.category === 'superchat'">
-            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
+            <GiftCard
+              v-if="!isUseMiniGiftCard"
+              v-bind="message">
               <div :style="{ padding: '10px' }">
                 {{ message.content }}
                 <template v-if="message.contentJPN && isShowSuperChatJPN">
@@ -85,16 +167,28 @@
                 </template>
               </div>
             </GiftCard>
-            <GiftCardMini v-else v-bind="message"> {{ `: ${message.content}` }} </GiftCardMini>
+            <GiftCardMini
+              v-else
+              v-bind="message">
+              {{ `: ${message.content}` }}
+            </GiftCardMini>
           </template>
+
+          <!-- 礼物 -->
           <template v-else-if="message.category === 'gift'">
-            <GiftCard v-if="!isUseMiniGiftCard" v-bind="message">
-              <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">{{ `${message.username} 赠送了
-                ${message.count} 个 ${message.name}` }}</span>
-              <img :style="{ 'vertical-align': 'middle', width: '35px' }"
-                :src="giftGifMap[message.id] && giftGifMap[message.id].webp" />
+            <GiftCard
+              v-if="!isUseMiniGiftCard"
+              v-bind="message">
+              <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
+                {{ `${message.username} 赠送了 ${message.count} 个 ${message.name}` }}
+              </span>
+              <img
+                :src="giftGifMap[message.id] && giftGifMap[message.id].webp"
+                :style="{ 'vertical-align': 'middle', width: '35px' }" />
             </GiftCard>
-            <GiftCardMini v-else v-bind="message">
+            <GiftCardMini
+              v-else
+              v-bind="message">
               {{ ` 赠送了 ${message.count}个 ${message.name}` }}
             </GiftCardMini>
           </template>
@@ -109,9 +203,12 @@ import { ref, reactive, computed, onMounted, toRefs } from 'vue'
 import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE } from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
-import GiftTag from './GiftTag.vue'
-import GiftTagExpand from './GiftTagExpand.vue'
+import GiftTag from '@tokine/shared/components/GiftTag.vue'
+import GiftTagExpand from '@tokine/shared/components/GiftTagExpand.vue'
+import SimilarCommentBadge from '@tokine/shared/components/SimilarCommentBadge.vue'
 import FanMedal from '@tokine/shared/components/FanMedal.vue'
+import GiftCard from '@tokine/shared/components/GiftCard.vue'
+import GiftCardMini from '@tokine/shared/components/GiftCardMini.vue'
 import { getClientConfig } from '../../service/api'
 import { sse } from '../../service/sse-client'
 import config from '../../service/config'
@@ -119,8 +216,6 @@ import config from '../../service/config'
 defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 let promiseQueue: PromiseQueue | null = null
-
-
 
 const roomId = ref(0)
 const giftHover = ref<string[]>([])
@@ -155,7 +250,7 @@ const dmStyle = reactive<DmStyle>({
   windowOpacity: 1,
   windowBackground: 'rgba(0,0,0,0)',
   isWindowAlwaysOnTop: false,
-  messageSettings: [],
+  messageSlots: [],
   borderImages: [],
 
   messageContainer0: {},
@@ -178,25 +273,52 @@ const dmStyle = reactive<DmStyle>({
 })
 
 const {
-  showGiftCardThreshold, combineSimilarTime, showHeadlineThreshold,
-  isShowFanMedal, isUseMiniGiftCard, isShowFace, isShowAnchorIcon,
-  font, faceSize, windowBackground, windowOpacity,
-  isShowInteractInfo, isShowSilverGift, isShowHeadline,
-  fontWeight, hiddenExpiredTime, messageSettings, borderImages,
-  isShowType1, isShowType2, isShowSuperChatJPN,
-  isShowAdminIcon, adminIcon, adminIconColor,
-  channelDelayTime, channelCount,
-  messageContainer0: message_lv0, messageUsername0: name_lv0, messageComment0: comment_lv0,
-  messageContainer1: message_lv1, messageUsername1: name_lv1, messageComment1: comment_lv1,
-  messageContainer2: message_lv2, messageUsername2: name_lv2, messageComment2: comment_lv2,
-  messageContainer3: message_lv3, messageUsername3: name_lv3, messageComment3: comment_lv3,
-  messageContainer99: message_lvadmin, messageUsername99: name_lvadmin, messageComment99: comment_lvadmin,
-  messageContainerInteract: message_lvinteract, messageCommentInteract: comment_lvinteract,
+  showGiftCardThreshold,
+  combineSimilarTime,
+  showHeadlineThreshold,
+  isShowFanMedal,
+  isUseMiniGiftCard,
+  isShowFace,
+  isShowAnchorIcon,
+  font,
+  faceSize,
+  windowBackground,
+  windowOpacity,
+  isShowInteractInfo,
+  isShowSilverGift,
+  isShowHeadline,
+  fontWeight,
+  hiddenExpiredTime,
+  messageSlots,
+  borderImages,
+  isShowType1,
+  isShowType2,
+  isShowSuperChatJPN,
+  isShowAdminIcon,
+  adminIcon,
+  adminIconColor,
+  channelDelayTime,
+  channelCount,
+  messageContainer0: message_lv0,
+  messageUsername0: name_lv0,
+  messageComment0: comment_lv0,
+  messageContainer1: message_lv1,
+  messageUsername1: name_lv1,
+  messageComment1: comment_lv1,
+  messageContainer2: message_lv2,
+  messageUsername2: name_lv2,
+  messageComment2: comment_lv2,
+  messageContainer3: message_lv3,
+  messageUsername3: name_lv3,
+  messageComment3: comment_lv3,
+  messageContainer99: message_lvadmin,
+  messageUsername99: name_lvadmin,
+  messageComment99: comment_lvadmin,
+  messageContainerInteract: message_lvinteract,
+  messageCommentInteract: comment_lvinteract,
 } = toRefs(dmStyle)
 
-const messages = ref<Message[]>([
-
-])
+const messages = ref<Message[]>([])
 
 const borderImageStyle = computed(() => {
   const img = borderImages.value.find((i: any) => i.isSelected)
@@ -242,7 +364,12 @@ onMounted(async () => {
   setupSSE()
   sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {
-    headlines.value = headlines.value.map((h: any) => { h.existsTime = (h.existsTime || 0) + 1000; return h }).filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
+    headlines.value = headlines.value
+      .map((h: any) => {
+        h.existsTime = (h.existsTime || 0) + 1000
+        return h
+      })
+      .filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
   }, 1000)
   setInterval(() => {
     if (!hiddenExpiredTime.value) return
@@ -250,13 +377,14 @@ onMounted(async () => {
   }, 2000)
 })
 
-
-
 function setupSSE() {
   sse.on('DM_STYLE', (payload: SSEPayload) => onDMStyle(payload.payload || payload))
   sse.on('MESSAGE', (payload: SSEPayload) => {
     if (promiseQueue) {
-      promiseQueue.push(async () => { onMessage(payload.payload || payload); await wait(channelDelayTime.value) })
+      promiseQueue.push(async () => {
+        onMessage(payload.payload || payload)
+        await wait(channelDelayTime.value)
+      })
     } else {
       onMessage(payload.payload || payload)
     }
@@ -307,12 +435,14 @@ function onMessage(msg: Message) {
         }
       }
     }
-    // if (msg.emots) {
-    //   const regstr = Object.keys(msg.emots).map((k: string) => k.replace(/\[|\]/g, '')).map((k: string) => '\[' + k + '\]').join('|')
-    //   msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
-    // }
+    if (msg.emots) {
+      const regstr = Object.keys(msg.emots)
+        .map((k: string) => k.replace(/\[|\]/g, ''))
+        .map((k: string) => '\[' + k + '\]')
+        .join('|')
+      msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
+    }
   }
-
 
   // gift
   if (msg.category === 'gift' && msg.gift) {
@@ -369,51 +499,124 @@ function getFaceSizeStyle() {
   return {
     width: faceSize + 'px',
     height: faceSize + 'px',
-    'line-height': faceSize + 'px'
+    'line-height': faceSize + 'px',
   }
 }
 
 function styleBySuffix(suffix?: string) {
   if (!suffix) suffix = '0'
-  if (suffix === '0') return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }
-  if (suffix === '1') return { container: dmStyle.messageContainer1, username: dmStyle.messageUsername1, comment: dmStyle.messageComment1 }
-  if (suffix === '2') return { container: dmStyle.messageContainer2, username: dmStyle.messageUsername2, comment: dmStyle.messageComment2 }
-  if (suffix === '3') return { container: dmStyle.messageContainer3, username: dmStyle.messageUsername3, comment: dmStyle.messageComment3 }
-  if (suffix === '99') return { container: dmStyle.messageContainer99, username: dmStyle.messageUsername99, comment: dmStyle.messageComment99 }
-  if (suffix === 'interact') return { container: dmStyle.messageContainerInteract, username: dmStyle.messageUsername0, comment: dmStyle.messageCommentInteract }
+  if (suffix === '0')
+    return {
+      container: dmStyle.messageContainer0,
+      username: dmStyle.messageUsername0,
+      comment: dmStyle.messageComment0,
+    }
+  if (suffix === '1')
+    return {
+      container: dmStyle.messageContainer1,
+      username: dmStyle.messageUsername1,
+      comment: dmStyle.messageComment1,
+    }
+  if (suffix === '2')
+    return {
+      container: dmStyle.messageContainer2,
+      username: dmStyle.messageUsername2,
+      comment: dmStyle.messageComment2,
+    }
+  if (suffix === '3')
+    return {
+      container: dmStyle.messageContainer3,
+      username: dmStyle.messageUsername3,
+      comment: dmStyle.messageComment3,
+    }
+  if (suffix === '99')
+    return {
+      container: dmStyle.messageContainer99,
+      username: dmStyle.messageUsername99,
+      comment: dmStyle.messageComment99,
+    }
+  if (suffix === 'interact')
+    return {
+      container: dmStyle.messageContainerInteract,
+      username: dmStyle.messageUsername0,
+      comment: dmStyle.messageCommentInteract,
+    }
   return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }
 }
 
-function getContainerStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).container }
-function getNameStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).username }
-function getCommentStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).comment }
+function getContainerStyle(msg: Message) {
+  return styleBySuffix(msg.styleSuffix).container
+}
+function getNameStyle(msg: Message) {
+  return styleBySuffix(msg.styleSuffix).username
+}
+function getCommentStyle(msg: Message) {
+  return styleBySuffix(msg.styleSuffix).comment
+}
 
 function getTextShadow(msg: Message, type: string) {
   const style = type === 'name' ? getNameStyle(msg) : getCommentStyle(msg)
-  const w = style['--textStrokeWidth']; const c = style['--textStrokeColor']
+  const w = style['--textStrokeWidth']
+  const c = style['--textStrokeColor']
   if (!parseFloat(w) || !c) return { textShadow: '' }
-  return { textShadow: w + ' 0px ' + w + ' ' + c + ', 0px ' + w + ' ' + w + ' ' + c + ', -' + w + ' 0px ' + w + ' ' + c + ', 0px -' + w + ' ' + w + ' ' + c }
+  return {
+    textShadow:
+      w +
+      ' 0px ' +
+      w +
+      ' ' +
+      c +
+      ', 0px ' +
+      w +
+      ' ' +
+      w +
+      ' ' +
+      c +
+      ', -' +
+      w +
+      ' 0px ' +
+      w +
+      ' ' +
+      c +
+      ', 0px -' +
+      w +
+      ' ' +
+      w +
+      ' ' +
+      c,
+  }
 }
 
-function getInteractContentStyle() { return dmStyle.messageCommentInteract }
-function getInteractTextShadow() { return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment') }
-function hoverGift(giftId: string) { giftHover.value = [...giftHover.value, giftId] }
-function unhoverGift(giftId: string) { giftHover.value = giftHover.value.filter((id: string) => id !== giftId) }
+function getInteractContentStyle() {
+  return dmStyle.messageCommentInteract
+}
+function getInteractTextShadow() {
+  return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment')
+}
+function hoverGift(giftId: string) {
+  giftHover.value = [...giftHover.value, giftId]
+}
+function unhoverGift(giftId: string) {
+  giftHover.value = giftHover.value.filter((id: string) => id !== giftId)
+}
 
-function giftScroll(e: WheelEvent) { document.getElementById('gift-headline-wrapper')!.scrollLeft += e.deltaY }
+function giftScroll(e: WheelEvent) {
+  document.getElementById('gift-headline-wrapper')!.scrollLeft += e.deltaY
+}
 function getAnchorIcon(msg: Message): string | undefined {
-  for (const role of (msg.roles || [])) {
+  for (const role of msg.roles || []) {
     if (ANCHOR_ICON_MAP[role]) return ANCHOR_ICON_MAP[role]
   }
 }
 function getIsAdmin(msg: Message) {
   return msg.roles?.some(role => role >= 99)
 }
-function playAudio(url: string) { new Audio(url).play() }
+function playAudio(url: string) {
+  new Audio(url).play()
+}
 
 document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0);')
 </script>
-
 
 <style scoped>
 .layout {

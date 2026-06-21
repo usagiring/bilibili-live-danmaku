@@ -24,7 +24,10 @@ interface DmStyle {
   windowOpacity: number
   windowBackground: string
   isWindowAlwaysOnTop: boolean
-  messageSettings: any[]
+  messageSlots: {
+    type: string
+    isShow: boolean
+  }[]
   borderImages: any[]
   messageContainer0: StyleValue
   messageUsername0: StyleValue
@@ -90,7 +93,7 @@ interface Message {
   isAdmin?: boolean
   similar?: number
 
-  // splitContent?: string[]
+  splitContent?: string[]
   emojiUrl?: string
   voiceUrl?: string
   contentJPN?: string

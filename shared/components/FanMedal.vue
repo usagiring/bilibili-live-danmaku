@@ -1,21 +1,26 @@
 <template>
   <div :style="{ display: 'inline-block' }">
-    <img v-if="role" class="guard-icon" :src="`${ANCHOR_ICON_MAP[role]}`" />
+    <img
+      v-if="anchorIcon"
+      class="guard-icon"
+      :src="`${anchorIcon}`" />
 
     <span :style="getStyle()">
-      {{ medal.name }}
-      <span :style="getLevelStyle()"> {{ medal.level < 10 ? `0${medal.level}` : medal.level }}</span>
-      </span>
+      {{ medal?.name }}
+      <span :style="getLevelStyle()"> {{ getLevelText(medal?.level) }}</span>
+    </span>
   </div>
 </template>
 
-<script setup>
-import { ANCHOR_ICON_MAP } from '../service/const'
-
+<script setup lang="ts">
 const props = defineProps({
   medal: Object,
-  role: [String, Number],
+  anchorIcon: String,
 })
+
+function getLevelText(level: number) {
+  return String(level).padStart(2, '0')
+}
 
 function getStyle() {
   return {
@@ -24,7 +29,7 @@ function getStyle() {
     border: `solid 0.5px ${props.medal?.color?.border}`,
     'font-size': '12px',
     'border-radius': '10px',
-    padding: `2px 2.5px 2px ${props.role ? 15 : 4}px`,
+    padding: `2px 2.5px 2px ${props.anchorIcon ? 15 : 4}px`,
   }
 }
 function getLevelStyle() {

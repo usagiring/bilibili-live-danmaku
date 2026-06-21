@@ -1,5 +1,5 @@
 // 粉丝勋章图标映射
-export const ANCHOR_ICON_MAP: Record<number, string> = {
+export const GUARD_ICON_MAP: Record<number, string> = {
   1: "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp",
   2: "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png@44w_44h.webp",
   3: "https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png@44w_44h.webp",
@@ -11,3 +11,9 @@ export const INTERACT_TYPE: Record<number, string> = {
   2: '关注',
   3: '分享'
 }
+
+// 相似评论标记颜色池
+export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+
+// 默认头像
+export const DEFAULT_AVATAR = 'https://static.hdslb.com/images/member/noface.gif'

@@ -1,13 +1,22 @@
 <template>
-  <div class="gift-tag" :style="{ background: gift.priceProperties.backgroundColor }">
-    <div class="gift-tag-progress" :style="{ width: `${widthCalculator(gift)}%`, background: gift.priceProperties.backgroundBottomColor }" />
+  <div
+    class="gift-tag"
+    :style="{ background: gift.priceProperties.backgroundColor }">
+    <div
+      class="gift-tag-progress"
+      :style="{ width: `${widthCalculator(gift)}%`, background: gift.priceProperties.backgroundBottomColor }" />
     <div class="gift-tag-content-wrapper">
-      <Avatar class="gift-tag-avatar" :src="gift.avatar" size="small" />
+      <Avatar
+        class="gift-tag-avatar"
+        :src="gift.avatar"
+        size="small" />
       <template v-if="gift.type === 2">
         <span>{{ gift.count === 1 ? `${gift.name}` : `${gift.name}×${gift.count}` }}</span>
       </template>
       <template v-else-if="gift.totalPrice">
-        <span>{{ `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}` }}</span>
+        <span>{{
+          `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}`
+        }}</span>
       </template>
     </div>
   </div>
@@ -48,14 +57,11 @@ export default {
 }
 .gift-tag-avatar {
   margin-top: -2px;
-  margin-right: 2px;
 }
 .gift-tag-content-wrapper {
-  margin: 0 10px;
-  font-weight: bold;
-  z-index: 3;
-  /* -webkit-text-stroke-width: 0.3px;
-  -webkit-text-stroke-color: gray; */
-  text-shadow: gray 0.7px 0 1px, gray 0 0.7px 1px, gray -0.7px 0 1px, gray 0 -0.7px 1px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>

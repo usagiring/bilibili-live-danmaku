@@ -1,12 +1,14 @@
 <template>
-  <div :class="`comment-similar-badge animated ${animateKey}`" :style="{ background: `${randomColor}` }">
+  <div
+    :class="`comment-similar-badge animated ${animateKey}`"
+    :style="{ background: `${randomColor}` }">
     {{ number }}
   </div>
 </template>
 
 <script>
 import { shuffle } from 'lodash'
-import { COLORS } from '../../service/const'
+import { COLORS } from '../service/const'
 const colorPool = shuffle(COLORS)
 
 export default {
@@ -22,14 +24,6 @@ export default {
       colorPool.push(color)
       return color
     },
-  },
-  watch: {
-    // number: function (newValue) {
-    //   this.animateKey = "rubberBand";
-    //   setTimeout(() => {
-    //     this.animateKey = "";
-    //   }, 500);
-    // },
   },
 }
 </script>

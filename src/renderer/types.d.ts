@@ -65,7 +65,7 @@ interface DmStyle {
   windowOpacity: number
   windowBackground: string
   isWindowAlwaysOnTop: boolean
-  messageSettings: any[]
+  messageSlots: any[]
   borderImages: any[]
   messageContainer0: StyleValue
   messageUsername0: StyleValue
