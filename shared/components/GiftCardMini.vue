@@ -24,17 +24,11 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { DEFAULT_AVATAR } from '../service/const'
 import { dateFormat } from '../service/util'
 
-export default {
-  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type', 'sendAt', 'showTime'],
-  data() {
-    return { DEFAULT_AVATAR }
-  },
-  methods: { dateFormat },
-}
+defineProps(['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type', 'sendAt', 'showTime'])
 </script>
 
 <style scoped>

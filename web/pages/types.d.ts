@@ -99,7 +99,9 @@ interface Message {
   contentJPN?: string
   // count?: number
   // name?: string
-  fileDuration?: number
   // totalPrice?: number
   // priceProperties?: { time?: number; colors?: string[] }
+  // // avatar?: string
+  // uname?: string
+  fileDuration?: number
 }

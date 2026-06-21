@@ -28,10 +28,8 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  props: ['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'],
-}
+<script setup lang="ts">
+defineProps(['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type'])
 </script>
 
 <style scoped>

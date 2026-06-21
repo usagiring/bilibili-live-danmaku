@@ -39,11 +39,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'GiftTagExpand',
-  props: ['gift', 'isShowSuperChatJpn'],
-}
+<script setup lang="ts">
+defineProps<{ gift: any; isShowSuperChatJpn?: boolean }>()
 </script>
 
 <style scoped>

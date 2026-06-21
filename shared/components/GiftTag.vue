@@ -22,20 +22,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'GiftTag',
-  props: ['gift'],
+<script setup lang="ts">
+defineProps<{ gift: any }>()
 
-  methods: {
-    widthCalculator(item) {
-      if (Number(item.existsTime) && Number(item.priceProperties.time)) {
-        return Math.floor((1 - item.existsTime / item.priceProperties.time) * 100)
-      } else {
-        return 100
-      }
-    },
-  },
+function widthCalculator(item: any) {
+  if (Number(item.existsTime) && Number(item.priceProperties.time)) {
+    return Math.floor((1 - item.existsTime / item.priceProperties.time) * 100)
+  }
+  return 100
 }
 </script>
 

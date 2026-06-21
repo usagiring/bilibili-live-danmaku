@@ -6,26 +6,20 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 import { shuffle } from 'lodash'
 import { COLORS } from '../service/const'
-const colorPool = shuffle(COLORS)
 
-export default {
-  props: ['number'],
-  data() {
-    return {
-      animateKey: '',
-    }
-  },
-  computed: {
-    randomColor() {
-      const color = colorPool.shift()
-      colorPool.push(color)
-      return color
-    },
-  },
-}
+const props = defineProps<{ number: number }>()
+const animateKey = ref('')
+
+const colorPool = shuffle(COLORS)
+const randomColor = computed(() => {
+  const color = colorPool.shift()!
+  colorPool.push(color)
+  return color
+})
 </script>
 
 <style scoped>
