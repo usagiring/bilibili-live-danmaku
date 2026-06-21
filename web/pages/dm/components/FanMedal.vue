@@ -1,6 +1,6 @@
 <template>
   <div :style="{ display: 'inline-block' }">
-    <img v-if="role" class="guard-icon" :src="`${GUARD_ICON_MAP[role]}`" />
+    <img v-if="role" class="guard-icon" :src="`${ANCHOR_ICON_MAP[role]}`" />
 
     <span :style="getStyle()">
       {{ medal.name }}
@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { GUARD_ICON_MAP } from '../../service/const'
+import { ANCHOR_ICON_MAP } from '../../service/const'
 
 const props = defineProps({
   medal: Object,

@@ -7,7 +7,8 @@
       <div v-if="isShowHeadline" id="gift-headline-wrapper" class="gift-headline-wrapper" @wheel.prevent="giftScroll">
         <transition-group name="fade">
           <template v-for="(gift, index) of headlines" :key="index">
-            <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))" @mouseleave="unhoverGift(String(gift.id))">
+            <div class="gift-tag-wrapper" @mouseenter="hoverGift(String(gift.id))"
+              @mouseleave="unhoverGift(String(gift.id))">
               <GiftTag v-if="!giftHover.includes(String(gift.id))" :gift="gift" />
               <GiftTagExpand v-else :gift="gift" :is-show-super-chat-jpn="isShowSuperChatJPN" />
             </div>
@@ -81,8 +82,7 @@
                   :style="{ width: `28px`, height: `28px`, 'line-height': `28px` }" />
                 <!-- <img class="guard-icon margin-lr-1px" :src="`${getGuardIcon(message.role)}`" /> -->
                 <FanMedal v-if="isShowFanMedal && message.medal" :medal="message.medal" :role="message.medal.guard" />
-                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ `${message.username}
-                  ${parseMsgType(message.type)}了直播间` }}</span>
+                <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ message.content }}</span>
               </p>
             </template>
             <template v-if="message.category === 'superchat'">
@@ -117,7 +117,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { DEFAULT_FACE, INTERACT_TYPE, GUARD_ICON_MAP, MAX_MESSAGE } from '../../service/const'
+import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE } from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from './GiftTag.vue'
@@ -130,54 +130,6 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 let promiseQueue: PromiseQueue | null = null
 
-type StyleValue = Record<string, string>
-
-interface DmStyle {
-  isShowFace: boolean
-  isShowAnchorIcon: boolean
-  isShowFanMedal: boolean
-  isShowHeadline: boolean
-  faceSize: number
-  combineSimilarTime: number
-  hiddenExpiredTime: number
-  showHeadlineThreshold: number
-  isShowInteractInfo: boolean
-  showGiftCardThreshold: number
-  isShowSilverGift: boolean
-  font: string
-  fontWeight: string
-  isUseMiniGiftCard: boolean
-  adminIcon: string
-  isShowAdminIcon: boolean
-  adminIconColor: string
-  isShowType1: boolean
-  isShowType2: boolean
-  channelCount: number
-  channelDelayTime: number
-  isShowSuperChatJPN: boolean
-  windowOpacity: number
-  windowBackground: string
-  isWindowAlwaysOnTop: boolean
-  messageSettings: any[]
-  borderImages: any[]
-  messageContainer0: StyleValue
-  messageUsername0: StyleValue
-  messageComment0: StyleValue
-  messageContainer1: StyleValue
-  messageUsername1: StyleValue
-  messageComment1: StyleValue
-  messageContainer2: StyleValue
-  messageUsername2: StyleValue
-  messageComment2: StyleValue
-  messageContainer3: StyleValue
-  messageUsername3: StyleValue
-  messageComment3: StyleValue
-  messageContainer99: StyleValue
-  messageUsername99: StyleValue
-  messageComment99: StyleValue
-  messageContainerInteract: StyleValue
-  messageCommentInteract: StyleValue
-}
 
 
 const roomId = ref(0)
@@ -252,107 +204,8 @@ const {
   messageContainerInteract: message_lvinteract, messageCommentInteract: comment_lvinteract,
 } = toRefs(dmStyle)
 
-interface GiftExtra {
-  id: number
-  name: string
-  price: number
-  count: number
-  coinType?: 'gold' | 'silver'
-  priceProperties?: {
-    colors: string[]
-    duration: number
-  }
-  totalPrice?: number
-}
-
-interface Message {
-  id: number
-  content: string                   // 原始消息文本（弹幕文本 / 礼物名称 / 进入房间等）
-  color?: string | null             // 弹幕颜色（十六进制字符串）
-  category: 'comment' | 'gift' | 'guard' | 'superchat' | 'interact'
-  type?: number | null
-  sendAt: number                    // 发送时间戳 (ms)
-  roomId: string
-  clientId?: string | null
-  userId: string
-  username: string                  // 用户名
-  usernameColor?: string | null     // 用户名颜色
-  roles?: string[] | null           // 身份标识数组
-  face?: string | null              // 头像 URL
-  emots?: Record<string, { url: string; height?: number }> // 表情映射
-  gift?: GiftExtra
-  medal?: { name: string; level: number; guard: number }
-  interact?: { type: number }
-  createdAt: number
-  // ── 运行时计算字段 ──
-
-  isHover?: boolean
-  styleKey?: string
-  _id?: string
-  role?: number
-  isAdmin?: boolean
-  similar?: number
-  splitContent?: string[]
-  emojiUrl?: string
-  voiceUrl?: string
-  contentJPN?: string
-  count?: number
-  name?: string
-  fileDuration?: number
-  totalPrice?: number
-  priceProperties?: { time?: number; colors?: string[] }
-}
-
 const messages = ref<Message[]>([
-  // 普通弹幕
-  {
-    id: 1, category: 'comment', content: '哈哈哈太搞笑了', color: '#ffffff',
-    sendAt: Date.now(), roomId: '12345', userId: '1001', username: '吃瓜群众',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 0,
-    createdAt: Date.now(),
-  },
-  // 舰长弹幕（带粉丝勋章）
-  {
-    id: 2, category: 'comment', content: '主播加油！', color: '#66ccff',
-    sendAt: Date.now(), roomId: '12345', userId: '1002', username: '舰长大人',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 1,
-    medal: { name: '粉丝勋章', level: 10, guard: 0 },
-    createdAt: Date.now(),
-  },
-  // 带表情弹幕
-  {
-    id: 3, category: 'comment', content: '恭喜[笑哭]', color: '#ffcc00',
-    sendAt: Date.now(), roomId: '12345', userId: '1003', username: '开心果',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 0,
-    emots: { '[笑哭]': { url: 'https://i0.hdslb.com/bfs/emote/xxx.png', height: 24 } },
-    splitContent: ['恭喜', '[笑哭]'],
-    createdAt: Date.now(),
-  },
-  // 礼物
-  {
-    id: 4, category: 'gift', content: '小花花', totalPrice: 1000,
-    sendAt: Date.now(), roomId: '12345', userId: '1004', username: '大佬',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 2,
-    gift: { id: 1, name: '小花花', price: 1000, count: 1 },
-    count: 1, name: '小花花', priceProperties: { time: 3000 },
-    createdAt: Date.now(),
-  },
-  // SC
-  {
-    id: 5, category: 'superchat', content: '主播点个歌！', color: '#ff6600',
-    sendAt: Date.now(), roomId: '12345', userId: '1005', username: '土豪',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', role: 3,
-    totalPrice: 30000, priceProperties: { time: 60000 },
-    contentJPN: '歌をリクエスト！',
-    createdAt: Date.now(),
-  },
-  // 入场
-  {
-    id: 6, category: 'interact', content: '',
-    sendAt: Date.now(), roomId: '12345', userId: '1006', username: '新朋友',
-    face: 'https://i0.hdslb.com/bfs/face/default.png', type: 1,
-    createdAt: Date.now(),
-  },
+
 ])
 
 const borderImageStyle = computed(() => {
@@ -378,10 +231,37 @@ const fontStyle = computed(() => ({
   'font-weight': fontWeight.value,
 }))
 
-interface SSEPayload {
-  cmd: string,
-  payload: any,
-}
+onMounted(async () => {
+  const params = new URLSearchParams(window.location.search)
+  const port = params.get('port') || '30031'
+  // port.value = parseInt(params.get('port') || '8081')
+  const clientId = params.get('clientId') || ''
+  const roomId = params.get('roomId')
+
+  config.set('baseUrl', `http://127.0.0.1:${port}`)
+
+  const clientConfig = await getClientConfig({ clientId })
+
+  console.log(clientConfig)
+
+  if (clientConfig.dmStyle) {
+    Object.assign(dmStyle, clientConfig.dmStyle)
+  }
+
+  // promiseQueue = new PromiseQueue({ limit: channelCount.value })
+  setupSSE()
+  sse.connect(`http://127.0.0.1:${port}`, clientId)
+  setInterval(() => {
+    headlines.value = headlines.value.map((h: any) => { h.existsTime = (h.existsTime || 0) + 1000; return h }).filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
+  }, 1000)
+  setInterval(() => {
+    if (!hiddenExpiredTime.value) return
+    messages.value = messages.value.filter((m: any) => m.sendAt + hiddenExpiredTime.value > Date.now())
+  }, 2000)
+})
+
+
+
 function setupSSE() {
   sse.on('DM_STYLE', (payload: SSEPayload) => onDMStyle(payload.payload || payload))
   sse.on('MESSAGE', (payload: SSEPayload) => {
@@ -391,14 +271,17 @@ function setupSSE() {
       onMessage(payload.payload || payload)
     }
   })
-  sse.on('MESSAGE_CLEAR', () => clearMessages())
+  sse.on('MESSAGE_CLEAR', () => {
+    messages.value = []
+    headlines.value = []
+  })
 }
 
 function onDMStyle(payload: Record<string, any>) {
   Object.assign(dmStyle, payload)
 }
 
-function getStyleKey(msg: Message) {
+function getStyleSuffix(msg: Message) {
   if (msg.category === 'interact') {
     return 'interact'
   }
@@ -416,7 +299,8 @@ function onMessage(msg: Message) {
   // common
   msg.face = msg.face ? msg.face + '@48w_48h' : DEFAULT_FACE
   msg.sendAt = msg.sendAt || Date.now()
-  msg.styleKey = getStyleKey(msg)
+  msg.styleSuffix = getStyleSuffix(msg)
+  msg.anchorIcon = getAnchorIcon(msg)
 
   // comment
   if (msg.type === 1 && !isShowType1.value) return
@@ -454,7 +338,7 @@ function onMessage(msg: Message) {
 
   if (msg.category === 'interact' && msg.interact) {
     if (!isShowInteractInfo.value) isAddMessage = false
-    msg.content = ''
+    msg.content = msg.content || INTERACT_TYPE[msg.type || 1]
   }
 
   if (msg.category === 'superchat' && msg.gift) {
@@ -496,64 +380,41 @@ function getAvatarSizeStyle(setting: any) {
   return { width: setting.size + 'px', height: setting.size + 'px', 'line-height': setting.size + 'px' }
 }
 
-function resolveRoleKey(msg: any): string {
-  if (msg.isAdmin) return '99'
-  return String(msg.role ?? 'interact')
+function styleBySuffix(suffix?: string) {
+  if (!suffix) suffix = '0'
+  if (suffix === '0') return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }
+  if (suffix === '1') return { container: dmStyle.messageContainer1, username: dmStyle.messageUsername1, comment: dmStyle.messageComment1 }
+  if (suffix === '2') return { container: dmStyle.messageContainer2, username: dmStyle.messageUsername2, comment: dmStyle.messageComment2 }
+  if (suffix === '3') return { container: dmStyle.messageContainer3, username: dmStyle.messageUsername3, comment: dmStyle.messageComment3 }
+  if (suffix === '99') return { container: dmStyle.messageContainer99, username: dmStyle.messageUsername99, comment: dmStyle.messageComment99 }
+  if (suffix === 'interact') return { container: dmStyle.messageContainerInteract, username: dmStyle.messageUsername0, comment: dmStyle.messageCommentInteract }
+  return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }
 }
 
-function getContainerStyle(msg: Message) { return (dmStyle as any)[`messageContainer${msg.styleKey}`] }
-function getNameStyle(msg: any) { return (dmStyle as any)['messageUsername' + resolveRoleKey(msg)] }
-function getCommentStyle(msg: any) { return (dmStyle as any)['messageComment' + resolveRoleKey(msg)] }
+function getContainerStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).container }
+function getNameStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).username }
+function getCommentStyle(msg: Message) { return styleBySuffix(msg.styleSuffix).comment }
 
-function getTextShadow(msg: any, type: string) {
-  const roleKey = resolveRoleKey(msg)
-  const prefix = type === 'name' ? 'messageUsername' : 'messageComment'
-  const style = (dmStyle as any)[prefix + roleKey] || {}
+function getTextShadow(msg: Message, type: string) {
+  const style = type === 'name' ? getNameStyle(msg) : getCommentStyle(msg)
   const w = style['--textStrokeWidth']; const c = style['--textStrokeColor']
   if (!parseFloat(w) || !c) return { textShadow: '' }
   return { textShadow: w + ' 0px ' + w + ' ' + c + ', 0px ' + w + ' ' + w + ' ' + c + ', -' + w + ' 0px ' + w + ' ' + c + ', 0px -' + w + ' ' + w + ' ' + c }
 }
 
-function getInteractContentStyle() { return dmStyle.messageCommentInteract }
-function getInteractTextShadow() { return getTextShadow({ isAdmin: false, role: 'interact' }, 'comment') }
-function parseMsgType(type: number) { return (INTERACT_TYPE as any)[type] }
+// function getInteractTextShadow() { return getTextShadow({ isAdmin: false, role: 'interact' }, 'comment') }
 function hoverGift(giftId: string) { giftHover.value = [...giftHover.value, giftId] }
 function unhoverGift(giftId: string) { giftHover.value = giftHover.value.filter((id: string) => id !== giftId) }
-function clearMessages() { messages.value = []; headlines.value = [] }
+
 function giftScroll(e: WheelEvent) { document.getElementById('gift-headline-wrapper')!.scrollLeft += e.deltaY }
-function getGuardIcon(level: number) { return (GUARD_ICON_MAP as any)[level] }
+function getAnchorIcon(msg: Message): string | undefined {
+  for (const role of (msg.roles || [])) {
+    if (ANCHOR_ICON_MAP[role]) return ANCHOR_ICON_MAP[role]
+  }
+}
 function playAudio(url: string) { new Audio(url).play() }
 
 document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0);')
-
-onMounted(async () => {
-  const params = new URLSearchParams(window.location.search)
-  const port = params.get('port') || '30031'
-  // port.value = parseInt(params.get('port') || '8081')
-  const clientId = params.get('clientId') || ''
-  const roomId = params.get('roomId')
-
-  config.set('baseUrl', `http://127.0.0.1:${port}`)
-
-  const clientConfig = await getClientConfig({ clientId })
-
-  console.log(clientConfig)
-
-  if (clientConfig.dmStyle) {
-    Object.assign(dmStyle, clientConfig.dmStyle)
-  }
-
-  // promiseQueue = new PromiseQueue({ limit: channelCount.value })
-  setupSSE()
-  sse.connect(`http://127.0.0.1:${port}`, clientId)
-  setInterval(() => {
-    headlines.value = headlines.value.map((h: any) => { h.existsTime = (h.existsTime || 0) + 1000; return h }).filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
-  }, 1000)
-  setInterval(() => {
-    if (!hiddenExpiredTime.value) return
-    messages.value = messages.value.filter((m: any) => m.sendAt + hiddenExpiredTime.value > Date.now())
-  }, 2000)
-})
 </script>
 
 
