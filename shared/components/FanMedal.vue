@@ -2,7 +2,7 @@
   <div :style="{ display: 'inline-block' }">
     <img
       v-if="anchorIcon"
-      class="guard-icon"
+      class="anchor-icon"
       :src="`${anchorIcon}`" />
 
     <span :style="getStyle()">
@@ -24,7 +24,7 @@ function getLevelText(level: number) {
 
 function getStyle() {
   return {
-    background: props.medal?.color?.background,
+    background: props.medal?.color?.bg,
     color: props.medal?.color?.text,
     border: `solid 0.5px ${props.medal?.color?.border}`,
     'font-size': '12px',
@@ -45,7 +45,7 @@ function getLevelStyle() {
 </script>
 
 <style scoped>
-.guard-icon {
+.anchor-icon {
   width: 22px;
   margin-right: -16px;
   position: relative;

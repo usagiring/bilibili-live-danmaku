@@ -1,19 +1,18 @@
 <template>
   <div id="app">
-    <Danmaku />
+    <DM />
   </div>
 </template>
 
 <script>
-import Danmaku from './components/Danmaku.vue';
+import DM from './components/DM.vue'
 
 export default {
   name: 'App',
   components: {
-    Danmaku
+    DM,
   },
 }
-
 </script>
 
 <style>

@@ -4,88 +4,194 @@
     <div class="divider">Cookie 设置</div>
     <div class="section">
       <div class="section-row">
-        <input class="input" v-model="cookieInput" type="password" placeholder="输入 B站 Cookie..."
-          style="width:280px;text-align:left;padding:0 8px" />
-        <button class="btn btn-primary" @click="showQrCodeLoginModal">扫码登录</button>
+        <input
+          class="input"
+          v-model="cookieInput"
+          type="password"
+          placeholder="输入 B站 Cookie..."
+          style="width: 280px; text-align: left; padding: 0 8px" />
+        <button
+          class="btn btn-primary"
+          @click="showQrCodeLoginModal">
+          扫码登录
+        </button>
       </div>
     </div>
 
     <!-- ═══ dmStyle — 弹幕窗样式 ═══ -->
     <div class="divider">弹幕窗样式</div>
-    <div class="preview"
+    <div
+      class="preview"
       :style="{ background: dmStyle?.windowBackground || 'rgba(30,30,40,0.9)', opacity: dmStyle?.windowOpacity ?? 1 }">
-      <img v-if="dmStyle?.isShowFace" class="avatar" :src="DEFAULT_AVATAR" />
-      <span v-if="dmStyle?.isShowType1 !== false" class="name">用户名</span>
-      <span v-if="dmStyle?.isShowType2 !== false" class="colon">：</span>
+      <img
+        v-if="dmStyle?.isShowFace"
+        class="avatar"
+        :src="DEFAULT_AVATAR" />
+      <span
+        v-if="dmStyle?.isShowType1 !== false"
+        class="name"
+        >用户名</span
+      >
+      <span
+        v-if="dmStyle?.isShowType2 !== false"
+        class="colon"
+        >：</span
+      >
       <span class="msg">这是一条测试弹幕</span>
     </div>
-    <div class="section" style="padding-bottom:8px">
-      <div class="section-row" style="gap:4px">
-        <button class="btn btn-default" style="font-size:10px;height:22px" @click="sendTestDanmaku">生成测试弹幕</button>
-        <button class="btn btn-default" style="font-size:10px;height:22px" @click="clearDanmaku">清空弹幕</button>
+    <div
+      class="section"
+      style="padding-bottom: 8px">
+      <div
+        class="section-row"
+        style="gap: 4px">
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
+          @click="sendTestDanmaku">
+          生成测试弹幕
+        </button>
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
+          @click="clearDanmaku">
+          清空弹幕
+        </button>
       </div>
     </div>
 
     <div class="section">
       <div class="chips">
-        <span class="chip" :class="{ on: dmStyle?.isShowFace !== false }"
-          @click="toggle('dmStyle.isShowFace')">头像</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowFanMedal !== false }"
-          @click="toggle('dmStyle.isShowFanMedal')">粉丝牌</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowType1 !== false }"
-          @click="toggle('dmStyle.isShowType1')">用户名</span>
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowFace !== false }"
+          @click="toggle('dmStyle.isShowFace')"
+          >头像</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowFanMedal !== false }"
+          @click="toggle('dmStyle.isShowFanMedal')"
+          >粉丝牌</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowType1 !== false }"
+          @click="toggle('dmStyle.isShowType1')"
+          >用户名</span
+        >
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowType2 !== false }"
           @click="toggle('dmStyle.isShowType2')">冒号</span> -->
-        <span style="color:#ddd;margin:0 2px">│</span>
+        <span style="color: #ddd; margin: 0 2px">│</span>
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowSuperChatJPN !== false }"
           @click="toggle('dmStyle.isShowSuperChatJPN')">SC日文</span> -->
-        <span class="chip" :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
-          @click="toggle('dmStyle.isShowAnchorIcon')">舰队标记</span>
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
+          @click="toggle('dmStyle.isShowAnchorIcon')"
+          >舰队标记</span
+        >
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
           @click="toggle('dmStyle.isShowAdminIcon')">房管标</span> -->
-        <span class="chip" :class="{ on: dmStyle?.isShowInteractInfo === true }"
-          @click="toggle('dmStyle.isShowInteractInfo')">入场消息</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowType1 === true }"
-          @click="toggle('dmStyle.isShowType1')">节奏风暴</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowType2 === true }"
-          @click="toggle('dmStyle.isShowType2')">天选时刻</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowSilverGift === true }"
-          @click="toggle('dmStyle.isShowSilverGift')">银瓜子礼物</span>
-        <span class="chip" :class="{ on: dmStyle?.isShowHeadline !== false }"
-          @click="toggle('dmStyle.isShowHeadline')">礼物栏</span>
-        <span style="color:#ddd;margin:0 2px">│</span>
-        <span class="chip" :class="{ on: dmStyle?.isWindowAlwaysOnTop === true }"
-          @click="toggle('dmStyle.isWindowAlwaysOnTop')">窗口置顶</span>
-        <span class="chip" :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
-          @click="toggle('dmRawStyle.ignoreMouseEvent')">鼠标穿透</span>
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowInteractInfo === true }"
+          @click="toggle('dmStyle.isShowInteractInfo')"
+          >入场消息</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowType1 === true }"
+          @click="toggle('dmStyle.isShowType1')"
+          >节奏风暴</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowType2 === true }"
+          @click="toggle('dmStyle.isShowType2')"
+          >天选时刻</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowSilverGift === true }"
+          @click="toggle('dmStyle.isShowSilverGift')"
+          >银瓜子礼物</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isShowHeadline !== false }"
+          @click="toggle('dmStyle.isShowHeadline')"
+          >礼物栏</span
+        >
+        <span style="color: #ddd; margin: 0 2px">│</span>
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isWindowAlwaysOnTop === true }"
+          @click="toggle('dmStyle.isWindowAlwaysOnTop')"
+          >窗口置顶</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
+          @click="toggle('dmRawStyle.ignoreMouseEvent')"
+          >鼠标穿透</span
+        >
       </div>
 
       <div class="section-row">
         <span class="label">透明度</span>
         <span class="stepper">
-          <span class="stepper-btn" @click="stepDown('dmStyle.windowOpacity', 1, 0, 0.05)">−</span>
-          <input class="stepper-input" :value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
+          <span
+            class="stepper-btn"
+            @click="stepDown('dmStyle.windowOpacity', 1, 0, 0.05)"
+            >−</span
+          >
+          <input
+            class="stepper-input"
+            :value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
             @change="setVal('dmStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
-          <span class="stepper-btn" @click="stepUp('dmStyle.windowOpacity', 1, 1, 0.05)">+</span>
+          <span
+            class="stepper-btn"
+            @click="stepUp('dmStyle.windowOpacity', 1, 1, 0.05)"
+            >+</span
+          >
         </span>
-        <span class="label" style="margin-left:8px">背景色</span>
+        <span
+          class="label"
+          style="margin-left: 8px"
+          >背景色</span
+        >
         <label class="color-pick">
-          <span class="color-dot" :style="{ background: dmStyle?.windowBackground || '#1e1e28' }"></span>
-          <input type="color" :value="dmStyle?.windowBackground || '#1e1e28'"
+          <span
+            class="color-dot"
+            :style="{ background: dmStyle?.windowBackground || '#1e1e28' }"></span>
+          <input
+            type="color"
+            :value="dmStyle?.windowBackground || '#1e1e28'"
             @input="setVal('dmStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
         </label>
       </div>
       <div class="section-row">
         <span class="label">字体</span>
-        <select class="select" style="width:90px" :value="dmStyle?.font || 'auto'"
+        <select
+          class="select"
+          style="width: 90px"
+          :value="dmStyle?.font || 'auto'"
           @change="setVal('dmStyle.font', ($event.target as HTMLSelectElement).value)">
           <option value="auto">auto</option>
           <option value="serif">serif</option>
           <option value="sans-serif">sans-serif</option>
           <option value="monospace">monospace</option>
         </select>
-        <span class="label" style="margin-left:8px">字重</span>
-        <select class="select" style="width:70px" :value="dmStyle?.fontWeight || 'normal'"
+        <span
+          class="label"
+          style="margin-left: 8px"
+          >字重</span
+        >
+        <select
+          class="select"
+          style="width: 70px"
+          :value="dmStyle?.fontWeight || 'normal'"
           @change="setVal('dmStyle.fontWeight', ($event.target as HTMLSelectElement).value)">
           <option value="normal">正常</option>
           <option value="lighter">细体</option>
@@ -96,21 +202,37 @@
       <div class="section-row">
         <span class="label">头像大小</span>
         <span class="stepper">
-          <span class="stepper-btn" @click="stepDown('dmStyle.faceSize', 28, 12, 2)">−</span>
-          <input class="stepper-input" :value="dmStyle?.faceSize ?? 28"
+          <span
+            class="stepper-btn"
+            @click="stepDown('dmStyle.faceSize', 28, 12, 2)"
+            >−</span
+          >
+          <input
+            class="stepper-input"
+            :value="dmStyle?.faceSize ?? 28"
             @change="setVal('dmStyle.faceSize', Number(($event.target as HTMLInputElement).value))" />
-          <span class="stepper-btn" @click="stepUp('dmStyle.faceSize', 28, 64, 2)">+</span>
+          <span
+            class="stepper-btn"
+            @click="stepUp('dmStyle.faceSize', 28, 64, 2)"
+            >+</span
+          >
         </span>
       </div>
       <div class="section-row">
         <span class="label">重复合并</span>
-        <input class="input" style="width:48px" :value="dmStyle?.combineSimilarTime ?? 3000"
+        <input
+          class="input"
+          style="width: 48px"
+          :value="dmStyle?.combineSimilarTime ?? 3000"
           @change="setVal('dmStyle.combineSimilarTime', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">ms</span>
       </div>
       <div class="section-row">
         <span class="label">弹幕超时消隐</span>
-        <input class="input" style="width:48px" :value="dmStyle?.hiddenExpiredTime ?? 0"
+        <input
+          class="input"
+          style="width: 48px"
+          :value="dmStyle?.hiddenExpiredTime ?? 0"
           @change="setVal('dmStyle.hiddenExpiredTime', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">ms</span>
       </div>
@@ -121,97 +243,210 @@
       </div> -->
       <div class="section-row">
         <span class="label">弹幕礼物阈值</span>
-        <input class="input" style="width:40px" :value="(dmStyle?.showGiftCardThreshold ?? 0) / 1000"
+        <input
+          class="input"
+          style="width: 40px"
+          :value="(dmStyle?.showGiftCardThreshold ?? 0) / 1000"
           @change="setVal('dmStyle.showGiftCardThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
         <span class="input-unit">元</span>
       </div>
       <div class="section-row">
         <span class="label">礼物栏阈值</span>
-        <input class="input" style="width:40px" :value="(dmStyle?.showHeadlineThreshold ?? 0) / 1000"
+        <input
+          class="input"
+          style="width: 40px"
+          :value="(dmStyle?.showHeadlineThreshold ?? 0) / 1000"
           @change="setVal('dmStyle.showHeadlineThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
         <span class="input-unit">元</span>
       </div>
 
       <!-- 等级样式 -->
-      <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #e8eaec">
-        <div class="lvl-tabs" style="margin-bottom:6px">
-          <span class="lvl-tab" :class="{ on: activeLevel === '0' }" @click="activeLevel = '0'">普通</span>
-          <span class="lvl-tab" :class="{ on: activeLevel === '1' }" @click="activeLevel = '1'">舰长</span>
-          <span class="lvl-tab" :class="{ on: activeLevel === '2' }" @click="activeLevel = '2'">提督</span>
-          <span class="lvl-tab" :class="{ on: activeLevel === '3' }" @click="activeLevel = '3'">总督</span>
-          <span class="lvl-tab" :class="{ on: activeLevel === '99' }" @click="activeLevel = '99'">房管</span>
-          <span class="lvl-tab" :class="{ on: activeLevel === 'Interact' }" @click="activeLevel = 'Interact'">入场</span>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e8eaec">
+        <div
+          class="lvl-tabs"
+          style="margin-bottom: 6px">
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === '0' }"
+            @click="activeLevel = '0'"
+            >普通</span
+          >
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === '1' }"
+            @click="activeLevel = '1'"
+            >舰长</span
+          >
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === '2' }"
+            @click="activeLevel = '2'"
+            >提督</span
+          >
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === '3' }"
+            @click="activeLevel = '3'"
+            >总督</span
+          >
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === '99' }"
+            @click="activeLevel = '99'"
+            >房管</span
+          >
+          <span
+            class="lvl-tab"
+            :class="{ on: activeLevel === 'Interact' }"
+            @click="activeLevel = 'Interact'"
+            >入场</span
+          >
         </div>
         <div class="section-row">
-          <span class="label" style="min-width:auto">背景色</span>
+          <span
+            class="label"
+            style="min-width: auto"
+            >背景色</span
+          >
           <label class="color-pick">
-            <span class="color-dot" :style="{ background: currentLevelStyle?.bgColor || '#000' }"></span>
-            <input type="color" :value="currentLevelStyle?.bgColor || '#000000'"
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.bgColor || '#000' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.bgColor || '#000000'"
               @input="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
           </label>
-          <div v-if="activeLevel === '99'" class="icon-dropdown">
-            <div class="icon-trigger" @click="iconOpen = !iconOpen">
-              <span v-if="!dmStyle?.adminIcon" style="font-size:10px;color:#999">无</span>
-              <Icon v-else :type="dmStyle?.adminIcon" :color="dmStyle?.adminIconColor || '#ff9900'" size="16" />
+          <div
+            v-if="activeLevel === '99'"
+            class="icon-dropdown">
+            <div
+              class="icon-trigger"
+              @click="iconOpen = !iconOpen">
+              <span
+                v-if="!dmStyle?.adminIcon"
+                style="font-size: 10px; color: #999"
+                >无</span
+              >
+              <Icon
+                v-else
+                :type="dmStyle?.adminIcon"
+                :color="dmStyle?.adminIconColor || '#ff9900'"
+                size="16" />
             </div>
-            <div class="icon-overlay" v-show="iconOpen" @click="iconOpen = false"></div>
-            <div class="icon-menu" v-show="iconOpen">
-              <div class="icon-item" :class="{ on: !dmStyle?.adminIcon }"
-                @click="setVal('dmStyle.adminIcon', ''); iconOpen = false">
-                <span style="font-size:10px;color:#999">无</span>
+            <div
+              class="icon-overlay"
+              v-show="iconOpen"
+              @click="iconOpen = false"></div>
+            <div
+              class="icon-menu"
+              v-show="iconOpen">
+              <div
+                class="icon-item"
+                :class="{ on: !dmStyle?.adminIcon }"
+                @click="selectNoIcon">
+                <span style="font-size: 10px; color: #999">无</span>
               </div>
-              <div v-for="icon in adminIcons" :key="icon" class="icon-item"
+              <div
+                v-for="icon in adminIcons"
+                :key="icon"
+                class="icon-item"
                 :class="{ on: dmStyle?.adminIcon === icon }"
-                @click="setVal('dmStyle.adminIcon', icon); iconOpen = false">
-                <Icon :type="icon" :color="dmStyle?.adminIconColor || '#ff9900'" size="18" />
+                @click="selectAdminIcon(icon)">
+                <Icon
+                  :type="icon"
+                  :color="dmStyle?.adminIconColor || '#ff9900'"
+                  size="18" />
               </div>
             </div>
           </div>
-          <label v-if="activeLevel === '99'" class="color-pick">
-            <span class="color-dot" :style="{ background: dmStyle?.adminIconColor || '#ff9900' }"></span>
-            <input type="color" :value="dmStyle?.adminIconColor || '#ff9900'"
+          <label
+            v-if="activeLevel === '99'"
+            class="color-pick">
+            <span
+              class="color-dot"
+              :style="{ background: dmStyle?.adminIconColor || '#ff9900' }"></span>
+            <input
+              type="color"
+              :value="dmStyle?.adminIconColor || '#ff9900'"
               @input="setVal('dmStyle.adminIconColor', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
         <div class="section-row">
-          <span class="label" style="min-width:auto">昵称</span>
+          <span
+            class="label"
+            style="min-width: auto"
+            >昵称</span
+          >
           <span class="hint">字号</span>
-          <input class="input" style="width:30px" :value="currentLevelStyle?.usernameFontSize ?? 13"
+          <input
+            class="input"
+            style="width: 30px"
+            :value="currentLevelStyle?.usernameFontSize ?? 13"
             @change="setLevelStyle('userFontSize', ($event.target as HTMLInputElement).value)" />
           <span class="hint">颜色</span>
           <label class="color-pick">
-            <span class="color-dot" :style="{ background: currentLevelStyle?.usernameColor || '#66ccff' }"></span>
-            <input type="color" :value="currentLevelStyle?.usernameColor || '#66ccff'"
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.usernameColor || '#66ccff' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.usernameColor || '#66ccff'"
               @input="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">边宽</span>
-          <input class="input" style="width:28px" :value="currentLevelStyle?.usernameStrokeWidth ?? 0"
+          <input
+            class="input"
+            style="width: 28px"
+            :value="currentLevelStyle?.usernameStrokeWidth ?? 0"
             @change="setLevelStyle('userStrokeWidth', ($event.target as HTMLInputElement).value)" />
           <span class="hint">边色</span>
           <label class="color-pick">
-            <span class="color-dot" :style="{ background: currentLevelStyle?.usernameStrokeColor || '#000' }"></span>
-            <input type="color" :value="currentLevelStyle?.usernameStrokeColor || '#000000'"
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.usernameStrokeColor || '#000' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.usernameStrokeColor || '#000000'"
               @input="setLevelStyleColor('userStroke', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
         <div class="section-row">
-          <span class="label" style="min-width:auto">内容</span>
+          <span
+            class="label"
+            style="min-width: auto"
+            >内容</span
+          >
           <span class="hint">字号</span>
-          <input class="input" style="width:30px" :value="currentLevelStyle?.commentFontSize ?? 13"
+          <input
+            class="input"
+            style="width: 30px"
+            :value="currentLevelStyle?.commentFontSize ?? 13"
             @change="setLevelStyle('commentFontSize', ($event.target as HTMLInputElement).value)" />
           <span class="hint">颜色</span>
           <label class="color-pick">
-            <span class="color-dot" :style="{ background: currentLevelStyle?.commentColor || '#fff' }"></span>
-            <input type="color" :value="currentLevelStyle?.commentColor || '#ffffff'"
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.commentColor || '#fff' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.commentColor || '#ffffff'"
               @input="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">边宽</span>
-          <input class="input" style="width:28px" :value="currentLevelStyle?.commentStrokeWidth ?? 0"
+          <input
+            class="input"
+            style="width: 28px"
+            :value="currentLevelStyle?.commentStrokeWidth ?? 0"
             @change="setLevelStyle('commentStrokeWidth', ($event.target as HTMLInputElement).value)" />
           <span class="hint">边色</span>
           <label class="color-pick">
-            <span class="color-dot" :style="{ background: currentLevelStyle?.commentStrokeColor || '#000' }"></span>
-            <input type="color" :value="currentLevelStyle?.commentStrokeColor || '#000000'"
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.commentStrokeColor || '#000' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.commentStrokeColor || '#000000'"
               @input="setLevelStyleColor('commentStroke', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
@@ -222,50 +457,93 @@
     <div class="divider">原生弹幕窗样式</div>
     <div class="section">
       <div class="chips">
-        <span class="chip" :class="{ on: dmRawStyle?.isWindowAlwaysOnTop === true }"
-          @click="toggle('dmRawStyle.isWindowAlwaysOnTop')">窗口置顶</span>
-        <span class="chip" :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
-          @click="toggle('dmRawStyle.ignoreMouseEvent')">鼠标穿透</span>
+        <span
+          class="chip"
+          :class="{ on: dmRawStyle?.isWindowAlwaysOnTop === true }"
+          @click="toggle('dmRawStyle.isWindowAlwaysOnTop')"
+          >窗口置顶</span
+        >
+        <span
+          class="chip"
+          :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
+          @click="toggle('dmRawStyle.ignoreMouseEvent')"
+          >鼠标穿透</span
+        >
       </div>
       <div class="section-row">
         <span class="label">透明度</span>
         <span class="stepper">
-          <span class="stepper-btn" @click="stepDown('dmRawStyle.windowOpacity', 1, 0, 0.05)">−</span>
-          <input class="stepper-input" :value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
+          <span
+            class="stepper-btn"
+            @click="stepDown('dmRawStyle.windowOpacity', 1, 0, 0.05)"
+            >−</span
+          >
+          <input
+            class="stepper-input"
+            :value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
             @change="setVal('dmRawStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
-          <span class="stepper-btn" @click="stepUp('dmRawStyle.windowOpacity', 1, 1, 0.05)">+</span>
+          <span
+            class="stepper-btn"
+            @click="stepUp('dmRawStyle.windowOpacity', 1, 1, 0.05)"
+            >+</span
+          >
         </span>
-        <span class="label" style="margin-left:8px">背景色</span>
+        <span
+          class="label"
+          style="margin-left: 8px"
+          >背景色</span
+        >
         <label class="color-pick">
-          <span class="color-dot" :style="{ background: dmRawStyle?.windowBackground || '#1e1e28' }"></span>
-          <input type="color" :value="dmRawStyle?.windowBackground || '#1e1e28'"
+          <span
+            class="color-dot"
+            :style="{ background: dmRawStyle?.windowBackground || '#1e1e28' }"></span>
+          <input
+            type="color"
+            :value="dmRawStyle?.windowBackground || '#1e1e28'"
             @input="setVal('dmRawStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
         </label>
       </div>
       <div class="section-row">
         <span class="label">方向</span>
         <span class="segmented">
-          <span class="seg-item" :class="{ on: (dmRawStyle?.direction || 'RL') === 'LR' }"
-            @click="setVal('dmRawStyle.direction', 'LR')">向左</span>
-          <span class="seg-item" :class="{ on: (dmRawStyle?.direction || 'RL') === 'RL' }"
-            @click="setVal('dmRawStyle.direction', 'RL')">向右</span>
+          <span
+            class="seg-item"
+            :class="{ on: (dmRawStyle?.direction || 'RL') === 'LR' }"
+            @click="setVal('dmRawStyle.direction', 'LR')"
+            >向左</span
+          >
+          <span
+            class="seg-item"
+            :class="{ on: (dmRawStyle?.direction || 'RL') === 'RL' }"
+            @click="setVal('dmRawStyle.direction', 'RL')"
+            >向右</span
+          >
         </span>
       </div>
       <div class="section-row">
         <span class="label">整体字号</span>
-        <input class="input" style="width:40px" :value="(dmRawStyle as any)?.fontSize ?? 14"
+        <input
+          class="input"
+          style="width: 40px"
+          :value="(dmRawStyle as any)?.fontSize ?? 14"
           @change="setVal('dmRawStyle.fontSize', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">表情大小</span>
-        <input class="input" style="width:40px" :value="dmRawStyle?.emojiSize ?? 24"
+        <input
+          class="input"
+          style="width: 40px"
+          :value="dmRawStyle?.emojiSize ?? 24"
           @change="setVal('dmRawStyle.emojiSize', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">弹幕持续时间</span>
-        <input class="input" style="width:40px" :value="dmRawStyle?.duration ?? 15"
+        <input
+          class="input"
+          style="width: 40px"
+          :value="dmRawStyle?.duration ?? 15"
           @change="setVal('dmRawStyle.duration', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">ms</span>
       </div>
@@ -275,31 +553,62 @@
     <div class="divider">直播与录制</div>
     <div class="section">
       <div class="chips">
-        <span class="chip" :class="{ on: liveConfig?.isWithCookie === true }"
-          @click="toggle('liveConfig.isWithCookie')">携带Cookie</span>
+        <span
+          class="chip"
+          :class="{ on: liveConfig?.isWithCookie === true }"
+          @click="toggle('liveConfig.isWithCookie')"
+          >携带Cookie</span
+        >
       </div>
       <div class="section-row">
         <span class="label">音量</span>
         <span class="stepper">
-          <span class="stepper-btn" @click="stepDown('liveConfig.volume', 60, 0, 5)">−</span>
-          <input class="stepper-input" :value="liveConfig?.volume ?? 60"
+          <span
+            class="stepper-btn"
+            @click="stepDown('liveConfig.volume', 60, 0, 5)"
+            >−</span
+          >
+          <input
+            class="stepper-input"
+            :value="liveConfig?.volume ?? 60"
             @change="setVal('liveConfig.volume', Number(($event.target as HTMLInputElement).value))" />
-          <span class="stepper-btn" @click="stepUp('liveConfig.volume', 60, 100, 5)">+</span>
+          <span
+            class="stepper-btn"
+            @click="stepUp('liveConfig.volume', 60, 100, 5)"
+            >+</span
+          >
         </span>
       </div>
       <div class="section-row">
         <span class="label">保存路径</span>
-        <input class="input" style="width:230px" :value="recordConfig?.savePath || ''" disabled
+        <input
+          class="input"
+          style="width: 230px"
+          :value="recordConfig?.savePath || ''"
+          disabled
           placeholder="/path/to/save" />
-        <button class="btn btn-default" style="font-size:10px" @click="selectSavePath">选择</button>
+        <button
+          class="btn btn-default"
+          style="font-size: 10px"
+          @click="selectSavePath">
+          选择
+        </button>
       </div>
       <div class="section-row">
         <span class="label">画质</span>
         <span class="segmented">
-          <span class="seg-item" :class="{ on: (recordConfig?.quality || '原画') === '原画' }"
-            @click="setVal('recordConfig.quality', '原画')">原画</span>
-          <span class="seg-item" :class="{ on: recordConfig?.quality === '高清' }"
-            @click="setVal('recordConfig.quality', '高清')">高清</span>
+          <span
+            class="seg-item"
+            :class="{ on: (recordConfig?.quality || '原画') === '原画' }"
+            @click="setVal('recordConfig.quality', '原画')"
+            >原画</span
+          >
+          <span
+            class="seg-item"
+            :class="{ on: recordConfig?.quality === '高清' }"
+            @click="setVal('recordConfig.quality', '高清')"
+            >高清</span
+          >
         </span>
       </div>
     </div>
@@ -309,13 +618,27 @@
     <div class="section">
       <div class="section-row">
         <span class="label">色彩表</span>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <span class="tag" v-for="(c, i) in (chartConfig?.colors || [])" :key="i">
-            <span class="tag-dot" :style="{ background: c }"></span>{{ c }}
-            <span class="tag-close" @click="removeColor(i)">✕</span>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap">
+          <span
+            class="tag"
+            v-for="(c, i) in chartConfig?.colors || []"
+            :key="i">
+            <span
+              class="tag-dot"
+              :style="{ background: c }"></span
+            >{{ c }}
+            <span
+              class="tag-close"
+              @click="removeColor(i)"
+              >✕</span
+            >
           </span>
-          <span class="tag" style="border:dashed 1px #ccc;background:transparent;color:#999;cursor:pointer"
-            @click="addColor">+ 添加</span>
+          <span
+            class="tag"
+            style="border: dashed 1px #ccc; background: transparent; color: #999; cursor: pointer"
+            @click="addColor"
+            >+ 添加</span
+          >
         </div>
       </div>
     </div>
@@ -324,16 +647,30 @@
     <div class="divider">数据</div>
     <div class="section">
       <div class="section-row">
-        <button class="btn btn-default" @click="restoreDefaults">还原默认弹幕样式</button>
-        <span style="font-size:11px;color:#999">~/Library/Application Support/bilibili-danmaku</span>
+        <button
+          class="btn btn-default"
+          @click="restoreDefaults">
+          还原默认弹幕样式
+        </button>
+        <span style="font-size: 11px; color: #999">~/Library/Application Support/bilibili-danmaku</span>
       </div>
     </div>
 
     <!-- ═══ 扫码登录弹窗 ═══ -->
-    <Modal v-model="showQrModal" title="扫码登录" width="300">
-      <div style="text-align:center">
-        <canvas id="qrcode" width="200" height="200"></canvas>
-        <p v-if="qrError" style="color:red;margin-top:8px">{{ qrError }}</p>
+    <Modal
+      v-model="showQrModal"
+      title="扫码登录"
+      width="300">
+      <div style="text-align: center">
+        <canvas
+          id="qrcode"
+          width="200"
+          height="200"></canvas>
+        <p
+          v-if="qrError"
+          style="color: red; margin-top: 8px">
+          {{ qrError }}
+        </p>
       </div>
     </Modal>
   </div>
@@ -460,17 +797,33 @@ function removeColor(index: number) {
 }
 
 // ── 测试弹幕 ──
+async function selectAdminIcon(icon: string) {
+  setVal('dmStyle.adminIcon', icon)
+  iconOpen.value = false
+}
+
+function selectNoIcon() {
+  setVal('dmStyle.adminIcon', '')
+  iconOpen.value = false
+}
+
 async function sendTestDanmaku() {
   try {
     await sendDM('danmaku', {
       username: '测试用户',
       comment: '这是一条测试弹幕 🎉',
     })
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 async function clearDanmaku() {
-  try { await clearDM() } catch { /* ignore */ }
+  try {
+    await clearDM()
+  } catch {
+    /* ignore */
+  }
 }
 
 // ── 保存路径 ──
@@ -492,19 +845,32 @@ async function showQrCodeLoginModal() {
       const canvas = document.getElementById('qrcode') as HTMLCanvasElement
       if (canvas) QRCode.toCanvas(canvas, url)
     }, 100)
-  } catch { qrError.value = '二维码加载失败' }
+  } catch {
+    qrError.value = '二维码加载失败'
+  }
 }
 
 // ── 还原默认 ──
 function restoreDefaults() {
   const defaults: Record<string, any> = {
-    isShowFace: true, isShowFanMedal: true, isShowHeadline: true,
-    isShowType1: true, isShowType2: true,
-    windowOpacity: 1, font: 'auto', fontWeight: 'normal', faceSize: 28,
-    combineSimilarTime: 3000, hiddenExpiredTime: 0,
-    showGiftCardThreshold: 0, showHeadlineThreshold: 0,
-    isShowInteractInfo: false, isShowSilverGift: false,
-    isShowSuperChatJPN: true, isShowAnchorIcon: true, isShowAdminIcon: false,
+    isShowFace: true,
+    isShowFanMedal: true,
+    isShowHeadline: true,
+    isShowType1: true,
+    isShowType2: true,
+    windowOpacity: 1,
+    font: 'auto',
+    fontWeight: 'normal',
+    faceSize: 28,
+    combineSimilarTime: 3000,
+    hiddenExpiredTime: 0,
+    showGiftCardThreshold: 0,
+    showHeadlineThreshold: 0,
+    isShowInteractInfo: false,
+    isShowSilverGift: false,
+    isShowSuperChatJPN: true,
+    isShowAnchorIcon: true,
+    isShowAdminIcon: false,
     isWindowAlwaysOnTop: false,
   }
   const current = dmStyle.value || {}
@@ -516,7 +882,7 @@ function restoreDefaults() {
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box
+  box-sizing: border-box;
 }
 
 .page {
@@ -524,11 +890,11 @@ function restoreDefaults() {
   height: 100%;
   overflow-y: auto;
   padding: 0 0 20px;
-  background: #fff
+  background: #fff;
 }
 
 .section {
-  padding: 0 16px
+  padding: 0 16px;
 }
 
 .section-row {
@@ -536,7 +902,7 @@ function restoreDefaults() {
   align-items: center;
   gap: 8px;
   padding: 4px 0;
-  flex-wrap: wrap
+  flex-wrap: wrap;
 }
 
 .label {
@@ -544,7 +910,7 @@ function restoreDefaults() {
   color: #666;
   /* min-width: 54px; */
   white-space: nowrap;
-  text-align: right
+  text-align: right;
 }
 
 .hint {
@@ -559,7 +925,7 @@ function restoreDefaults() {
   padding: 18px 16px 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #333
+  color: #333;
 }
 
 .divider::before {
@@ -568,7 +934,7 @@ function restoreDefaults() {
   height: 14px;
   background: #2d8cf0;
   border-radius: 2px;
-  margin-right: 8px
+  margin-right: 8px;
 }
 
 .input {
@@ -582,18 +948,18 @@ function restoreDefaults() {
   outline: none;
   background: transparent;
   text-align: center;
-  transition: border-color .15s;
-  font-family: inherit
+  transition: border-color 0.15s;
+  font-family: inherit;
 }
 
 .input:focus {
-  border-bottom-color: #2d8cf0
+  border-bottom-color: #2d8cf0;
 }
 
 .input-unit {
   font-size: 11px;
   color: #999;
-  margin-left: 2px
+  margin-left: 2px;
 }
 
 .btn {
@@ -602,25 +968,25 @@ function restoreDefaults() {
   border-radius: 4px;
   padding: 0 10px;
   font-size: 11px;
-  cursor: pointer
+  cursor: pointer;
 }
 
 .btn-primary {
   background: #2d8cf0;
   color: #fff;
-  border: none
+  border: none;
 }
 
 .btn-default {
   background: #fff;
-  color: #2d8cf0
+  color: #2d8cf0;
 }
 
 /* 步进器 */
 .stepper {
   display: inline-flex;
   align-items: center;
-  gap: 4px
+  gap: 4px;
 }
 
 .stepper-btn {
@@ -636,14 +1002,14 @@ function restoreDefaults() {
   font-size: 11px;
   color: #999;
   line-height: 1;
-  transition: .15s;
-  user-select: none
+  transition: 0.15s;
+  user-select: none;
 }
 
 .stepper-btn:hover {
   border-color: #2d8cf0;
   color: #2d8cf0;
-  background: #f0f5ff
+  background: #f0f5ff;
 }
 
 .stepper-val {
@@ -651,7 +1017,7 @@ function restoreDefaults() {
   color: #333;
   min-width: 36px;
   text-align: center;
-  font-variant-numeric: tabular-nums
+  font-variant-numeric: tabular-nums;
 }
 
 .stepper-input {
@@ -666,13 +1032,13 @@ function restoreDefaults() {
   outline: none;
   background: transparent;
   text-align: center;
-  transition: border-color .15s;
+  transition: border-color 0.15s;
   font-family: inherit;
-  font-variant-numeric: tabular-nums
+  font-variant-numeric: tabular-nums;
 }
 
 .stepper-input:focus {
-  border-bottom-color: #2d8cf0
+  border-bottom-color: #2d8cf0;
 }
 
 /* 预览 */
@@ -682,29 +1048,29 @@ function restoreDefaults() {
   border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 6px
+  gap: 6px;
 }
 
 .preview .avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #e88
+  background: #e88;
 }
 
 .preview .name {
   color: #6cf;
-  font-size: 13px
+  font-size: 13px;
 }
 
 .preview .colon {
   color: #6cf;
-  font-size: 13px
+  font-size: 13px;
 }
 
 .preview .msg {
   color: #ddd;
-  font-size: 13px
+  font-size: 13px;
 }
 
 /* 芯片切换 */
@@ -712,7 +1078,7 @@ function restoreDefaults() {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  padding: 4px 0
+  padding: 4px 0;
 }
 
 .chip {
@@ -725,13 +1091,13 @@ function restoreDefaults() {
   align-items: center;
   cursor: pointer;
   color: #666;
-  user-select: none
+  user-select: none;
 }
 
 .chip.on {
   background: rgba(45, 140, 240, 0.08);
   border-color: #2d8cf0;
-  color: #2d8cf0
+  color: #2d8cf0;
 }
 
 /* 下拉框 */
@@ -747,17 +1113,17 @@ function restoreDefaults() {
   background: transparent;
   cursor: pointer;
   font-family: inherit;
-  color: #333
+  color: #333;
 }
 
 .select:focus {
-  border-bottom-color: #2d8cf0
+  border-bottom-color: #2d8cf0;
 }
 
 /* 图标下拉 */
 .icon-dropdown {
   position: relative;
-  display: inline-flex
+  display: inline-flex;
 }
 
 .icon-trigger {
@@ -768,11 +1134,11 @@ function restoreDefaults() {
   justify-content: center;
   cursor: pointer;
   border-bottom: 1.5px solid #ddd;
-  transition: border-color .15s
+  transition: border-color 0.15s;
 }
 
 .icon-trigger:hover {
-  border-bottom-color: #2d8cf0
+  border-bottom-color: #2d8cf0;
 }
 
 .icon-menu {
@@ -783,12 +1149,12 @@ function restoreDefaults() {
   background: #fff;
   border: 1px solid #e8eaec;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 4px;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 40px
+  min-width: 40px;
 }
 
 .icon-item {
@@ -798,21 +1164,21 @@ function restoreDefaults() {
   padding: 4px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background .1s
+  transition: background 0.1s;
 }
 
 .icon-item:hover {
-  background: #f0f5ff
+  background: #f0f5ff;
 }
 
 .icon-item.on {
-  background: rgba(45, 140, 240, .08)
+  background: rgba(45, 140, 240, 0.08);
 }
 
 .icon-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9
+  z-index: 9;
 }
 
 /* 分段胶囊 */
@@ -820,7 +1186,7 @@ function restoreDefaults() {
   display: inline-flex;
   background: #f0f2f5;
   border-radius: 11px;
-  padding: 2px
+  padding: 2px;
 }
 
 .seg-item {
@@ -832,14 +1198,14 @@ function restoreDefaults() {
   color: #999;
   border-radius: 10px;
   cursor: pointer;
-  transition: .15s;
-  user-select: none
+  transition: 0.15s;
+  user-select: none;
 }
 
 .seg-item.on {
   background: #fff;
   color: #2d8cf0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .06)
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* 等级分段 */
@@ -848,7 +1214,7 @@ function restoreDefaults() {
   background: #f0f2f5;
   border-radius: 6px;
   padding: 2px 8px;
-  gap: 8px
+  gap: 8px;
 }
 
 .lvl-tab {
@@ -862,14 +1228,14 @@ function restoreDefaults() {
   color: #999;
   border-radius: 5px;
   cursor: pointer;
-  transition: .15s;
-  user-select: none
+  transition: 0.15s;
+  user-select: none;
 }
 
 .lvl-tab.on {
   background: #fff;
   color: #2d8cf0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .06)
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* 色彩标签 */
@@ -881,36 +1247,36 @@ function restoreDefaults() {
   padding: 0 8px;
   border-radius: 4px;
   background: #f0f0f0;
-  font-size: 11px
+  font-size: 11px;
 }
 
 .tag-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%
+  border-radius: 50%;
 }
 
 .tag-close {
   cursor: pointer;
   color: #999;
   font-size: 10px;
-  margin-left: 2px
+  margin-left: 2px;
 }
 
 /* 颜色选择器 */
 .color-pick {
   position: relative;
   display: inline-flex;
-  cursor: pointer
+  cursor: pointer;
 }
 
-.color-pick input[type=color] {
+.color-pick input[type='color'] {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
   padding: 0;
-  border: none
+  border: none;
 }
 
 /* 颜色圆点 */
@@ -919,16 +1285,16 @@ function restoreDefaults() {
   width: 18px;
   height: 18px;
   border-radius: 3px;
-  border: 1px solid #ddd
+  border: 1px solid #ddd;
 }
 
 /* 滚动条 */
 .page::-webkit-scrollbar {
-  width: 3px
+  width: 3px;
 }
 
 .page::-webkit-scrollbar-thumb {
   background: #ddd;
-  border-radius: 10px
+  border-radius: 10px;
 }
 </style>

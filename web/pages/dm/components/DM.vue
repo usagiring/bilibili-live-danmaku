@@ -1,19 +1,5 @@
 <template>
-  <div
-    :style="
-      ($ as any)({
-        position: 'absolute',
-        top: '0px',
-        bottom: '0px',
-        left: '0px',
-        right: '0px',
-        padding: '4px',
-        background: windowBackground,
-        opacity: windowOpacity,
-        '-webkit-user-select': 'none',
-        '-webkit-app-region': 'drag',
-      })
-    ">
+  <div :style="rootStyle">
     <!-- 礼物头条 -->
     <div
       v-if="isShowHeadline"
@@ -23,18 +9,18 @@
       @wheel.prevent="giftScroll">
       <transition-group name="fade">
         <template
-          v-for="(gift, index) of headlines"
-          :key="index">
+          v-for="(msg, index) of headlines"
+          :key="index"
+          @mouseleave="unhoverHeadline()">
           <div
             class="gift-tag-wrapper"
-            @mouseenter="hoverGift(String(gift.id))"
-            @mouseleave="unhoverGift(String(gift.id))">
+            @mouseenter="hoverHeadline(String(msg.id))">
             <GiftTag
-              v-if="!giftHover.includes(String(gift.id))"
-              :gift="gift" />
+              v-if="false"
+              :gift="msg" />
             <GiftTagExpand
               v-else
-              :gift="gift"
+              :gift="msg"
               :is-show-super-chat-jpn="isShowSuperChatJPN" />
           </div>
         </template>
@@ -44,12 +30,7 @@
     <!-- 消息列表 -->
     <div
       class="message-content-wrapper"
-      :style="
-        ($ as any)({
-          top: `${headlines.length && isShowHeadline ? '36px' : '0px'}`,
-          '-webkit-app-region': 'no-drag',
-        })
-      ">
+      :style="contentWrapperStyle">
       <transition-group
         name="fade"
         tag="div"
@@ -80,7 +61,8 @@
                   class="margin-lr-1px"
                   :src="message.face"
                   :style="{ ...getFaceSizeStyle() }" />
-                <FanMedal
+                <FanM
+                  edal
                   v-if="s.type === 'medal' && s.isShow && message.medal"
                   class="margin-lr-1px vertical-align-middle"
                   :medal="message.medal"
@@ -89,7 +71,7 @@
                   v-if="s.type === 'name'"
                   class="vertical-align-middle"
                   :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">
-                  {{ message.username }}
+                  {{ `${message.username}${isShowColon ? '：' : ''}` }}
                 </span>
                 <span v-if="s.type === 'comment'">
                   <img
@@ -116,7 +98,11 @@
                   <span
                     v-else
                     class="vertical-align-middle"
-                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }"
+                    :style="{
+                      ...fontStyle,
+                      ...getCommentStyle(message),
+                      ...getTextShadow(message, 'comment'),
+                    }"
                     >{{ message.content }}</span
                   >
                   <!-- 语音 -->
@@ -134,7 +120,8 @@
               <SimilarCommentBadge
                 v-if="message.similar! > 0"
                 class="vertical-align-middle"
-                :number="message.similar"
+                :number="message.similar!"
+                :color="message.similarColor!"
                 :style="{ 'margin-left': '5px' }" />
             </span>
           </template>
@@ -149,8 +136,14 @@
               <FanMedal
                 v-if="isShowFanMedal && message.medal"
                 :medal="message.medal"
-                :role="message.medal.guard" />
-              <span :style="{ ...getInteractContentStyle(), ...getInteractTextShadow() }">{{ message.content }}</span>
+                :role="message.medal.anchor" />
+              <span
+                :style="{
+                  ...getInteractContentStyle(),
+                  ...getInteractTextShadow(),
+                }"
+                >{{ message.content }}</span
+              >
             </p>
           </template>
 
@@ -158,7 +151,9 @@
           <template v-else-if="message.category === 'superchat'">
             <GiftCard
               v-if="!isUseMiniGiftCard"
-              v-bind="message">
+              :gift="message.gift"
+              :username="message.username"
+              :face="message.face">
               <div :style="{ padding: '10px' }">
                 {{ message.content }}
                 <template v-if="message.contentJPN && isShowSuperChatJPN">
@@ -169,7 +164,9 @@
             </GiftCard>
             <GiftCardMini
               v-else
-              v-bind="message">
+              :gift="message.gift"
+              :username="message.username"
+              :face="message.face">
               {{ `: ${message.content}` }}
             </GiftCardMini>
           </template>
@@ -178,9 +175,11 @@
           <template v-else-if="message.category === 'gift'">
             <GiftCard
               v-if="!isUseMiniGiftCard"
-              v-bind="message">
+              :gift="message.gift"
+              :username="message.username"
+              :face="message.face">
               <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
-                {{ `${message.username} 赠送了 ${message.count} 个 ${message.name}` }}
+                {{ `${message.username} 赠送了 ${message.gift?.count} 个 ${message.gift?.name}` }}
               </span>
               <img
                 :src="giftGifMap[message.id] && giftGifMap[message.id].webp"
@@ -188,8 +187,10 @@
             </GiftCard>
             <GiftCardMini
               v-else
-              v-bind="message">
-              {{ ` 赠送了 ${message.count}个 ${message.name}` }}
+              :gift="message.gift"
+              :username="message.username"
+              :face="message.face">
+              {{ ` 赠送了 ${message.gift?.count}个 ${message.gift?.name}` }}
             </GiftCardMini>
           </template>
         </div>
@@ -200,7 +201,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE } from '../../service/const'
+import {
+  DEFAULT_FACE,
+  INTERACT_TYPE,
+  ANCHOR_ICON_MAP,
+  MAX_MESSAGE,
+  COLORS,
+  PRICE_PROPERTIES,
+} from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from '@tokine/shared/components/GiftTag.vue'
@@ -217,11 +225,8 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 let promiseQueue: PromiseQueue | null = null
 
-const roomId = ref(0)
-const giftHover = ref<string[]>([])
 const giftGifMap = ref<Record<string, any>>({})
 const headlines = ref<Message[]>([])
-const port = ref(3000)
 const emojiSize = ref(24)
 
 const dmStyle = reactive<DmStyle>({
@@ -278,8 +283,6 @@ const {
   showHeadlineThreshold,
   isShowFanMedal,
   isUseMiniGiftCard,
-  isShowFace,
-  isShowAnchorIcon,
   font,
   faceSize,
   windowBackground,
@@ -294,31 +297,104 @@ const {
   isShowType1,
   isShowType2,
   isShowSuperChatJPN,
-  isShowAdminIcon,
   adminIcon,
   adminIconColor,
   channelDelayTime,
-  channelCount,
-  messageContainer0: message_lv0,
-  messageUsername0: name_lv0,
-  messageComment0: comment_lv0,
-  messageContainer1: message_lv1,
-  messageUsername1: name_lv1,
-  messageComment1: comment_lv1,
-  messageContainer2: message_lv2,
-  messageUsername2: name_lv2,
-  messageComment2: comment_lv2,
-  messageContainer3: message_lv3,
-  messageUsername3: name_lv3,
-  messageComment3: comment_lv3,
-  messageContainer99: message_lvadmin,
-  messageUsername99: name_lvadmin,
-  messageComment99: comment_lvadmin,
-  messageContainerInteract: message_lvinteract,
-  messageCommentInteract: comment_lvinteract,
 } = toRefs(dmStyle)
 
-const messages = ref<Message[]>([])
+const messages = ref<Message[]>([
+  // 普通弹幕
+  {
+    id: '1',
+    category: 'comment',
+    content: '主播好强啊！',
+    username: '观众A',
+    userId: '1001',
+    sendAt: Date.now(),
+    roomId: '123',
+    face: 'https://static.hdslb.com/images/member/noface.gif',
+    roles: [0],
+    styleSuffix: '0',
+    type: 0,
+    createdAt: Date.now(),
+  } as Message,
+  {
+    id: '2',
+    category: 'comment',
+    content: '666666',
+    username: '舰长大人',
+    userId: '1002',
+    sendAt: Date.now(),
+    roomId: '123',
+    face: 'https://static.hdslb.com/images/member/noface.gif',
+    roles: [1],
+    styleSuffix: '1',
+    type: 0,
+    createdAt: Date.now(),
+    medal: { name: '舰长', level: 10, anchor: 1 },
+    isAdmin: false,
+    similar: 3,
+    similarColor: '#ff9900',
+  } as Message,
+  {
+    id: '3',
+    category: 'comment',
+    content: '哈哈哈哈笑死了',
+    username: '提督Pro',
+    userId: '1003',
+    sendAt: Date.now(),
+    roomId: '123',
+    face: 'https://static.hdslb.com/images/member/noface.gif',
+    roles: [2],
+    styleSuffix: '2',
+    type: 0,
+    createdAt: Date.now(),
+    medal: {
+      name: '提督',
+      level: 21,
+      anchor: 2,
+      color: { bg: '#5c968e', text: '#FFFFFF', border: '#5c968e', level: '#FFFFFF' },
+    },
+  } as Message,
+  // 互动消息
+  {
+    id: '4',
+    category: 'interact',
+    content: '进入了直播间',
+    username: '新观众',
+    userId: '1004',
+    sendAt: Date.now(),
+    roomId: '123',
+    roles: [0],
+    styleSuffix: 'interact',
+    type: 1,
+    createdAt: Date.now(),
+    face: 'https://static.hdslb.com/images/member/noface.gif',
+  } as Message,
+  // SuperChat
+  {
+    id: '5',
+    category: 'superchat',
+    content: '主播加油！',
+    username: '土豪哥',
+    userId: '1005',
+    sendAt: Date.now(),
+    roomId: '123',
+    roles: [0],
+    type: 3,
+    createdAt: Date.now(),
+    face: 'https://static.hdslb.com/images/member/noface.gif',
+    gift: {
+      id: '',
+      count: 1,
+      price: 50,
+      name: 'SuperChat',
+      totalPrice: 50,
+      priceProperties: PRICE_PROPERTIES[0],
+    },
+    contentJPN: '配信者頑張って！',
+  } as Message,
+])
 
 const borderImageStyle = computed(() => {
   const img = borderImages.value.find((i: any) => i.isSelected)
@@ -343,6 +419,35 @@ const fontStyle = computed(() => ({
   'font-weight': fontWeight.value,
 }))
 
+const rootStyle = computed(
+  () =>
+    ({
+      position: 'absolute',
+      top: '0px',
+      bottom: '0px',
+      left: '0px',
+      right: '0px',
+      padding: '4px',
+      background: windowBackground.value,
+      opacity: windowOpacity.value,
+      '-webkit-user-select': 'none',
+      '-webkit-app-region': 'drag',
+    }) as Record<string, string | number>,
+)
+
+const contentWrapperStyle = computed(
+  () =>
+    ({
+      top: `${headlines.value.length && isShowHeadline.value ? '36px' : '0px'}`,
+      '-webkit-app-region': 'no-drag',
+    }) as Record<string, string>,
+)
+
+const isShowColon = computed(() => {
+  const index = messageSlots.value.findIndex(s => s.type === 'name')
+  return index !== messageSlots.value.length - 1
+})
+
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search)
   const port = params.get('port') || '30031'
@@ -352,13 +457,13 @@ onMounted(async () => {
 
   config.set('baseUrl', `http://127.0.0.1:${port}`)
 
-  const clientConfig = await getClientConfig({ clientId })
-
-  console.log(clientConfig)
+  const { data: clientConfig } = await getClientConfig({ clientId })
 
   if (clientConfig.dmStyle) {
     Object.assign(dmStyle, clientConfig.dmStyle)
   }
+
+  console.log(dmStyle)
 
   // promiseQueue = new PromiseQueue({ limit: channelCount.value })
   setupSSE()
@@ -431,6 +536,7 @@ function onMessage(msg: Message) {
         if (m.sendAt < Date.now() - combineSimilarTime.value) break
         if (m.content === msg.content) {
           m.similar = (m.similar || 0) + 1
+          if (!m.similarColor) m.similarColor = getRandomColor()
           isAddMessage = false
         }
       }
@@ -560,30 +666,7 @@ function getTextShadow(msg: Message, type: string) {
   const c = style['--textStrokeColor']
   if (!parseFloat(w) || !c) return { textShadow: '' }
   return {
-    textShadow:
-      w +
-      ' 0px ' +
-      w +
-      ' ' +
-      c +
-      ', 0px ' +
-      w +
-      ' ' +
-      w +
-      ' ' +
-      c +
-      ', -' +
-      w +
-      ' 0px ' +
-      w +
-      ' ' +
-      c +
-      ', 0px -' +
-      w +
-      ' ' +
-      w +
-      ' ' +
-      c,
+    textShadow: `${w} 0px ${w} ${c}, 0px ${w} ${w} ${c}, -${w} 0px ${w} ${c}, 0px -${w} ${w} ${c}`,
   }
 }
 
@@ -593,11 +676,19 @@ function getInteractContentStyle() {
 function getInteractTextShadow() {
   return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment')
 }
-function hoverGift(giftId: string) {
-  giftHover.value = [...giftHover.value, giftId]
+function hoverHeadline(id: string) {
+  for (const headline of headlines.value) {
+    if (headline.id === id) {
+      headline.isHover = true
+    } else {
+      headline.isHover = false
+    }
+  }
 }
-function unhoverGift(giftId: string) {
-  giftHover.value = giftHover.value.filter((id: string) => id !== giftId)
+function unhoverHeadline() {
+  for (const headline of headlines.value) {
+    headline.isHover = false
+  }
 }
 
 function giftScroll(e: WheelEvent) {
@@ -613,6 +704,11 @@ function getIsAdmin(msg: Message) {
 }
 function playAudio(url: string) {
   new Audio(url).play()
+}
+
+function getRandomColor() {
+  const idx = Math.floor(Math.random() * COLORS.length)
+  return COLORS[idx]
 }
 
 document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0);')

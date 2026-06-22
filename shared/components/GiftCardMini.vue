@@ -1,42 +1,59 @@
 <template>
   <div
-    :style="{ border: `solid 0.5px ${priceProperties.backgroundBottomColor}` }"
-    class="message-super-chat">
-    <div :style="{ background: `${priceProperties.backgroundColor}`, padding: '10px' }">
+    class="message-super-chat"
+    :style="{ border: `solid 0.5px ${color1}` }">
+    <div
+      class="gift-card-mini-header"
+      :style="{ background: color2 }">
       <span
-        v-if="showTime"
+        v-if="isShowSendAt"
         class="date-style"
         >{{ dateFormat(sendAt) }}</span
       >
       <Avatar
         class="space-left-2px"
-        :src="avatar || DEFAULT_AVATAR"
+        :src="face"
         size="small" />
-      <span class="space-left-2px">{{ uname }}</span>
+      <span class="space-left-2px">{{ username }}</span>
       <slot />
-      <template v-if="type === 2">
-        <span class="price-style space-left-2px">{{ count === 1 ? `${name}` : `${name}×${count}` }}</span>
-      </template>
-      <template v-else-if="totalPrice">
-        <span class="price-style space-left-2px">{{ `¥${totalPrice}` }}</span>
-      </template>
+      <span
+        v-if="type === 2"
+        class="price-style space-left-2px">
+        {{ count === 1 ? name : `${name}×${count}` }}
+      </span>
+      <span
+        v-else-if="totalPrice"
+        class="price-style space-left-2px"
+        >{{ formattedPrice }}</span
+      >
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_AVATAR } from '../service/const'
+import { computed, toRefs } from 'vue'
 import { dateFormat } from '../service/util'
 
-defineProps(['priceProperties', 'avatar', 'uname', 'name', 'totalPrice', 'count', 'type', 'sendAt', 'showTime'])
+const props = defineProps(['gift', 'face', 'username', 'isShowSendAt', 'sendAt'])
+
+const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
+const color1 = computed(() => priceProperties.value?.backgroundBottomColor ?? 'rgba(66,125,158,1)')
+const color2 = computed(() => priceProperties.value?.backgroundColor ?? '#EDF5FF')
+
+const formattedPrice = computed(() => `¥${totalPrice.value}`)
 </script>
 
 <style scoped>
 .message-super-chat {
   border-radius: 10px;
-  border: solid 0.5px rgba(66, 125, 158, 1);
   margin: 5px;
   overflow: hidden;
+}
+.gift-card-mini-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 2px;
 }
 .date-style {
   font-size: 12px;

@@ -1,25 +1,16 @@
 <template>
   <div
-    :class="`comment-similar-badge animated ${animateKey}`"
-    :style="{ background: `${randomColor}` }">
+    :class="`comment-similar-badge animated`"
+    :style="{ background: `${color}` }">
     {{ number }}
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { shuffle } from 'lodash'
-import { COLORS } from '../service/const'
-
-const props = defineProps<{ number: number }>()
-const animateKey = ref('')
-
-const colorPool = shuffle(COLORS)
-const randomColor = computed(() => {
-  const color = colorPool.shift()!
-  colorPool.push(color)
-  return color
-})
+const props = defineProps<{
+  number: number
+  color: string
+}>()
 </script>
 
 <style scoped>

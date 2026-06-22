@@ -1,29 +1,33 @@
 <template>
   <div
     class="gift-tag"
-    :style="{ background: gift.priceProperties.backgroundColor }">
+    :style="{ background: color1 }">
     <div
       class="gift-tag-progress"
-      :style="{ width: `${widthCalculator(gift)}%`, background: gift.priceProperties.backgroundBottomColor }" />
+      :style="{ width: `${widthCalculator(gift)}%`, background: color2 }" />
     <div class="gift-tag-content-wrapper">
       <Avatar
         class="gift-tag-avatar"
-        :src="gift.avatar"
+        :src="face"
         size="small" />
-      <template v-if="gift.type === 2">
-        <span>{{ gift.count === 1 ? `${gift.name}` : `${gift.name}×${gift.count}` }}</span>
-      </template>
-      <template v-else-if="gift.totalPrice">
-        <span>{{
-          `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}`
-        }}</span>
-      </template>
+      <span v-if="type === 2">{{ count === 1 ? name : `${name}×${count}` }}</span>
+      <span v-else-if="totalPrice">{{ formattedPrice }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ gift: any }>()
+import { computed, toRefs } from 'vue'
+
+const props = defineProps(['gift', 'face'])
+const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
+const color1 = computed(() => priceProperties.value?.colors[0])
+const color2 = computed(() => priceProperties.value?.colors[1])
+
+const formattedPrice = computed(() => {
+  const price = totalPrice.value
+  return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
+})
 
 function widthCalculator(item: any) {
   if (Number(item.existsTime) && Number(item.priceProperties.time)) {

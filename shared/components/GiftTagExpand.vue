@@ -1,46 +1,48 @@
 <template>
   <div
     class="gift-tag-expand"
-    :style="{ border: `1px solid ${gift.priceProperties.backgroundBottomColor}` }">
+    :style="{ border: `1px solid ${color2}` }">
     <div
       class="gift-tag-expand-top"
-      :style="{ background: gift.priceProperties.backgroundColor }">
+      :style="{ background: color1 }">
       <Avatar
         class="gift-tag-expand-top-left"
-        :src="gift.avatar" />
+        :src="face" />
       <div class="gift-tag-expand-top-right">
         <p>{{ gift.uname }}</p>
-        <template v-if="gift.type === 2">
-          <p>{{ gift.count === 1 ? `${gift.name}` : `${gift.name}×${gift.count}` }}</p>
-        </template>
-        <template v-else-if="gift.totalPrice">
-          <p>
-            {{
-              `￥${Number.isSafeInteger(gift.totalPrice) ? Number(gift.totalPrice).toFixed(0) : Number(gift.totalPrice).toFixed(1)}`
-            }}
-          </p>
-        </template>
+        <p v-if="type === 2">{{ count === 1 ? name : `${name}×${count}` }}</p>
+        <p v-else-if="totalPrice">{{ formattedPrice }}</p>
       </div>
     </div>
     <div
       class="gift-tag-expand-bottom"
-      :style="{ background: gift.priceProperties.backgroundBottomColor }">
-      <template v-if="gift.type === 3">
+      :style="{ background: color2 }">
+      <template v-if="type === 3">
         {{ gift.content }}
-        <template v-if="gift.contentJPN && isShowSuperChatJpn">
+        <template v-if="contentJPN && isShowSuperChatJpn">
           <div class="divider" />
-          {{ gift.contentJPN }}
+          {{ contentJPN }}
         </template>
       </template>
       <template v-else>
-        {{ `${gift.uname} 赠送了 ${gift.count} 个 ${gift.name}` }}
+        {{ `${gift.uname} 赠送了 ${count} 个 ${name}` }}
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{ gift: any; isShowSuperChatJpn?: boolean }>()
+import { computed, toRefs } from 'vue'
+
+const props = defineProps(['gift', 'face', 'isShowSuperChatJpn'])
+const { priceProperties, totalPrice, name, count, type, contentJPN } = toRefs(props.gift)
+const color1 = computed(() => priceProperties.value?.colors[0] ?? 'transparent')
+const color2 = computed(() => priceProperties.value?.colors[1] ?? 'transparent')
+
+const formattedPrice = computed(() => {
+  const price = totalPrice.value
+  return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
+})
 </script>
 
 <style scoped>
