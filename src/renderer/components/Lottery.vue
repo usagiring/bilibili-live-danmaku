@@ -1,15 +1,32 @@
 <template>
   <div>
     <div class="selector-content">
-      <Input v-model="description" placeholder="关于本次祈愿的一些描述..." />
+      <Input
+        v-model="description"
+        placeholder="关于本次祈愿的一些描述..." />
     </div>
 
     <div class="selector-wrapper">
-      <div class="selector-content" :style="isDanmaku && { border: '2px solid orange' }">
-        <Radio class="" :model-value="isDanmaku" @on-change="selectDanmakuOrGift">弹幕</Radio>
+      <div
+        class="selector-content"
+        :style="isDanmaku && { border: '2px solid orange' }">
+        <Radio
+          class=""
+          :model-value="isDanmaku"
+          @on-change="selectDanmakuOrGift"
+          >弹幕</Radio
+        >
         <span class="inline-text">牌子等级大于</span>
-        <InputNumber v-model="medalLevel" :min="0" size="small" :style="{ width: '55px' }" />
-        <Input v-model="danmakuText" size="small" placeholder="弹幕..." style="width: 300px" />
+        <InputNumber
+          v-model="medalLevel"
+          :min="0"
+          size="small"
+          :style="{ width: '55px' }" />
+        <Input
+          v-model="danmakuText"
+          size="small"
+          placeholder="弹幕..."
+          style="width: 300px" />
       </div>
       <!-- <div class="selector-content" :style="isGift && { border: '2px solid orange' }">
         <Radio :model-value="isGift" @on-change="selectDanmakuOrGift">礼物</Radio>
@@ -24,45 +41,94 @@
     </div>
     <div class="button-cotainer">
       <template v-if="isRunning">
-        <Button type="primary" @click="iNoRu">少女祈愿中</Button>
+        <Button
+          type="primary"
+          @click="iNoRu"
+          >少女祈愿中</Button
+        >
       </template>
       <template v-else>
-        <Button type="primary" @click="start">祈愿</Button>
+        <Button
+          type="primary"
+          @click="start"
+          >祈愿</Button
+        >
       </template>
       <div :style="{ float: 'right' }">
-        <Checkbox :model-value="isShowProbability" @on-change="showProbability">显示概率</Checkbox>
+        <Checkbox
+          :model-value="isShowProbability"
+          @on-change="showProbability"
+          >显示概率</Checkbox
+        >
         <Button @click="showHistoryModal">中奖记录</Button>
       </div>
-      <span v-if="isDanmaku && isShowProbability" :style="{ margin: '0px 10px' }">总数: {{ count }}</span>
-      <span v-if="isGift && isShowProbability" :style="{ margin: '0px 10px' }">总价值: {{ totalPrice.toFixed(1) }}</span>
-      <span v-if="aTaRi.uname" :style="{ 'margin-left': '30px' }">
-        恭喜 <span :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }" @click="openBiliUserSpace(aTaRi.uid)"> {{ aTaRi.uname }} </span>
+      <span
+        v-if="isDanmaku && isShowProbability"
+        :style="{ margin: '0px 10px' }"
+        >总数: {{ count }}</span
+      >
+      <span
+        v-if="isGift && isShowProbability"
+        :style="{ margin: '0px 10px' }"
+        >总价值: {{ totalPrice.toFixed(1) }}</span
+      >
+      <span
+        v-if="aTaRi.uname"
+        :style="{ 'margin-left': '30px' }">
+        恭喜
+        <span
+          :style="{ color: 'crimson', 'font-weight': 'bold', cursor: 'pointer' }"
+          @click="openBiliUserSpace(aTaRi.uid)">
+          {{ aTaRi.uname }}
+        </span>
       </span>
     </div>
 
     <div class="candidate-container">
       <template v-if="isDanmaku">
-        <div v-for="info of userComments" :key="`${info.uid}`" class="candidate">
-          <Avatar :src="info.avatar" size="small" />
+        <div
+          v-for="info of userComments"
+          :key="`${info.uid}`"
+          class="candidate">
+          <Avatar
+            :src="info.avatar"
+            size="small" />
           {{ `${info.uname}: ${info.content}` }}
-          <span v-if="isShowProbability" :style="{ 'margin-left': '5px' }">
+          <span
+            v-if="isShowProbability"
+            :style="{ 'margin-left': '5px' }">
             {{ `( ${count ? ((1 / count) * 100).toFixed(2) : 0}% )` }}
           </span>
         </div>
       </template>
       <template v-else>
-        <div v-for="info of userGifts" :key="`${info.uid}:${info.giftId}`" class="candidate">
-          <Avatar :src="info.avatar" size="small" />
+        <div
+          v-for="info of userGifts"
+          :key="`${info.uid}:${info.giftId}`"
+          class="candidate">
+          <Avatar
+            :src="info.avatar"
+            size="small" />
           {{ `${info.uname}: 赠送了 ${info.count} 个 ${info.name}` }}
-          <span v-if="isShowProbability" :style="{ 'margin-left': '5px' }">
+          <span
+            v-if="isShowProbability"
+            :style="{ 'margin-left': '5px' }">
             {{ `( ${totalPrice ? Number((info.price / totalPrice) * 100).toFixed(2) : 0}% )` }}
           </span>
         </div>
       </template>
     </div>
 
-    <Modal v-model="historyModal" title="中奖记录" scrollable lock-scroll transfer :styles="{ overflow: 'auto' }">
-      <template v-for="(history, index) in histories" :key="index">
+    <Modal
+      v-model="historyModal"
+      title="中奖记录"
+      scrollable
+      lock-scroll
+      transfer
+      :styles="{ overflow: 'auto' }">
+      <template
+        v-for="(history, index) in histories"
+        :key="index">
         <p>
           {{ `${history.uname}(${history.uid}) ${history.awardedAt}` }}
           <span :style="{ color: 'gray' }">
@@ -71,7 +137,11 @@
         </p>
       </template>
       <template #footer>
-        <Button type="error" @click="removeAllHistory">清空</Button>
+        <Button
+          type="error"
+          @click="removeAllHistory"
+          >清空</Button
+        >
       </template>
     </Modal>
   </div>
@@ -81,7 +151,7 @@
 import { useConfigStore } from '../store'
 import { shell } from 'electron'
 import { getRandomItem, dateFormat } from '../service/util'
-import { DEFAULT_AVATAR } from '../../service/const'
+import { DEFAULT_FACE } from '../../service/const'
 import { queryLotteryHistories, addLotteryHistory, deleteLotteryHistories } from '../service/api'
 import { sse } from '../service/sse-client'
 
@@ -177,7 +247,7 @@ export default {
         uid: comment.uid,
         uname: comment.uname,
         content: comment.content,
-        avatar: comment.avatar || DEFAULT_AVATAR,
+        avatar: comment.avatar || DEFAULT_FACE,
       }
       this.userCommentMap[comment.uid] = history
       this.userComments = [history, ...this.userComments]
@@ -187,7 +257,7 @@ export default {
       const gift = data.payload
       if (!this.selectedGiftIds.includes(`${gift.id}`)) return
 
-      const { uid, uname, id, name, count = 1, singleCount = 1, price = 0, avatar = DEFAULT_AVATAR } = gift
+      const { uid, uname, id, name, count = 1, singleCount = 1, price = 0, avatar = DEFAULT_FACE } = gift
       const key = `${uid}:${id}`
       const userGift = this.userGiftMap[key]
       // test: 小心心
@@ -238,7 +308,7 @@ export default {
       this.isRunning = false
 
       if (this.isDanmaku) {
-        const withProbability = this.userComments.map((comment) => {
+        const withProbability = this.userComments.map(comment => {
           comment.probability = 1 / this.count
           return comment
         })
@@ -249,7 +319,7 @@ export default {
           Object.assign({}, this.aTaRi, {
             awardedAt: Date.now(),
             description: this.description,
-          })
+          }),
         )
         // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
         //   time: Date.now(),
@@ -287,7 +357,7 @@ export default {
           Object.assign({}, this.aTaRi, {
             awardedAt: Date.now(),
             description: this.description,
-          })
+          }),
         )
 
         // await lotteryDB.insert(Object.assign({}, this.aTaRi, {
@@ -310,7 +380,7 @@ export default {
 
       const { data: histories } = await queryLotteryHistories({})
       // const histories = await lotteryDB.find({})
-      this.histories = histories.map((history) => {
+      this.histories = histories.map(history => {
         history.awardedAt = dateFormat(history.awardedAt)
         return history
       })

@@ -1,64 +1,122 @@
 <template>
   <div class="disable-user-select">
-    <Drawer title="关于弹幕用户名、头像不显示说明" placement="bottom" height="70" :closable="true" v-model="showDrawTip">
+    <Drawer
+      title="关于弹幕用户名、头像不显示说明"
+      placement="bottom"
+      height="70"
+      :closable="true"
+      v-model="showDrawTip">
       <p>由于B站隐私策略限制，未登录用户无法查看用户名、头像、ID</p>
       <p>未登录会导致投票、统计功能不可用</p>
-      <p>您可以通过
-        <Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）
-      </p>
+      <p>您可以通过 <Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
       <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，完整复制粘贴到设置中</p>
       <p>目前已支持APP端扫码登录</p>
-      <p :style="{ color: 'crimson' }">Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
+      <p :style="{ color: 'crimson' }">
+        Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie
+      </p>
       <img src="../assets/tip-01.png" />
     </Drawer>
     <div class="setting-group">
-      <Alert type="warning" :style="{ cursor: 'pointer' }" @click="showDrawTip = true">
-        <Icon type="ios-megaphone" :style="{ 'font-size': '16px' }" />
+      <Alert
+        type="warning"
+        :style="{ cursor: 'pointer' }"
+        @click="showDrawTip = true">
+        <Icon
+          type="ios-megaphone"
+          :style="{ 'font-size': '16px' }" />
         <span> 关于弹幕用户名、头像不显示说明</span>
       </Alert>
     </div>
-    <div class="setting-group" :style="{ 'padding-top': '0px' }">
-      <Button size="small" @click="sendTestMessage">发送测试弹幕</Button>
-      <Button :style="{ 'margin-left': '10px' }" size="small" @click="clearDanmaku">清空弹幕</Button>
+    <div
+      class="setting-group"
+      :style="{ 'padding-top': '0px' }">
+      <Button
+        size="small"
+        @click="sendTestMessage"
+        >发送测试弹幕</Button
+      >
+      <Button
+        :style="{ 'margin-left': '10px' }"
+        size="small"
+        @click="clearDanmaku"
+        >清空弹幕</Button
+      >
     </div>
-    <Divider orientation="left" size="small">
+    <Divider
+      orientation="left"
+      size="small">
       <span class="divider-text">样式预览</span>
     </Divider>
     <div class="setting-group">
-      <div :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default operatable-preview-text"
+      <div
+        :class="!isBorderAdaptContent ? 'max-width' : ''"
+        class="border-image-default operatable-preview-text"
         :style="{ ...borderImageStyle, ...message_lv3, background }">
-        <draggable :list="displayMessageSlots" group="messages" :style="{ 'z-index': 1, 'min-height': '0px' }"
+        <draggable
+          :list="displayMessageSlots"
+          group="messages"
+          :style="{ 'z-index': 1, 'min-height': '0px' }"
           @change="onDragChange">
           <template #item="{ element: setting }">
-            <div v-if="setting.type === 'medal'" class="vertical-align-middle padding-lr-1px">
-              <FanMedal v-if="example.medal" :medal="example.medal" :role="example.role" />
+            <div
+              v-if="setting.type === 'medal'"
+              class="vertical-align-middle padding-lr-1px">
+              <FanMedal
+                v-if="example.medal"
+                :medal="example.medal"
+                :role="example.role" />
             </div>
-            <div v-else-if="setting.type === 'avatar'" class="vertical-align-middle padding-lr-1px">
-              <Avatar :src="example.avatar" :style="avatarSizeStyle" />
+            <div
+              v-else-if="setting.type === 'avatar'"
+              class="vertical-align-middle padding-lr-1px">
+              <Avatar
+                :src="example.avatar"
+                :style="avatarSizeStyle" />
             </div>
-            <div v-else-if="setting.type === 'name'" :style="{ ...name_lv3, ...fontStyle }"
+            <div
+              v-else-if="setting.type === 'name'"
+              :style="{ ...name_lv3, ...fontStyle }"
               class="vertical-align-middle padding-lr-1px message-username">
               <span>{{ `${example.uname}` }}</span>
             </div>
-            <div v-else-if="setting.type === 'colon'" :style="{ ...name_lv3, ...fontStyle }"
+            <div
+              v-else-if="setting.type === 'colon'"
+              :style="{ ...name_lv3, ...fontStyle }"
               class="vertical-align-middle">
               <span>：</span>
             </div>
-            <div v-else-if="setting.type === 'comment'" class="vertical-align-middle">
-              <img v-if="example.emojiUrl" :style="{ height: '20px' }" :src="example.emojiUrl" />
-              <span v-else :style="{ ...comment_lv3, ...fontStyle }" class="message-comment">{{ example.content
-              }}</span>
+            <div
+              v-else-if="setting.type === 'comment'"
+              class="vertical-align-middle">
+              <img
+                v-if="example.emojiUrl"
+                :style="{ height: '20px' }"
+                :src="example.emojiUrl" />
+              <span
+                v-else
+                :style="{ ...comment_lv3, ...fontStyle }"
+                class="message-comment"
+                >{{ example.content }}</span
+              >
             </div>
           </template>
         </draggable>
       </div>
     </div>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" @click="changeCollapse(0)">
+    <Divider
+      orientation="left"
+      size="small">
+      <span
+        class="divider-text"
+        @click="changeCollapse(0)">
         常规设置
-        <Icon v-if="collapse[0]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
+        <Icon
+          v-if="collapse[0]"
+          type="md-arrow-dropdown" />
+        <Icon
+          v-else
+          type="md-arrow-dropup" />
       </span>
     </Divider>
     <transition name="fade">
@@ -66,14 +124,20 @@
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>窗体背景色</span>
-            <ColorPicker transfer :model-value="background" size="small" alpha
+            <ColorPicker
+              transfer
+              :model-value="background"
+              size="small"
+              alpha
               @on-active-change="debouncedUpdateBackground" />
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span :style="{ 'padding-right': '10px' }">整体透明度</span>
             <div class="avatar-controller-slider">
-              <Slider :model-value="opacity" @on-change="changeOpacity" />
+              <Slider
+                :model-value="opacity"
+                @on-change="changeOpacity" />
             </div>
           </div>
         </div>
@@ -81,36 +145,61 @@
           <div :style="{ display: 'inline-block' }">
             <span :style="{ 'padding-right': '10px' }">头像大小</span>
             <div class="avatar-controller-slider">
-              <Slider :model-value="avatarSize" @on-change="changeAvatarSize" />
+              <Slider
+                :model-value="avatarSize"
+                @on-change="changeAvatarSize" />
             </div>
           </div>
         </div>
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>字体</span>
-            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }"
-              :model-value="danmakuFont" size="small" @on-change="changeDanmakuFont"
+            <Select
+              class="space-left-2px"
+              :style="{ width: '100px', display: 'inline-block' }"
+              :model-value="danmakuFont"
+              size="small"
+              @on-change="changeDanmakuFont"
               @on-open-change="onOpenFontSelectChange">
               <OptionGroup label="全局值">
-                <Option v-for="item in fonts.filter((font) => font.type === 'default')" :key="item.key"
-                  :value="item.value">{{ item.value }}</Option>
+                <Option
+                  v-for="item in fonts.filter(font => font.type === 'default')"
+                  :key="item.key"
+                  :value="item.value"
+                  >{{ item.value }}</Option
+                >
               </OptionGroup>
               <OptionGroup label="通用字体族">
-                <Option v-for="item in fonts.filter((font) => font.type === 'common')" :key="item.key"
-                  :value="item.value">{{ item.value }}</Option>
+                <Option
+                  v-for="item in fonts.filter(font => font.type === 'common')"
+                  :key="item.key"
+                  :value="item.value"
+                  >{{ item.value }}</Option
+                >
               </OptionGroup>
               <OptionGroup label="系统">
-                <Option v-for="item in fonts.filter((font) => font.type === 'custom')" :key="item.key"
-                  :value="item.value">{{ item.value }}</Option>
+                <Option
+                  v-for="item in fonts.filter(font => font.type === 'custom')"
+                  :key="item.key"
+                  :value="item.value"
+                  >{{ item.value }}</Option
+                >
               </OptionGroup>
             </Select>
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span>粗细</span>
-            <Select class="space-left-2px" :style="{ width: '100px', display: 'inline-block' }"
-              :model-value="fontWeight" size="small" @on-change="changeFontWeight">
-              <Option v-for="(option, index) in fontWeightOptions" :key="index" :value="option.key"
+            <Select
+              class="space-left-2px"
+              :style="{ width: '100px', display: 'inline-block' }"
+              :model-value="fontWeight"
+              size="small"
+              @on-change="changeFontWeight">
+              <Option
+                v-for="(option, index) in fontWeightOptions"
+                :key="index"
+                :value="option.key"
                 :label="option.label">
                 <span>{{ option.value }}</span>
               </Option>
@@ -120,7 +209,9 @@
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>
-              <Tooltip placement="top" transfer>
+              <Tooltip
+                placement="top"
+                transfer>
                 重复弹幕合并
                 <template #content>
                   <div class="description-text">
@@ -129,14 +220,21 @@
                 </template>
               </Tooltip>
             </span>
-            <InputNumber class="space-left-2px" :model-value="combineSimilarTime" :min="0" :step="100" size="small"
+            <InputNumber
+              class="space-left-2px"
+              :model-value="combineSimilarTime"
+              :min="0"
+              :step="100"
+              size="small"
               @on-change="changeCombineSimilarTime" />
             {{ ' ms' }}
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span>
-              <Tooltip placement="top" transfer>
+              <Tooltip
+                placement="top"
+                transfer>
                 弹幕超时消失
                 <template #content>
                   <div class="description-text">
@@ -145,7 +243,12 @@
                 </template>
               </Tooltip>
             </span>
-            <InputNumber class="space-left-2px" :model-value="hiddenExpiredTime" :min="0" :step="100" size="small"
+            <InputNumber
+              class="space-left-2px"
+              :model-value="hiddenExpiredTime"
+              :min="0"
+              :step="100"
+              size="small"
               @on-change="changeHiddenExpiredTime" />
             {{ ' ms' }}
           </div>
@@ -153,51 +256,105 @@
         <div class="setting-group">
           <div :style="{ display: 'inline-block' }">
             <span>礼物栏展示大于</span>
-            <InputNumber class="space-left-2px number-input-size" :model-value="showHeadlineThreshold" :min="0"
-              size="small" @on-change="changeShowHeadlineThreshold" />
+            <InputNumber
+              class="space-left-2px number-input-size"
+              :model-value="showHeadlineThreshold"
+              :min="0"
+              size="small"
+              @on-change="changeShowHeadlineThreshold" />
             {{ ' 元' }}
           </div>
           <Divider type="vertical" />
           <div :style="{ display: 'inline-block' }">
             <span>弹幕礼物展示大于</span>
-            <InputNumber class="space-left-2px number-input-size" :model-value="showGiftCardThreshold" :min="0"
-              size="small" @on-change="changeShowGiftCardThreshold" />
+            <InputNumber
+              class="space-left-2px number-input-size"
+              :model-value="showGiftCardThreshold"
+              :min="0"
+              size="small"
+              @on-change="changeShowGiftCardThreshold" />
             {{ ' 元' }}
           </div>
         </div>
         <div class="setting-group">
-          <Button size="small" @click="openImageBorderModal">设置图片边框</Button>
+          <Button
+            size="small"
+            @click="openImageBorderModal"
+            >设置图片边框</Button
+          >
           <Divider type="vertical" />
           <span>表情大小</span>
-          <InputNumber class="space-left-2px number-input-size" :model-value="emojiSize" :min="0" size="small"
+          <InputNumber
+            class="space-left-2px number-input-size"
+            :model-value="emojiSize"
+            :min="0"
+            size="small"
             @on-change="changeEmojiSize" />
         </div>
         <div class="setting-group">
-          <Checkbox :model-value="isShowInteractInfo" @on-change="showInteractInfo">显示交互消息</Checkbox>
+          <Checkbox
+            :model-value="isShowInteractInfo"
+            @on-change="showInteractInfo"
+            >显示交互消息</Checkbox
+          >
           <Divider type="vertical" />
-          <Checkbox :model-value="isShowSilverGift" @on-change="showSilverGift">展示银瓜子礼物</Checkbox>
+          <Checkbox
+            :model-value="isShowSilverGift"
+            @on-change="showSilverGift"
+            >展示银瓜子礼物</Checkbox
+          >
           <!-- <Divider type="vertical" /> -->
           <!-- <Checkbox :model-value="isShowMemberShipIcon" @on-change="showMemberShipIcon">显示舰队图标</Checkbox> -->
         </div>
         <div class="setting-group">
-          <Checkbox :model-value="isShowFanMedal" @on-change="showFanMedal">显示粉丝牌</Checkbox>
+          <Checkbox
+            :model-value="isShowFanMedal"
+            @on-change="showFanMedal"
+            >显示粉丝牌</Checkbox
+          >
           <Divider type="vertical" />
-          <Checkbox :model-value="isShowHeadline" @on-change="showHeadLine">显示顶部礼物栏</Checkbox>
+          <Checkbox
+            :model-value="isShowHeadline"
+            @on-change="showHeadLine"
+            >显示顶部礼物栏</Checkbox
+          >
           <Divider type="vertical" />
-          <Checkbox :model-value="isShowColon" @on-change="showColon">显示冒号</Checkbox>
+          <Checkbox
+            :model-value="isShowColon"
+            @on-change="showColon"
+            >显示冒号</Checkbox
+          >
         </div>
         <div class="setting-group">
           <!-- <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">炫彩模式</Checkbox> -->
-          <Checkbox :model-value="isUseMiniGiftCard" @on-change="useMiniGiftCard">使用礼物小卡片</Checkbox>
+          <Checkbox
+            :model-value="isUseMiniGiftCard"
+            @on-change="useMiniGiftCard"
+            >使用礼物小卡片</Checkbox
+          >
           <Divider type="vertical" />
-          <Checkbox :model-value="isShowType1" @on-change="showType1">显示节奏风暴弹幕</Checkbox>
+          <Checkbox
+            :model-value="isShowType1"
+            @on-change="showType1"
+            >显示节奏风暴弹幕</Checkbox
+          >
           <Divider type="vertical" />
-          <Checkbox :model-value="isShowType2" @on-change="showType2">显示天选时刻弹幕</Checkbox>
+          <Checkbox
+            :model-value="isShowType2"
+            @on-change="showType2"
+            >显示天选时刻弹幕</Checkbox
+          >
         </div>
         <div class="setting-group">
-          <Checkbox :model-value="isShowSuperChatJPN" @on-change="showSuperChatJPN">显示醒目留言日语翻译</Checkbox>
+          <Checkbox
+            :model-value="isShowSuperChatJPN"
+            @on-change="showSuperChatJPN"
+            >显示醒目留言日语翻译</Checkbox
+          >
           <Divider type="vertical" />
-          <Tooltip placement="top" transfer>
+          <Tooltip
+            placement="top"
+            transfer>
             通道数
             <template #content>
               <div class="description-text">
@@ -205,9 +362,17 @@
               </div>
             </template>
           </Tooltip>
-          <InputNumber class="space-left-2px" :model-value="danmakuChannel" :min="1" :step="1"
-            :style="{ width: '50px' }" size="small" @on-change="changeDanmakuChannel" />
-          <Tooltip placement="top" transfer>
+          <InputNumber
+            class="space-left-2px"
+            :model-value="danmakuChannel"
+            :min="1"
+            :step="1"
+            :style="{ width: '50px' }"
+            size="small"
+            @on-change="changeDanmakuChannel" />
+          <Tooltip
+            placement="top"
+            transfer>
             <span class="space-left-2px">延时</span>
             <template #content>
               <div class="description-text">
@@ -215,17 +380,32 @@
               </div>
             </template>
           </Tooltip>
-          <InputNumber class="space-left-2px" :model-value="channelDelayTime" :min="0" :step="1"
-            :style="{ width: '60px' }" size="small" @on-change="changeChannelDelayTime" /> ms
+          <InputNumber
+            class="space-left-2px"
+            :model-value="channelDelayTime"
+            :min="0"
+            :step="1"
+            :style="{ width: '60px' }"
+            size="small"
+            @on-change="changeChannelDelayTime" />
+          ms
         </div>
       </div>
     </transition>
 
-    <Divider orientation="left" size="small">
-      <span class="divider-text" @click="changeCollapse(1)">
+    <Divider
+      orientation="left"
+      size="small">
+      <span
+        class="divider-text"
+        @click="changeCollapse(1)">
         个性化弹幕设置
-        <Icon v-if="collapse[1]" type="md-arrow-dropdown" />
-        <Icon v-else type="md-arrow-dropup" />
+        <Icon
+          v-if="collapse[1]"
+          type="md-arrow-dropdown" />
+        <Icon
+          v-else
+          type="md-arrow-dropup" />
       </span>
     </Divider>
 
@@ -357,15 +537,32 @@
             <Divider type="vertical" />
             <StyleEditor v-bind="editors[44]" />
             <Divider type="vertical" />
-            <Checkbox :model-value="isShowAdminIcon" @on-change="showAdminIcon">图标</Checkbox>
-            <AutoComplete size="small" :style="{ width: '100px' }" :model-value="adminIcon" @on-search="searchAdminIcon"
+            <Checkbox
+              :model-value="isShowAdminIcon"
+              @on-change="showAdminIcon"
+              >图标</Checkbox
+            >
+            <AutoComplete
+              size="small"
+              :style="{ width: '100px' }"
+              :model-value="adminIcon"
+              @on-search="searchAdminIcon"
               @on-change="changeAdminIcon">
-              <Option v-for="icon in icons" :key="icon" :value="icon">
+              <Option
+                v-for="icon in icons"
+                :key="icon"
+                :value="icon">
                 <Icon :type="icon" /> {{ icon }}
               </Option>
             </AutoComplete>
-            <Icon :type="adminIcon" class="admin-icon" :color="adminIconColor" />
-            <ColorPicker :model-value="adminIconColor" size="small" alpha
+            <Icon
+              :type="adminIcon"
+              class="admin-icon"
+              :color="adminIconColor" />
+            <ColorPicker
+              :model-value="adminIconColor"
+              size="small"
+              alpha
               @on-active-change="debouncedChangeAdminIconColor" />
             <!-- </Space> -->
           </div>
@@ -414,54 +611,99 @@
       </div>
     </transition>
 
-    <Modal v-model="isShowBorderModal" title="图片边框设置" width="650" scrollable lock-scroll transfer
-      :styles="{ overflow: 'auto' }" @on-ok="applyBorderImageSetting">
+    <Modal
+      v-model="isShowBorderModal"
+      title="图片边框设置"
+      width="650"
+      scrollable
+      lock-scroll
+      transfer
+      :styles="{ overflow: 'auto' }"
+      @on-ok="applyBorderImageSetting">
       <div :style="{ padding: '20px' }">
-        <span :class="!isBorderAdaptContent ? 'max-width' : ''" class="border-image-default"
-          :style="borderImageStyle">样式预览：预览图片边框效果展示文本</span>
+        <span
+          :class="!isBorderAdaptContent ? 'max-width' : ''"
+          class="border-image-default"
+          :style="borderImageStyle"
+          >样式预览：预览图片边框效果展示文本</span
+        >
       </div>
       <div>
-        <template v-for="(item, index) in borderImages" :key="index">
+        <template
+          v-for="(item, index) in borderImages"
+          :key="index">
           <div class="image-container">
-            <Icon class="close-icon" type="md-close-circle" @click="deleteBorderImage(index)" />
-            <img :src="item.dataUrl" :class="item.isSelected ? 'image image-selected' : 'image'"
+            <Icon
+              class="close-icon"
+              type="md-close-circle"
+              @click="deleteBorderImage(index)" />
+            <img
+              :src="item.dataUrl"
+              :class="item.isSelected ? 'image image-selected' : 'image'"
               @click="selectImageBorder(index)" />
           </div>
         </template>
-        <label v-if="borderImages.length < 4" class="upload-file-container">
-          <input :style="{ display: 'none' }" type="file" accept="image/*" @change="encodeImageFileAsURL" />
-          <Icon class="upload-file-icon" type="md-add" />
+        <label
+          v-if="borderImages.length < 4"
+          class="upload-file-container">
+          <input
+            :style="{ display: 'none' }"
+            type="file"
+            accept="image/*"
+            @change="encodeImageFileAsURL" />
+          <Icon
+            class="upload-file-icon"
+            type="md-add" />
         </label>
       </div>
       <div :style="{ padding: '5px 10px' }">
-        <Checkbox :model-value="isBorderAdaptContent" @on-change="changeBorderAdaptContent">适应文本长度</Checkbox>
+        <Checkbox
+          :model-value="isBorderAdaptContent"
+          @on-change="changeBorderAdaptContent"
+          >适应文本长度</Checkbox
+        >
       </div>
       <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">边框宽度</span>
-        <InputNumber :model-value="borderWidthValue" :style="{ width: '55px' }" @on-change="setBorderWidthValue" />
+        <InputNumber
+          :model-value="borderWidthValue"
+          :style="{ width: '55px' }"
+          @on-change="setBorderWidthValue" />
       </div>
       <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
-          <Tooltip placement="top" transfer>
+          <Tooltip
+            placement="top"
+            transfer>
             图片分割线
             <template #content>
               <div :style="{ 'white-space': 'normal' }">
-                <p>border-image-slice属性会将图片分割为9个区域：四个角，四个边以及中心区域。四条切片线，从它们各自的侧面设置给定距离，控制区域的大小。</p>
+                <p>
+                  border-image-slice属性会将图片分割为9个区域：四个角，四个边以及中心区域。四条切片线，从它们各自的侧面设置给定距离，控制区域的大小。
+                </p>
                 <p>https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-slice</p>
               </div>
             </template>
           </Tooltip>
         </span>
-        <Input :model-value="borderImageSliceValue" :style="{ width: '180px' }" @on-change="setBorderImageSliceValue" />
+        <Input
+          :model-value="borderImageSliceValue"
+          :style="{ width: '180px' }"
+          @on-change="setBorderImageSliceValue" />
       </div>
       <div :style="{ padding: '5px 10px' }">
         <!-- https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image-width -->
         <span class="border-image-setting-text">图片边框宽度</span>
-        <Input :model-value="borderImageWidthValue" :style="{ width: '180px' }" @on-change="setBorderImageWidthValue" />
+        <Input
+          :model-value="borderImageWidthValue"
+          :style="{ width: '180px' }"
+          @on-change="setBorderImageWidthValue" />
       </div>
       <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
-          <Tooltip placement="top" transfer>
+          <Tooltip
+            placement="top"
+            transfer>
             填充方式
             <template #content>
               <div :style="{ 'white-space': 'normal' }">
@@ -472,12 +714,16 @@
             </template>
           </Tooltip>
         </span>
-        <Input :model-value="borderImageRepeatValue" :style="{ width: '180px' }"
+        <Input
+          :model-value="borderImageRepeatValue"
+          :style="{ width: '180px' }"
           @on-change="setBorderImageRepeatValue" />
       </div>
       <div :style="{ padding: '5px 10px' }">
         <span class="border-image-setting-text">
-          <Tooltip placement="top" transfer>
+          <Tooltip
+            placement="top"
+            transfer>
             outset
             <template #content>
               <div :style="{ 'white-space': 'normal' }">
@@ -487,7 +733,9 @@
             </template>
           </Tooltip>
         </span>
-        <Input :model-value="borderImageOutsetValue" :style="{ width: '180px' }"
+        <Input
+          :model-value="borderImageOutsetValue"
+          :style="{ width: '180px' }"
           @on-change="setBorderImageOutsetValue" />
       </div>
     </Modal>
@@ -503,17 +751,17 @@ import FontList from 'font-list'
 import StyleEditor from './StyleEditor'
 // @ts-ignore
 import FanMedal from '@tokine/shared/components/FanMedal.vue'
-import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_AVATAR, ICONS } from '../../service/const'
+import { DEFAULT_FONTS, DEFAULT_COMMON_FONT_FAMILIES, GUARD_ICON_MAP, DEFAULT_FACE, ICONS } from '../../service/const'
 import { getRandomItem } from '../service/util'
 import { cloneDeep, debounce } from 'lodash'
 import { updateClientConfig, clearDM, sendDM } from '../service/api'
 const defaultFonts = [
-  ...DEFAULT_FONTS.map((font) => ({
+  ...DEFAULT_FONTS.map(font => ({
     key: font,
     value: font,
     type: 'default',
   })),
-  ...DEFAULT_COMMON_FONT_FAMILIES.map((font) => ({
+  ...DEFAULT_COMMON_FONT_FAMILIES.map(font => ({
     key: font,
     value: font,
     type: 'common',
@@ -531,7 +779,7 @@ export default {
     return {
       fonts: defaultFonts,
       example: {
-        avatar: DEFAULT_AVATAR,
+        avatar: DEFAULT_FACE,
         roomId: 0,
         sendAt: 1628534054678,
         uid: 1,
@@ -1049,22 +1297,22 @@ export default {
     },
     isShowAvatar() {
       const settings = useConfigStore().messageSlots
-      return settings.find((setting) => setting.type === 'avatar')!.isShow
+      return settings.find(setting => setting.type === 'avatar')!.isShow
     },
     isShowMemberShipIcon() {
       const settings = useConfigStore().messageSlots
-      return settings.find((setting) => setting.type === 'guard')!.isShow
+      return settings.find(setting => setting.type === 'guard')!.isShow
     },
     isShowInteractInfo() {
       return useConfigStore().isShowInteractInfo
     },
     isShowFanMedal() {
       const settings = useConfigStore().messageSlots
-      return settings.find((setting) => setting.type === 'medal')!.isShow
+      return settings.find(setting => setting.type === 'medal')!.isShow
     },
     avatarSize() {
       const settings = useConfigStore().messageSlots
-      return settings.find((setting) => setting.type === 'avatar')!.size
+      return settings.find(setting => setting.type === 'avatar')!.size
     },
     combineSimilarTime() {
       return useConfigStore().combineSimilarTime
@@ -1086,7 +1334,7 @@ export default {
     },
     isShowColon() {
       const settings = useConfigStore().messageSlots
-      return settings.find((setting) => setting.type === 'colon')!.isShow
+      return settings.find(setting => setting.type === 'colon')!.isShow
     },
     isShowHeadline() {
       return useConfigStore().isShowHeadline
@@ -1126,7 +1374,7 @@ export default {
       return useConfigStore().borderImages
     },
     borderImageStyle() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return {}
       return {
         'border-width': `${image['border-width']}px`,
@@ -1138,32 +1386,32 @@ export default {
       }
     },
     isBorderAdaptContent() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return false
       return image.isAdaptContent
     },
     borderImageSliceValue() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return ''
       return image['border-image-slice']
     },
     borderWidthValue() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return 0
       return image['border-width']
     },
     borderImageWidthValue() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return ''
       return image['border-image-width']
     },
     borderImageRepeatValue() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return ''
       return image['border-image-repeat']
     },
     borderImageOutsetValue() {
-      const image = this.borderImages.find((image) => image.isSelected)
+      const image = this.borderImages.find(image => image.isSelected)
       if (!image) return ''
       return image['border-image-outset']
     },
@@ -1208,7 +1456,7 @@ export default {
   mounted() {
     // this.initExamleMessages()
 
-    if (defaultFonts.find((font) => font.key === this.danmakuFont)) return
+    if (defaultFonts.find(font => font.key === this.danmakuFont)) return
     this.fonts.push({
       key: this.danmakuFont,
       value: this.danmakuFont,
@@ -1218,28 +1466,49 @@ export default {
   methods: {
     async showMemberShipIcon(status) {
       const settings = cloneDeep(this.messageSlots)
-      const setting = settings.find((setting) => setting.type === 'guard')
+      const setting = settings.find(setting => setting.type === 'guard')
       setting.isShow = status
 
       const data = { messageSlots: settings }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async showFanMedal(status) {
       const settings = cloneDeep(this.messageSlots)
-      const setting = settings.find((setting) => setting.type === 'medal')
+      const setting = settings.find(setting => setting.type === 'medal')
       setting.isShow = status
 
       const data = {
         messageSlots: settings,
         isShowFanMedal: status,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async showInteractInfo(status) {
       const data = { isShowInteractInfo: status }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async sendTestMessage() {
@@ -1253,7 +1522,14 @@ export default {
         background: color,
         // scrollDanmakuBackground: color,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async changeAvatarSize(size) {
@@ -1261,7 +1537,7 @@ export default {
       //   avatarSize: size,
       // }
       const settings = cloneDeep(this.messageSlots)
-      const setting = settings.find((setting) => setting.type === 'avatar')
+      const setting = settings.find(setting => setting.type === 'avatar')
       setting.size = size
       const data = {}
       if (size === 0) {
@@ -1274,7 +1550,14 @@ export default {
 
       data.messageSlots = settings
 
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async changeOpacity(number) {
@@ -1282,14 +1565,28 @@ export default {
         opacity: Number((number / 100).toFixed(2)),
       }
       useConfigStore().updateConfig(data)
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
     },
 
     async changeCombineSimilarTime(number) {
       const data = {
         combineSimilarTime: number,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1297,7 +1594,14 @@ export default {
       const data = {
         hiddenExpiredTime: number,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1305,14 +1609,28 @@ export default {
       const data = {
         showHeadlineThreshold: number,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
     async changeShowGiftCardThreshold(number) {
       const data = {
         showGiftCardThreshold: number,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1320,7 +1638,14 @@ export default {
       const data = {
         isShowSilverGift: status,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1430,7 +1755,7 @@ export default {
 
     async getFonts() {
       const fonts = await FontList.getFonts({ disableQuoting: true })
-      this.fonts = [...defaultFonts, ...fonts.map((font) => ({ key: font, value: font, type: 'custom' }))]
+      this.fonts = [...defaultFonts, ...fonts.map(font => ({ key: font, value: font, type: 'custom' }))]
     },
 
     async onOpenFontSelectChange(value) {
@@ -1443,7 +1768,14 @@ export default {
       const data = {
         danmakuFont: value,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1451,7 +1783,14 @@ export default {
       const data = {
         isUseMiniGiftCard: value,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1491,7 +1830,7 @@ export default {
     selectImageBorder(index) {
       const borderImages = cloneDeep(this.borderImages)
       const preStatus = borderImages[index].isSelected
-      borderImages.forEach((item) => {
+      borderImages.forEach(item => {
         item.isSelected = false
       })
       borderImages[index].isSelected = !preStatus
@@ -1519,7 +1858,7 @@ export default {
 
     setBorderImageSliceValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image['border-image-slice'] = e.target.value
       useConfigStore().updateConfig({
@@ -1529,7 +1868,7 @@ export default {
 
     setBorderWidthValue(number) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image['border-width'] = number
       useConfigStore().updateConfig({
@@ -1539,7 +1878,7 @@ export default {
 
     setBorderImageWidthValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image['border-image-width'] = e.target.value
       useConfigStore().updateConfig({
@@ -1549,7 +1888,7 @@ export default {
 
     setBorderImageRepeatValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image['border-image-repeat'] = e.target.value
       useConfigStore().updateConfig({
@@ -1559,7 +1898,7 @@ export default {
 
     setBorderImageOutsetValue(e) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image['border-image-outset'] = e.target.value
       useConfigStore().updateConfig({
@@ -1571,7 +1910,14 @@ export default {
       const data = {
         borderImages: this.borderImages,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
     },
 
     changeCollapse(index) {
@@ -1596,12 +1942,12 @@ export default {
           }
         })
         .filter(Boolean)
-      const displayItems = messageSlots.filter((setting) => setting.isShow)
+      const displayItems = messageSlots.filter(setting => setting.isShow)
 
       const itemToAdd = displayItems.splice(oldIndex, 1)[0]
       displayItems.splice(newIndex, 0, itemToAdd)
 
-      hiddenItems.forEach((item) => {
+      hiddenItems.forEach(item => {
         displayItems.splice(item.index, 0, item.data)
       })
       const data = {
@@ -1615,7 +1961,14 @@ export default {
       const data = {
         fontWeight: value,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1623,23 +1976,37 @@ export default {
       const data = {
         isShowHeadline: value,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
     async showColon(status) {
       const settings = cloneDeep(this.messageSlots)
-      const setting = settings.find((setting) => setting.type === 'colon')
+      const setting = settings.find(setting => setting.type === 'colon')
       setting.isShow = status
 
       const data = { messageSlots: settings }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
     async changeBorderAdaptContent(status) {
       const borderImages = cloneDeep(this.borderImages)
-      const image = borderImages.find((image) => image.isSelected)
+      const image = borderImages.find(image => image.isSelected)
       if (!image) return
       image.isAdaptContent = status
       useConfigStore().updateConfig({
@@ -1651,7 +2018,14 @@ export default {
       const data = {
         isShowType1: status,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1659,7 +2033,14 @@ export default {
       const data = {
         isShowType2: status,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1667,7 +2048,14 @@ export default {
       const data = {
         isShowSuperChatJPN: status,
       }
-      const clientId = (this as any).$global?.clientId; if (clientId) { const kvs = Object.entries(data).map(([key, value]) => ({ key, value: typeof value === 'string' ? value : JSON.stringify(value) })); await updateClientConfig(clientId, kvs) }
+      const clientId = (this as any).$global?.clientId
+      if (clientId) {
+        const kvs = Object.entries(data).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string' ? value : JSON.stringify(value),
+        }))
+        await updateClientConfig(clientId, kvs)
+      }
       useConfigStore().updateConfig(data)
     },
 
@@ -1791,7 +2179,8 @@ export default {
   margin: 0 1em;
 }
 
-.one-line {}
+.one-line {
+}
 
 .one-line:before,
 .one-line:after {

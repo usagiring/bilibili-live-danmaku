@@ -21,25 +21,6 @@
     <!-- ═══ dmStyle — 弹幕窗样式 ═══ -->
     <div class="divider">弹幕窗样式</div>
     <div
-      class="preview"
-      :style="{ background: dmStyle?.windowBackground || 'rgba(30,30,40,0.9)', opacity: dmStyle?.windowOpacity ?? 1 }">
-      <img
-        v-if="dmStyle?.isShowFace"
-        class="avatar"
-        :src="DEFAULT_AVATAR" />
-      <span
-        v-if="dmStyle?.isShowType1 !== false"
-        class="name"
-        >用户名</span
-      >
-      <span
-        v-if="dmStyle?.isShowType2 !== false"
-        class="colon"
-        >：</span
-      >
-      <span class="msg">这是一条测试弹幕</span>
-    </div>
-    <div
       class="section"
       style="padding-bottom: 8px">
       <div
@@ -54,7 +35,7 @@
         <button
           class="btn btn-default"
           style="font-size: 10px; height: 22px"
-          @click="clearDanmaku">
+          @click="clearDM">
           清空弹幕
         </button>
       </div>
@@ -64,33 +45,37 @@
       <div class="chips">
         <span
           class="chip"
-          :class="{ on: dmStyle?.isShowFace !== false }"
-          @click="toggle('dmStyle.isShowFace')"
-          >头像</span
-        >
+          :class="{ on: getSlotShow('medal') }"
+          @click="toggleSlot('medal')">
+          粉丝牌
+        </span>
         <span
           class="chip"
-          :class="{ on: dmStyle?.isShowFanMedal !== false }"
-          @click="toggle('dmStyle.isShowFanMedal')"
-          >粉丝牌</span
-        >
+          :class="{ on: getSlotShow('face') }"
+          @click="toggleSlot('face')">
+          头像
+        </span>
         <span
           class="chip"
-          :class="{ on: dmStyle?.isShowType1 !== false }"
-          @click="toggle('dmStyle.isShowType1')"
-          >用户名</span
-        >
+          :class="{ on: getSlotShow('name') }"
+          @click="toggleSlot('name')">
+          昵称
+        </span>
+        <span
+          class="chip"
+          :class="{ on: getSlotShow('comment') }"
+          @click="toggleSlot('comment')">
+          内容
+        </span>
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowType2 !== false }"
           @click="toggle('dmStyle.isShowType2')">冒号</span> -->
         <span style="color: #ddd; margin: 0 2px">│</span>
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowSuperChatJPN !== false }"
           @click="toggle('dmStyle.isShowSuperChatJPN')">SC日文</span> -->
-        <span
-          class="chip"
-          :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
+        <!-- <span class="chip" :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
           @click="toggle('dmStyle.isShowAnchorIcon')"
           >舰队标记</span
-        >
+        > -->
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
           @click="toggle('dmStyle.isShowAdminIcon')">房管标</span> -->
         <span
@@ -646,14 +631,14 @@
     <!-- ═══ 数据 ═══ -->
     <div class="divider">数据</div>
     <div class="section">
-      <div class="section-row">
+      <!-- <div class="section-row">
         <button
           class="btn btn-default"
           @click="restoreDefaults">
           还原默认弹幕样式
         </button>
         <span style="font-size: 11px; color: #999">~/Library/Application Support/bilibili-danmaku</span>
-      </div>
+      </div> -->
     </div>
 
     <!-- ═══ 扫码登录弹窗 ═══ -->
@@ -680,8 +665,8 @@
 import { ref, computed } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
-import { generateQRCode, sendDM, clearDM } from '../service/api'
-import { DEFAULT_AVATAR } from '../../service/const'
+import { updateClientConfig, generateQRCode, sendDM, clearDM as clearDMApi } from '../service/api'
+import { DEFAULT_FACE as DEFAULT_FACE } from '../../service/const'
 import QRCode from 'qrcode'
 
 const dmStyle = computed(() => config.dmStyle)
@@ -689,6 +674,7 @@ const dmRawStyle = computed(() => config.dmRawStyle)
 const liveConfig = computed(() => config.liveConfig)
 const recordConfig = computed(() => config.recordConfig)
 const chartConfig = computed(() => config.chartConfig)
+const clientId = computed(() => config.id)
 
 // ── Cookie ──
 const cookieInput = ref('')
@@ -729,44 +715,68 @@ const currentLevelStyle = computed((): LevelStyle => {
     commentFontSize: comment['font-size'] ? parseInt(comment['font-size']) : undefined,
     commentStrokeColor: comment['-webkit-text-stroke-color'],
     commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseInt(comment['-webkit-text-stroke-width']) : 0,
-    bgColor: container['background-color'] || container['background'],
+    bgColor: container['background'],
   }
 })
 
 // ── 工具函数 ──
 function setVal(path: string, value: any) {
   _set(config, path, value)
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [
+      {
+        key: path,
+        value,
+      },
+    ],
+  }).catch(e => {
+    console.error(e)
+  })
 }
 
 function toggle(path: string) {
   const cur = _get(config, path, false)
-  _set(config, path, !cur)
+  setVal(path, !cur)
+}
+
+function getSlotShow(type: string) {
+  const slots = dmStyle.value?.messageSlots || []
+  return slots.find(s => s.type === type)?.isShow ?? false
+}
+
+function toggleSlot(type: string) {
+  const slots = [...(dmStyle.value?.messageSlots || [])]
+  const slot = slots.find(s => s.type === type)
+  if (slot) {
+    slot.isShow = !slot.isShow
+    setVal('dmStyle.messageSlots', slots)
+  }
 }
 
 function stepUp(path: string, defaultVal: number, max: number, step: number) {
   const cur = _get(config, path, defaultVal)
-  _set(config, path, Math.min(max, cur + step))
+  setVal(path, Math.min(max, cur + step))
 }
 
 function stepDown(path: string, defaultVal: number, min: number, step: number) {
   const cur = _get(config, path, defaultVal)
-  _set(config, path, Math.max(min, cur - step))
+  setVal(path, Math.max(min, cur - step))
 }
 
 function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke', color: string) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
   if (target === 'user') {
-    _set(config, `dmStyle.messageUsername${suffix}.color`, color)
+    setVal(`dmStyle.messageUsername${suffix}.color`, color)
   } else if (target === 'comment') {
-    _set(config, `dmStyle.messageComment${suffix}.color`, color)
+    setVal(`dmStyle.messageComment${suffix}.color`, color)
   } else if (target === 'bg') {
-    _set(config, `dmStyle.messageContainer${suffix}.background-color`, color)
-    _set(config, `dmStyle.messageContainer${suffix}.background`, color)
+    setVal(`dmStyle.messageContainer${suffix}.background`, color)
   } else if (target === 'userStroke') {
-    _set(config, `dmStyle.messageUsername${suffix}.-webkit-text-stroke-color`, color)
+    setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-color`, color)
   } else if (target === 'commentStroke') {
-    _set(config, `dmStyle.messageComment${suffix}.-webkit-text-stroke-color`, color)
+    setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-color`, color)
   }
 }
 
@@ -774,26 +784,26 @@ function setLevelStyle(key: string, value: any) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
   if (key === 'userFontSize') {
-    _set(config, `dmStyle.messageUsername${suffix}.font-size`, `${value}px`)
+    setVal(`dmStyle.messageUsername${suffix}.font-size`, `${value}px`)
   } else if (key === 'commentFontSize') {
-    _set(config, `dmStyle.messageComment${suffix}.font-size`, `${value}px`)
+    setVal(`dmStyle.messageComment${suffix}.font-size`, `${value}px`)
   } else if (key === 'userStrokeWidth') {
-    _set(config, `dmStyle.messageUsername${suffix}.-webkit-text-stroke-width`, `${value}px`)
+    setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-width`, `${value}px`)
   } else if (key === 'commentStrokeWidth') {
-    _set(config, `dmStyle.messageComment${suffix}.-webkit-text-stroke-width`, `${value}px`)
+    setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-width`, `${value}px`)
   }
 }
 
 // ── 色彩表 ──
 function addColor() {
   const colors = [...(chartConfig.value?.colors || []), '#2d8cf0']
-  _set(config, 'chartConfig.colors', colors)
+  setVal('chartConfig.colors', colors)
 }
 
 function removeColor(index: number) {
   const colors = [...(chartConfig.value?.colors || [])]
   colors.splice(index, 1)
-  _set(config, 'chartConfig.colors', colors)
+  setVal('chartConfig.colors', colors)
 }
 
 // ── 测试弹幕 ──
@@ -818,9 +828,9 @@ async function sendTestDanmaku() {
   }
 }
 
-async function clearDanmaku() {
+async function clearDM() {
   try {
-    await clearDM()
+    await clearDMApi()
   } catch {
     /* ignore */
   }
@@ -830,7 +840,7 @@ async function clearDanmaku() {
 function selectSavePath() {
   const { ipcRenderer } = (window as any).require('electron')
   ipcRenderer.invoke('select-directory').then((path: string | null) => {
-    if (path) _set(config, 'recordConfig.savePath', path)
+    if (path) setVal('recordConfig.savePath', path)
   })
 }
 
@@ -850,32 +860,32 @@ async function showQrCodeLoginModal() {
   }
 }
 
-// ── 还原默认 ──
-function restoreDefaults() {
-  const defaults: Record<string, any> = {
-    isShowFace: true,
-    isShowFanMedal: true,
-    isShowHeadline: true,
-    isShowType1: true,
-    isShowType2: true,
-    windowOpacity: 1,
-    font: 'auto',
-    fontWeight: 'normal',
-    faceSize: 28,
-    combineSimilarTime: 3000,
-    hiddenExpiredTime: 0,
-    showGiftCardThreshold: 0,
-    showHeadlineThreshold: 0,
-    isShowInteractInfo: false,
-    isShowSilverGift: false,
-    isShowSuperChatJPN: true,
-    isShowAnchorIcon: true,
-    isShowAdminIcon: false,
-    isWindowAlwaysOnTop: false,
-  }
-  const current = dmStyle.value || {}
-  _set(config, 'dmStyle', { ...current, ...defaults })
-}
+// // ── 还原默认 ──
+// function restoreDefaults() {
+//   const defaults: Record<string, any> = {
+//     isShowFace: true,
+//     isShowFanMedal: true,
+//     isShowHeadline: true,
+//     isShowType1: true,
+//     isShowType2: true,
+//     windowOpacity: 1,
+//     font: 'auto',
+//     fontWeight: 'normal',
+//     faceSize: 28,
+//     combineSimilarTime: 3000,
+//     hiddenExpiredTime: 0,
+//     showGiftCardThreshold: 0,
+//     showHeadlineThreshold: 0,
+//     isShowInteractInfo: false,
+//     isShowSilverGift: false,
+//     isShowSuperChatJPN: true,
+//     isShowAnchorIcon: true,
+//     isShowAdminIcon: false,
+//     isWindowAlwaysOnTop: false,
+//   }
+//   const current = dmStyle.value || {}
+//   _set(config, 'dmStyle', { ...current, ...defaults })
+// }
 </script>
 
 <style scoped>

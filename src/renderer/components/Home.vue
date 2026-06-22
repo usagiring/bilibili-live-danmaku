@@ -3,20 +3,28 @@
     <!-- 标题栏 -->
     <div id="title-bar">
       <div id="title-bar-title">
-        <img id="title-bar-logo" src="../assets/logo.png" />
+        <img
+          id="title-bar-logo"
+          src="../assets/logo.png" />
         <span id="title-bar-text">bilibili-danmaku</span>
       </div>
       <div id="title-bar-status">
         <!-- <span v-if="isRecording">录制中...</span> -->
       </div>
       <div id="title-bar-controller">
-        <div id="tray" @click="hideToTray">
+        <div
+          id="tray"
+          @click="hideToTray">
           <Icon type="logo-windows" />
         </div>
-        <div id="minimize" @click="minimize">
+        <div
+          id="minimize"
+          @click="minimize">
           <Icon type="md-remove" />
         </div>
-        <div id="close" @click="close">
+        <div
+          id="close"
+          @click="close">
           <Icon type="md-close" />
         </div>
       </div>
@@ -25,63 +33,106 @@
     <!-- 主体两栏 -->
     <div class="main-body">
       <!-- 左侧：直播间列表 -->
-      <div class="room-panel" :class="{ collapsed: isRoomPanelCollapsed }">
+      <div
+        class="room-panel"
+        :class="{ collapsed: isRoomPanelCollapsed }">
         <template v-if="!isRoomPanelCollapsed">
           <div class="room-panel-header">
             <h3>直播间</h3>
             <div class="add-room-wrapper">
-              <button ref="addRoomBtn" class="add-room-btn" title="添加直播间" @click.stop="toggleAddRoom">
+              <button
+                ref="addRoomBtn"
+                class="add-room-btn"
+                title="添加直播间"
+                @click.stop="toggleAddRoom">
                 <Icon type="md-add" />
               </button>
             </div>
             <!-- 弹出面板（Teleport 到 body 避免被裁剪） -->
             <Teleport to="body">
-              <div v-if="showAddRoom" class="add-room-popover" :style="popoverStyle" @click.stop>
+              <div
+                v-if="showAddRoom"
+                class="add-room-popover"
+                :style="popoverStyle"
+                @click.stop>
                 <div class="popover-label">直播间号</div>
-                <Input v-model="newRoomId" placeholder="请输入直播间号，如 55609" size="small" @on-enter="handleAddRoom" />
+                <Input
+                  v-model="newRoomId"
+                  placeholder="请输入直播间号，如 55609"
+                  size="small"
+                  @on-enter="handleAddRoom" />
                 <div class="popover-actions">
-                  <Button size="small" @click="showAddRoom = false">取消</Button>
-                  <Button size="small" type="primary" @click="handleAddRoom">连接</Button>
+                  <Button
+                    size="small"
+                    @click="showAddRoom = false"
+                    >取消</Button
+                  >
+                  <Button
+                    size="small"
+                    type="primary"
+                    @click="handleAddRoom"
+                    >连接</Button
+                  >
                 </div>
               </div>
             </Teleport>
-            <span style="flex:1"></span>
+            <span style="flex: 1"></span>
           </div>
           <div class="room-list">
-            <div v-for="(room, index) in store.rooms" :key="index" class="room-card"
-              :class="{ active: room.isActive, connect: room.isConnected }" @click="selectRoom(index)">
-              <img class="room-avatar" :src="room.face || DEFAULT_AVATAR" />
+            <div
+              v-for="(room, index) in store.rooms"
+              :key="index"
+              class="room-card"
+              :class="{ active: room.isActive, connect: room.isConnected }"
+              @click="selectRoom(index)">
+              <img
+                class="room-avatar"
+                :src="room.face || DEFAULT_FACE" />
               <div class="room-info">
                 <div class="room-name">{{ room.username || '未连接' }}</div>
                 <div class="room-id">
                   直播间 {{ room.displayId || room.id }}
-                  <span v-if="room.liveStatus === 1" class="live-bars">
+                  <span
+                    v-if="room.liveStatus === 1"
+                    class="live-bars">
                     <i class="bar bar1"></i><i class="bar bar2"></i><i class="bar bar3"></i>
                   </span>
                 </div>
               </div>
-              <button class="delete-btn" @click.stop="removeRoom(index)">
+              <button
+                class="delete-btn"
+                @click.stop="removeRoom(index)">
                 <Icon type="md-close" />
               </button>
             </div>
 
             <!-- 空状态 -->
-            <div v-if="store.rooms.length === 0" class="empty-rooms">
-              <Icon type="md-add-circle" size="32" style="color:#ddd" />
+            <div
+              v-if="store.rooms.length === 0"
+              class="empty-rooms">
+              <Icon
+                type="md-add-circle"
+                size="32"
+                style="color: #ddd" />
               <p>点击 + 添加直播间</p>
             </div>
           </div>
           <!-- 左下角设置栏 -->
-          <div class="config-bar" @click="activeTab = 'config'">
-            <Icon type="md-settings" size="16" />
+          <div
+            class="config-bar"
+            @click="activeTab = 'config'">
+            <Icon
+              type="md-settings"
+              size="16" />
             <span>设置</span>
           </div>
         </template>
         <!-- 缩进切换按钮 - 右侧 -->
-        <div class="panel-toggle" @click="toggleRoomPanel" :title="isRoomPanelCollapsed ? '展开侧栏' : '收起侧栏'">
-          <span class="hamburger">
-            <i></i><i></i><i></i>
-          </span>
+        <div
+          class="panel-toggle"
+          @click="toggleRoomPanel"
+          :title="isRoomPanelCollapsed ? '展开侧栏' : '收起侧栏'">
+          <span class="hamburger"> <i></i><i></i><i></i> </span>
         </div>
       </div>
 
@@ -95,37 +146,55 @@
           <!-- Banner 包裹区：路由 + 用户信息 + 连接 -->
           <div class="detail-banner">
             <!-- 默认banner "https://i0.hdslb.com/bfs/activity-plat/static/0977767b2e79d8ad0a36a731068a83d7/1sz3p8w2Sk.png" -->
-            <img class="banner-bg" :src="activeRoom?.userSpaceBanner || ''" />
+            <img
+              class="banner-bg"
+              :src="activeRoom?.userSpaceBanner || ''" />
             <div class="banner-overlay">
               <!-- Tab 导航 -->
               <div class="room-tabs">
-                <div class="room-tab" :class="{ active: activeTab === 'overview' }" @click="activeTab = 'overview'">
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'overview' }"
+                  @click="activeTab = 'overview'">
                   <Icon type="md-home" /> 概览
                 </div>
               </div>
               <!-- 用户信息 + 连接 -->
               <div class="banner-profile">
-                <img class="banner-avatar" :src="activeRoom?.face || DEFAULT_AVATAR" />
+                <img
+                  class="banner-avatar"
+                  :src="activeRoom?.face || DEFAULT_FACE" />
                 <div class="banner-info">
                   <div class="banner-name">{{ activeRoom?.username || '未连接' }}</div>
                   <div class="banner-id">
                     直播间 {{ activeRoom?.displayId || activeRoom?.id }}
-                    <span v-if="activeRoom?.liveStatus === 1" class="live-bars">
+                    <span
+                      v-if="activeRoom?.liveStatus === 1"
+                      class="live-bars">
                       <i class="bar bar1"></i><i class="bar bar2"></i><i class="bar bar3"></i>
                     </span>
                   </div>
                 </div>
                 <div class="banner-actions">
                   <label class="switch">
-                    <input type="checkbox" :checked="activeRoom?.isConnected" :disabled="connecting"
+                    <input
+                      type="checkbox"
+                      :checked="activeRoom?.isConnected"
+                      :disabled="connecting"
                       @change="toggleConnect" />
                     <span class="slider">
                       <span class="slider-text on">已连接</span>
                       <span class="slider-text off">未连接</span>
                     </span>
                   </label>
-                  <Button class="btn-danmaku" size="small" @click="handleShowDanmaku(true)">
-                    <Icon type="md-chatboxes" size="13" /> 弹幕窗
+                  <Button
+                    class="btn-danmaku"
+                    size="small"
+                    @click="handleShowDanmaku(true)">
+                    <Icon
+                      type="md-chatboxes"
+                      size="13" />
+                    弹幕窗
                   </Button>
                 </div>
               </div>
@@ -139,13 +208,17 @@
         </template>
 
         <!-- 空状态（无房间时） -->
-        <div class="empty-state" v-else>
-          <Icon type="md-home" size="48" style="opacity:0.15" />
+        <div
+          class="empty-state"
+          v-else>
+          <Icon
+            type="md-home"
+            size="48"
+            style="opacity: 0.15" />
           <p>选择或添加一个直播间</p>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -157,13 +230,8 @@ import { useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Config from './Config.vue'
-import {
-  connect as connectApi,
-  disconnect as disconnectApi,
-  updateClientConfig,
-  getRoomStatus,
-} from '../service/api'
-import { DEFAULT_AVATAR } from '../../service/const'
+import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomStatus } from '../service/api'
+import { DEFAULT_FACE } from '../../service/const'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -219,16 +287,20 @@ onMounted(() => {
 })
 
 // 等 rooms 有值后拉取连接状态（只执行一次）
-watch(() => store.rooms.length, async () => {
-  const roomIds = store.rooms.map(room => room.id)
-  const { data } = await getRoomStatus({ roomIds, clientId: store.id })
-  data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
-    const room = store.rooms.find(room => room.id === roomId)
-    console.log(room, 'room')
-    if (!room) return
-    room.isConnected = isConnected
-  })
-}, { once: true })
+watch(
+  () => store.rooms.length,
+  async () => {
+    const roomIds = store.rooms.map(room => room.id)
+    const { data } = await getRoomStatus({ roomIds, clientId: store.id })
+    data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
+      const room = store.rooms.find(room => room.id === roomId)
+      console.log(room, 'room')
+      if (!room) return
+      room.isConnected = isConnected
+    })
+  },
+  { once: true },
+)
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
@@ -302,7 +374,9 @@ async function toggleConnect() {
       await connectApi({ roomId: room.id, userId: room.userId, clientId: clientId.value })
       room.isConnected = true
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   connecting.value = false
 }
 
@@ -321,7 +395,7 @@ function minimize() {
   window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' })
 }
 function hideToTray() {
-  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' }) 
+  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' })
 }
 </script>
 
@@ -374,7 +448,7 @@ function hideToTray() {
   -webkit-app-region: no-drag;
 }
 
-#title-bar-controller>div {
+#title-bar-controller > div {
   width: 36px;
   height: 28px;
   display: flex;
@@ -386,7 +460,7 @@ function hideToTray() {
   font-size: 16px;
 }
 
-#title-bar-controller>div:hover {
+#title-bar-controller > div:hover {
   background: #f0f2f5;
 }
 
@@ -430,7 +504,9 @@ function hideToTray() {
   justify-content: center;
   cursor: pointer;
   color: transparent;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   z-index: 1;
 }
 
@@ -541,7 +617,7 @@ function hideToTray() {
   padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: .15s;
+  transition: 0.15s;
   position: relative;
   border-left: 3px solid transparent;
 }
@@ -613,7 +689,6 @@ function hideToTray() {
 }
 
 @keyframes live-bounce {
-
   0%,
   100% {
     transform: scaleY(0.5);
@@ -648,7 +723,7 @@ function hideToTray() {
   justify-content: center;
   color: transparent;
   font-size: 10px;
-  transition: .15s;
+  transition: 0.15s;
 }
 
 .room-card:hover .delete-btn {
@@ -676,7 +751,9 @@ function hideToTray() {
   cursor: pointer;
   color: #999;
   font-size: 12px;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   flex-shrink: 0;
 }
 
@@ -724,7 +801,7 @@ function hideToTray() {
   color: rgba(0, 0, 0, 0.55);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: .15s;
+  transition: 0.15s;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -828,7 +905,9 @@ function hideToTray() {
   background: rgba(255, 255, 255, 0.6);
   border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: 24px;
-  transition: background 0.25s, border-color 0.25s;
+  transition:
+    background 0.25s,
+    border-color 0.25s;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -868,24 +947,24 @@ function hideToTray() {
   opacity: 1;
 }
 
-.switch input:checked+.slider {
+.switch input:checked + .slider {
   background: rgba(25, 190, 107, 0.8);
   border-color: rgba(255, 255, 255, 0.8);
 }
 
-.switch input:checked+.slider::before {
+.switch input:checked + .slider::before {
   transform: translateX(40px);
 }
 
-.switch input:checked+.slider .slider-text.on {
+.switch input:checked + .slider .slider-text.on {
   opacity: 1;
 }
 
-.switch input:checked+.slider .slider-text.off {
+.switch input:checked + .slider .slider-text.off {
   opacity: 0;
 }
 
-.switch input:disabled+.slider {
+.switch input:disabled + .slider {
   opacity: 0.5;
   cursor: not-allowed;
 }

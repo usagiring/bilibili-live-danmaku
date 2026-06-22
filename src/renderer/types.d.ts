@@ -1,4 +1,3 @@
-
 type StyleValue = Record<string, string>
 
 interface Provider {
@@ -40,9 +39,6 @@ interface User {
 }
 
 interface DmStyle {
-  isShowFace: boolean
-  isShowAnchorIcon: boolean
-  isShowFanMedal: boolean
   isShowHeadline: boolean
   faceSize: number
   combineSimilarTime: number
@@ -65,7 +61,10 @@ interface DmStyle {
   windowOpacity: number
   windowBackground: string
   isWindowAlwaysOnTop: boolean
-  messageSlots: any[]
+  messageSlots: {
+    type: 'medal' | 'face' | 'name' | 'comment'
+    isShow: boolean
+  }[]
   borderImages: any[]
   messageContainer0: StyleValue
   messageUsername0: StyleValue
