@@ -197,6 +197,7 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 let promiseQueue: PromiseQueue | null = null
 
 const giftGifMap = ref<Record<string, any>>({})
+const roomId = ref<String>('')
 const headlines = ref<Message[]>([
   // {
   //   id: 192,
@@ -476,10 +477,10 @@ const isShowColon = computed(() => {
 
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search)
-  const port = params.get('port') || '30031'
+  const port = params.get('port') || window.location.port || '30031'
   // port.value = parseInt(params.get('port') || '8081')
   const clientId = params.get('clientId') || ''
-  const roomId = params.get('roomId')
+  roomId.value = String(params.get('roomId') || '')
 
   config.set('baseUrl', `http://127.0.0.1:${port}`)
 
@@ -511,6 +512,10 @@ onMounted(async () => {
 function setupSSE() {
   sse.on('DM_STYLE', data => onDMStyle(data))
   sse.on('MESSAGE', data => {
+    if (roomId.value && roomId.value !== '*') {
+      if (data.roomId !== roomId.value) return
+    }
+
     if (promiseQueue) {
       promiseQueue.push(async () => {
         onMessage(data)

@@ -4,15 +4,16 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  root: resolve(__dirname, 'pages'),
   resolve: {
     alias: {
-      '@': resolve('pages'),
+      '@': resolve(__dirname, 'pages'),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
   base: './',
   build: {
-    outDir: 'dist',
+    outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
     rollupOptions: {
       input: {
