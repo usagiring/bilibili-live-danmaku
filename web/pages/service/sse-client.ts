@@ -31,15 +31,17 @@ class SSEClient {
       console.log('[SSE] 已连接')
     }
 
-    this.es.onmessage = (event: MessageEvent) => {
+    this.es.onmessage = (e: MessageEvent) => {
       try {
-        const payload = JSON.parse(event.data)
-        const cmd = payload.cmd
-        if (cmd) {
-          const list = this.handlers.get(cmd)
-          if (list) list.forEach(fn => fn(payload))
+        const payload = JSON.parse(e.data)
+        const event = payload.event
+        if (event) {
+          const list = this.handlers.get(event)
+          if (list) list.forEach(fn => fn(payload.data))
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     this.es.onerror = () => {
@@ -51,20 +53,30 @@ class SSEClient {
     }
   }
 
-  on(cmd: string, handler: Handler): void {
-    const list = this.handlers.get(cmd)
+  on(event: string, handler: Handler): void {
+    const list = this.handlers.get(event)
     if (list) list.push(handler)
-    else this.handlers.set(cmd, [handler])
+    else this.handlers.set(event, [handler])
   }
 
-  off(cmd: string, handler?: Handler): void {
-    if (!handler) { this.handlers.delete(cmd); return }
-    const list = this.handlers.get(cmd)
-    if (list) this.handlers.set(cmd, list.filter(fn => fn !== handler))
+  off(event: string, handler?: Handler): void {
+    if (!handler) {
+      this.handlers.delete(event)
+      return
+    }
+    const list = this.handlers.get(event)
+    if (list)
+      this.handlers.set(
+        event,
+        list.filter(fn => fn !== handler),
+      )
   }
 
   disconnect(): void {
-    if (this.es) { this.es.close(); this.es = null }
+    if (this.es) {
+      this.es.close()
+      this.es = null
+    }
     this.handlers.clear()
   }
 }

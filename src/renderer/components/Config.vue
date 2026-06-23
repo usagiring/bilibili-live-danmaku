@@ -42,34 +42,30 @@
     </div>
 
     <div class="section">
+      <!-- 弹幕排版 -->
+      <div class="slot-box">
+        <span class="slot-box-label">弹幕排版</span>
+        <draggable
+          :list="slotItems"
+          item-key="type"
+          class="chips slot-chips"
+          :animation="200"
+          ghost-class="slot-ghost"
+          @change="onSlotDragEnd">
+          <template #item="{ element: s }">
+            <span
+              class="chip"
+              :class="{ on: s.isShow }"
+              @click="toggleSlot(s.type)">
+              {{ slotNameMap[s.type] }}
+            </span>
+          </template>
+        </draggable>
+      </div>
+
+      <!-- 其他开关 -->
       <div class="chips">
-        <span
-          class="chip"
-          :class="{ on: getSlotShow('medal') }"
-          @click="toggleSlot('medal')">
-          粉丝牌
-        </span>
-        <span
-          class="chip"
-          :class="{ on: getSlotShow('face') }"
-          @click="toggleSlot('face')">
-          头像
-        </span>
-        <span
-          class="chip"
-          :class="{ on: getSlotShow('name') }"
-          @click="toggleSlot('name')">
-          昵称
-        </span>
-        <span
-          class="chip"
-          :class="{ on: getSlotShow('comment') }"
-          @click="toggleSlot('comment')">
-          内容
-        </span>
-        <!-- <span class="chip" :class="{ on: dmStyle?.isShowType2 !== false }"
-          @click="toggle('dmStyle.isShowType2')">冒号</span> -->
-        <span style="color: #ddd; margin: 0 2px">│</span>
+        <!-- <span style="color: #ddd; margin: 0 2px">│</span> -->
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowSuperChatJPN !== false }"
           @click="toggle('dmStyle.isShowSuperChatJPN')">SC日文</span> -->
         <!-- <span class="chip" :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
@@ -153,7 +149,7 @@
           <input
             type="color"
             :value="dmStyle?.windowBackground || '#1e1e28'"
-            @input="setVal('dmStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
+            @change="setVal('dmStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
         </label>
       </div>
       <div class="section-row">
@@ -173,16 +169,26 @@
           style="margin-left: 8px"
           >字重</span
         >
-        <select
-          class="select"
-          style="width: 70px"
-          :value="dmStyle?.fontWeight || 'normal'"
-          @change="setVal('dmStyle.fontWeight', ($event.target as HTMLSelectElement).value)">
-          <option value="normal">正常</option>
-          <option value="lighter">细体</option>
-          <option value="bold">加粗</option>
-          <option value="bolder">更粗</option>
-        </select>
+        <span class="segmented">
+          <span
+            class="seg-item"
+            :class="{ on: dmStyle?.fontWeight === 'lighter' }"
+            @click="setVal('dmStyle.fontWeight', 'lighter')">
+            细体
+          </span>
+          <span
+            class="seg-item"
+            :class="{ on: dmStyle?.fontWeight === 'normal' }"
+            @click="setVal('dmStyle.fontWeight', 'normal')">
+            正常
+          </span>
+          <span
+            class="seg-item"
+            :class="{ on: dmStyle?.fontWeight === 'bold' }"
+            @click="setVal('dmStyle.fontWeight', 'bold')">
+            加粗
+          </span>
+        </span>
       </div>
       <div class="section-row">
         <span class="label">头像大小</span>
@@ -231,8 +237,8 @@
         <input
           class="input"
           style="width: 40px"
-          :value="(dmStyle?.showGiftCardThreshold ?? 0) / 1000"
-          @change="setVal('dmStyle.showGiftCardThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
+          :value="dmStyle?.showGiftCardThreshold ?? 0"
+          @change="setVal('dmStyle.showGiftCardThreshold', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">元</span>
       </div>
       <div class="section-row">
@@ -240,16 +246,14 @@
         <input
           class="input"
           style="width: 40px"
-          :value="(dmStyle?.showHeadlineThreshold ?? 0) / 1000"
-          @change="setVal('dmStyle.showHeadlineThreshold', Number(($event.target as HTMLInputElement).value) * 1000)" />
+          :value="dmStyle?.showHeadlineThreshold ?? 0"
+          @change="setVal('dmStyle.showHeadlineThreshold', Number(($event.target as HTMLInputElement).value))" />
         <span class="input-unit">元</span>
       </div>
 
       <!-- 等级样式 -->
-      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e8eaec">
-        <div
-          class="lvl-tabs"
-          style="margin-bottom: 6px">
+      <div class="slot-box slot-box--tabs">
+        <div class="lvl-tabs">
           <span
             class="lvl-tab"
             :class="{ on: activeLevel === '0' }"
@@ -300,7 +304,7 @@
             <input
               type="color"
               :value="currentLevelStyle?.bgColor || '#000000'"
-              @input="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
+              @change="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
           </label>
           <div
             v-if="activeLevel === '99'"
@@ -354,7 +358,7 @@
             <input
               type="color"
               :value="dmStyle?.adminIconColor || '#ff9900'"
-              @input="setVal('dmStyle.adminIconColor', ($event.target as HTMLInputElement).value)" />
+              @change="setVal('dmStyle.adminIconColor', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
         <div class="section-row">
@@ -377,7 +381,7 @@
             <input
               type="color"
               :value="currentLevelStyle?.usernameColor || '#66ccff'"
-              @input="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
+              @change="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">边宽</span>
           <input
@@ -393,7 +397,7 @@
             <input
               type="color"
               :value="currentLevelStyle?.usernameStrokeColor || '#000000'"
-              @input="setLevelStyleColor('userStroke', ($event.target as HTMLInputElement).value)" />
+              @change="setLevelStyleColor('userStroke', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
         <div class="section-row">
@@ -416,7 +420,7 @@
             <input
               type="color"
               :value="currentLevelStyle?.commentColor || '#ffffff'"
-              @input="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
+              @change="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">边宽</span>
           <input
@@ -432,7 +436,7 @@
             <input
               type="color"
               :value="currentLevelStyle?.commentStrokeColor || '#000000'"
-              @input="setLevelStyleColor('commentStroke', ($event.target as HTMLInputElement).value)" />
+              @change="setLevelStyleColor('commentStroke', ($event.target as HTMLInputElement).value)" />
           </label>
         </div>
       </div>
@@ -485,7 +489,7 @@
           <input
             type="color"
             :value="dmRawStyle?.windowBackground || '#1e1e28'"
-            @input="setVal('dmRawStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
+            @change="setVal('dmRawStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
         </label>
       </div>
       <div class="section-row">
@@ -599,7 +603,7 @@
     </div>
 
     <!-- ═══ chartConfig — 图表 ═══ -->
-    <div class="divider">图表</div>
+    <!-- <div class="divider">图表</div>
     <div class="section">
       <div class="section-row">
         <span class="label">色彩表</span>
@@ -626,7 +630,7 @@
           >
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- ═══ 数据 ═══ -->
     <div class="divider">数据</div>
@@ -666,8 +670,8 @@ import { ref, computed } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
 import { updateClientConfig, generateQRCode, sendDM, clearDM as clearDMApi } from '../service/api'
-import { DEFAULT_FACE as DEFAULT_FACE } from '../../service/const'
 import QRCode from 'qrcode'
+import draggable from 'vuedraggable'
 
 const dmStyle = computed(() => config.dmStyle)
 const dmRawStyle = computed(() => config.dmRawStyle)
@@ -708,13 +712,13 @@ const currentLevelStyle = computed((): LevelStyle => {
   const comment = (s as any)[`messageComment${suffix}`] || {}
   return {
     usernameColor: username['color'],
-    usernameFontSize: username['font-size'] ? parseInt(username['font-size']) : undefined,
+    usernameFontSize: username['font-size'] ? parseFloat(username['font-size']) || undefined : undefined,
     usernameStrokeColor: username['-webkit-text-stroke-color'],
-    usernameStrokeWidth: username['-webkit-text-stroke-width'] ? parseInt(username['-webkit-text-stroke-width']) : 0,
+    usernameStrokeWidth: username['-webkit-text-stroke-width'] ? parseFloat(username['-webkit-text-stroke-width']) || 0 : 0,
     commentColor: comment['color'],
-    commentFontSize: comment['font-size'] ? parseInt(comment['font-size']) : undefined,
+    commentFontSize: comment['font-size'] ? parseFloat(comment['font-size']) || undefined : undefined,
     commentStrokeColor: comment['-webkit-text-stroke-color'],
-    commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseInt(comment['-webkit-text-stroke-width']) : 0,
+    commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseFloat(comment['-webkit-text-stroke-width']) || 0 : 0,
     bgColor: container['background'],
   }
 })
@@ -740,11 +744,6 @@ function toggle(path: string) {
   setVal(path, !cur)
 }
 
-function getSlotShow(type: string) {
-  const slots = dmStyle.value?.messageSlots || []
-  return slots.find(s => s.type === type)?.isShow ?? false
-}
-
 function toggleSlot(type: string) {
   const slots = [...(dmStyle.value?.messageSlots || [])]
   const slot = slots.find(s => s.type === type)
@@ -752,6 +751,17 @@ function toggleSlot(type: string) {
     slot.isShow = !slot.isShow
     setVal('dmStyle.messageSlots', slots)
   }
+}
+
+const slotNameMap: Record<string, string> = { medal: '粉丝牌', face: '头像', name: '昵称', comment: '内容' }
+
+const slotItems = computed({
+  get: () => dmStyle.value?.messageSlots || [],
+  set: slots => setVal('dmStyle.messageSlots', slots),
+})
+
+function onSlotDragEnd() {
+  setVal('dmStyle.messageSlots', slotItems.value)
 }
 
 function stepUp(path: string, defaultVal: number, max: number, step: number) {
@@ -1091,6 +1101,36 @@ async function showQrCodeLoginModal() {
   padding: 4px 0;
 }
 
+/* 插槽排序框 */
+.slot-box {
+  position: relative;
+  border: 1px solid #e8eaec;
+  border-radius: 6px;
+  padding: 12px 10px 6px;
+  margin: 6px 0;
+}
+
+.slot-box-label {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: #fff;
+  padding: 0 6px;
+  font-size: 11px;
+  color: #999;
+}
+
+.slot-chips {
+  padding: 0;
+}
+
+/* 拖拽占位虚影 */
+.slot-ghost {
+  opacity: 0.3;
+  background: #e8eaec;
+  border-style: dashed;
+}
+
 .chip {
   height: 22px;
   padding: 0 10px;
@@ -1200,7 +1240,7 @@ async function showQrCodeLoginModal() {
 }
 
 .seg-item {
-  height: 22px;
+  height: 20px;
   padding: 0 12px;
   display: flex;
   align-items: center;
@@ -1218,34 +1258,45 @@ async function showQrCodeLoginModal() {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* 等级分段 */
-.lvl-tabs {
+/* 等级分段 — 嵌在边框中 */
+.slot-box--tabs {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.slot-box--tabs .lvl-tabs {
+  position: absolute;
+  top: -12px;
+  left: 10px;
   display: inline-flex;
-  background: #f0f2f5;
-  border-radius: 6px;
-  padding: 2px 8px;
-  gap: 8px;
+  gap: 0;
+  margin: 0;
+  background: #eeeeee;
+  border: 1px solid #e8eaec;
+  border-radius: 6px 6px 6px 6px;
+  overflow: hidden;
 }
 
 .lvl-tab {
-  width: 40px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: #999;
-  border-radius: 5px;
+  background: transparent;
+  border: none;
   cursor: pointer;
   transition: 0.15s;
   user-select: none;
+  border-radius: 6px 6px 6px 6px;
+}
+
+.lvl-tab:last-child {
+  border-right: none;
 }
 
 .lvl-tab.on {
   background: #fff;
   color: #2d8cf0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 /* 色彩标签 */

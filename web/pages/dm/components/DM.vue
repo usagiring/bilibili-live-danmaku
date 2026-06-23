@@ -14,7 +14,7 @@
           @mouseleave="unhoverHeadline()">
           <div
             class="gift-tag-wrapper"
-            @mouseenter="hoverHeadline(String(msg.id))">
+            @mouseenter="hoverHeadline(msg.id)">
             <GiftTag
               v-if="false"
               :gift="msg" />
@@ -39,7 +39,7 @@
           v-for="message in messages"
           :key="message.id">
           <!-- 弹幕评论 -->
-          <template v-if="message.category === 'comment'">
+          <template v-if="message.category === 'comment' || message.category === 'interact'">
             <span
               :class="!isBorderAdaptContent ? 'max-width' : ''"
               class="border-image-default"
@@ -52,7 +52,7 @@
                   :color="adminIconColor" />
               </template>
 
-              <!-- 行内插槽：头像 / 勋章 / 昵称 / 冒号 / 正文 -->
+              <!-- 行内插槽：头像 / 勋章 / 昵称 /  正文 -->
               <template
                 v-for="(s, index) of messageSlots"
                 :key="index">
@@ -60,9 +60,8 @@
                   v-if="s.type === 'face' && s.isShow"
                   class="margin-lr-1px"
                   :src="message.face"
-                  :style="{ ...getFaceSizeStyle() }" />
-                <FanM
-                  edal
+                  :style="{ ...faceSizeStyle }" />
+                <FanMedal
                   v-if="s.type === 'medal' && s.isShow && message.medal"
                   class="margin-lr-1px vertical-align-middle"
                   :medal="message.medal"
@@ -126,27 +125,6 @@
             </span>
           </template>
 
-          <!-- 互动消息 -->
-          <template v-else-if="message.category === 'interact'">
-            <p :style="getContainerStyle(message)">
-              <Avatar
-                class="margin-lr-1px"
-                :src="message.face"
-                :style="{ width: '28px', height: '28px', 'line-height': '28px' }" />
-              <FanMedal
-                v-if="isShowFanMedal && message.medal"
-                :medal="message.medal"
-                :role="message.medal.anchor" />
-              <span
-                :style="{
-                  ...getInteractContentStyle(),
-                  ...getInteractTextShadow(),
-                }"
-                >{{ message.content }}</span
-              >
-            </p>
-          </template>
-
           <!-- SuperChat -->
           <template v-else-if="message.category === 'superchat'">
             <GiftCard
@@ -201,14 +179,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import {
-  DEFAULT_FACE,
-  INTERACT_TYPE,
-  ANCHOR_ICON_MAP,
-  MAX_MESSAGE,
-  COLORS,
-  PRICE_PROPERTIES,
-} from '../../service/const'
+import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE, COLORS, PRICE_PROPERTIES } from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from '@tokine/shared/components/GiftTag.vue'
@@ -226,7 +197,45 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 let promiseQueue: PromiseQueue | null = null
 
 const giftGifMap = ref<Record<string, any>>({})
-const headlines = ref<Message[]>([])
+const headlines = ref<Message[]>([
+  // {
+  //   id: 192,
+  //   content: '残*** 赠送了 盛典门票',
+  //   color: null,
+  //   category: 'gift',
+  //   type: null,
+  //   sendAt: 1782125493078,
+  //   roomId: '5050',
+  //   clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
+  //   userId: '0',
+  //   username: '残***',
+  //   usernameColor: null,
+  //   roles: [0],
+  //   face: 'http://i1.hdslb.com/bfs/face/865dff24ced774fb2557456bc45644389910a17f.jpg@48w_48h',
+  //   emots: null,
+  //   voiceUrl: null,
+  //   fileDuration: null,
+  //   emojiUrl: null,
+  //   gift: {
+  //     id: '34144',
+  //     type: 'gift',
+  //     name: '盛典门票',
+  //     price: 0.1,
+  //     count: 1,
+  //     coinType: 'gold',
+  //     batchComboId: 'batch:gift:combo_id:343333383836353939d41d8cd98f00b204e9800998ecf8427e:433351:34144:1782125492.2750',
+  //     totalPrice: 0.1,
+  //     priceProperties: {
+  //       colors: ['#EDF5FF', '#2A60B2'],
+  //       duration: 60000,
+  //     },
+  //   },
+  //   medal: null,
+  //   interact: null,
+  //   createdAt: 1782125493000,
+  //   styleSuffix: '0',
+  // },
+])
 const emojiSize = ref(24)
 
 const dmStyle = reactive<DmStyle>({
@@ -303,97 +312,104 @@ const {
 } = toRefs(dmStyle)
 
 const messages = ref<Message[]>([
-  // 普通弹幕
   {
-    id: '1',
+    id: 135,
+    content: '就有一个17智力头环，不是关键的东西',
+    color: '#ffffff',
     category: 'comment',
-    content: '主播好强啊！',
-    username: '观众A',
-    userId: '1001',
-    sendAt: Date.now(),
-    roomId: '123',
-    face: 'https://static.hdslb.com/images/member/noface.gif',
-    roles: [0],
-    styleSuffix: '0',
     type: 0,
-    createdAt: Date.now(),
-  } as Message,
-  {
-    id: '2',
-    category: 'comment',
-    content: '666666',
-    username: '舰长大人',
-    userId: '1002',
-    sendAt: Date.now(),
-    roomId: '123',
-    face: 'https://static.hdslb.com/images/member/noface.gif',
+    sendAt: 1782125409239,
+    roomId: '5050',
+    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
+    userId: '0',
+    username: 's***',
+    usernameColor: '#000000',
     roles: [1],
-    styleSuffix: '1',
-    type: 0,
-    createdAt: Date.now(),
-    medal: { name: '舰长', level: 10, anchor: 1 },
+    face: 'http://i0.hdslb.com/bfs/face/member/noface.jpg@48w_48h',
+    emots: null,
+    voiceUrl: null,
+    fileDuration: null,
+    emojiUrl: null,
+    gift: null,
+    medal: null,
+    interact: null,
+    createdAt: 1782125410000,
+    styleSuffix: '0',
     isAdmin: false,
-    similar: 3,
-    similarColor: '#ff9900',
-  } as Message,
+  },
   {
-    id: '3',
-    category: 'comment',
-    content: '哈哈哈哈笑死了',
-    username: '提督Pro',
-    userId: '1003',
-    sendAt: Date.now(),
-    roomId: '123',
-    face: 'https://static.hdslb.com/images/member/noface.gif',
-    roles: [2],
-    styleSuffix: '2',
-    type: 0,
-    createdAt: Date.now(),
-    medal: {
-      name: '提督',
-      level: 21,
-      anchor: 2,
-      color: { bg: '#5c968e', text: '#FFFFFF', border: '#5c968e', level: '#FFFFFF' },
-    },
-  } as Message,
-  // 互动消息
-  {
-    id: '4',
-    category: 'interact',
-    content: '进入了直播间',
-    username: '新观众',
-    userId: '1004',
-    sendAt: Date.now(),
-    roomId: '123',
+    id: 192,
+    content: '残*** 赠送了 盛典门票',
+    color: null,
+    category: 'gift',
+    type: null,
+    sendAt: 1782125493078,
+    roomId: '5050',
+    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
+    userId: '0',
+    username: '残***',
+    usernameColor: null,
     roles: [0],
-    styleSuffix: 'interact',
-    type: 1,
-    createdAt: Date.now(),
-    face: 'https://static.hdslb.com/images/member/noface.gif',
-  } as Message,
-  // SuperChat
-  {
-    id: '5',
-    category: 'superchat',
-    content: '主播加油！',
-    username: '土豪哥',
-    userId: '1005',
-    sendAt: Date.now(),
-    roomId: '123',
-    roles: [0],
-    type: 3,
-    createdAt: Date.now(),
-    face: 'https://static.hdslb.com/images/member/noface.gif',
+    face: 'http://i1.hdslb.com/bfs/face/865dff24ced774fb2557456bc45644389910a17f.jpg@48w_48h',
+    emots: null,
+    voiceUrl: null,
+    fileDuration: null,
+    emojiUrl: null,
     gift: {
-      id: '',
+      id: '34144',
+      type: 'gift',
+      name: '盛典门票',
+      price: 0.1,
       count: 1,
-      price: 50,
-      name: 'SuperChat',
-      totalPrice: 50,
-      priceProperties: PRICE_PROPERTIES[0],
+      coinType: 'gold',
+      batchComboId: 'batch:gift:combo_id:343333383836353939d41d8cd98f00b204e9800998ecf8427e:433351:34144:1782125492.2750',
+      totalPrice: 0.1,
+      priceProperties: {
+        colors: ['#EDF5FF', '#2A60B2'],
+        duration: 60000,
+      },
     },
-    contentJPN: '配信者頑張って！',
-  } as Message,
+    medal: null,
+    interact: null,
+    createdAt: 1782125493000,
+    styleSuffix: '0',
+  },
+  {
+    id: 466,
+    content: '只算最高',
+    color: '#e33fff',
+    category: 'comment',
+    type: 0,
+    sendAt: 1782125594993,
+    roomId: '5050',
+    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
+    userId: '0',
+    username: '蝉***',
+    usernameColor: '#000000',
+    roles: [1],
+    face: 'https://i1.hdslb.com/bfs/face/ad40d9066b0e4ea2f120a1c04d25eec273b37363.jpg@48w_48h',
+    emots: null,
+    voiceUrl: null,
+    fileDuration: null,
+    emojiUrl: null,
+    gift: null,
+    medal: {
+      name: '大母鹅',
+      level: 35,
+      roomId: '5050',
+      color: {
+        bg: '#4C7DFF99',
+        border: '#58A1F8',
+        level: '#4C7DFFE6',
+        text: '#FFFFFF',
+      },
+    },
+    interact: null,
+    createdAt: 1782125596000,
+    styleSuffix: '1',
+    anchorIcon: 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp',
+    isAdmin: false,
+  },
 ])
 
 const borderImageStyle = computed(() => {
@@ -443,6 +459,15 @@ const contentWrapperStyle = computed(
     }) as Record<string, string>,
 )
 
+const faceSizeStyle = computed(() => {
+  console.log(faceSize.value)
+  return {
+    width: `${faceSize.value}px`,
+    height: `${faceSize.value}px`,
+    'line-height': `${faceSize.value}px`,
+  }
+})
+
 const isShowColon = computed(() => {
   const index = messageSlots.value.findIndex(s => s.type === 'name')
   return index !== messageSlots.value.length - 1
@@ -483,15 +508,15 @@ onMounted(async () => {
 })
 
 function setupSSE() {
-  sse.on('DM_STYLE', (payload: SSEPayload) => onDMStyle(payload.payload || payload))
-  sse.on('MESSAGE', (payload: SSEPayload) => {
+  sse.on('DM_STYLE', data => onDMStyle(data))
+  sse.on('MESSAGE', data => {
     if (promiseQueue) {
       promiseQueue.push(async () => {
-        onMessage(payload.payload || payload)
+        onMessage(data)
         await wait(channelDelayTime.value)
       })
     } else {
-      onMessage(payload.payload || payload)
+      onMessage(data)
     }
   })
   sse.on('MESSAGE_CLEAR', () => {
@@ -500,8 +525,9 @@ function setupSSE() {
   })
 }
 
-function onDMStyle(payload: Record<string, any>) {
-  Object.assign(dmStyle, payload)
+function onDMStyle(data: Record<string, any>) {
+  console.log(data)
+  Object.assign(dmStyle, data)
 }
 
 function getStyleSuffix(msg: Message) {
@@ -580,6 +606,7 @@ function onMessage(msg: Message) {
   }
 
   if (isAddMessage) {
+    console.log(msg)
     if (messages.value.length > MAX_MESSAGE) messages.value.pop()
     messages.value = [msg, ...messages.value]
   }
@@ -598,14 +625,6 @@ function addToHeadline(msg: Message) {
       msg.isHover = false
     }, 5000)
     headlines.value = [msg, ...headlines.value]
-  }
-}
-
-function getFaceSizeStyle() {
-  return {
-    width: faceSize + 'px',
-    height: faceSize + 'px',
-    'line-height': faceSize + 'px',
   }
 }
 
@@ -676,7 +695,7 @@ function getInteractContentStyle() {
 function getInteractTextShadow() {
   return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment')
 }
-function hoverHeadline(id: string) {
+function hoverHeadline(id: number) {
   for (const headline of headlines.value) {
     if (headline.id === id) {
       headline.isHover = true
