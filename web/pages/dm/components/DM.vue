@@ -455,7 +455,6 @@ const contentWrapperStyle = computed(
   () =>
     ({
       top: `${headlines.value.length && isShowHeadline.value ? '36px' : '0px'}`,
-      '-webkit-app-region': 'no-drag',
     }) as Record<string, string>,
 )
 
@@ -787,6 +786,7 @@ document.getElementsByTagName('body')[0].setAttribute('style', 'background-color
   overflow-y: auto;
   display: flex;
   flex-direction: column-reverse;
+  /* -webkit-app-region: no-drag; */
 }
 
 .message-content::-webkit-scrollbar {

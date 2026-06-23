@@ -111,7 +111,6 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
       const win = new BrowserWindow({
         width: width || 800,
         height: height || 600,
-        type: 'toolbar',
         webPreferences: {},
         alwaysOnTop: alwaysOnTop ?? false,
         resizable: resizable ?? true,
