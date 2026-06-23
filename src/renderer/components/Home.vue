@@ -120,7 +120,7 @@
           <!-- 左下角设置栏 -->
           <div
             class="config-bar"
-            @click="activeTab = 'config'">
+            @click="toConfigTab">
             <Icon
               type="md-settings"
               size="16" />
@@ -378,6 +378,15 @@ async function toggleConnect() {
     /* ignore */
   }
   connecting.value = false
+}
+
+function toConfigTab() {
+  activeTab.value = 'config'
+
+  // 临时切换到配置页不显示Active样式
+  store.rooms.forEach((room, i) => {
+    room.isActive = false
+  })
 }
 
 function handleConnect(_status: boolean) {

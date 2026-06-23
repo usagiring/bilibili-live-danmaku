@@ -67,12 +67,12 @@
                   :medal="message.medal"
                   :anchorIcon="message.anchorIcon" />
                 <span
-                  v-if="s.type === 'name'"
+                  v-if="s.type === 'name' && s.isShow"
                   class="vertical-align-middle"
                   :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">
                   {{ `${message.username}${isShowColon ? '：' : ''}` }}
                 </span>
-                <span v-if="s.type === 'comment'">
+                <span v-if="s.type === 'comment' && s.isShow">
                   <img
                     v-if="message.emojiUrl"
                     class="vertical-align-middle"
@@ -469,8 +469,9 @@ const faceSizeStyle = computed(() => {
 })
 
 const isShowColon = computed(() => {
+  const showSlots = messageSlots.value.filter(s => s.isShow)
   const index = messageSlots.value.findIndex(s => s.type === 'name')
-  return index !== messageSlots.value.length - 1
+  return index !== showSlots.length - 1
 })
 
 onMounted(async () => {

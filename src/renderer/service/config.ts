@@ -16,7 +16,7 @@ const config: ClientConfig = reactive({
 
   set(path: string, value: any) {
     _set(this, path, value)
-  }
+  },
 })
 
 export default config

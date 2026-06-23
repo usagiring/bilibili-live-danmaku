@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow, app, Tray, Menu, nativeImage } from 'electron'
+import { ipcMain, dialog, BrowserWindow, app, Tray, Menu, nativeImage, shell } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
@@ -30,7 +30,6 @@ function getRendererUrl(hash: string) {
 }
 
 export function registerIpcHandlers(mainWindow: BrowserWindow) {
-
   // ---- 基础信息 ----
 
   ipcMain.handle(IPC_GET_USER_PATH, async () => {
@@ -45,7 +44,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     return app.getVersion()
   })
 
-  ipcMain.handle(IPC_GET_CURRENT_WINDOW_ID, async (event) => {
+  ipcMain.handle(IPC_GET_CURRENT_WINDOW_ID, async event => {
     const win = BrowserWindow.fromWebContents(event.sender)
     return win?.id ?? mainWindow.id
   })
@@ -56,16 +55,28 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win) return
     switch (action) {
-      case 'minimize': win.minimize(); break
-      case 'maximize': win.maximize(); break
-      case 'unmaximize': win.unmaximize(); break
-      case 'close': win.close(); break
-      case 'hide': win.hide(); break
-      case 'show': win.show(); break
+      case 'minimize':
+        win.minimize()
+        break
+      case 'maximize':
+        win.maximize()
+        break
+      case 'unmaximize':
+        win.unmaximize()
+        break
+      case 'close':
+        win.close()
+        break
+      case 'hide':
+        win.hide()
+        break
+      case 'show':
+        win.show()
+        break
     }
   })
 
-  ipcMain.handle('IPC_HIDE_TO_TRAY', async (event) => {
+  ipcMain.handle('IPC_HIDE_TO_TRAY', async event => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win) return
     // 这里无法从渲染进程传 icon，用默认行为
@@ -83,32 +94,35 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
   // ---- 子窗口 ----
 
-  ipcMain.handle(IPC_CREATE_CHILD_WINDOW, async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow }) => {
-    const parent = BrowserWindow.fromWebContents(event.sender) ?? mainWindow
-    const winURL = url || getRendererUrl(hash)
+  ipcMain.handle(
+    IPC_CREATE_CHILD_WINDOW,
+    async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow }) => {
+      const parent = BrowserWindow.fromWebContents(event.sender) ?? mainWindow
+      const winURL = url || getRendererUrl(hash)
 
-    const win = new BrowserWindow({
-      width: width || 800,
-      height: height || 600,
-      parent,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-      },
-      alwaysOnTop: alwaysOnTop ?? false,
-      resizable: resizable ?? true,
-      frame: frame ?? true,
-      transparent: transparent ?? false,
-      hasShadow: hasShadow ?? true,
-    })
+      const win = new BrowserWindow({
+        width: width || 800,
+        height: height || 600,
+        parent,
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+        },
+        alwaysOnTop: alwaysOnTop ?? false,
+        resizable: resizable ?? true,
+        frame: frame ?? true,
+        transparent: transparent ?? false,
+        hasShadow: hasShadow ?? true,
+      })
 
-    if (iconDataUrl) {
-      win.setIcon(nativeImage.createFromDataURL(iconDataUrl))
-    }
+      if (iconDataUrl) {
+        win.setIcon(nativeImage.createFromDataURL(iconDataUrl))
+      }
 
-    win.loadURL(winURL)
-    return { windowId: win.id }
-  })
+      win.loadURL(winURL)
+      return { windowId: win.id }
+    },
+  )
 
   ipcMain.handle(IPC_CLOSE_CHILD_WINDOW, async (_event, { windowId }: { windowId: number }) => {
     const win = BrowserWindow.fromId(windowId)
@@ -117,17 +131,20 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     }
   })
 
-  ipcMain.handle('IPC_WINDOW_CONTROL', async (_event, { windowId, method, args }: { windowId: number; method: string; args?: unknown[] }) => {
-    const win = BrowserWindow.fromId(windowId)
-    if (!win || win.isDestroyed()) return null
-    if (method === 'getSize') return win.getSize()
-    if (method === 'getPosition') return win.getPosition()
-    if (method === 'setFocusable') return win.setFocusable(args?.[0] as boolean)
-    if (method === 'moveTop') return win.moveTop()
-    if (method === 'setAlwaysOnTop') return win.setAlwaysOnTop(args?.[0] as boolean, (args?.[1] as any))
-    if (method === 'setIgnoreMouseEvents') return win.setIgnoreMouseEvents(args?.[0] as boolean, (args?.[1] as any))
-    return null
-  })
+  ipcMain.handle(
+    'IPC_WINDOW_CONTROL',
+    async (_event, { windowId, method, args }: { windowId: number; method: string; args?: unknown[] }) => {
+      const win = BrowserWindow.fromId(windowId)
+      if (!win || win.isDestroyed()) return null
+      if (method === 'getSize') return win.getSize()
+      if (method === 'getPosition') return win.getPosition()
+      if (method === 'setFocusable') return win.setFocusable(args?.[0] as boolean)
+      if (method === 'moveTop') return win.moveTop()
+      if (method === 'setAlwaysOnTop') return win.setAlwaysOnTop(args?.[0] as boolean, args?.[1] as any)
+      if (method === 'setIgnoreMouseEvents') return win.setIgnoreMouseEvents(args?.[0] as boolean, args?.[1] as any)
+      return null
+    },
+  )
 
   // ---- 子窗口通信 ----
 
@@ -168,15 +185,27 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     return null
   })
 
+  // ---- 打开外部链接 ----
+
+  ipcMain.handle('open-external', async (_event, url: string) => {
+    await shell.openExternal(url)
+  })
+
   // ---- 文件保存 ----
 
   ipcMain.handle(IPC_SAVE_FILE, async (_event, { filePath, roomId, start, end, fileName }) => {
-    const res = await axios.post(`${globalVar.baseUrl}/api/statistic/gift/export`, {
-      roomId, start, end,
-    }, {
-      responseType: 'text',
-      transitional: { forcedJSONParsing: false },
-    })
+    const res = await axios.post(
+      `${globalVar.baseUrl}/api/statistic/gift/export`,
+      {
+        roomId,
+        start,
+        end,
+      },
+      {
+        responseType: 'text',
+        transitional: { forcedJSONParsing: false },
+      },
+    )
 
     if (!fs.existsSync(filePath)) {
       fs.mkdirSync(filePath, { recursive: true })
@@ -192,4 +221,3 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     return true
   })
 }
-

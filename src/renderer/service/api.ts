@@ -53,7 +53,14 @@ export async function getRecordState(body: { roomId?: number }) {
 
 // ==================== Message ====================
 
-export async function queryMessages(body: { category?: string; roomId?: number; userId?: string; skip?: number; limit?: number; sort?: any }) {
+export async function queryMessages(body: {
+  category?: string
+  roomId?: number
+  userId?: string
+  skip?: number
+  limit?: number
+  sort?: any
+}) {
   const res = await axios.get(`${baseUrl}/api/message/query`, { params: body })
   return res.data
 }
@@ -145,7 +152,14 @@ export async function sendAudio(data: Int16Array) {
 
 // ==================== Translate ====================
 
-export async function translateSentence(body: { text: string; from?: string; to?: string; accessKeyId: string; accessKeySecret: string; payload?: any }) {
+export async function translateSentence(body: {
+  text: string
+  from?: string
+  to?: string
+  accessKeyId: string
+  accessKeySecret: string
+  payload?: any
+}) {
   const res = await axios.post(`${baseUrl}/api/translate/sentence`, body)
   return res.data
 }
@@ -217,7 +231,9 @@ export async function sendComment({ roomId, comment }: { roomId: number; comment
 }
 
 export async function getRandomPlayUrl(body: { roomId: number; qn?: number; withCookie?: boolean }) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/room/playurl`, { params: { roomId: String(body.roomId), qn: body.qn, withCookie: body.withCookie ? 'true' : undefined } })
+  const res = await axios.get(`${baseUrl}/api/bilibili/room/playurl`, {
+    params: { roomId: String(body.roomId), qn: body.qn, withCookie: body.withCookie ? 'true' : undefined },
+  })
   return res.data
 }
 
@@ -248,14 +264,21 @@ export async function getClientConfig(clientId: string) {
   return res.data
 }
 
-export async function updateClientConfig({ clientId, kvs }: { clientId: string, kvs: Array<{ key: string; value: any }> }) {
+export async function updateClientConfig({ clientId, kvs }: { clientId: string; kvs: Array<{ key: string; value: any }> }) {
   const res = await axios.post(`${baseUrl}/api/client/config/update`, { clientId, kvs })
+  return res.data
+}
+
+export async function restoreDmStyle({ clientId }: { clientId: string }) {
+  const res = await axios.post(`${baseUrl}/api/client/config/dm-style/restore`, {
+    clientId,
+  })
   return res.data
 }
 
 export async function registryClient({ clientId }) {
   const res = await axios.post(`${baseUrl}/api/client/register`, {
-    clientId
+    clientId,
   })
   return res.data
 }
@@ -266,4 +289,3 @@ export async function touch() {
   const res = await axios.get(`${baseUrl}/api/touch`)
   return res.data
 }
-

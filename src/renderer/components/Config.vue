@@ -11,10 +11,19 @@
           placeholder="输入 B站 Cookie..."
           style="width: 280px; text-align: left; padding: 0 8px" />
         <button
-          class="btn btn-primary"
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
           @click="showQrCodeLoginModal">
           扫码登录
         </button>
+        <span
+          class="tip-icon"
+          @click="showCookieTip">
+          <Icon
+            type="md-information-circle"
+            size="20"
+            color="#2d8cf0" />
+        </span>
       </div>
     </div>
 
@@ -37,6 +46,12 @@
           style="font-size: 10px; height: 22px"
           @click="clearDM">
           清空弹幕
+        </button>
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
+          @click="restoreDmDefaults">
+          恢复默认
         </button>
       </div>
     </div>
@@ -294,9 +309,9 @@
         <div class="section-row">
           <span
             class="label"
-            style="min-width: auto"
-            >背景色</span
-          >
+            style="min-width: auto">
+            背景色
+          </span>
           <label class="color-pick">
             <span
               class="color-dot"
@@ -306,6 +321,28 @@
               :value="currentLevelStyle?.bgColor || '#000000'"
               @change="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
           </label>
+          <span class="hint">边框宽</span>
+          <input
+            class="input"
+            style="width: 28px"
+            :value="currentLevelStyle?.borderWidth ?? 0"
+            @change="setLevelStyle('borderWidth', ($event.target as HTMLInputElement).value)" />
+          <span class="hint">边框色</span>
+          <label class="color-pick">
+            <span
+              class="color-dot"
+              :style="{ background: currentLevelStyle?.borderColor || 'transparent' }"></span>
+            <input
+              type="color"
+              :value="currentLevelStyle?.borderColor || '#000000'"
+              @change="setLevelStyleColor('border', ($event.target as HTMLInputElement).value)" />
+          </label>
+          <span class="hint">圆角</span>
+          <input
+            class="input"
+            style="width: 32px"
+            :value="currentLevelStyle?.borderRadius ?? 0"
+            @change="setLevelStyle('borderRadius', ($event.target as HTMLInputElement).value)" />
           <div
             v-if="activeLevel === '99'"
             class="icon-dropdown">
@@ -314,9 +351,9 @@
               @click="iconOpen = !iconOpen">
               <span
                 v-if="!dmStyle?.adminIcon"
-                style="font-size: 10px; color: #999"
-                >无</span
-              >
+                style="font-size: 10px; color: #999">
+                无
+              </span>
               <Icon
                 v-else
                 :type="dmStyle?.adminIcon"
@@ -383,13 +420,13 @@
               :value="currentLevelStyle?.usernameColor || '#66ccff'"
               @change="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
           </label>
-          <span class="hint">边宽</span>
+          <span class="hint">描边宽</span>
           <input
             class="input"
             style="width: 28px"
             :value="currentLevelStyle?.usernameStrokeWidth ?? 0"
             @change="setLevelStyle('userStrokeWidth', ($event.target as HTMLInputElement).value)" />
-          <span class="hint">边色</span>
+          <span class="hint">描边色</span>
           <label class="color-pick">
             <span
               class="color-dot"
@@ -422,13 +459,13 @@
               :value="currentLevelStyle?.commentColor || '#ffffff'"
               @change="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
           </label>
-          <span class="hint">边宽</span>
+          <span class="hint">描边宽</span>
           <input
             class="input"
             style="width: 28px"
             :value="currentLevelStyle?.commentStrokeWidth ?? 0"
             @change="setLevelStyle('commentStrokeWidth', ($event.target as HTMLInputElement).value)" />
-          <span class="hint">边色</span>
+          <span class="hint">描边色</span>
           <label class="color-pick">
             <span
               class="color-dot"
@@ -632,19 +669,107 @@
       </div>
     </div> -->
 
-    <!-- ═══ 数据 ═══ -->
-    <div class="divider">数据</div>
-    <div class="section">
-      <!-- <div class="section-row">
-        <button
-          class="btn btn-default"
-          @click="restoreDefaults">
-          还原默认弹幕样式
-        </button>
-        <span style="font-size: 11px; color: #999">~/Library/Application Support/bilibili-danmaku</span>
-      </div> -->
+    <div class="divider">其他</div>
+    <div
+      class="section"
+      style="padding-bottom: 16px">
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: auto"
+          >快捷键</span
+        >
+        <span style="font-size: 11px; color: #666">Ctrl + R 刷新</span>
+      </div>
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: auto">
+          OBS 捕获 弹幕窗默认监听所有当前连接的直播间弹幕，如果需要指定直播间请修改 roomId={直播间号}
+        </span>
+      </div>
+      <div class="section-row">
+        <span class="hint">弹幕窗</span>
+        <span
+          class="url-tag"
+          @click="copyObsUrl(obsDmUrl)">
+          {{ obsDmUrl }}
+        </span>
+        <span
+          class="tip-icon"
+          @click="copyObsUrl(obsDmUrl)">
+          <Icon
+            type="md-copy"
+            size="14"
+            color="#999" />
+        </span>
+      </div>
+      <div class="section-row">
+        <span class="hint">原生弹幕窗</span>
+        <span
+          class="url-tag"
+          @click="copyObsUrl(obsRawUrl)">
+          {{ obsRawUrl }}
+        </span>
+        <span
+          class="tip-icon"
+          @click="copyObsUrl(obsRawUrl)">
+          <Icon
+            type="md-copy"
+            size="14"
+            color="#999" />
+        </span>
+      </div>
     </div>
-
+    <div class="divider">关于</div>
+    <div
+      class="section"
+      style="padding-bottom: 16px">
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: auto"
+          >下载</span
+        >
+        <span
+          class="download-link"
+          @click="openGithub">
+          <Icon
+            type="logo-github"
+            size="18" />
+          <span>GitHub</span>
+        </span>
+        <span
+          class="download-link"
+          @click="openBaiduNetdisk">
+          <Icon
+            type="md-cloud-download"
+            size="18" />
+          <span>百度网盘</span>
+        </span>
+      </div>
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: auto">
+          如有问题请向
+          <span
+            class="about-link"
+            @click="openBiliSpace">
+            @其妙
+          </span>
+          反馈
+        </span>
+      </div>
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: auto"
+          >版本</span
+        >
+        <span class="about-val">v{{ version }}</span>
+      </div>
+    </div>
     <!-- ═══ 扫码登录弹窗 ═══ -->
     <Modal
       v-model="showQrModal"
@@ -660,16 +785,33 @@
           style="color: red; margin-top: 8px">
           {{ qrError }}
         </p>
+        <p>请在手机上扫码并确认之后，再点击确认</p>
       </div>
     </Modal>
+
+    <Drawer
+      title="关于弹幕用户名不显示说明"
+      placement="bottom"
+      height="80"
+      :closable="true"
+      v-model="showDrawTip">
+      <p>由于B站风控策略限制，未登录用户无法查看用户名、ID</p>
+      <p>您可以通过 <Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
+      <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，<strong>完整复制粘贴</strong>到设置中</p>
+      <p>目前已支持APP端扫码登录</p>
+      <p :style="{ color: 'crimson' }">Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
+      <img src="../assets/tip-01.png" />
+    </Drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
-import { updateClientConfig, generateQRCode, sendDM, clearDM as clearDMApi } from '../service/api'
+import { updateClientConfig, restoreDmStyle, generateQRCode, sendDM, clearDM as clearDMApi } from '../service/api'
+import { IPC_GET_VERSION } from '../../service/const'
+import globalVar from '../../service/global'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
 
@@ -684,6 +826,7 @@ const clientId = computed(() => config.id)
 const cookieInput = ref('')
 const showQrModal = ref(false)
 const qrError = ref('')
+const showDrawTip = ref(false)
 
 // ── 等级样式 ──
 const activeLevel = ref('0')
@@ -700,6 +843,9 @@ interface LevelStyle {
   commentStrokeColor?: string
   commentStrokeWidth?: number
   bgColor?: string
+  borderColor?: string
+  borderWidth?: number
+  borderRadius?: number
 }
 
 const currentLevelStyle = computed((): LevelStyle => {
@@ -720,6 +866,9 @@ const currentLevelStyle = computed((): LevelStyle => {
     commentStrokeColor: comment['-webkit-text-stroke-color'],
     commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseFloat(comment['-webkit-text-stroke-width']) || 0 : 0,
     bgColor: container['background'],
+    borderColor: container['border-color'],
+    borderWidth: container['border-width'] ? parseFloat(container['border-width']) || 0 : 0,
+    borderRadius: container['border-radius'] ? parseFloat(container['border-radius']) || 0 : 0,
   }
 })
 
@@ -774,7 +923,7 @@ function stepDown(path: string, defaultVal: number, min: number, step: number) {
   setVal(path, Math.max(min, cur - step))
 }
 
-function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke', color: string) {
+function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke' | 'border', color: string) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
   if (target === 'user') {
@@ -787,6 +936,8 @@ function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | '
     setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-color`, color)
   } else if (target === 'commentStroke') {
     setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-color`, color)
+  } else if (target === 'border') {
+    setVal(`dmStyle.messageContainer${suffix}.border-color`, color)
   }
 }
 
@@ -801,6 +952,10 @@ function setLevelStyle(key: string, value: any) {
     setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-width`, `${value}px`)
   } else if (key === 'commentStrokeWidth') {
     setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-width`, `${value}px`)
+  } else if (key === 'borderWidth') {
+    setVal(`dmStyle.messageContainer${suffix}.border-width`, `${value}px`)
+  } else if (key === 'borderRadius') {
+    setVal(`dmStyle.messageContainer${suffix}.border-radius`, `${value}px`)
   }
 }
 
@@ -846,10 +1001,22 @@ async function clearDM() {
   }
 }
 
+async function restoreDmDefaults() {
+  try {
+    const { data } = await restoreDmStyle({ clientId: clientId.value })
+    // 恢复后重新拉取配置更新本地状态
+
+    if (data) {
+      config.dmStyle = data.dmStyle
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 // ── 保存路径 ──
 function selectSavePath() {
-  const { ipcRenderer } = (window as any).require('electron')
-  ipcRenderer.invoke('select-directory').then((path: string | null) => {
+  ;(window as any).ipcRenderer.invoke('select-directory').then((path: string | null) => {
     if (path) setVal('recordConfig.savePath', path)
   })
 }
@@ -868,6 +1035,44 @@ async function showQrCodeLoginModal() {
   } catch {
     qrError.value = '二维码加载失败'
   }
+}
+
+// ── Cookie 提示 ──
+function showCookieTip() {
+  showDrawTip.value = true
+}
+
+// ── 关于 ──
+const version = ref(0)
+const baseObsUrl = computed(() => `http://127.0.0.1:${(globalVar as any).port}`)
+const obsDmUrl = computed(() => `${baseObsUrl.value}/dm?clientId=${clientId.value}&roomId=*`)
+const obsRawUrl = computed(() => `${baseObsUrl.value}/dm-raw-style?clientId=${clientId.value}&roomId=*`)
+
+onMounted(async () => {
+  version.value = await (window as any).ipcRenderer.invoke(IPC_GET_VERSION)
+})
+
+function openGithub() {
+  window.openExternal('https://github.com/usagiring/bilibili-live-danmaku/releases')
+}
+
+function openBiliSpace() {
+  window.openExternal('https://space.bilibili.com/55609')
+}
+
+function openBaiduNetdisk() {
+  window.openExternal('https://pan.baidu.com/share/init?surl=E3Tr0SCojOzGgrGBDOdouA&pwd=2bjw')
+}
+
+function copyObsUrl(url: string) {
+  navigator.clipboard.writeText(url).catch(() => {
+    const input = document.createElement('input')
+    input.value = url
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+  })
 }
 
 // // ── 还原默认 ──
@@ -923,6 +1128,73 @@ async function showQrCodeLoginModal() {
   gap: 8px;
   padding: 4px 0;
   flex-wrap: wrap;
+}
+
+.tip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.tip-icon:hover {
+  opacity: 0.8;
+}
+
+.url-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-family: monospace;
+  color: #555;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #e8eaec;
+  cursor: pointer;
+  user-select: all;
+  transition: background 0.15s;
+}
+
+.url-tag:hover {
+  background: #e8f0fe;
+  border-color: #2d8cf0;
+}
+
+.about-val {
+  font-size: 11px;
+  color: #999;
+}
+
+.about-link {
+  color: #2d8cf0;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.about-link:hover {
+  text-decoration: underline;
+}
+
+.download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #555;
+  background: #f5f5f5;
+  border: 1px solid #e8eaec;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.download-link:hover {
+  color: #2d8cf0;
+  background: #e8f0fe;
+  border-color: #2d8cf0;
 }
 
 .label {

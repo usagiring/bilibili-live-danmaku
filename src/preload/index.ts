@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (channel: string, func: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => func(...args))
   },
-  invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args)
+  invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args),
 })
+
+// 暴露打开外部链接方法
+contextBridge.exposeInMainWorld('openExternal', (url: string) => ipcRenderer.invoke('open-external', url))
