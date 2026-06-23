@@ -1,27 +1,5 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs'
 import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
-
-// TODO 设置一些更小的粒度？ < 1
-// export function getPriceProperties(price) {
-//   if (price < 50) {
-//     return PRICE_PROPERTIES["1"];
-//   }
-//   if (price >= 50 && price < 100) {
-//     return PRICE_PROPERTIES["2"];
-//   }
-//   if (price >= 100 && price < 500) {
-//     return PRICE_PROPERTIES["3"];
-//   }
-//   if (price >= 500 && price < 1000) {
-//     return PRICE_PROPERTIES["4"];
-//   }
-//   if (price >= 1000 && price < 2000) {
-//     return PRICE_PROPERTIES["5"];
-//   }
-//   if (price >= 2000) {
-//     return PRICE_PROPERTIES["6"];
-//   }
-// }
 
 export function getGuardIcon(level) {
   return GUARD_ICON_MAP[level]
@@ -42,8 +20,8 @@ export function parseHexColor(colorNumber) {
   return `#${colorNumber.toString(16).padStart(6, '0')}`
 }
 
-export function dateFormat(date, formatter = "YYYY-MM-DD HH:mm:ss") {
-  return dayjs(date).format(formatter);
+export function dateFormat(date, formatter = 'YYYY-MM-DD HH:mm:ss') {
+  return dayjs(date).format(formatter)
 }
 
 export async function wait(ms = 1000) {

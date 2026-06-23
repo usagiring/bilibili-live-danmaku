@@ -13,7 +13,7 @@ export async function start(maxRetries = 3): Promise<{ port: number }> {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      await bridge(currentPort)
+      await bridge({ port: currentPort, htmlPath: '' })
       console.log(`[Bridge] 服务已启动，端口: ${currentPort}`)
 
       globalVar.port = currentPort
@@ -44,4 +44,3 @@ export async function start(maxRetries = 3): Promise<{ port: number }> {
 function getRandomPort(): number {
   return Math.floor(Math.random() * 20001) + 30000
 }
-

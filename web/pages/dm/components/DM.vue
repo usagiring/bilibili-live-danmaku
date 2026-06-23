@@ -179,7 +179,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE, COLORS, PRICE_PROPERTIES } from '../../service/const'
+import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE, COLORS } from '../../service/const'
 import { getPriceProperties, wait } from '../../service/util'
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from '@tokine/shared/components/GiftTag.vue'
