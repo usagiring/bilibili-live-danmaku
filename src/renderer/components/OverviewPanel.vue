@@ -5,43 +5,33 @@
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.ninkiNumber) }}</div>
-          <div class="stat-label">
-            <Icon type="md-eye" /> 热度
-          </div>
+          <div class="stat-label"><Icon type="md-eye" /> 热度</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.fansNumber) }}</div>
-          <div class="stat-label">
-            <Icon type="md-heart" /> 关注
-          </div>
+          <div class="stat-label"><Icon type="md-heart" /> 关注</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.fansclubNumber) }}</div>
-          <div class="stat-label">
-            <Icon type="md-star" /> 粉丝团
-          </div>
+          <div class="stat-label"><Icon type="md-star" /> 粉丝团</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ activeRoom?.anchorNumber }}</div>
-          <div class="stat-label">
-            <Icon type="md-flag" /> 舰队
-          </div>
+          <div class="stat-label"><Icon type="md-flag" /> 舰队</div>
         </div>
       </div>
 
       <!-- 观看/点赞 -->
-      <div class="stats-row" style="grid-template-columns: repeat(2, 1fr)">
+      <div
+        class="stats-row"
+        style="grid-template-columns: repeat(2, 1fr)">
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
-          <div class="stat-label">
-            <Icon type="md-person" /> 看过
-          </div>
+          <div class="stat-label"><Icon type="md-person" /> 看过</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
-          <div class="stat-label">
-            <Icon type="md-thumbs-up" /> 点赞
-          </div>
+          <div class="stat-label"><Icon type="md-thumbs-up" /> 点赞</div>
         </div>
       </div>
     </template>
@@ -53,12 +43,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Message } from 'view-ui-plus'
 import { useConfigStore } from '../store'
 import { sse } from '../service/sse-client'
-import {
-  getRoomInfoV2,
-  getGuardInfo,
-  updateClientConfig,
-  getUserInfoV2,
-} from '../service/api'
+import { getRoomInfoV2, getGuardInfo, updateClientConfig, getUserInfoV2 } from '../service/api'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -81,11 +66,14 @@ onMounted(() => {
 })
 
 // 切换房间时重新初始化（跳过已初始化的房间）
-watch(() => activeRoom.value?.id, (newId, oldId) => {
-  if (newId && newId !== oldId) {
-    initialize()
-  }
-})
+watch(
+  () => activeRoom.value?.id,
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
+      initialize()
+    }
+  },
+)
 
 onBeforeUnmount(() => {
   // sse.off('NINKI', onNinki)
@@ -97,7 +85,6 @@ onBeforeUnmount(() => {
   // sse.off('ONLINE_COUNT', onOnlineCount)
 })
 
-
 // ── SSE 回调 ──
 function onNinki(data: any) {
   const { roomId, ninkiNumber } = data.payload
@@ -107,7 +94,6 @@ function onNinki(data: any) {
   // store.UPDATE_ACTIVE_ROOM({ ninkiNumber: data.payload?.ninkiNumber ?? 0 })
 }
 function onLive() {
-
   // store.UPDATE_ACTIVE_ROOM({ liveStatus: 1 })
 }
 function onPreparing() {
@@ -171,7 +157,6 @@ async function initialize() {
     room.id = String(realRoomId)
     room.realId = String(realRoomId)
 
-
     room.realId = String(realRoomId)
     room.userId = String(userId)
     room.username = username
@@ -192,11 +177,9 @@ async function initialize() {
     }
 
     await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
-
   } catch (e: any) {
     Message.error(`连接失败: ${e.message}`)
   }
-
 }
 
 function formatNumber(n?: number): string {
@@ -204,7 +187,6 @@ function formatNumber(n?: number): string {
   if (n >= 10000) return (n / 10000).toFixed(1) + '万'
   return n.toLocaleString()
 }
-
 </script>
 
 <style scoped>

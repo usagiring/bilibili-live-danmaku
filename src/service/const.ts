@@ -1,11 +1,8 @@
 export const DEFAULT_FACE = 'https://static.hdslb.com/images/member/noface.gif'
 
-export const GUARD_ICON_1 =
-  'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png'
-export const GUARD_ICON_2 =
-  'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png'
-export const GUARD_ICON_3 =
-  'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png'
+export const GUARD_ICON_1 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png'
+export const GUARD_ICON_2 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png'
+export const GUARD_ICON_3 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png'
 
 export const GUARD_ICON_MAP = {
   1: GUARD_ICON_1,
@@ -39,8 +36,10 @@ export const IPC_ENABLE_WEB_CONTENTS = 'IPC_ENABLE_WEB_CONTENTS'
 export const IPC_LIVE_WINDOW_ON_TOP = 'IPC_LIVE_WINDOW_ON_TOP'
 export const IPC_CHOOSE_DIRECTORY = 'IPC_CHOOSE_DIRECTORY'
 export const IPC_SAVE_FILE = 'IPC_SAVE_FILE'
-export const IPC_CREATE_CHILD_WINDOW = 'IPC_CREATE_CHILD_WINDOW'
-export const IPC_CLOSE_CHILD_WINDOW = 'IPC_CLOSE_CHILD_WINDOW'
+export const IPC_WINDOW_CREATE = 'IPC_WINDOW_CREATE'
+export const IPC_WINDOW_CLOSE = 'IPC_WINDOW_CLOSE'
+export const IPC_WINDOW_FIND = 'IPC_WINDOW_FIND'
+export const IPC_CHILD_WINDOW_ON_TOP = 'IPC_CHILD_WINDOW_ON_TOP'
 export const IPC_SHOW_OPEN_DIALOG = 'IPC_SHOW_OPEN_DIALOG'
 export const IPC_GET_CURRENT_WINDOW_ID = 'IPC_GET_CURRENT_WINDOW_ID'
 export const IPC_WINDOW_ACTION = 'IPC_WINDOW_ACTION'

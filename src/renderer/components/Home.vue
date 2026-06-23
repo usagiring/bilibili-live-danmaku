@@ -227,11 +227,13 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from
 // import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
 // import { Room } from '../types'
-import { IPC_WINDOW_ACTION } from '../../service/const'
+import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Config from './Config.vue'
 import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomStatus } from '../service/api'
 import { DEFAULT_FACE } from '../../service/const'
+import globalVar from '../../service/global'
+import config from '../service/config'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -393,9 +395,48 @@ function handleConnect(_status: boolean) {
   // 由 OverviewPanel emit 上来触发连接
   // TODO 状态变化
 }
-function handleShowDanmaku(_status: boolean) {
-  // 由 OverviewPanel emit 上来触发弹幕窗
+const dmWindowId = ref<number | null>(null)
+
+async function handleShowDanmaku(_status: boolean) {
+  const room = activeRoom.value
+  if (!room) return
+  const url = `http://127.0.0.1:${globalVar.port}/dm?clientId=${clientId.value}&roomId=${room.id}`
+  await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
+    url,
+    width: 440,
+    height: 600,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: false,
+    type: 'dm',
+  })
 }
+
+// 监听 dmStyle 的 Electron 窗口配置变化，同步到 DM 窗口
+watch(
+  () => config.dmStyle?.ignoreMouseEvent,
+  async val => {
+    if (dmWindowId.value == null) return
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'dm',
+      action: 'setIgnoreMouseEvents',
+      value: [val, { forward: true }],
+    })
+  },
+)
+
+watch(
+  () => config.dmStyle?.isWindowAlwaysOnTop,
+  async val => {
+    if (dmWindowId.value == null) return
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'dm',
+      action: 'setAlwaysOnTop',
+      value: [val, 'floating'],
+    })
+  },
+)
 
 function close() {
   window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })

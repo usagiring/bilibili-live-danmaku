@@ -38,6 +38,17 @@ interface User {
   cookie: string
 }
 
+interface Window {
+  id: string
+  type: 'live' | 'dm' | 'dmRaw' | 'asr'
+  roomId: number
+
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 interface DmStyle {
   isShowHeadline: boolean
   faceSize: number
@@ -61,6 +72,7 @@ interface DmStyle {
   windowOpacity: number
   windowBackground: string
   isWindowAlwaysOnTop: boolean
+  ignoreMouseEvent: boolean
   messageSlots: {
     type: 'medal' | 'face' | 'name' | 'comment'
     isShow: boolean

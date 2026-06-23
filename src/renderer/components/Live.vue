@@ -3,14 +3,24 @@
     <div id="live-config-wrapper">
       <div :style="{ display: 'inline-block' }">
         <template v-if="!isRecording">
-          <Button shape="circle" class="space-left-5px" @click="startRecord">
-            <Icon type="ios-radio-button-on" color="crimson" />
+          <Button
+            shape="circle"
+            class="space-left-5px"
+            @click="startRecord">
+            <Icon
+              type="ios-radio-button-on"
+              color="crimson" />
             录制
           </Button>
         </template>
         <template v-else>
-          <Button shape="circle" class="space-left-5px" @click="cancelRecord">
-            <Icon type="ios-square" color="crimson" />
+          <Button
+            shape="circle"
+            class="space-left-5px"
+            @click="cancelRecord">
+            <Icon
+              type="ios-square"
+              color="crimson" />
             停止
           </Button>
         </template>
@@ -18,50 +28,112 @@
         <div :style="{ display: 'inline-block', width: '80px', 'text-align': 'center' }">
           {{ downloadRate }}
         </div>
-        <Select size="small" :model-value="recordQuality" style="width: 70px" @on-change="changeRecordQuality">
-          <Option v-for="quality in qualities" :key="quality.key" :value="quality.value">{{ quality.value }}</Option>
+        <Select
+          size="small"
+          :model-value="recordQuality"
+          style="width: 70px"
+          @on-change="changeRecordQuality">
+          <Option
+            v-for="quality in qualities"
+            :key="quality.key"
+            :value="quality.value"
+            >{{ quality.value }}</Option
+          >
         </Select>
-        <Button class="space-left-5px" size="small" @click="openRecordSaveFolderSelector"> 选择文件夹 </Button>
+        <Button
+          class="space-left-5px"
+          size="small"
+          @click="openRecordSaveFolderSelector">
+          选择文件夹
+        </Button>
         {{ recordDir }}
       </div>
       <div :style="{ 'padding-top': '3px' }">
-        <Button class="space-left-5px" shape="circle" @click="play">
-          <Icon type="md-play" color="green" />
+        <Button
+          class="space-left-5px"
+          shape="circle"
+          @click="play">
+          <Icon
+            type="md-play"
+            color="green" />
           播放
         </Button>
-        <Select class="space-left-5px" size="small" :model-value="playQuality" style="width: 70px" @on-change="changePlayQuality">
-          <Option v-for="quality in qualities" :key="quality.key" :value="quality.value">{{ quality.value }}</Option>
+        <Select
+          class="space-left-5px"
+          size="small"
+          :model-value="playQuality"
+          style="width: 70px"
+          @on-change="changePlayQuality">
+          <Option
+            v-for="quality in qualities"
+            :key="quality.key"
+            :value="quality.value"
+            >{{ quality.value }}</Option
+          >
         </Select>
         <!-- <Select class="space-left-5px" size="small" :model-value="resolution" style="width: 70px" @on-change="changeResolutions">
           <Option v-for="__resolution in resolutions" :key="__resolution.key" :value="__resolution.value">{{ __resolution.value }}</Option>
         </Select> -->
-        <Checkbox class="setting-checkbox" :style="{ 'padding-left': '10px' }" :model-value="isWithCookie" @on-change="withCookie">带上Cookie录制/播放</Checkbox>
+        <Checkbox
+          class="setting-checkbox"
+          :style="{ 'padding-left': '10px' }"
+          :model-value="isWithCookie"
+          @on-change="withCookie"
+          >带上Cookie录制/播放</Checkbox
+        >
         <div :style="{ display: 'inline-block', position: 'relative' }">
           <span class="volume-icon"><Icon type="md-volume-up" /></span>
           <!-- <Icon type="md-volume-off" /> -->
           <div class="volume-controller-slider">
-            <Slider :model-value="liveVolume" @on-change="changeLiveVolume" />
+            <Slider
+              :model-value="liveVolume"
+              @on-change="changeLiveVolume" />
           </div>
         </div>
       </div>
       <div :style="{ 'margin-left': '25px' }">
-        独立播放窗 <i-switch :model-value="isShowLiveWindow" :loading="isShowLiveWindowLoading" @on-change="showLiveWindow" />
-        <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isLiveWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+        独立播放窗
+        <i-switch
+          :model-value="isShowLiveWindow"
+          :loading="isShowLiveWindowLoading"
+          @on-change="showLiveWindow" />
+        <Checkbox
+          :style="{ 'padding-left': '10px' }"
+          :model-value="isLiveWindowAlwaysOnTop"
+          @on-change="changeAlwaysOnTop"
+          >置顶</Checkbox
+        >
         <span :style="{ 'padding-right': '3px' }">透明度</span>
         <div class="opcity-controller-slider">
-          <Slider :model-value="liveWindowOpacity" @on-change="changeLiveWindowOpacity" />
+          <Slider
+            :model-value="liveWindowOpacity"
+            @on-change="changeLiveWindowOpacity" />
         </div>
       </div>
     </div>
 
-    <video id="live-player" controls :style="{ height: `${resolution}px` }" />
+    <video
+      id="live-player"
+      controls
+      :style="{ height: `${resolution}px` }" />
     <div :style="{ padding: '0 20px 5px 10px' }">
       <template v-if="medalData">
-        <FanMedal :medal="medalData" :role="(medalData as any).guard" />
+        <FanMedal
+          :medal="medalData"
+          :role="(medalData as any).guard" />
       </template>
       <template v-else>
-        <Tooltip transfer placement="top">
-          <Button :disabled="!userCookie" :loading="getMedalDataLoading" size="small" :style="{ 'font-size': '12px', margin: '0 3px' }" @click="getMedalData"> 获取当前佩戴粉丝牌 </Button>
+        <Tooltip
+          transfer
+          placement="top">
+          <Button
+            :disabled="!userCookie"
+            :loading="getMedalDataLoading"
+            size="small"
+            :style="{ 'font-size': '12px', margin: '0 3px' }"
+            @click="getMedalData">
+            获取当前佩戴粉丝牌
+          </Button>
           <template #content>
             <div :style="{ 'white-space': 'normal' }">
               <p>会同时触发进入房间消息</p>
@@ -69,10 +141,21 @@
           </template>
         </Tooltip>
       </template>
-      <Input v-model="message" placeholder="弹幕..." clearable :style="{ width: '360px' }" @on-keyup.ctrl.enter="sendMessage" />
+      <Input
+        v-model="message"
+        placeholder="弹幕..."
+        clearable
+        :style="{ width: '360px' }"
+        @on-keyup.ctrl.enter="sendMessage" />
 
       <Tooltip placement="top">
-        <Button :style="{ margin: '0 3px' }" :disabled="!message || !userCookie || !realRoomId" :loading="isSending" @click="sendMessage">发送</Button>
+        <Button
+          :style="{ margin: '0 3px' }"
+          :disabled="!message || !userCookie || !realRoomId"
+          :loading="isSending"
+          @click="sendMessage"
+          >发送</Button
+        >
         <template #content>
           <div :style="{ color: 'pink', 'white-space': 'normal' }">
             <p>本应用通过模拟客户端请求带上身份信息发送弹幕。</p>
@@ -81,7 +164,12 @@
           </div>
         </template>
       </Tooltip>
-      <Button :disabled="!userCookie || !medalId" :loading="isWearing" @click="wearCurrentMedal">佩戴当前直播间牌子</Button>
+      <Button
+        :disabled="!userCookie || !medalId"
+        :loading="isWearing"
+        @click="wearCurrentMedal"
+        >佩戴当前直播间牌子</Button
+      >
     </div>
   </div>
 </template>
@@ -89,10 +177,19 @@
 <script lang="ts">
 import { useConfigStore } from '../store'
 import * as flvjs from 'flv.js'
-import { defineComponent } from "vue"
+import { defineComponent } from 'vue'
 import { ipcRenderer } from 'electron'
 import emitter from '../../service/event'
-import { IPC_GET_EXE_PATH, IPC_LIVE_WINDOW_PLAY, IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_LIVE_WINDOW_ON_TOP, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_CHOOSE_DIRECTORY } from '../../service/const'
+import {
+  IPC_GET_EXE_PATH,
+  IPC_LIVE_WINDOW_PLAY,
+  IPC_LIVE_WINDOW_CLOSE,
+  IPC_ENABLE_WEB_CONTENTS,
+  IPC_LIVE_WINDOW_ON_TOP,
+  IPC_WINDOW_CREATE,
+  IPC_WINDOW_CLOSE,
+  IPC_CHOOSE_DIRECTORY,
+} from '../../service/const'
 // @ts-ignore
 import { parseDownloadRate, parseHexColor, dateFormat } from '../service/util'
 import { sendComment, getUserInfoInRoom, wearMedal, getRandomPlayUrl, record, cancelRecord, getRecordState } from '../service/api'
@@ -362,15 +459,13 @@ export default defineComponent({
           {
             headers,
             autoCleanupSourceBuffer: true,
-          }
+          },
         )
 
-        this.flvPlayer!.on((flvjs as any).Events.ERROR, (e) => {
+        this.flvPlayer!.on((flvjs as any).Events.ERROR, e => {
           this.$Message.error(`播放失败: ${e}`)
           console.log(e)
-        })
-
-        (livePlayer as HTMLVideoElement).volume = (Number(this.liveVolume) || 100) / 100
+        })(livePlayer as HTMLVideoElement).volume = (Number(this.liveVolume) || 100) / 100
 
         this.flvPlayer!.attachMediaElement(livePlayer)
         this.flvPlayer!.load()
@@ -423,7 +518,7 @@ export default defineComponent({
             message: this.message,
             roomId: this.realRoomId,
           },
-          this.userCookie
+          this.userCookie,
         )
         if (result.data.message) {
           this.$Message.warning(`发送未成功: ${result.data.message}`)
@@ -453,7 +548,8 @@ export default defineComponent({
         this.getMedalDataLoading = false
         return
       }
-      const { v2_medal_color_border, level, v2_medal_color_level, v2_medal_color_start, v2_medal_color_text, guard_level, name } = curr_weared_v2
+      const { v2_medal_color_border, level, v2_medal_color_level, v2_medal_color_start, v2_medal_color_text, guard_level, name } =
+        curr_weared_v2
 
       this.medalData = {
         name: name,
@@ -534,7 +630,7 @@ export default defineComponent({
       this.isShowLiveWindowLoading = true
 
       if (status) {
-        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+        const { windowId } = await ipcRenderer.invoke(IPC_WINDOW_CREATE, {
           hash: '/live-window',
           width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
           height: this.liveWindowHeight || 320,

@@ -4,7 +4,10 @@
       <div class="config-container">
         自动语音识别技术
         <span>
-          <Tooltip max-width="600" transfer placement="right">
+          <Tooltip
+            max-width="600"
+            transfer
+            placement="right">
             <span class="help">?</span>
             <template #content>
               <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
@@ -20,20 +23,37 @@
       </div>
       <div class="config-container">
         独立窗口
-        <i-switch :model-value="isShowASRWindow" :loading="isShowASRWindowLoading" @on-change="showASRWindow" />
-        <Checkbox :style="{ 'padding-left': '10px' }" :model-value="isASRWindowAlwaysOnTop" @on-change="changeAlwaysOnTop">置顶</Checkbox>
+        <i-switch
+          :model-value="isShowASRWindow"
+          :loading="isShowASRWindowLoading"
+          @on-change="showASRWindow" />
+        <Checkbox
+          :style="{ 'padding-left': '10px' }"
+          :model-value="isASRWindowAlwaysOnTop"
+          @on-change="changeAlwaysOnTop"
+          >置顶</Checkbox
+        >
       </div>
       <!-- <div class="divider"></div> -->
 
       <div class="config-container">
         <span>
           显示行数：
-          <InputNumber :model-value="ASRLineCount" size="small" :min="1" :step="1" :style="{ width: '50px' }" @on-change="changeASRLineCount" />
+          <InputNumber
+            :model-value="ASRLineCount"
+            size="small"
+            :min="1"
+            :step="1"
+            :style="{ width: '50px' }"
+            @on-change="changeASRLineCount" />
         </span>
       </div>
       <div class="config-container">
         <span>
-          <Tooltip max-width="600" transfer placement="top">
+          <Tooltip
+            max-width="600"
+            transfer
+            placement="top">
             <span>翻译：</span>
 
             <template #content>
@@ -42,41 +62,93 @@
               </div>
             </template>
           </Tooltip>
-          <Select :model-value="mtFromLang" :disabled="enableTranslate" size="small" style="width: 80px" @on-change="changeFromLang">
-            <Option v-for="item in fromLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
+          <Select
+            :model-value="mtFromLang"
+            :disabled="enableTranslate"
+            size="small"
+            style="width: 80px"
+            @on-change="changeFromLang">
+            <Option
+              v-for="item in fromLangs"
+              :key="item.value"
+              :value="item.value"
+              >{{ item.label }}</Option
+            >
           </Select>
           =>
-          <Select :model-value="mtToLang" :disabled="enableTranslate" size="small" style="width: 80px" @on-change="changeToLang">
-            <Option v-for="item in toLangs" :key="item.value" :value="item.value">{{ item.label }}</Option>
+          <Select
+            :model-value="mtToLang"
+            :disabled="enableTranslate"
+            size="small"
+            style="width: 80px"
+            @on-change="changeToLang">
+            <Option
+              v-for="item in toLangs"
+              :key="item.value"
+              :value="item.value"
+              >{{ item.label }}</Option
+            >
           </Select>
 
-          <Checkbox class="margin-left-10px" :model-value="enableTranslate" :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang" @on-change="changeEnableTranslate"
+          <Checkbox
+            class="margin-left-10px"
+            :model-value="enableTranslate"
+            :disabled="!aliAccessKeyId || !aliAccessKeySecret || !mtFromLang || !mtToLang"
+            @on-change="changeEnableTranslate"
             >启动</Checkbox
           >
         </span>
       </div>
       <div class="config-container">
-        <RadioGroup :model-value="audioFrom" @on-change="changeAudioFrom">
-          <Radio label="livestream" :disabled="isStarted">
+        <RadioGroup
+          :model-value="audioFrom"
+          @on-change="changeAudioFrom">
+          <Radio
+            label="livestream"
+            :disabled="isStarted">
             <span>从直播流输入音频</span>
           </Radio>
-          <Radio label="microphone" :disabled="isStarted">
+          <Radio
+            label="microphone"
+            :disabled="isStarted">
             <span>从麦克风输入音频</span>
           </Radio>
         </RadioGroup>
       </div>
-      <div v-if="audioFrom === 'microphone'" class="config-container">
+      <div
+        v-if="audioFrom === 'microphone'"
+        class="config-container">
         选择设备：
-        <Select v-model:audioDevices="audioDevices" :disabled="audioFrom !== 'microphone'" size="small" style="width: 220px" placeholder="未选择时使用默认设备" @on-open-change="getAudioDevice">
-          <Option v-for="d in audioDevices" :key="d.value" :value="d.value">{{ d.label }}</Option>
+        <Select
+          v-model:audioDevices="audioDevices"
+          :disabled="audioFrom !== 'microphone'"
+          size="small"
+          style="width: 220px"
+          placeholder="未选择时使用默认设备"
+          @on-open-change="getAudioDevice">
+          <Option
+            v-for="d in audioDevices"
+            :key="d.value"
+            :value="d.value"
+            >{{ d.label }}</Option
+          >
         </Select>
         <!-- <Button class="margin-left-2px" :disabled="audioFrom !== 'microphone'" size="small" @click="openAuidoTestModal">测试</Button> -->
       </div>
 
-      <div v-if="audioFrom === 'livestream'" class="config-container">
+      <div
+        v-if="audioFrom === 'livestream'"
+        class="config-container">
         <span>
-          <Tooltip max-width="600" transfer placement="right">
-            <Button size="small" @click="openFFmpegSelector">选择 ffmpeg 文件</Button>
+          <Tooltip
+            max-width="600"
+            transfer
+            placement="right">
+            <Button
+              size="small"
+              @click="openFFmpegSelector"
+              >选择 ffmpeg 文件</Button
+            >
             <template #content>
               <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
                 <p>● 您可以手动指定ffmpeg文件路径。</p>
@@ -87,15 +159,26 @@
         </span>
         <span v-if="ffmpegExe">
           {{ ffmpegExe }}
-          <Icon type="md-close" :style="{ color: 'crimson', cursor: 'pointer' }" @click="clearFFmpegPath()" />
+          <Icon
+            type="md-close"
+            :style="{ color: 'crimson', cursor: 'pointer' }"
+            @click="clearFFmpegPath()" />
         </span>
       </div>
 
-      <div class="config-container" :style="{ width: '400px' }">
+      <div
+        class="config-container"
+        :style="{ width: '400px' }">
         <div :style="{ 'text-align': 'center' }">阿里云</div>
         <div>
           <div class="key-item">AccessKeyId:</div>
-          <Input :model-value="aliAccessKeyId" :disabled="isStarted" :style="{ display: 'inline-block', width: '220px' }" size="small" placeholder="AccessKeyId..." @on-change="changeAliAccessKeyId" />
+          <Input
+            :model-value="aliAccessKeyId"
+            :disabled="isStarted"
+            :style="{ display: 'inline-block', width: '220px' }"
+            size="small"
+            placeholder="AccessKeyId..."
+            @on-change="changeAliAccessKeyId" />
         </div>
         <div>
           <div class="key-item">AccessKeySecret:</div>
@@ -106,42 +189,83 @@
             placeholder="AccessKeySecret..."
             type="password"
             :style="{ display: 'inline-block', width: '220px' }"
-            @on-change="changeAliAccessKeySecret"
-          />
+            @on-change="changeAliAccessKeySecret" />
         </div>
         <div>
           <div class="key-item">AppKey:</div>
           <!-- <Input :model-value="aliAppKey" :disabled="isStarted" @on-change="changeAliAppKey" size="small" placeholder="AppKey..." :style="{display: 'inline-block', width: '220px'}" /> -->
-          <AutoComplete :model-value="aliAppKey" :disabled="isStarted" size="small" placeholder="AppKey..." :style="{ display: 'inline-block', width: '220px' }" @on-change="changeAliAppKey">
-            <Option v-for="appKey in aliAppKeys" :key="appKey" :value="appKey">
+          <AutoComplete
+            :model-value="aliAppKey"
+            :disabled="isStarted"
+            size="small"
+            placeholder="AppKey..."
+            :style="{ display: 'inline-block', width: '220px' }"
+            @on-change="changeAliAppKey">
+            <Option
+              v-for="appKey in aliAppKeys"
+              :key="appKey"
+              :value="appKey">
               {{ appKey }}
-              <Icon type="md-close" class="remove-history-appkey" @click="removeHistoryAppkey(appKey)" />
+              <Icon
+                type="md-close"
+                class="remove-history-appkey"
+                @click="removeHistoryAppkey(appKey)" />
             </Option>
           </AutoComplete>
         </div>
       </div>
       <div class="config-container">
-        <Button type="primary" :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey" :loading="isStarting" @click="start">开始</Button>
-        <Button class="margin-left-5px" :disabled="!isStarted" @click="stop">停止</Button>
+        <Button
+          type="primary"
+          :disabled="isStarted || !aliAccessKeyId || !aliAccessKeySecret || !aliAppKey"
+          :loading="isStarting"
+          @click="start"
+          >开始</Button
+        >
+        <Button
+          class="margin-left-5px"
+          :disabled="!isStarted"
+          @click="stop"
+          >停止</Button
+        >
       </div>
 
       <Divider size="small"> </Divider>
 
-      <Button :loading="isStartingSpeechToDanmaku" class="config-container" @click="showSpeechToDanmaku">语音发送弹幕</Button>
+      <Button
+        :loading="isStartingSpeechToDanmaku"
+        class="config-container"
+        @click="showSpeechToDanmaku"
+        >语音发送弹幕</Button
+      >
     </div>
 
     <div class="right-container">
-      <template v-for="(text, index) in texts" :key="index">
+      <template
+        v-for="(text, index) in texts"
+        :key="index">
         <div>
           <div>{{ text.text }}</div>
-          <div v-if="text.translate" :style="{ color: 'gray' }">{{ text.translate }}</div>
+          <div
+            v-if="text.translate"
+            :style="{ color: 'gray' }">
+            {{ text.translate }}
+          </div>
         </div>
       </template>
     </div>
 
-    <Modal v-model="isMicrophoneNoticeModalOpen" title="即将使用麦克风" @on-ok="microphoneNoticeOk" @on-cancel="microphoneNoticeCancel">
+    <Modal
+      v-model="isMicrophoneNoticeModalOpen"
+      title="即将使用麦克风"
+      @on-ok="microphoneNoticeOk"
+      @on-cancel="microphoneNoticeCancel">
       <p :style="{ padding: '5px' }">您的麦克风输入数据将提交至云服务商进行分析</p>
-      <Checkbox v-model="isDisableMircrophotoNoticeMessagePersistent" :style="{ padding: '10px' }">下次不再显示</Checkbox>
+      <Checkbox
+        v-model="isDisableMircrophotoNoticeMessagePersistent"
+        :style="{ padding: '10px' }"
+        >下次不再显示</Checkbox
+      >
     </Modal>
   </div>
 </template>
@@ -169,7 +293,13 @@ import {
   speechToText,
   getRandomPlayUrl,
 } from '../service/api'
-import { IPC_LIVE_WINDOW_CLOSE, IPC_ENABLE_WEB_CONTENTS, IPC_CREATE_CHILD_WINDOW, IPC_CLOSE_CHILD_WINDOW, IPC_SHOW_OPEN_DIALOG } from '../../service/const'
+import {
+  IPC_LIVE_WINDOW_CLOSE,
+  IPC_ENABLE_WEB_CONTENTS,
+  IPC_WINDOW_CREATE,
+  IPC_WINDOW_CLOSE,
+  IPC_SHOW_OPEN_DIALOG,
+} from '../../service/const'
 import icon from '../assets/logo.png'
 const processorUrl = new URL('../../service/processor.worklet.js', import.meta.url)
 // import { AudioWorklet } from '../../service/audio-worklet'
@@ -331,8 +461,8 @@ export default {
     async getAudioDevice() {
       const devices = await navigator.mediaDevices.enumerateDevices()
       this.audioDevices = devices
-        .filter((d) => d.kind === 'audioinput')
-        .map((d) => {
+        .filter(d => d.kind === 'audioinput')
+        .map(d => {
           return {
             value: d.deviceId,
             label: d.label,
@@ -538,7 +668,7 @@ export default {
 
       // let count = 0
       let sample8192 = []
-      worklet.port.onmessage = (e) => {
+      worklet.port.onmessage = e => {
         let sample128 = JSON.parse(e.data)
         sample8192 = sample8192.concat(sample128)
 
@@ -585,7 +715,7 @@ export default {
         accessKeySecret: this.aliAccessKeySecret,
       })
 
-      const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+      const { windowId } = await ipcRenderer.invoke(IPC_WINDOW_CREATE, {
         hash: '/speech-to-danmaku',
         width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
         height: this.liveWindowHeight || 320,
@@ -620,7 +750,7 @@ export default {
       this.isShowASRWindowLoading = true
 
       if (status) {
-        const { windowId } = await ipcRenderer.invoke(IPC_CREATE_CHILD_WINDOW, {
+        const { windowId } = await ipcRenderer.invoke(IPC_WINDOW_CREATE, {
           hash: '/asr-window',
           width: this.liveWindowHeight ? this.liveWindowHeight * 2 : 640,
           height: this.liveWindowHeight || 320,
@@ -641,7 +771,7 @@ export default {
       } else {
         if (!this.ASRWindowId) return
         try {
-          await ipcRenderer.invoke(IPC_CLOSE_CHILD_WINDOW, { windowId: this.ASRWindowId })
+          await ipcRenderer.invoke(IPC_WINDOW_CLOSE, { windowId: this.ASRWindowId })
         } catch (e) {
           console.log('Close window error', e)
         }
@@ -700,7 +830,7 @@ export default {
     },
 
     removeHistoryAppkey(appKey) {
-      const aliAppKeys = this.aliAppKeys.filter((__appKey) => __appKey !== appKey)
+      const aliAppKeys = this.aliAppKeys.filter(__appKey => __appKey !== appKey)
       useConfigStore().updateConfig({
         aliAppKeys,
       })

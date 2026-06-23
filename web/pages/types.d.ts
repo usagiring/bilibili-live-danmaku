@@ -23,7 +23,6 @@ interface DmStyle {
   isShowSuperChatJPN: boolean
   windowOpacity: number
   windowBackground: string
-  isWindowAlwaysOnTop: boolean
   messageSlots: {
     type: string
     isShow: boolean

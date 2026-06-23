@@ -264,7 +264,6 @@ const dmStyle = reactive<DmStyle>({
   isShowSuperChatJPN: true,
   windowOpacity: 1,
   windowBackground: 'rgba(0,0,0,0)',
-  isWindowAlwaysOnTop: false,
   messageSlots: [],
   borderImages: [],
 

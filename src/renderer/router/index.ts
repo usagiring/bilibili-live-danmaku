@@ -8,24 +8,24 @@ const routes = [
   },
   {
     path: '/asr-window',
-    component: () => import('../components/ASRWindow.vue')
+    component: () => import('../components/ASRWindow.vue'),
   },
   {
     path: '/speech-to-danmaku',
-    component: () => import('../components/SpeechToDanmaku.vue')
+    component: () => import('../components/SpeechToDanmaku.vue'),
   },
   {
     path: '/live-window',
-    component: () => import('../components/LiveWindow.vue')
+    component: () => import('../components/LiveWindow.vue'),
   },
-  {
-    path: '/danmaku-scroll',
-    component: () => import('../components/Danmaku-Scroll.vue')
-  },
+  // {
+  //   path: '/danmaku-scroll',
+  //   component: () => import('../components/Danmaku-Scroll.vue')
+  // },
   {
     path: '/:pathMatch(.*)*',
-    component: () => import('../components/NotFound.vue')
-  }
+    component: () => import('../components/NotFound.vue'),
+  },
 ]
 
 export default createRouter({
