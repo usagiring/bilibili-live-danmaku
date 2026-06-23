@@ -106,13 +106,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle(
     IPC_WINDOW_CREATE,
     async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow, type }) => {
-      const parent = BrowserWindow.fromWebContents(event.sender) ?? mainWindow
       const winURL = url || getRendererUrl(hash)
 
       const win = new BrowserWindow({
         width: width || 800,
         height: height || 600,
-        parent,
+        type: 'toolbar',
         webPreferences: {},
         alwaysOnTop: alwaysOnTop ?? false,
         resizable: resizable ?? true,

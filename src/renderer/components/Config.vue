@@ -132,12 +132,6 @@
           @click="toggle('dmStyle.ignoreMouseEvent')"
           >鼠标穿透</span
         >
-        <span
-          class="chip"
-          :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
-          @click="toggle('dmRawStyle.ignoreMouseEvent')"
-          >鼠标穿透</span
-        >
       </div>
 
       <div class="section-row">

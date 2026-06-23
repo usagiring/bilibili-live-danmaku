@@ -190,7 +190,7 @@
                   <Button
                     class="btn-danmaku"
                     size="small"
-                    @click="handleShowDanmaku(true)">
+                    @click="handleShowDanmaku()">
                     <Icon
                       type="md-chatboxes"
                       size="13" />
@@ -395,9 +395,8 @@ function handleConnect(_status: boolean) {
   // 由 OverviewPanel emit 上来触发连接
   // TODO 状态变化
 }
-const dmWindowId = ref<number | null>(null)
 
-async function handleShowDanmaku(_status: boolean) {
+async function handleShowDanmaku() {
   const room = activeRoom.value
   if (!room) return
   const url = `http://127.0.0.1:${globalVar.port}/dm?clientId=${clientId.value}&roomId=${room.id}`
@@ -417,7 +416,6 @@ async function handleShowDanmaku(_status: boolean) {
 watch(
   () => config.dmStyle?.ignoreMouseEvent,
   async val => {
-    if (dmWindowId.value == null) return
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
       action: 'setIgnoreMouseEvents',
@@ -429,7 +427,6 @@ watch(
 watch(
   () => config.dmStyle?.isWindowAlwaysOnTop,
   async val => {
-    if (dmWindowId.value == null) return
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
       action: 'setAlwaysOnTop',
