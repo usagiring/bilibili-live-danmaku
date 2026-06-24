@@ -4,7 +4,7 @@
     :style="{ background: color1 }">
     <div
       class="gift-tag-progress"
-      :style="{ width: `${widthCalculator(gift)}%`, background: color2 }" />
+      :style="{ width: `${width}%`, background: color2 }" />
     <div class="gift-tag-content-wrapper">
       <Avatar
         class="gift-tag-avatar"
@@ -17,24 +17,38 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed, ref, onMounted, onUnmounted, toRefs } from 'vue'
 
-const props = defineProps(['gift', 'face'])
+const props = defineProps<{ gift: any; face?: string; sendAt: number }>()
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
 const color1 = computed(() => priceProperties.value?.colors[0])
 const color2 = computed(() => priceProperties.value?.colors[1])
+
+const existsTime = ref(0)
+let timer: ReturnType<typeof setInterval>
+
+onMounted(() => {
+  existsTime.value = Date.now() - props.sendAt
+
+  timer = setInterval(() => {
+    existsTime.value = Date.now() - props.sendAt
+  }, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(timer)
+})
+
+const width = computed(() => {
+  const duration = priceProperties.value?.duration
+  if (!existsTime.value || !duration) return 100
+  return Math.max(0, Math.floor((1 - existsTime.value / duration) * 100))
+})
 
 const formattedPrice = computed(() => {
   const price = totalPrice.value
   return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
 })
-
-function widthCalculator(item: any) {
-  if (Number(item.existsTime) && Number(item.priceProperties.time)) {
-    return Math.floor((1 - item.existsTime / item.priceProperties.time) * 100)
-  }
-  return 100
-}
 </script>
 
 <style scoped>

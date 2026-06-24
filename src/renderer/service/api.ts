@@ -77,8 +77,8 @@ export async function clearDM() {
   return res.data
 }
 
-export async function sendDM(category: string, data: any) {
-  const res = await axios.post(`${baseUrl}/api/dm/send`, { category, data })
+export async function sendDM({ clientId, data }: { clientId: string; data: any }) {
+  const res = await axios.post(`${baseUrl}/api/dm/send`, { clientId, data })
   return res.data
 }
 

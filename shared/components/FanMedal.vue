@@ -28,18 +28,20 @@ function getStyle() {
     color: props.medal?.color?.text,
     border: `solid 0.5px ${props.medal?.color?.border}`,
     'font-size': '12px',
-    'border-radius': '10px',
+    'border-radius': '9px',
     padding: `2px 2.5px 2px ${props.anchorIcon ? 15 : 4}px`,
   }
 }
 function getLevelStyle() {
   return {
-    'border-radius': '10px',
-    color: props.medal?.color?.level,
-    background: '#FFFFFF',
-    'font-size': '11px',
-    padding: '1px 2px 1px 1px',
-    'margin-left': '-2px',
+    // 'border-radius': '10px',
+    // color: props.medal?.color?.level,
+    color: '#FFFFFF',
+    'font-weight': 'bold',
+    // background: '#FFFFFF',
+    'font-size': '12px',
+    // padding: '1px 2px 1px 1px',
+    'margin-left': '-2.5px',
   }
 }
 </script>

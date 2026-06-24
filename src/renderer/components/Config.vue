@@ -110,15 +110,21 @@
         <span
           class="chip"
           :class="{ on: dmStyle?.isShowSilverGift === true }"
-          @click="toggle('dmStyle.isShowSilverGift')"
-          >银瓜子礼物</span
-        >
+          @click="toggle('dmStyle.isShowSilverGift')">
+          银瓜子礼物
+        </span>
+        <span
+          class="chip"
+          :class="{ on: dmStyle?.isUseMiniGiftCard === true }"
+          @click="toggle('dmStyle.isUseMiniGiftCard')">
+          礼物小卡片
+        </span>
         <span
           class="chip"
           :class="{ on: dmStyle?.isShowHeadline !== false }"
-          @click="toggle('dmStyle.isShowHeadline')"
-          >礼物栏</span
-        >
+          @click="toggle('dmStyle.isShowHeadline')">
+          礼物栏
+        </span>
         <span style="color: #ddd; margin: 0 2px">│</span>
         <span
           class="chip"
@@ -982,12 +988,59 @@ function selectNoIcon() {
   iconOpen.value = false
 }
 
+function getTestDMGift() {
+  return {
+    id: String(Math.floor(Date.now() * Math.random())),
+    type: 'gift',
+    name: '测试礼物',
+    price: Math.floor(Math.random() * 100), // 0 ~ 100 元
+    count: 1,
+    coinType: 'gold',
+  }
+}
+
 async function sendTestDanmaku() {
   try {
-    await sendDM('danmaku', {
+    const categories: Array<'comment' | 'gift' | 'superchat'> = ['comment', 'gift', 'superchat']
+    const category = categories[Math.floor(Math.random() * categories.length)]
+
+    const data: any = {
+      id: Date.now() + Math.random(),
+      content: '',
+      color: null,
+      category,
+      type: null,
+      sendAt: Date.now(),
+      roomId: '*',
+      clientId: clientId.value,
+      userId: '0',
       username: '测试用户',
-      comment: '这是一条测试弹幕 🎉',
-    })
+      usernameColor: null,
+      roles: [Math.floor(Math.random() * 4)], // 随机 0~3
+      face: null,
+      emots: null,
+      voiceUrl: null,
+      fileDuration: null,
+      emojiUrl: null,
+      gift: null,
+      medal: null,
+      interact: null,
+      createdAt: Date.now(),
+    }
+
+    if (category === 'comment') {
+      data.content = '这是一条测试弹幕 🎉'
+    } else if (category === 'gift') {
+      const gift = getTestDMGift()
+      data.content = `${data.username} 赠送了 ${gift.count} 个 ${gift.name}`
+      data.gift = gift
+    } else if (category === 'superchat') {
+      const gift = getTestDMGift()
+      data.content = '这是一条测试SC留言'
+      data.gift = gift
+    }
+
+    await sendDM({ clientId: clientId.value, data })
   } catch {
     /* ignore */
   }

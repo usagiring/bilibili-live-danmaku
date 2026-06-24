@@ -10,17 +10,21 @@
       <transition-group name="fade">
         <template
           v-for="(msg, index) of headlines"
-          :key="index"
-          @mouseleave="unhoverHeadline()">
-          <div
-            class="gift-tag-wrapper"
-            @mouseenter="hoverHeadline(msg.id)">
+          :key="index">
+          <div class="gift-tag-wrapper">
             <GiftTag
-              v-if="false"
-              :gift="msg" />
+              v-if="!msg.isHover"
+              @mouseenter="hoverHeadline(msg.id)"
+              :sendAt="msg.sendAt"
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face" />
             <GiftTagExpand
               v-else
-              :gift="msg"
+              @mouseleave="unhoverHeadline(msg.id)"
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face"
               :is-show-super-chat-jpn="isShowSuperChatJPN" />
           </div>
         </template>
@@ -150,17 +154,17 @@
           </template>
 
           <!-- 礼物 -->
-          <template v-else-if="message.category === 'gift'">
+          <template v-else-if="message.category === 'gift' && message.gift">
             <GiftCard
               v-if="!isUseMiniGiftCard"
               :gift="message.gift"
               :username="message.username"
               :face="message.face">
               <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
-                {{ `${message.username} 赠送了 ${message.gift?.count} 个 ${message.gift?.name}` }}
+                {{ `${message.username} 赠送了 ${message.gift.count} 个 ${message.gift.name}` }}
               </span>
               <img
-                :src="giftGifMap[message.id] && giftGifMap[message.id].webp"
+                :src="giftGifMap[message.gift.id] && giftGifMap[message.gift.id].webp"
                 :style="{ 'vertical-align': 'middle', width: '35px' }" />
             </GiftCard>
             <GiftCardMini
@@ -168,7 +172,7 @@
               :gift="message.gift"
               :username="message.username"
               :face="message.face">
-              {{ ` 赠送了 ${message.gift?.count}个 ${message.gift?.name}` }}
+              {{ ` 赠送了 ${message.gift.count}个 ${message.gift.name}` }}
             </GiftCardMini>
           </template>
         </div>
@@ -198,45 +202,7 @@ let promiseQueue: PromiseQueue | null = null
 
 const giftGifMap = ref<Record<string, any>>({})
 const roomId = ref<String>('')
-const headlines = ref<Message[]>([
-  // {
-  //   id: 192,
-  //   content: '残*** 赠送了 盛典门票',
-  //   color: null,
-  //   category: 'gift',
-  //   type: null,
-  //   sendAt: 1782125493078,
-  //   roomId: '5050',
-  //   clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
-  //   userId: '0',
-  //   username: '残***',
-  //   usernameColor: null,
-  //   roles: [0],
-  //   face: 'http://i1.hdslb.com/bfs/face/865dff24ced774fb2557456bc45644389910a17f.jpg@48w_48h',
-  //   emots: null,
-  //   voiceUrl: null,
-  //   fileDuration: null,
-  //   emojiUrl: null,
-  //   gift: {
-  //     id: '34144',
-  //     type: 'gift',
-  //     name: '盛典门票',
-  //     price: 0.1,
-  //     count: 1,
-  //     coinType: 'gold',
-  //     batchComboId: 'batch:gift:combo_id:343333383836353939d41d8cd98f00b204e9800998ecf8427e:433351:34144:1782125492.2750',
-  //     totalPrice: 0.1,
-  //     priceProperties: {
-  //       colors: ['#EDF5FF', '#2A60B2'],
-  //       duration: 60000,
-  //     },
-  //   },
-  //   medal: null,
-  //   interact: null,
-  //   createdAt: 1782125493000,
-  //   styleSuffix: '0',
-  // },
-])
+const headlines = ref<Message[]>([])
 const emojiSize = ref(24)
 
 const dmStyle = reactive<DmStyle>({
@@ -311,106 +277,7 @@ const {
   channelDelayTime,
 } = toRefs(dmStyle)
 
-const messages = ref<Message[]>([
-  {
-    id: 135,
-    content: '就有一个17智力头环，不是关键的东西',
-    color: '#ffffff',
-    category: 'comment',
-    type: 0,
-    sendAt: 1782125409239,
-    roomId: '5050',
-    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
-    userId: '0',
-    username: 's***',
-    usernameColor: '#000000',
-    roles: [1],
-    face: 'http://i0.hdslb.com/bfs/face/member/noface.jpg@48w_48h',
-    emots: null,
-    voiceUrl: null,
-    fileDuration: null,
-    emojiUrl: null,
-    gift: null,
-    medal: null,
-    interact: null,
-    createdAt: 1782125410000,
-    styleSuffix: '0',
-    isAdmin: false,
-  },
-  {
-    id: 192,
-    content: '残*** 赠送了 盛典门票',
-    color: null,
-    category: 'gift',
-    type: null,
-    sendAt: 1782125493078,
-    roomId: '5050',
-    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
-    userId: '0',
-    username: '残***',
-    usernameColor: null,
-    roles: [0],
-    face: 'http://i1.hdslb.com/bfs/face/865dff24ced774fb2557456bc45644389910a17f.jpg@48w_48h',
-    emots: null,
-    voiceUrl: null,
-    fileDuration: null,
-    emojiUrl: null,
-    gift: {
-      id: '34144',
-      type: 'gift',
-      name: '盛典门票',
-      price: 0.1,
-      count: 1,
-      coinType: 'gold',
-      batchComboId: 'batch:gift:combo_id:343333383836353939d41d8cd98f00b204e9800998ecf8427e:433351:34144:1782125492.2750',
-      totalPrice: 0.1,
-      priceProperties: {
-        colors: ['#EDF5FF', '#2A60B2'],
-        duration: 60000,
-      },
-    },
-    medal: null,
-    interact: null,
-    createdAt: 1782125493000,
-    styleSuffix: '0',
-  },
-  {
-    id: 466,
-    content: '只算最高',
-    color: '#e33fff',
-    category: 'comment',
-    type: 0,
-    sendAt: 1782125594993,
-    roomId: '5050',
-    clientId: 'dd987939-7cf2-4cc9-8173-7857a9c22950',
-    userId: '0',
-    username: '蝉***',
-    usernameColor: '#000000',
-    roles: [1],
-    face: 'https://i1.hdslb.com/bfs/face/ad40d9066b0e4ea2f120a1c04d25eec273b37363.jpg@48w_48h',
-    emots: null,
-    voiceUrl: null,
-    fileDuration: null,
-    emojiUrl: null,
-    gift: null,
-    medal: {
-      name: '大母鹅',
-      level: 35,
-      roomId: '5050',
-      color: {
-        bg: '#4C7DFF99',
-        border: '#58A1F8',
-        level: '#4C7DFFE6',
-        text: '#FFFFFF',
-      },
-    },
-    interact: null,
-    createdAt: 1782125596000,
-    styleSuffix: '1',
-    anchorIcon: 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png@44w_44h.webp',
-    isAdmin: false,
-  },
-])
+const messages = ref<Message[]>([])
 
 const borderImageStyle = computed(() => {
   const img = borderImages.value.find((i: any) => i.isSelected)
@@ -459,7 +326,6 @@ const contentWrapperStyle = computed(
 )
 
 const faceSizeStyle = computed(() => {
-  console.log(faceSize.value)
   return {
     width: `${faceSize.value}px`,
     height: `${faceSize.value}px`,
@@ -494,12 +360,7 @@ onMounted(async () => {
   setupSSE()
   sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {
-    headlines.value = headlines.value
-      .map((h: any) => {
-        h.existsTime = (h.existsTime || 0) + 1000
-        return h
-      })
-      .filter((h: any) => h.sendAt + h.priceProperties.time > Date.now())
+    headlines.value = headlines.value.filter((h: Message) => h.sendAt + h.gift?.priceProperties?.duration! > Date.now())
   }, 1000)
   setInterval(() => {
     if (!hiddenExpiredTime.value) return
@@ -510,9 +371,7 @@ onMounted(async () => {
 function setupSSE() {
   sse.on('DM_STYLE', data => onDMStyle(data))
   sse.on('MESSAGE', data => {
-    if (roomId.value && roomId.value !== '*') {
-      if (data.roomId !== roomId.value) return
-    }
+    if (roomId.value && roomId.value !== '*' && data.roomId !== roomId.value && data.roomId !== '*') return
 
     if (promiseQueue) {
       promiseQueue.push(async () => {
@@ -530,7 +389,6 @@ function setupSSE() {
 }
 
 function onDMStyle(data: Record<string, any>) {
-  console.log(data)
   Object.assign(dmStyle, data)
 }
 
@@ -587,7 +445,6 @@ function onMessage(msg: Message) {
 
     if (!isShowSilverGift.value && msg.gift?.coinType !== 'gold') return
     msg.gift.priceProperties = getPriceProperties(totalPrice)
-
     addToHeadline(msg)
 
     const exist = messages.value.find((m: any) => m.id === msg.id)
@@ -604,13 +461,15 @@ function onMessage(msg: Message) {
   }
 
   if (msg.category === 'superchat' && msg.gift) {
-    const totalPrice = msg.gift?.count * msg.gift?.price
+    const totalPrice = msg.gift.count * msg.gift.price
+    msg.gift.totalPrice = totalPrice
+    msg.gift.priceProperties = getPriceProperties(totalPrice)
+
     addToHeadline(msg)
     if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
   }
 
   if (isAddMessage) {
-    console.log(msg)
     if (messages.value.length > MAX_MESSAGE) messages.value.pop()
     messages.value = [msg, ...messages.value]
   }
@@ -693,12 +552,6 @@ function getTextShadow(msg: Message, type: string) {
   }
 }
 
-function getInteractContentStyle() {
-  return dmStyle.messageCommentInteract
-}
-function getInteractTextShadow() {
-  return getTextShadow({ styleSuffix: 'interact' } as Message, 'comment')
-}
 function hoverHeadline(id: number) {
   for (const headline of headlines.value) {
     if (headline.id === id) {
@@ -708,10 +561,12 @@ function hoverHeadline(id: number) {
     }
   }
 }
-function unhoverHeadline() {
-  for (const headline of headlines.value) {
-    headline.isHover = false
-  }
+function unhoverHeadline(id: number) {
+  setTimeout(() => {
+    const msg = headlines.value.find(m => m.id === id)
+    if (!msg) return
+    msg.isHover = false
+  }, 100)
 }
 
 function giftScroll(e: WheelEvent) {

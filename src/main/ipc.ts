@@ -98,6 +98,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   interface WindowMeta {
     id: number
     type: string
+    roomId: string
     win?: BrowserWindow
   }
 
@@ -105,7 +106,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
   ipcMain.handle(
     IPC_WINDOW_CREATE,
-    async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow, type }) => {
+    async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow, type, roomId }) => {
       const winURL = url || getRendererUrl(hash)
 
       const win = new BrowserWindow({
@@ -117,13 +118,14 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
         frame: frame ?? true,
         transparent: transparent ?? false,
         hasShadow: hasShadow ?? true,
+        // roundedCorners: false, // mac 自带圆角
       })
 
       if (iconDataUrl) {
         win.setIcon(nativeImage.createFromDataURL(iconDataUrl))
       }
 
-      windowMetaMap[win.id] = { win, id: win.id, type }
+      windowMetaMap[win.id] = { win, id: win.id, type, roomId }
 
       win.on('closed', () => {
         delete windowMetaMap[win.id]
@@ -156,16 +158,12 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle(
     'IPC_WINDOW_CONTROL',
     async (_event, { windowId, method, args }: { windowId: number; method: string; args?: unknown[] }) => {
-      // const entry = windowMetaMap.get(windowId)
-      // const win = entry?.win
-      // if (!win || win.isDestroyed()) return null
-      // if (method === 'getSize') return win.getSize()
-      // if (method === 'getPosition') return win.getPosition()
-      // if (method === 'setFocusable') return win.setFocusable(args?.[0] as boolean)
-      // if (method === 'moveTop') return win.moveTop()
-      // if (method === 'setAlwaysOnTop') return win.setAlwaysOnTop(args?.[0] as boolean, args?.[1] as any)
-      // if (method === 'setIgnoreMouseEvents') return win.setIgnoreMouseEvents(args?.[0] as boolean, args?.[1] as any)
-      // return null
+      const win = windowMetaMap[windowId]?.win
+      if (!win || win.isDestroyed()) return null
+      if (method === 'moveTop') return win.moveTop()
+      if (method === 'setAlwaysOnTop') return win.setAlwaysOnTop(args?.[0] as boolean, args?.[1] as any)
+      if (method === 'setIgnoreMouseEvents') return win.setIgnoreMouseEvents(args?.[0] as boolean, args?.[1] as any)
+      return null
     },
   )
 

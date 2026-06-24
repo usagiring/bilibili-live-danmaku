@@ -20,7 +20,7 @@ if (import.meta.env.DEV) {
 
 initialize()
 
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.log('uncaughtException')
   console.error(error)
 })
@@ -47,9 +47,7 @@ if (!import.meta.env.DEV) {
 }
 
 let mainWindow: BrowserWindow | null = null
-const winURL = import.meta.env.DEV
-  ? process.env.ELECTRON_RENDERER_URL!
-  : `file://${path.join(__dirname, '../renderer/index.html')}`
+const winURL = import.meta.env.DEV ? process.env.ELECTRON_RENDERER_URL! : `file://${path.join(__dirname, '../renderer/index.html')}`
 
 const preloadPath = path.join(__dirname, '../preload/index.js')
 
@@ -81,7 +79,6 @@ function createWindow() {
 }
 
 app.on('ready', async () => {
-
   // 等待 bridge / 初始化完成
   await initApp()
 
@@ -163,7 +160,7 @@ app.on('ready', async () => {
       mainWindow!.webContents.send(IPC_UPDATE_AVAILABLE)
     })
 
-    autoUpdater.on('download-progress', (progress) => {
+    autoUpdater.on('download-progress', progress => {
       mainWindow!.webContents.send(IPC_DOWNLOAD_PROGRESS, {
         progress: progress.percent,
         bytesPerSecond: progress.bytesPerSecond,
@@ -176,7 +173,7 @@ app.on('ready', async () => {
       autoUpdater.quitAndInstall()
     })
 
-    autoUpdater.on('error', (error) => {
+    autoUpdater.on('error', error => {
       console.error(`AutoUpdate: ${error === null ? 'unknown' : (error.stack || error).toString()}`)
     })
 
@@ -185,7 +182,6 @@ app.on('ready', async () => {
     })
   }
 })
-
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

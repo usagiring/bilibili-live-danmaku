@@ -6,16 +6,25 @@
         <img
           id="title-bar-logo"
           src="../assets/logo.png" />
-        <span id="title-bar-text">bilibili-danmaku</span>
+        <span id="title-bar-text">Bilive</span>
       </div>
-      <div id="title-bar-status">
-        <!-- <span v-if="isRecording">录制中...</span> -->
-      </div>
+      <div id="title-bar-status"></div>
       <div id="title-bar-controller">
+        <div
+          id="window"
+          @click="showWindowList = true"
+          ref="windowBtnRef">
+          <Icon type="md-desktop" />
+          <span
+            v-if="dmWindows.length"
+            class="window-badge"
+            >{{ dmWindows.length }}</span
+          >
+        </div>
         <div
           id="tray"
           @click="hideToTray">
-          <Icon type="logo-windows" />
+          <Icon type="md-arrow-dropdown" />
         </div>
         <div
           id="minimize"
@@ -219,6 +228,39 @@
         </div>
       </div>
     </div>
+
+    <Modal
+      v-model="showWindowList"
+      width="320"
+      :footer-hide="true"
+      :closable="false"
+      class="window-list-modal">
+      <div
+        v-if="!dmWindows.length"
+        style="text-align: center; padding: 20px; color: #ccc; font-size: 13px">
+        暂无弹幕窗口
+      </div>
+      <div
+        v-for="win in dmWindows"
+        :key="win.id"
+        class="modal-window-item"
+        @click="focusWindow(win.id)">
+        <Icon
+          type="md-desktop"
+          size="16"
+          color="#2d8cf0" />
+        <span class="modal-window-label">弹幕窗</span>
+        <span class="modal-window-id">id:{{ win.id }}</span>
+        <span class="modal-window-room">直播间 {{ win.roomId }}</span>
+        <span
+          class="modal-window-close"
+          @click.stop="closeDmWindow(win.id)">
+          <Icon
+            type="md-close"
+            size="14" />
+        </span>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -227,7 +269,7 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from
 // import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
 // import { Room } from '../types'
-import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE } from '../../service/const'
+import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Config from './Config.vue'
 import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomStatus } from '../service/api'
@@ -409,8 +451,39 @@ async function handleShowDanmaku() {
     resizable: true,
     alwaysOnTop: false,
     type: 'dm',
+    roomId: room.id,
+    clientId: clientId.value,
   })
+  fetchWindows()
 }
+
+// ── 标题栏窗口列表 ──
+interface WindowItem {
+  id: number
+  type: string
+  roomId: string
+}
+const dmWindows = ref<WindowItem[]>([])
+const showWindowList = ref(false)
+
+async function fetchWindows() {
+  const list = (await window.ipcRenderer.invoke(IPC_WINDOW_FIND, { type: 'dm' })) as WindowItem[]
+  dmWindows.value = list || []
+}
+
+async function focusWindow(id: number) {
+  await window.ipcRenderer.invoke('IPC_WINDOW_CONTROL', { windowId: id, method: 'moveTop' })
+}
+
+async function closeDmWindow(id: number) {
+  await window.ipcRenderer.invoke(IPC_WINDOW_CLOSE, { id })
+  fetchWindows()
+}
+
+onMounted(() => {
+  fetchWindows()
+  setInterval(fetchWindows, 3000)
+})
 
 // 监听 dmStyle 的 Electron 窗口配置变化，同步到 DM 窗口
 watch(
@@ -485,9 +558,68 @@ function hideToTray() {
 
 #title-bar-status {
   flex: 1;
-  text-align: center;
-  font-size: 12px;
-  color: #19be6b;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+  overflow: hidden;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-sep {
+  font-size: 11px;
+  color: #ddd;
+  margin: 0 2px;
+  user-select: none;
+}
+
+.titlebar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 6px;
+  height: 18px;
+  font-size: 10px;
+  color: #aaa;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.15s;
+}
+
+.titlebar-chip:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.titlebar-chip-label {
+  font-size: 10px;
+}
+
+.titlebar-chip-close {
+  font-size: 10px;
+  line-height: 1;
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.12s;
+  margin-left: -2px;
+}
+
+.titlebar-chip:hover .titlebar-chip-close {
+  opacity: 0.5;
+}
+
+.titlebar-chip-close:hover {
+  opacity: 1 !important;
+  color: #fff;
+  background: #ed4014;
 }
 
 #title-bar-controller {
@@ -514,6 +646,95 @@ function hideToTray() {
 #close:hover {
   background: #ed4014 !important;
   color: #fff !important;
+}
+
+#window {
+  position: relative;
+}
+
+.window-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 12px;
+  height: 12px;
+  padding: 0 3px;
+  font-size: 8px;
+  line-height: 12px;
+  text-align: center;
+  color: #fff;
+  background: #999;
+  border-radius: 6px;
+}
+
+.window-list-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
+
+.window-list-panel {
+  position: fixed;
+  top: 29px;
+  right: 80px;
+  width: 200px;
+  background: #fff;
+  border: 1px solid #e8eaec;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.window-list-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #ccc;
+}
+
+.window-list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: #555;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.window-list-item:hover {
+  background: #f0f2f5;
+}
+
+.window-list-label {
+  flex: 1;
+}
+
+.window-list-room {
+  font-size: 10px;
+  color: #bbb;
+}
+
+.window-list-close {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 10px;
+  color: #999;
+  transition: all 0.1s;
+}
+
+.window-list-close:hover {
+  color: #fff;
+  background: #ed4014;
 }
 
 /* ── 主体 ── */
@@ -1030,5 +1251,67 @@ function hideToTray() {
   color: #ccc;
   gap: 10px;
   font-size: 14px;
+}
+
+/* Modal 窗口列表 */
+.window-list-modal :deep(.ivu-modal-header),
+.window-list-modal :deep(.ivu-modal-footer) {
+  display: none;
+}
+
+.window-list-modal :deep(.ivu-modal-body) {
+  padding: 8px 0;
+}
+
+.modal-window-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #555;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.modal-window-item:hover {
+  background: #f0f2f5;
+}
+
+.modal-window-label {
+  flex: 1;
+}
+
+.modal-window-id {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.modal-window-label {
+  flex: 1;
+}
+
+.modal-window-room {
+  font-size: 12px;
+  color: #bbb;
+  margin-right: 4px;
+}
+
+.modal-window-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  color: #ccc;
+  transition: all 0.1s;
+  height: 16px;
+  width: 16px;
+}
+
+.modal-window-close:hover {
+  color: #fff;
+  background: #ed4014;
 }
 </style>

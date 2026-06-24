@@ -17,6 +17,7 @@ const props = defineProps<{
 .comment-similar-badge {
   min-width: 16px;
   height: 16px;
+  line-height: 16px;
   border-radius: 8px;
   display: inline-block;
   text-align: center;

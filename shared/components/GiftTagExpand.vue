@@ -9,7 +9,7 @@
         class="gift-tag-expand-top-left"
         :src="face" />
       <div class="gift-tag-expand-top-right">
-        <p>{{ gift.uname }}</p>
+        <p>{{ username }}</p>
         <p v-if="type === 2">{{ count === 1 ? name : `${name}×${count}` }}</p>
         <p v-else-if="totalPrice">{{ formattedPrice }}</p>
       </div>
@@ -25,7 +25,7 @@
         </template>
       </template>
       <template v-else>
-        {{ `${gift.uname} 赠送了 ${count} 个 ${name}` }}
+        {{ `${username} 赠送了 ${count} 个 ${name}` }}
       </template>
     </div>
   </div>
@@ -34,7 +34,7 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 
-const props = defineProps(['gift', 'face', 'isShowSuperChatJpn'])
+const props = defineProps(['username', 'gift', 'face', 'isShowSuperChatJpn'])
 const { priceProperties, totalPrice, name, count, type, contentJPN } = toRefs(props.gift)
 const color1 = computed(() => priceProperties.value?.colors[0] ?? 'transparent')
 const color2 = computed(() => priceProperties.value?.colors[1] ?? 'transparent')
@@ -71,7 +71,6 @@ const formattedPrice = computed(() => {
 .gift-tag-expand-top-right p {
   margin: 0;
   font-size: 12px;
-  color: white;
 }
 .gift-tag-expand-bottom {
   padding: 6px;

@@ -1,10 +1,10 @@
 <template>
   <div
     class="message-super-chat"
-    :style="{ border: `solid 0.5px ${color1}` }">
+    :style="{ border: `solid 0.5px ${color2}` }">
     <div
       class="gift-card-mini-header"
-      :style="{ background: color2 }">
+      :style="{ background: color1 }">
       <span
         v-if="isShowSendAt"
         class="date-style"
@@ -37,8 +37,8 @@ import { dateFormat } from '../service/util'
 const props = defineProps(['gift', 'face', 'username', 'isShowSendAt', 'sendAt'])
 
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties.value?.backgroundBottomColor ?? 'rgba(66,125,158,1)')
-const color2 = computed(() => priceProperties.value?.backgroundColor ?? '#EDF5FF')
+const color1 = computed(() => priceProperties.value?.colors[0])
+const color2 = computed(() => priceProperties.value?.colors[1])
 
 const formattedPrice = computed(() => `¥${totalPrice.value}`)
 </script>

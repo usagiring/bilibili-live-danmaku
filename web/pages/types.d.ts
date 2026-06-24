@@ -101,7 +101,6 @@ interface Message {
   anchorIcon?: string
   isAdmin?: boolean
   similar?: number
-
   splitContent?: string[]
   emojiUrl?: string | null
   voiceUrl?: string | null

@@ -1,10 +1,10 @@
 <template>
   <div
     class="message-super-chat"
-    :style="{ border: `solid 0.5px ${color1}` }">
+    :style="{ border: `solid 0.5px ${color2}` }">
     <div
       class="gift-card-header"
-      :style="{ background: color2 }">
+      :style="{ background: color1 }">
       <Avatar
         class="gift-card-avatar"
         :src="face"
@@ -17,7 +17,7 @@
     </div>
     <div
       class="gift-card-footer"
-      :style="{ background: color1 }">
+      :style="{ background: color2 }">
       <slot />
     </div>
   </div>
