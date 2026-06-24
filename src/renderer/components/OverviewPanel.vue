@@ -43,7 +43,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Message } from 'view-ui-plus'
 import { useConfigStore } from '../store'
 import { sse } from '../service/sse-client'
-import { getRoomInfoV2, getGuardInfo, updateClientConfig, getUserInfoV2 } from '../service/api'
+import { getRoomInfoV2, updateClientConfig, getUserInfoV2 } from '../service/api'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -61,19 +61,6 @@ onMounted(() => {
   sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
   sse.on('ONLINE_COUNT', onOnlineCount)
 })
-onMounted(() => {
-  initialize()
-})
-
-// 切换房间时重新初始化（跳过已初始化的房间）
-watch(
-  () => activeRoom.value?.id,
-  (newId, oldId) => {
-    if (newId && newId !== oldId) {
-      initialize()
-    }
-  },
-)
 
 onBeforeUnmount(() => {
   // sse.off('NINKI', onNinki)
@@ -124,62 +111,6 @@ function onOnlineCount(data: any) {
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.onlineNumber = onlineNumber
-}
-
-async function initialize() {
-  if (!activeRoom?.value) return
-
-  try {
-    const roomId = activeRoom.value?.displayId || activeRoom.value?.id
-    const { data } = await getRoomInfoV2({ roomId })
-
-    if (!data) {
-      Message.error('连接失败：无法获取房间信息')
-      connecting.value = false
-      return
-    }
-
-    const userId = data.room_info?.uid
-    const realRoomId = data.room_info?.room_id
-    const liveStatus = data.room_info?.live_status
-    const username = data.anchor_info?.base_info?.uname
-    const face = data.anchor_info?.base_info?.face
-    const fansNumber = data.anchor_info?.relation_info?.attention
-    const fansclubNumber = data.anchor_info?.medal_info?.fansclub
-    const watchedNumber = data.watched_show?.num
-    const likeNumber = data.like_info_v3?.total_likes
-    const ninkiNumber = data.room_info?.online
-    const onlineNumber = data.room_rank_info?.user_rank_entry?.user_contribution_rank_entry?.count
-    const anchorNumber = data.guard_info?.count
-
-    const room = store.rooms.find(room => room.id === roomId)
-    if (!room) throw new Error('房间未找到')
-    room.id = String(realRoomId)
-    room.realId = String(realRoomId)
-
-    room.realId = String(realRoomId)
-    room.userId = String(userId)
-    room.username = username
-    room.face = face
-    room.fansNumber = fansNumber || 0
-    room.fansclubNumber = fansclubNumber || 0
-    room.liveStatus = liveStatus || 0
-    room.ninkiNumber = ninkiNumber || 0
-    room.onlineNumber = onlineNumber || 0
-    room.watchedNumber = watchedNumber || 0
-    room.likeNumber = likeNumber || 0
-    room.anchorNumber = anchorNumber
-
-    if (!room.userSpaceBanner) {
-      const { data } = await getUserInfoV2({ userId })
-      const userSpaceBanner = data.top_photo_v2.l_img
-      room.userSpaceBanner = userSpaceBanner
-    }
-
-    await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
-  } catch (e: any) {
-    Message.error(`连接失败: ${e.message}`)
-  }
 }
 
 function formatNumber(n?: number): string {

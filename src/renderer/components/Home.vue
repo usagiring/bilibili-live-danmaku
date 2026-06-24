@@ -152,36 +152,29 @@
 
         <!-- 概览：需要活动房间 -->
         <template v-else-if="store.activeRoom">
-          <!-- Banner 包裹区：路由 + 用户信息 + 连接 -->
+          <!-- Banner 包裹区：用户信息 + 连接 + 路由 -->
           <div class="detail-banner">
             <!-- 默认banner "https://i0.hdslb.com/bfs/activity-plat/static/0977767b2e79d8ad0a36a731068a83d7/1sz3p8w2Sk.png" -->
             <img
               class="banner-bg"
               :src="activeRoom?.userSpaceBanner || ''" />
             <div class="banner-overlay">
-              <!-- Tab 导航 -->
-              <div class="room-tabs">
-                <div
-                  class="room-tab"
-                  :class="{ active: activeTab === 'overview' }"
-                  @click="activeTab = 'overview'">
-                  <Icon type="md-home" /> 概览
-                </div>
-              </div>
               <!-- 用户信息 + 连接 -->
               <div class="banner-profile">
-                <img
-                  class="banner-avatar"
-                  :src="activeRoom?.face || DEFAULT_FACE" />
-                <div class="banner-info">
-                  <div class="banner-name">{{ activeRoom?.username || '未连接' }}</div>
-                  <div class="banner-id">
-                    直播间 {{ activeRoom?.displayId || activeRoom?.id }}
-                    <span
-                      v-if="activeRoom?.liveStatus === 1"
-                      class="live-bars">
-                      <i class="bar bar1"></i><i class="bar bar2"></i><i class="bar bar3"></i>
-                    </span>
+                <div class="banner-profile-row">
+                  <img
+                    class="banner-avatar"
+                    :src="activeRoom?.face || DEFAULT_FACE" />
+                  <div class="banner-info">
+                    <div class="banner-name">{{ activeRoom?.username || '未连接' }}</div>
+                    <div class="banner-id">
+                      直播间 {{ activeRoom?.displayId || activeRoom?.id }}
+                      <span
+                        v-if="activeRoom?.liveStatus === 1"
+                        class="live-bars">
+                        <i class="bar bar1"></i><i class="bar bar2"></i><i class="bar bar3"></i>
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div class="banner-actions">
@@ -205,6 +198,21 @@
                       size="13" />
                     弹幕窗
                   </Button>
+                </div>
+              </div>
+              <!-- Tab 导航 -->
+              <div class="room-tabs">
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'overview' }"
+                  @click="activeTab = 'overview'">
+                  <Icon type="md-home" /> 概览
+                </div>
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'message' }"
+                  @click="activeTab = 'message'">
+                  <Icon type="md-chatboxes" /> 弹幕
                 </div>
               </div>
             </div>
@@ -272,10 +280,18 @@ import { useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Config from './Config.vue'
-import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomStatus } from '../service/api'
+import {
+  connect as connectApi,
+  disconnect as disconnectApi,
+  updateClientConfig,
+  getRoomStatus,
+  getRoomInfoV2,
+  getUserInfoV2,
+} from '../service/api'
 import { DEFAULT_FACE } from '../../service/const'
 import globalVar from '../../service/global'
 import config from '../service/config'
+import { Message } from 'view-ui-plus'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -368,6 +384,61 @@ async function removeRoom(index: number) {
   await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
 }
 
+async function initializeRoom({ roomId, force }: { roomId?: string; force?: boolean } = {}) {
+  if (!activeRoom?.value) return
+  // if (!force && activeRoom.value.isInitialized) {
+  //   return
+  // }
+
+  try {
+    const roomId = activeRoom.value?.displayId || activeRoom.value?.id
+    const { data } = await getRoomInfoV2({ roomId })
+
+    if (!data) {
+      Message.error('连接失败：无法获取房间信息')
+      connecting.value = false
+      return
+    }
+
+    const userId = data.room_info?.uid
+    const realRoomId = data.room_info?.room_id
+    const liveStatus = data.room_info?.live_status
+    const username = data.anchor_info?.base_info?.uname
+    const face = data.anchor_info?.base_info?.face
+    const fansNumber = data.anchor_info?.relation_info?.attention
+    const fansclubNumber = data.anchor_info?.medal_info?.fansclub
+    const watchedNumber = data.watched_show?.num
+    const likeNumber = data.like_info_v3?.total_likes
+    const ninkiNumber = data.room_info?.online
+    const onlineNumber = data.room_rank_info?.user_rank_entry?.user_contribution_rank_entry?.count
+    const anchorNumber = data.guard_info?.count
+
+    const room = store.rooms.find(room => room.id === roomId)
+    if (!room) throw new Error('房间未找到')
+    room.id = String(realRoomId)
+    room.realId = String(realRoomId)
+    room.userId = String(userId)
+    room.username = username
+    room.face = face
+    room.fansNumber = fansNumber || 0
+    room.fansclubNumber = fansclubNumber || 0
+    room.liveStatus = liveStatus || 0
+    room.ninkiNumber = ninkiNumber || 0
+    room.onlineNumber = onlineNumber || 0
+    room.watchedNumber = watchedNumber || 0
+    room.likeNumber = likeNumber || 0
+    room.anchorNumber = anchorNumber || 0
+
+    if (!room.userSpaceBanner) {
+      const { data } = await getUserInfoV2({ userId })
+      const userSpaceBanner = data.top_photo_v2.l_img
+      room.userSpaceBanner = userSpaceBanner
+    }
+  } catch (e: any) {
+    Message.error(`连接失败: ${e.message}`)
+  }
+}
+
 async function handleAddRoom() {
   const roomId = newRoomId.value.trim()
   if (!roomId) return
@@ -379,26 +450,13 @@ async function handleAddRoom() {
   store.rooms.push({
     id: roomId,
     userId: '',
-    liveStatus: 0,
-    liveStream: '',
     isAutoReply: false,
     autoReplyRules: [],
     voteOptions: [],
     isActive: true,
-    // 预填所有 Render 字段，确保 Vue 响应式追踪
-    realId: '',
-    isConnected: false,
-    username: '',
-    face: '',
-    displayId: '',
-    anchorNumber: 0,
-    fansNumber: 0,
-    fansclubNumber: 0,
-    ninkiNumber: 0,
-    watchedNumber: 0,
-    likeNumber: 0,
-    onlineNumber: 0,
   })
+
+  await initializeRoom({ force: true })
 
   showAddRoom.value = false
   newRoomId.value = ''
@@ -416,6 +474,7 @@ async function toggleConnect() {
       room.isConnected = false
     } else {
       await connectApi({ roomId: room.id, userId: room.userId, clientId: clientId.value })
+      await initializeRoom()
       room.isConnected = true
     }
   } catch {
@@ -1056,43 +1115,75 @@ function hideToTray() {
   position: relative;
 }
 
+.banner-overlay::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 4px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+  pointer-events: none;
+}
+
 .room-tabs {
+  position: relative;
+  z-index: 1;
   display: flex;
   gap: 0;
-  padding: 0 16px;
+  padding: 0 20px;
   flex-shrink: 0;
 }
 
 .room-tab {
-  padding: 8px 14px;
+  position: relative;
+  padding: 8px 18px;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(0, 0, 0, 0.8);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: 0.15s;
+  border-bottom: 3px solid transparent;
+  transition:
+    color 0.25s,
+    border-color 0.25s;
   display: flex;
   align-items: center;
   gap: 4px;
   white-space: nowrap;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  user-select: none;
 }
 
 .room-tab:hover {
-  color: #222;
+  transition:
+    color 0.25s,
+    text-shadow 0.25s;
+  text-shadow:
+    white 1px 0 1px,
+    white 0 1px 1px,
+    white -1px 0 1px,
+    white 0 -1px 1px;
 }
 
 .room-tab.active {
   color: #222;
-  border-bottom-color: #555;
   font-weight: 600;
+  border-bottom-color: #fff;
+  text-shadow:
+    white 1px 0 1px,
+    white 0 1px 1px,
+    white -1px 0 1px,
+    white 0 -1px 1px;
 }
 
 /* ── Banner 内用户信息 ── */
 .banner-profile {
   display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 16px 8px;
+}
+
+.banner-profile-row {
+  display: flex;
   align-items: center;
   gap: 12px;
-  padding: 40px 16px 16px;
 }
 
 .banner-avatar {
@@ -1143,8 +1234,8 @@ function hideToTray() {
   display: flex;
   align-items: center;
   gap: 8px;
-  align-self: flex-end;
-  margin-bottom: -2px;
+  margin-top: 6px;
+  margin-left: 6px;
 }
 
 .btn-danmaku {

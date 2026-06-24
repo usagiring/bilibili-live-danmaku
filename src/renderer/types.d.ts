@@ -11,17 +11,18 @@ interface Provider {
 interface Room {
   id: string
   userId: string
-  liveStatus: number
-  liveStream: string
   isAutoReply: boolean
   autoReplyRules: any[]
   voteOptions: Array<{ keyword: string; value: string }>
   realId?: string
+  username?: string
+  displayId?: string
+
+  liveStatus?: number
+  liveStream?: string
+  face?: string
   isConnected?: boolean
   isActive?: boolean
-  username?: string
-  face?: string
-  displayId?: string
   anchorNumber?: number
   fansNumber?: number
   fansclubNumber?: number
@@ -30,6 +31,7 @@ interface Room {
   likeNumber?: number
   onlineNumber?: number
   userSpaceBanner?: string
+  isInitialized?: boolean
 }
 
 interface User {
