@@ -23,6 +23,7 @@ interface DmStyle {
   isShowSuperChatJPN: boolean
   windowOpacity: number
   windowBackground: string
+  emojiSize: number
   messageSlots: {
     type: string
     isShow: boolean
@@ -92,7 +93,6 @@ interface Message {
       text: string
     }
   } | null
-  interact?: { type: number } | null
   createdAt: number
   // ── 运行时计算字段 ──
 

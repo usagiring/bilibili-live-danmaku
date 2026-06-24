@@ -806,6 +806,7 @@ function hideToTray() {
 /* ── 房间面板 ── */
 .room-panel {
   width: 210px;
+  user-select: none;
   background: #fff;
   border-right: 1px solid #e8eaec;
   display: flex;
@@ -1101,6 +1102,7 @@ function hideToTray() {
 .detail-banner {
   position: relative;
   flex-shrink: 0;
+  user-select: none;
 }
 
 .banner-bg {

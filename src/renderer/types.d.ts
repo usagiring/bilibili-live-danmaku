@@ -75,6 +75,7 @@ interface DmStyle {
   windowBackground: string
   isWindowAlwaysOnTop: boolean
   ignoreMouseEvent: boolean
+  emojiSize: number
   messageSlots: {
     type: 'medal' | 'face' | 'name' | 'comment'
     isShow: boolean

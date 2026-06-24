@@ -10,15 +10,15 @@
         :src="face" />
       <div class="gift-tag-expand-top-right">
         <p>{{ username }}</p>
-        <p v-if="type === 2">{{ count === 1 ? name : `${name}×${count}` }}</p>
+        <p v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</p>
         <p v-else-if="totalPrice">{{ formattedPrice }}</p>
       </div>
     </div>
     <div
       class="gift-tag-expand-bottom"
       :style="{ background: color2 }">
-      <template v-if="type === 3">
-        {{ gift.content }}
+      <template v-if="type === 'superchat'">
+        {{ content }}
         <template v-if="contentJPN && isShowSuperChatJpn">
           <div class="divider" />
           {{ contentJPN }}
@@ -34,8 +34,8 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 
-const props = defineProps(['username', 'gift', 'face', 'isShowSuperChatJpn'])
-const { priceProperties, totalPrice, name, count, type, contentJPN } = toRefs(props.gift)
+const props = defineProps(['username', 'gift', 'face', 'content', 'contentJPN', 'isShowSuperChatJpn'])
+const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
 const color1 = computed(() => priceProperties.value?.colors[0] ?? 'transparent')
 const color2 = computed(() => priceProperties.value?.colors[1] ?? 'transparent')
 

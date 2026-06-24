@@ -25,6 +25,7 @@
               :gift="msg.gift"
               :username="msg.username"
               :face="msg.face"
+              :content="msg.content"
               :is-show-super-chat-jpn="isShowSuperChatJPN" />
           </div>
         </template>
@@ -71,7 +72,7 @@
                   :medal="message.medal"
                   :anchorIcon="message.anchorIcon" />
                 <span
-                  v-if="s.type === 'name' && s.isShow"
+                  v-if="s.type === 'name' && s.isShow && message.category !== 'interact'"
                   class="vertical-align-middle"
                   :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">
                   {{ `${message.username}${isShowColon ? '：' : ''}` }}
@@ -200,10 +201,10 @@ defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 let promiseQueue: PromiseQueue | null = null
 
+// TODO 卡片显示Gift图标
 const giftGifMap = ref<Record<string, any>>({})
 const roomId = ref<String>('')
 const headlines = ref<Message[]>([])
-const emojiSize = ref(24)
 
 const dmStyle = reactive<DmStyle>({
   isShowFace: true,
@@ -214,7 +215,7 @@ const dmStyle = reactive<DmStyle>({
   combineSimilarTime: 3000,
   hiddenExpiredTime: 0,
   showHeadlineThreshold: 0,
-  isShowInteractInfo: true,
+  isShowInteractInfo: false,
   showGiftCardThreshold: 0,
   isShowSilverGift: false,
   font: 'auto',
@@ -230,6 +231,7 @@ const dmStyle = reactive<DmStyle>({
   isShowSuperChatJPN: true,
   windowOpacity: 1,
   windowBackground: 'rgba(0,0,0,0)',
+  emojiSize: 24,
   messageSlots: [],
   borderImages: [],
 
@@ -275,6 +277,7 @@ const {
   adminIcon,
   adminIconColor,
   channelDelayTime,
+  emojiSize,
 } = toRefs(dmStyle)
 
 const messages = ref<Message[]>([])
@@ -455,9 +458,9 @@ function onMessage(msg: Message) {
     if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
   }
 
-  if (msg.category === 'interact' && msg.interact) {
-    if (!isShowInteractInfo.value) isAddMessage = false
+  if (msg.category === 'interact') {
     msg.content = msg.content || INTERACT_TYPE[msg.type || 1]
+    if (!isShowInteractInfo.value) isAddMessage = false
   }
 
   if (msg.category === 'superchat' && msg.gift) {

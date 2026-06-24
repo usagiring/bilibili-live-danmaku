@@ -80,15 +80,6 @@
 
       <!-- 其他开关 -->
       <div class="chips">
-        <!-- <span style="color: #ddd; margin: 0 2px">│</span> -->
-        <!-- <span class="chip" :class="{ on: dmStyle?.isShowSuperChatJPN !== false }"
-          @click="toggle('dmStyle.isShowSuperChatJPN')">SC日文</span> -->
-        <!-- <span class="chip" :class="{ on: dmStyle?.isShowAnchorIcon !== false }"
-          @click="toggle('dmStyle.isShowAnchorIcon')"
-          >舰队标记</span
-        > -->
-        <!-- <span class="chip" :class="{ on: dmStyle?.isShowAdminIcon === true }"
-          @click="toggle('dmStyle.isShowAdminIcon')">房管标</span> -->
         <span
           class="chip"
           :class="{ on: dmStyle?.isShowInteractInfo === true }"
@@ -212,6 +203,17 @@
           :min="12"
           :max="64"
           @on-change="(v: number) => setVal('dmStyle.faceSize', v)" />
+        <span class="input-unit">px</span>
+      </div>
+      <div class="section-row">
+        <span class="label">表情大小</span>
+        <InputNumber
+          size="small"
+          style="width: 45px"
+          :model-value="dmStyle?.emojiSize ?? 24"
+          :min="12"
+          :max="64"
+          @on-change="(v: number) => setVal('dmStyle.emojiSize', v)" />
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
@@ -1107,33 +1109,6 @@ function copyObsUrl(url: string) {
     document.body.removeChild(input)
   })
 }
-
-// // ── 还原默认 ──
-// function restoreDefaults() {
-//   const defaults: Record<string, any> = {
-//     isShowFace: true,
-//     isShowFanMedal: true,
-//     isShowHeadline: true,
-//     isShowType1: true,
-//     isShowType2: true,
-//     windowOpacity: 1,
-//     font: 'auto',
-//     fontWeight: 'normal',
-//     faceSize: 28,
-//     combineSimilarTime: 3000,
-//     hiddenExpiredTime: 0,
-//     showGiftCardThreshold: 0,
-//     showHeadlineThreshold: 0,
-//     isShowInteractInfo: false,
-//     isShowSilverGift: false,
-//     isShowSuperChatJPN: true,
-//     isShowAnchorIcon: true,
-//     isShowAdminIcon: false,
-//     isWindowAlwaysOnTop: false,
-//   }
-//   const current = dmStyle.value || {}
-//   _set(config, 'dmStyle', { ...current, ...defaults })
-// }
 </script>
 
 <style scoped>

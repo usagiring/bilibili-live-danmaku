@@ -63,13 +63,13 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  // sse.off('NINKI', onNinki)
-  // sse.off('LIVE', onLive)
-  // sse.off('PREPARING', onPreparing)
-  // sse.off('WATCHED_CHANGE', onWatchedChange)
-  // sse.off('LIKE_CHANGE', onLikeChange)
-  // sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
-  // sse.off('ONLINE_COUNT', onOnlineCount)
+  sse.off('NINKI', onNinki)
+  sse.off('LIVE', onLive)
+  sse.off('PREPARING', onPreparing)
+  sse.off('WATCHED_CHANGE', onWatchedChange)
+  sse.off('LIKE_CHANGE', onLikeChange)
+  sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
+  sse.off('ONLINE_COUNT', onOnlineCount)
 })
 
 // ── SSE 回调 ──
