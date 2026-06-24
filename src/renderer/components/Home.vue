@@ -67,7 +67,7 @@
                 <div class="popover-label">直播间号</div>
                 <Input
                   v-model="newRoomId"
-                  placeholder="请输入直播间号，如 55609"
+                  placeholder="请输入直播间号"
                   size="small"
                   @on-enter="handleAddRoom" />
                 <div class="popover-actions">
@@ -1114,7 +1114,12 @@ function hideToTray() {
   font-size: 14px;
   font-weight: 600;
   color: #222;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  /* text-shadow: 0 0 8px rgba(255, 255, 255, 0.8); */
+  text-shadow:
+    white 1px 0 1px,
+    white 0 1px 1px,
+    white -1px 0 1px,
+    white 0 -1px 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1123,7 +1128,12 @@ function hideToTray() {
 .banner-id {
   font-size: 11px;
   color: rgba(0, 0, 0, 0.6);
-  text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.9);
+  /* text-shadow:
+    white 0.5px 0 1px,
+    white 0 0.5px 1px,
+    white -0.5px 0 1px,
+    white 0 -0.5px 1px; */
   display: flex;
   align-items: center;
   gap: 4px;

@@ -142,22 +142,14 @@
 
       <div class="section-row">
         <span class="label">透明度</span>
-        <span class="stepper">
-          <span
-            class="stepper-btn"
-            @click="stepDown('dmStyle.windowOpacity', 1, 0, 0.05)"
-            >−</span
-          >
-          <input
-            class="stepper-input"
-            :value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
-            @change="setVal('dmStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
-          <span
-            class="stepper-btn"
-            @click="stepUp('dmStyle.windowOpacity', 1, 1, 0.05)"
-            >+</span
-          >
-        </span>
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
+          :min="0"
+          :max="100"
+          @on-change="(v: number) => setVal('dmStyle.windowOpacity', v / 100)" />
+        <span class="input-unit">%</span>
         <span
           class="label"
           style="margin-left: 8px"
@@ -213,39 +205,34 @@
       </div>
       <div class="section-row">
         <span class="label">头像大小</span>
-        <span class="stepper">
-          <span
-            class="stepper-btn"
-            @click="stepDown('dmStyle.faceSize', 28, 12, 2)"
-            >−</span
-          >
-          <input
-            class="stepper-input"
-            :value="dmStyle?.faceSize ?? 28"
-            @change="setVal('dmStyle.faceSize', Number(($event.target as HTMLInputElement).value))" />
-          <span
-            class="stepper-btn"
-            @click="stepUp('dmStyle.faceSize', 28, 64, 2)"
-            >+</span
-          >
-        </span>
+        <InputNumber
+          size="small"
+          style="width: 45px"
+          :model-value="dmStyle?.faceSize ?? 28"
+          :min="12"
+          :max="64"
+          @on-change="(v: number) => setVal('dmStyle.faceSize', v)" />
+        <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">重复合并</span>
-        <input
-          class="input"
-          style="width: 48px"
-          :value="dmStyle?.combineSimilarTime ?? 3000"
-          @change="setVal('dmStyle.combineSimilarTime', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 60px"
+          :model-value="dmStyle?.combineSimilarTime ?? 3000"
+          :min="0"
+          @on-change="(v: number) => setVal('dmStyle.combineSimilarTime', v)" />
         <span class="input-unit">ms</span>
       </div>
       <div class="section-row">
         <span class="label">弹幕超时消隐</span>
-        <input
-          class="input"
-          style="width: 48px"
-          :value="dmStyle?.hiddenExpiredTime ?? 0"
-          @change="setVal('dmStyle.hiddenExpiredTime', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 60px"
+          :model-value="dmStyle?.hiddenExpiredTime ?? 0"
+          :step="500"
+          :min="0"
+          @on-change="(v: number) => setVal('dmStyle.hiddenExpiredTime', v)" />
         <span class="input-unit">ms</span>
       </div>
       <!-- <div class="section-row">
@@ -255,20 +242,22 @@
       </div> -->
       <div class="section-row">
         <span class="label">弹幕礼物阈值</span>
-        <input
-          class="input"
-          style="width: 40px"
-          :value="dmStyle?.showGiftCardThreshold ?? 0"
-          @change="setVal('dmStyle.showGiftCardThreshold', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 45px"
+          :model-value="dmStyle?.showGiftCardThreshold ?? 0"
+          :min="0"
+          @on-change="(v: number) => setVal('dmStyle.showGiftCardThreshold', v)" />
         <span class="input-unit">元</span>
       </div>
       <div class="section-row">
         <span class="label">礼物栏阈值</span>
-        <input
-          class="input"
-          style="width: 40px"
-          :value="dmStyle?.showHeadlineThreshold ?? 0"
-          @change="setVal('dmStyle.showHeadlineThreshold', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 45px"
+          :model-value="dmStyle?.showHeadlineThreshold ?? 0"
+          :min="0"
+          @on-change="(v: number) => setVal('dmStyle.showHeadlineThreshold', v)" />
         <span class="input-unit">元</span>
       </div>
 
@@ -328,11 +317,13 @@
               @change="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">边框宽</span>
-          <input
-            class="input"
-            style="width: 28px"
-            :value="currentLevelStyle?.borderWidth ?? 0"
-            @change="setLevelStyle('borderWidth', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 50px"
+            :model-value="currentLevelStyle?.borderWidth ?? 0"
+            :step="0.2"
+            :min="0"
+            @on-change="(v: number) => setLevelStyle('borderWidth', v)" />
           <span class="hint">边框色</span>
           <label class="color-pick">
             <span
@@ -344,11 +335,12 @@
               @change="setLevelStyleColor('border', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">圆角</span>
-          <input
-            class="input"
-            style="width: 32px"
-            :value="currentLevelStyle?.borderRadius ?? 0"
-            @change="setLevelStyle('borderRadius', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 44px"
+            :model-value="currentLevelStyle?.borderRadius ?? 0"
+            :min="0"
+            @on-change="(v: number) => setLevelStyle('borderRadius', v)" />
           <div
             v-if="activeLevel === '99'"
             class="icon-dropdown">
@@ -411,11 +403,13 @@
             >昵称</span
           >
           <span class="hint">字号</span>
-          <input
-            class="input"
-            style="width: 30px"
-            :value="currentLevelStyle?.usernameFontSize ?? 13"
-            @change="setLevelStyle('userFontSize', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 50px"
+            :model-value="currentLevelStyle?.usernameFontSize ?? 13"
+            :min="8"
+            :max="48"
+            @on-change="(v: number) => setLevelStyle('userFontSize', v)" />
           <span class="hint">颜色</span>
           <label class="color-pick">
             <span
@@ -427,11 +421,13 @@
               @change="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">描边宽</span>
-          <input
-            class="input"
-            style="width: 28px"
-            :value="currentLevelStyle?.usernameStrokeWidth ?? 0"
-            @change="setLevelStyle('userStrokeWidth', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 50px"
+            :model-value="currentLevelStyle?.usernameStrokeWidth ?? 0"
+            :min="0"
+            :step="0.2"
+            @on-change="(v: number) => setLevelStyle('userStrokeWidth', v)" />
           <span class="hint">描边色</span>
           <label class="color-pick">
             <span
@@ -450,11 +446,13 @@
             >内容</span
           >
           <span class="hint">字号</span>
-          <input
-            class="input"
-            style="width: 30px"
-            :value="currentLevelStyle?.commentFontSize ?? 13"
-            @change="setLevelStyle('commentFontSize', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 50px"
+            :model-value="currentLevelStyle?.commentFontSize ?? 13"
+            :min="8"
+            :max="48"
+            @on-change="(v: number) => setLevelStyle('commentFontSize', v)" />
           <span class="hint">颜色</span>
           <label class="color-pick">
             <span
@@ -466,11 +464,13 @@
               @change="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
           </label>
           <span class="hint">描边宽</span>
-          <input
-            class="input"
-            style="width: 28px"
-            :value="currentLevelStyle?.commentStrokeWidth ?? 0"
-            @change="setLevelStyle('commentStrokeWidth', ($event.target as HTMLInputElement).value)" />
+          <InputNumber
+            size="small"
+            style="width: 50px"
+            :model-value="currentLevelStyle?.commentStrokeWidth ?? 0"
+            :min="0"
+            :step="0.2"
+            @on-change="(v: number) => setLevelStyle('commentStrokeWidth', v)" />
           <span class="hint">描边色</span>
           <label class="color-pick">
             <span
@@ -504,22 +504,14 @@
       </div>
       <div class="section-row">
         <span class="label">透明度</span>
-        <span class="stepper">
-          <span
-            class="stepper-btn"
-            @click="stepDown('dmRawStyle.windowOpacity', 1, 0, 0.05)"
-            >−</span
-          >
-          <input
-            class="stepper-input"
-            :value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
-            @change="setVal('dmRawStyle.windowOpacity', Number(($event.target as HTMLInputElement).value) / 100)" />
-          <span
-            class="stepper-btn"
-            @click="stepUp('dmRawStyle.windowOpacity', 1, 1, 0.05)"
-            >+</span
-          >
-        </span>
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
+          :min="0"
+          :max="100"
+          @on-change="(v: number) => setVal('dmRawStyle.windowOpacity', v / 100)" />
+        <span class="input-unit">%</span>
         <span
           class="label"
           style="margin-left: 8px"
@@ -554,30 +546,36 @@
       </div>
       <div class="section-row">
         <span class="label">整体字号</span>
-        <input
-          class="input"
-          style="width: 40px"
-          :value="(dmRawStyle as any)?.fontSize ?? 14"
-          @change="setVal('dmRawStyle.fontSize', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="(dmRawStyle as any)?.fontSize ?? 14"
+          :min="8"
+          :max="48"
+          @on-change="(v: number) => setVal('dmRawStyle.fontSize', v)" />
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">表情大小</span>
-        <input
-          class="input"
-          style="width: 40px"
-          :value="dmRawStyle?.emojiSize ?? 24"
-          @change="setVal('dmRawStyle.emojiSize', Number(($event.target as HTMLInputElement).value))" />
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="dmRawStyle?.emojiSize ?? 24"
+          :min="8"
+          :max="64"
+          @on-change="(v: number) => setVal('dmRawStyle.emojiSize', v)" />
         <span class="input-unit">px</span>
       </div>
       <div class="section-row">
         <span class="label">弹幕持续时间</span>
-        <input
-          class="input"
-          style="width: 40px"
-          :value="dmRawStyle?.duration ?? 15"
-          @change="setVal('dmRawStyle.duration', Number(($event.target as HTMLInputElement).value))" />
-        <span class="input-unit">ms</span>
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="dmRawStyle?.duration ?? 15"
+          :min="1"
+          :max="60"
+          @on-change="(v: number) => setVal('dmRawStyle.duration', v)" />
+        <span class="input-unit">s</span>
       </div>
     </div>
 
@@ -594,22 +592,14 @@
       </div>
       <div class="section-row">
         <span class="label">音量</span>
-        <span class="stepper">
-          <span
-            class="stepper-btn"
-            @click="stepDown('liveConfig.volume', 60, 0, 5)"
-            >−</span
-          >
-          <input
-            class="stepper-input"
-            :value="liveConfig?.volume ?? 60"
-            @change="setVal('liveConfig.volume', Number(($event.target as HTMLInputElement).value))" />
-          <span
-            class="stepper-btn"
-            @click="stepUp('liveConfig.volume', 60, 100, 5)"
-            >+</span
-          >
-        </span>
+        <InputNumber
+          size="small"
+          style="width: 50px"
+          :model-value="liveConfig?.volume ?? 60"
+          :min="0"
+          :max="100"
+          @on-change="(v: number) => setVal('liveConfig.volume', v)" />
+        <span class="input-unit">%</span>
       </div>
       <div class="section-row">
         <span class="label">保存路径</span>
@@ -865,12 +855,12 @@ const currentLevelStyle = computed((): LevelStyle => {
   return {
     usernameColor: username['color'],
     usernameFontSize: username['font-size'] ? parseFloat(username['font-size']) || undefined : undefined,
-    usernameStrokeColor: username['-webkit-text-stroke-color'],
-    usernameStrokeWidth: username['-webkit-text-stroke-width'] ? parseFloat(username['-webkit-text-stroke-width']) || 0 : 0,
+    usernameStrokeColor: username['--textStrokeColor'],
+    usernameStrokeWidth: username['--textStrokeWidth'] ? parseFloat(username['--textStrokeWidth']) || 0 : 0,
     commentColor: comment['color'],
     commentFontSize: comment['font-size'] ? parseFloat(comment['font-size']) || undefined : undefined,
-    commentStrokeColor: comment['-webkit-text-stroke-color'],
-    commentStrokeWidth: comment['-webkit-text-stroke-width'] ? parseFloat(comment['-webkit-text-stroke-width']) || 0 : 0,
+    commentStrokeColor: comment['--textStrokeColor'],
+    commentStrokeWidth: comment['--textStrokeWidth'] ? parseFloat(comment['--textStrokeWidth']) || 0 : 0,
     bgColor: container['background'],
     borderColor: container['border-color'],
     borderWidth: container['border-width'] ? parseFloat(container['border-width']) || 0 : 0,
@@ -919,16 +909,6 @@ function onSlotDragEnd() {
   setVal('dmStyle.messageSlots', slotItems.value)
 }
 
-function stepUp(path: string, defaultVal: number, max: number, step: number) {
-  const cur = _get(config, path, defaultVal)
-  setVal(path, Math.min(max, cur + step))
-}
-
-function stepDown(path: string, defaultVal: number, min: number, step: number) {
-  const cur = _get(config, path, defaultVal)
-  setVal(path, Math.max(min, cur - step))
-}
-
 function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke' | 'border', color: string) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
@@ -939,9 +919,9 @@ function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | '
   } else if (target === 'bg') {
     setVal(`dmStyle.messageContainer${suffix}.background`, color)
   } else if (target === 'userStroke') {
-    setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-color`, color)
+    setVal(`dmStyle.messageUsername${suffix}.--textStrokeColor`, color)
   } else if (target === 'commentStroke') {
-    setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-color`, color)
+    setVal(`dmStyle.messageComment${suffix}.--textStrokeColor`, color)
   } else if (target === 'border') {
     setVal(`dmStyle.messageContainer${suffix}.border-color`, color)
   }
@@ -955,9 +935,9 @@ function setLevelStyle(key: string, value: any) {
   } else if (key === 'commentFontSize') {
     setVal(`dmStyle.messageComment${suffix}.font-size`, `${value}px`)
   } else if (key === 'userStrokeWidth') {
-    setVal(`dmStyle.messageUsername${suffix}.-webkit-text-stroke-width`, `${value}px`)
+    setVal(`dmStyle.messageUsername${suffix}.--textStrokeWidth`, `${value}px`)
   } else if (key === 'commentStrokeWidth') {
-    setVal(`dmStyle.messageComment${suffix}.-webkit-text-stroke-width`, `${value}px`)
+    setVal(`dmStyle.messageComment${suffix}.--textStrokeWidth`, `${value}px`)
   } else if (key === 'borderWidth') {
     setVal(`dmStyle.messageContainer${suffix}.border-width`, `${value}px`)
   } else if (key === 'borderRadius') {

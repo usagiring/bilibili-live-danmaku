@@ -335,7 +335,7 @@ const faceSizeStyle = computed(() => {
 
 const isShowColon = computed(() => {
   const showSlots = messageSlots.value.filter(s => s.isShow)
-  const index = messageSlots.value.findIndex(s => s.type === 'name')
+  const index = showSlots.findIndex(s => s.type === 'name')
   return index !== showSlots.length - 1
 })
 
