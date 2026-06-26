@@ -1,7 +1,12 @@
 <template>
   <div id="app">
-    <Spin fix v-if="isLoading">
-      <Icon type="ios-loading" size="18" class="demo-spin-icon-load"></Icon>
+    <Spin
+      fix
+      v-if="isLoading">
+      <Icon
+        type="ios-loading"
+        size="18"
+        class="demo-spin-icon-load"></Icon>
       <div>Loading</div>
     </Spin>
     <div id="main-container">
@@ -12,7 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onBeforeMount, onBeforeUnmount } from 'vue'
-import { touch, registryClient, getClientConfig } from './service/api'
+import { touch, registryClient, getClientConfig, getRoomStatus, getRoomInfoByIds } from './service/api'
 import { sse } from './service/sse-client'
 import { wait } from './service/util'
 import { useConfigStore } from './store'
@@ -20,6 +25,7 @@ import config from './service/config'
 
 const store = useConfigStore()
 const isLoading = ref(true)
+const clientId = ref('')
 
 onBeforeMount(async () => {
   let touching = true
@@ -38,27 +44,34 @@ onBeforeMount(async () => {
 
   // 向 bridge 后端注册，获取最终 clientId
   const { data: regData } = await registryClient({ clientId: storedClientId })
-  const clientId = regData?.id || storedClientId
+  clientId.value = regData?.id || storedClientId
 
   // 如果 clientId 有更新，回写到主进程 electron-store
-  if (clientId && clientId !== storedClientId) {
-    await window.setClientId(clientId)
+  if (clientId.value && clientId.value !== storedClientId) {
+    await window.setClientId(clientId.value)
   }
+  console.log('clientId: ' + clientId.value)
 
-  console.log('clientId: ' + clientId)
-
-  config.id = clientId
-  store.set('id', clientId)
+  config.id = clientId.value
+  store.id = clientId.value
 
   // 从 bridge 后端拉取完整配置
-  const { data: remoteConfig } = await getClientConfig(clientId)
-  if (remoteConfig) {
-    // 写入全局 config
-    // Object.assign(config, pick(remoteConfig, Object.keys(config)))
-    Object.assign(config, remoteConfig)
+  const { data: remoteConfig } = await getClientConfig(clientId.value)
 
+  // 写入全局 config
+  // Object.assign(config, pick(remoteConfig, Object.keys(config)))
+  Object.assign(config, remoteConfig)
+
+  if (remoteConfig.rooms?.length) {
     // 需要 Pinia 持久化的字段同步到 store
-    store.set('rooms', remoteConfig.rooms)
+    store.rooms = remoteConfig.rooms
+
+    try {
+      await setRoomIsConnected()
+      await setRoomLiveStatus()
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   isLoading.value = false
@@ -66,6 +79,27 @@ onBeforeMount(async () => {
   // bridge 就绪后建立全局 SSE 连接
   await sse.connect()
 })
+
+async function setRoomIsConnected() {
+  const roomIds = store.rooms.map(room => room.id)
+  const { data } = await getRoomStatus({ roomIds, clientId: store.id })
+  data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
+    const room = store.rooms.find(room => room.id === roomId)
+    if (!room) return
+    room.isConnected = isConnected
+  })
+}
+
+async function setRoomLiveStatus() {
+  const roomIds = store.rooms.map(room => room.id)
+  const { data } = await getRoomInfoByIds({ roomIds })
+  const infos: any[] = Object.values(data)
+  infos.forEach(({ roomid, live_status }: { roomid: string; live_status: number }) => {
+    const room = store.rooms.find(room => room.id === roomid)
+    if (!room) return
+    room.liveStatus = live_status
+  })
+}
 
 onBeforeUnmount(() => {
   sse.disconnect()

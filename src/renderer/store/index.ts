@@ -23,7 +23,6 @@ export const useConfigStore = defineStore('config', () => {
   })
 
   function set(path, value: any) {
-    console.log(path, value)
     _set(state, path, value)
   }
 

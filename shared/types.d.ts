@@ -70,7 +70,7 @@ export interface Message {
   content: string // 原始消息文本（弹幕文本 / 礼物名称 / 进入房间等）
   color?: string | null // 弹幕颜色（十六进制字符串）
   category: 'comment' | 'gift' | 'superchat' | 'interact'
-  type?: number | null
+  type?: number
   sendAt: number // 发送时间戳 (ms)
   roomId: string
   clientId?: string

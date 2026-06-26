@@ -221,6 +221,7 @@
           <!-- Tab 内容区 -->
           <div class="tab-content">
             <OverviewPanel v-if="activeTab === 'overview'" />
+            <Message v-if="activeTab === 'message'" />
           </div>
         </template>
 
@@ -274,24 +275,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
-// import { ipcRenderer } from 'electron'
 import { useConfigStore } from '../store'
-// import { Room } from '../types'
 import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
+import Message from './Message.vue'
 import Config from './Config.vue'
-import {
-  connect as connectApi,
-  disconnect as disconnectApi,
-  updateClientConfig,
-  getRoomStatus,
-  getRoomInfoV2,
-  getUserInfoV2,
-} from '../service/api'
+import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomInfoV2, getUserInfoV2 } from '../service/api'
 import { DEFAULT_FACE } from '../../service/const'
 import globalVar from '../../service/global'
 import config from '../service/config'
-import { Message } from 'view-ui-plus'
+import { Message as $Message } from 'view-ui-plus'
 // TODO: 逐模块重构，暂时注释
 // import StyleSetting from './StyleSetting.vue'
 // import Vote from './Vote.vue'
@@ -310,7 +303,6 @@ const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
 const clientId = computed(() => store.id)
-// const rooms = computed(() => store.rooms)
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
@@ -346,22 +338,6 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
 
-// 等 rooms 有值后拉取连接状态（只执行一次）
-watch(
-  () => store.rooms.length,
-  async () => {
-    const roomIds = store.rooms.map(room => room.id)
-    const { data } = await getRoomStatus({ roomIds, clientId: store.id })
-    data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
-      const room = store.rooms.find(room => room.id === roomId)
-      console.log(room, 'room')
-      if (!room) return
-      room.isConnected = isConnected
-    })
-  },
-  { once: true },
-)
-
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
@@ -395,7 +371,7 @@ async function initializeRoom({ roomId, force }: { roomId?: string; force?: bool
     const { data } = await getRoomInfoV2({ roomId })
 
     if (!data) {
-      Message.error('连接失败：无法获取房间信息')
+      $Message.error('连接失败：无法获取房间信息')
       connecting.value = false
       return
     }

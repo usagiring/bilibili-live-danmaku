@@ -9,7 +9,7 @@ export async function getRoomInfoV2({ roomId }: { roomId: string }) {
   return res.data
 }
 
-export async function getRoomInfoByIds(roomIds: string[]) {
+export async function getRoomInfoByIds({ roomIds }: { roomIds: string[] }) {
   const res = await axios.post(`${baseUrl}/api/bilibili/room/info`, { roomIds })
   return res.data
 }
@@ -65,6 +65,12 @@ export interface MessageQuery {
 }
 
 export async function queryMessages(body: MessageQuery) {
+  if (Array.isArray(body.category)) {
+    body.category = body.category.join(',')
+  }
+  if (Array.isArray(body.coinType)) {
+    body.coinType = body.coinType.join(',')
+  }
   const res = await axios.get(`${baseUrl}/api/message/query`, { params: body })
   return res.data
 }

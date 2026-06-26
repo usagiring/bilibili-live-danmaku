@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%; display: flex; flex-direction: column">
     <div class="searcher-wrapper">
       <DatePicker
         class="space-left-5px"
@@ -25,18 +25,24 @@
         icon="ios-search"
         :disabled="isRealTimeMode"
         @click="searchAll" />
-      <Checkbox
-        :model-value="isShowSilverGift"
-        @on-change="showSilverGift">
-        显示银瓜子礼物
-      </Checkbox>
-      <Checkbox
-        :model-value="isRealTimeMode"
-        @on-change="changeIsRealTimeMode">
-        实时更新模式
-      </Checkbox>
+      <div class="chips">
+        <span
+          class="chip"
+          :class="{ on: isShowSilverGift }"
+          @click="showSilverGift(!isShowSilverGift)">
+          银瓜子礼物
+        </span>
+        <span
+          class="chip"
+          :class="{ on: isRealTimeMode }"
+          @click="changeIsRealTimeMode(!isRealTimeMode)">
+          实时更新
+        </span>
+      </div>
     </div>
-    <div class="content-wrapper">
+    <div
+      class="content-wrapper"
+      style="flex: 1; min-height: 0">
       <Split
         v-model="split1"
         @on-moving="onResize">
@@ -59,14 +65,46 @@
                     class="margin-lr-1px vertical-align-middle"
                     :medal="msg.medal"
                     :anchorIcon="msg.anchorIcon" />
-                  <span class="space-left-2">{{ `${msg.username}` }}</span>
-                  <span
-                    v-if="isShowUserSpaceLink"
-                    class="user-link"
-                    @click="openBiliUserSpace(msg.userId)">
-                    {{ `(${msg.userId})` }}
-                  </span>
-                  <span>: </span>
+                  <template v-if="msg.category === 'comment'">
+                    <span class="space-left-2">{{ `${msg.username}` }}</span>
+                    <span
+                      v-if="isShowUserSpaceLink && msg.userId"
+                      class="user-link"
+                      @click="openBiliUserSpace(msg.userId)">
+                      {{ `(${msg.userId})` }}
+                    </span>
+                    <span>：</span>
+                    <img
+                      v-if="msg.emojiUrl"
+                      :style="{ 'vertical-align': 'middle', height: '20px' }"
+                      :src="msg.emojiUrl" />
+                    <span
+                      v-else-if="msg.emots"
+                      class="vertical-align-middle">
+                      <template
+                        v-for="(str, index) of msg.splitContent"
+                        :key="index">
+                        <template v-if="msg.emots[str]">
+                          <img
+                            class="vertical-align-middle"
+                            :src="msg.emots[str].url"
+                            :style="{ height: `${msg.emots[str].height || 20}px` }" />
+                        </template>
+                        <template v-else>{{ str }}</template>
+                      </template>
+                    </span>
+                    <span v-else>{{ msg.content }}</span>
+                  </template>
+                  <template v-else>
+                    <span class="space-left-2">{{ `${msg.username}` }}</span>
+                    <span
+                      v-if="isShowUserSpaceLink && msg.userId"
+                      class="user-link"
+                      @click="openBiliUserSpace(msg.userId)">
+                      {{ `(${msg.userId})` }}
+                    </span>
+                    <span>{{ msg.content }}</span>
+                  </template>
                   <!-- <span
                       v-if="msg.voiceUrl"
                       class="voice-container"
@@ -74,11 +112,6 @@
                       <Icon type="md-play" />
                       <span>{{ `${msg.fileDuration}"` }}</span>
                     </span> -->
-                  <img
-                    v-if="msg.emojiUrl"
-                    :style="{ 'vertical-align': 'middle', height: '20px' }"
-                    :src="msg.emojiUrl" />
-                  <span v-else>{{ msg.content }}</span>
                 </div>
               </template>
             </Scroll>
@@ -99,10 +132,11 @@
                   <template v-if="msg.category === 'superchat'">
                     <GiftCardMini
                       :gift="msg.gift"
-                      :username="msg.username"
+                      :username="`${msg.username}：`"
                       :face="msg.face"
+                      :sendAt="msg.sendAt"
                       :isShowSendAt="true">
-                      {{ `: ${msg.content}` }}
+                      {{ `${msg.content}` }}
                     </GiftCardMini>
                   </template>
                   <template v-else>
@@ -110,6 +144,7 @@
                       :gift="msg.gift"
                       :username="msg.username"
                       :face="msg.face"
+                      :sendAt="msg.sendAt"
                       :isShowSendAt="true">
                       {{ ` 赠送了 ${msg.gift!.count}个 ${msg.gift!.name}` }}
                     </GiftCardMini>
@@ -127,7 +162,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useConfigStore } from '../store'
-import { shell } from 'electron'
 import { getPriceProperties, dateFormat, wait, INTERACT_TYPE } from '@tokine/shared'
 import { MessageQuery, queryMessages } from '../service/api'
 import GiftCardMini from '@tokine/shared/components/GiftCardMini.vue'
@@ -161,14 +195,16 @@ function changeDateRange([startTime, endTime]: string[]) {
 }
 
 async function searchAll(options?: any) {
-  const messages = await searchMessage(options)
-  messages.value = messages
-  const gift = await searchGift(options)
-  gifts.value = gift
+  const msgs = await searchMessage(options)
+  messages.value = msgs
+  const gfs = await searchGift(options)
+  gifts.value = gfs
+
+  console.log(msgs)
 }
 
 async function searchMessage({ sort, scrollToken }: { sort?: string; scrollToken?: string } = {}) {
-  if (!room) return
+  if (!room.value) return []
   const query: MessageQuery = {
     roomId: room.value!.id,
   }
@@ -190,11 +226,26 @@ async function searchMessage({ sort, scrollToken }: { sort?: string; scrollToken
     category: ['comment', 'interact'],
     limit: 40,
   })
+
+  for (const msg of data) {
+    if (msg.category === 'interact') {
+      msg.content = `${INTERACT_TYPE[msg.type]}直播间`
+    }
+
+    if (msg.emots) {
+      const regstr = Object.keys(msg.emots)
+        .map((k: string) => k.replace(/\[|\]/g, ''))
+        .map((k: string) => '\[' + k + '\]')
+        .join('|')
+      msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
+    }
+  }
+
   return data
 }
 
 async function searchGift({ sort, scrollToken }: { sort?: string; scrollToken?: string } = {}) {
-  if (!room) return
+  if (!room.value) return []
   const query: MessageQuery = {
     roomId: room.value!.id,
   }
@@ -293,7 +344,7 @@ function clearDateRange() {
 }
 
 function openBiliUserSpace(userId: string) {
-  shell.openExternal(`https://space.bilibili.com/${userId}`)
+  window.openExternal(`https://space.bilibili.com/${userId}`)
 }
 
 function onResize() {
@@ -322,7 +373,7 @@ function listenStart() {
 }
 
 function listenStop() {
-  sse.off('COMMENT', onMessage)
+  sse.off('MESSAGE', onMessage)
 }
 
 function onMessage(message: Message) {
@@ -435,5 +486,31 @@ onBeforeUnmount(() => {
   border: 1px solid silver;
   border-radius: 8px;
   cursor: pointer;
+}
+
+/* 芯片切换 */
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  border: 1px solid #ddd;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #666;
+  user-select: none;
+}
+
+.chip.on {
+  background: rgba(45, 140, 240, 0.08);
+  border-color: #2d8cf0;
+  color: #2d8cf0;
 }
 </style>

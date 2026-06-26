@@ -40,17 +40,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { Message } from 'view-ui-plus'
 import { useConfigStore } from '../store'
 import { sse } from '../service/sse-client'
-import { getRoomInfoV2, updateClientConfig, getUserInfoV2 } from '../service/api'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
-
-// const initializing = ref(false)
-const connecting = ref(false)
-const clientId = computed(() => store.id)
 
 onMounted(() => {
   sse.on('NINKI', onNinki)

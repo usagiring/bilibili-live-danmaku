@@ -14,7 +14,7 @@
         class="space-left-2px"
         :src="face"
         size="small" />
-      <span class="space-left-2px">{{ username }}</span>
+      <span class="username-style">{{ username }}</span>
       <slot />
       <span
         v-if="type === 'anchor'"
@@ -59,6 +59,13 @@ const formattedPrice = computed(() => `¥${totalPrice.value}`)
   font-size: 12px;
   font-family: inherit;
   font-weight: bold;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.username-style {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: 2px;
 }
 .price-style {
   font-size: 12px;
