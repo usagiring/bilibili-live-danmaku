@@ -76,8 +76,9 @@ onBeforeMount(async () => {
 
   isLoading.value = false
 
+  const baseUrl = await window.getBaseUrl()
   // bridge 就绪后建立全局 SSE 连接
-  await sse.connect()
+  sse.connect(baseUrl, clientId.value)
 })
 
 async function setRoomIsConnected() {

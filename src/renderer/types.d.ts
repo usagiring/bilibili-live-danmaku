@@ -123,8 +123,11 @@ interface LiveConfig {
 
 interface MessageConfig {
   isRealTimeMode: boolean
-  isShowSilverGift: boolean
-  isShowUserSpaceLink: boolean
+  // isShowSilverGift: boolean
+  // isShowUserSpaceLink: boolean
+  isShowUserId: boolean
+  isShowSendAt: boolean
+  isShowInteract: boolean
 }
 
 interface AsrConfig {

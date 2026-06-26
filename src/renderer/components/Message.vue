@@ -1,48 +1,82 @@
 <template>
   <div style="height: 100%; display: flex; flex-direction: column">
     <div class="searcher-wrapper">
-      <DatePicker
-        class="space-left-5px"
-        type="datetimerange"
-        format="yyyy-MM-dd HH:mm"
-        placeholder="选择时间范围"
-        style="width: 280px"
-        size="small"
-        :model-value="dateRange"
-        @on-change="changeDateRange"
-        @on-clear="clearDateRange" />
-      <Input
-        v-model="q"
-        class="space-left-5px"
-        placeholder="ID/名称/评论"
-        clearable
-        style="width: 200px"
-        size="small" />
-      <Button
-        class="space-left-5px"
-        type="primary"
-        shape="circle"
-        icon="ios-search"
-        :disabled="isRealTimeMode"
-        @click="searchAll" />
-      <div class="chips">
-        <span
-          class="chip"
-          :class="{ on: isShowSilverGift }"
-          @click="showSilverGift(!isShowSilverGift)">
-          银瓜子礼物
-        </span>
-        <span
-          class="chip"
-          :class="{ on: isRealTimeMode }"
-          @click="changeIsRealTimeMode(!isRealTimeMode)">
-          实时更新
-        </span>
+      <div class="search-row">
+        <span class="filter-label">关键词</span>
+        <Input
+          v-model="q"
+          class="search-input"
+          placeholder="用户ID | 昵称 | 内容"
+          clearable
+          style="width: 240px"
+          size="small" />
+        <Button
+          type="primary"
+          shape="circle"
+          icon="ios-search"
+          style="width: 28px; height: 28px"
+          :disabled="isRealTimeMode"
+          @click="searchAll" />
+        <span class="row-sep"></span>
+        <div class="chips">
+          <span
+            class="chip"
+            :class="{ on: isShowUserId }"
+            @click="changeIsShowUserId()">
+            显示UID
+          </span>
+          <span
+            class="chip"
+            :class="{ on: isShowInteract }"
+            @click="changeIsShowInteract()">
+            显示入场
+          </span>
+          <span
+            class="chip"
+            :class="{ on: isShowSendAt }"
+            @click="changeIsShowSendAt()">
+            显示时间
+          </span>
+          <span
+            class="chip"
+            :class="{ on: isRealTimeMode }"
+            @click="changeIsRealTimeMode()">
+            实时模式
+          </span>
+        </div>
+      </div>
+      <div class="search-extra">
+        <div class="search-row">
+          <span class="filter-label">时间范围</span>
+          <DatePicker
+            type="datetimerange"
+            format="yyyy-MM-dd HH:mm"
+            placeholder="选择时间范围"
+            style="width: 240px"
+            size="small"
+            :model-value="dateRange"
+            @on-change="changeDateRange"
+            @on-clear="clearDateRange" />
+        </div>
+        <div class="search-row">
+          <span class="filter-label">礼物价格</span>
+          <Input
+            v-model="priceGte"
+            placeholder="最低"
+            size="small"
+            :number="true"
+            style="width: 80px" />
+          <span class="filter-sep">—</span>
+          <Input
+            v-model="priceLte"
+            placeholder="最高"
+            size="small"
+            :number="true"
+            style="width: 80px" />
+        </div>
       </div>
     </div>
-    <div
-      class="content-wrapper"
-      style="flex: 1; min-height: 0">
+    <div class="content-wrapper">
       <Split
         v-model="split1"
         @on-moving="onResize">
@@ -56,10 +90,14 @@
               :height="scrollHeightLeft"
               :distance-to-edge="[10, 10]">
               <template
-                v-for="(msg, i) in messages"
+                v-for="(msg, i) in filteredMessages"
                 :key="i">
                 <div class="comment-content">
-                  <span class="date-style">{{ dateFormat(msg.sendAt) }}</span>
+                  <span
+                    v-if="isShowSendAt"
+                    class="date-style"
+                    >{{ dateFormat(msg.sendAt) }}</span
+                  >
                   <FanMedal
                     v-if="msg.medal"
                     class="margin-lr-1px vertical-align-middle"
@@ -68,7 +106,7 @@
                   <template v-if="msg.category === 'comment'">
                     <span class="space-left-2">{{ `${msg.username}` }}</span>
                     <span
-                      v-if="isShowUserSpaceLink && msg.userId"
+                      v-if="isShowUserId && msg.userId"
                       class="user-link"
                       @click="openBiliUserSpace(msg.userId)">
                       {{ `(${msg.userId})` }}
@@ -98,7 +136,7 @@
                   <template v-else>
                     <span class="space-left-2">{{ `${msg.username}` }}</span>
                     <span
-                      v-if="isShowUserSpaceLink && msg.userId"
+                      v-if="isShowUserId && msg.userId"
                       class="user-link"
                       @click="openBiliUserSpace(msg.userId)">
                       {{ `(${msg.userId})` }}
@@ -145,7 +183,7 @@
                       :username="msg.username"
                       :face="msg.face"
                       :sendAt="msg.sendAt"
-                      :isShowSendAt="true">
+                      :isShowSendAt="isShowSendAt">
                       {{ ` 赠送了 ${msg.gift!.count}个 ${msg.gift!.name}` }}
                     </GiftCardMini>
                   </template>
@@ -163,7 +201,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useConfigStore } from '../store'
 import { getPriceProperties, dateFormat, wait, INTERACT_TYPE } from '@tokine/shared'
-import { MessageQuery, queryMessages } from '../service/api'
+import { MessageQuery, queryMessages, updateClientConfig } from '../service/api'
 import GiftCardMini from '@tokine/shared/components/GiftCardMini.vue'
 import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { sse } from '../service/sse-client'
@@ -174,6 +212,8 @@ const store = useConfigStore()
 
 // ── state ──
 const q = ref('')
+const priceGte = ref<number | null>(0.1)
+const priceLte = ref<number | null>(null)
 const split1 = ref(0.6)
 const dateRange = ref<Date[]>([])
 const messages = ref<Message[]>([])
@@ -181,12 +221,17 @@ const gifts = ref<Message[]>([])
 const scrollHeightLeft = ref(300)
 const scrollHeightRight = ref(1000)
 
-const isShowSilverGift = ref(config.messageConfig?.isShowSilverGift)
-const isShowUserSpaceLink = ref(true)
+const isShowUserId = ref(config.messageConfig?.isShowUserId)
+const isShowInteract = ref(config.messageConfig?.isShowInteract)
+const isShowSendAt = ref(config.messageConfig?.isShowSendAt)
 const isRealTimeMode = ref(config.messageConfig?.isRealTimeMode)
 
-const room = computed(() => {
-  return store.activeRoom
+const room = computed(() => store.activeRoom)
+const clientId = computed(() => store.id)
+
+const filteredMessages = computed(() => {
+  if (isShowInteract.value) return messages.value
+  return messages.value.filter(m => m.category !== 'interact')
 })
 
 // ── methods ──
@@ -264,9 +309,11 @@ async function searchGift({ sort, scrollToken }: { sort?: string; scrollToken?: 
     // query.sendAt[scrollKey] = Number(scrollValue)
   }
 
-  if (!isShowSilverGift.value) {
-    query.coinType = 'gold'
-  }
+  // if (!isShowSilverGift.value) {
+  //   query.coinType = 'gold'
+  // }
+  if (priceGte.value != null) query.priceGte = priceGte.value
+  if (priceLte.value != null) query.priceLte = priceLte.value
 
   const { data } = await queryMessages({
     ...query,
@@ -329,14 +376,6 @@ function handleReachEdgeGift(direct: number) {
   })
 }
 
-function showUserSpaceLink(status: boolean) {}
-
-async function showSilverGift(status: boolean) {
-  isShowSilverGift.value = status
-  let list = await searchGift()
-  gifts.value = list
-}
-
 function clearDateRange() {
   setTimeout(() => {
     dateRange.value = []
@@ -359,13 +398,30 @@ function onResize() {
 //   audio.play()
 // }
 
-async function changeIsRealTimeMode(status: boolean) {
-  if (status) {
+async function changeIsRealTimeMode() {
+  isRealTimeMode.value = !isRealTimeMode.value
+  if (isRealTimeMode.value) {
     await searchAll()
     listenStart()
   } else {
     listenStop()
   }
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isRealTimeMode', value: isRealTimeMode.value }] })
+}
+
+async function changeIsShowUserId() {
+  isShowUserId.value = !isShowUserId.value
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowUserId', value: isShowUserId.value }] })
+}
+
+async function changeIsShowInteract() {
+  isShowInteract.value = !isShowInteract.value
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowInteract', value: isShowInteract.value }] })
+}
+
+async function changeIsShowSendAt() {
+  isShowSendAt.value = !isShowSendAt.value
+  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowSendAt', value: isShowSendAt.value }] })
 }
 
 function listenStart() {
@@ -384,7 +440,6 @@ function onMessage(message: Message) {
 
   if (['gift', 'superchat'].includes(message.category)) {
     formatGift(message)
-    if (!isShowSilverGift.value && message.gift?.coinType === 'silver') return
     const exist = gifts.value.find(g => g.id === message.id)
     if (exist) {
       exist.gift = message.gift
@@ -412,7 +467,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .content-wrapper {
-  height: calc(100% - 35px);
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .split-pane {
@@ -434,11 +492,61 @@ onBeforeUnmount(() => {
 }
 
 .searcher-wrapper {
-  height: 35px;
+  height: 30px;
+  overflow: visible;
   position: relative;
-  min-width: 1000px;
-  padding: 0px 30px;
-  border-bottom: 1px solid lightgray;
+  z-index: 3;
+  padding: 0 14px;
+  background: white;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+}
+
+.search-extra {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  padding: 0px 14px 4px;
+  background: #fafbfc;
+  border-bottom: 1px solid #e8eaec;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.searcher-wrapper:hover .search-extra {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.search-input {
+  width: 180px;
+}
+
+.filter-label {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+  min-width: 52px;
+}
+
+.filter-sep {
+  font-size: 11px;
+  color: #ccc;
+}
+
+.row-sep {
+  width: 1px;
+  height: 14px;
+  background: #ddd;
+  flex-shrink: 0;
 }
 
 .space-left-5px {
