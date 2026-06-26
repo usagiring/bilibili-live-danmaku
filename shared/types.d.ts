@@ -1,4 +1,4 @@
-interface DmStyle {
+export interface DmStyle {
   isShowFace: boolean
   isShowAnchorIcon: boolean
   isShowFanMedal: boolean
@@ -69,7 +69,7 @@ export interface Message {
   id: number
   content: string // 原始消息文本（弹幕文本 / 礼物名称 / 进入房间等）
   color?: string | null // 弹幕颜色（十六进制字符串）
-  category: 'comment' | 'gift' | 'guard' | 'superchat' | 'interact'
+  category: 'comment' | 'gift' | 'superchat' | 'interact'
   type?: number | null
   sendAt: number // 发送时间戳 (ms)
   roomId: string
@@ -95,7 +95,6 @@ export interface Message {
   } | null
   createdAt: number
   emojiUrl?: string | null
-  voiceUrl?: string | null
 
   // ── 运行时计算字段 ──
   isHover?: boolean
@@ -106,5 +105,8 @@ export interface Message {
   splitContent?: string[]
   contentJPN?: string | null
   similarColor?: string
+
+  // legacy: 语音弹幕
   fileDuration?: number | null
+  voiceUrl?: string | null
 }

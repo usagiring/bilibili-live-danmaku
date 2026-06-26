@@ -5,4 +5,5 @@ export { default as SimilarCommentBadge } from './components/SimilarCommentBadge
 export { default as GiftCard } from './components/GiftCard.vue'
 export { default as GiftCardMini } from './components/GiftCardMini.vue'
 export { ANCHOR_ICON_MAP, INTERACT_TYPE, COLORS, DEFAULT_FACE } from './service/const'
-export { dateFormat } from './service/util'
+export { dateFormat, getPriceProperties, wait } from './service/util'
+// export { Message, DmStyle } from './types.d'

@@ -52,15 +52,19 @@ export async function getRecordState(body: { roomId?: number }) {
 }
 
 // ==================== Message ====================
-
-export async function queryMessages(body: {
-  category?: string
-  roomId?: number
+export interface MessageQuery {
+  roomId: string
+  category?: string | string[]
+  search?: string
   userId?: string
-  skip?: number
+  username?: string
+  coinType?: string | string[]
+  sendAtGte?: number
+  sendAtLte?: number
   limit?: number
-  sort?: any
-}) {
+}
+
+export async function queryMessages(body: MessageQuery) {
   const res = await axios.get(`${baseUrl}/api/message/query`, { params: body })
   return res.data
 }

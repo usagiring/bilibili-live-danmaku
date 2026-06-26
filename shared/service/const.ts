@@ -17,3 +17,30 @@ export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'dark
 
 // 默认头像
 export const DEFAULT_FACE = 'https://static.hdslb.com/images/member/noface.gif'
+
+export const PRICE_PROPERTIES = [
+  {
+    colors: ['#EDF5FF', '#2A60B2'], // [ 底色, 进度条颜色 ]
+    duration: 60000,
+  },
+  {
+    colors: ['#DBFFFD', '#427D9E'],
+    duration: 120000,
+  },
+  {
+    colors: ['#FFF1C5', '#E2B52B'],
+    duration: 300000,
+  },
+  {
+    colors: ['rgb(255,234,210)', 'rgb(244,148,67)'],
+    duration: 1800000,
+  },
+  {
+    colors: ['rgb(255,231,228)', 'rgb(229,77,77)'],
+    duration: 3600000,
+  },
+  {
+    colors: ['rgb(255,216,216)', 'rgb(171,26,50)'],
+    duration: 7200000,
+  },
+]

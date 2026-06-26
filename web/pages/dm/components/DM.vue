@@ -184,8 +184,9 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { DEFAULT_FACE, INTERACT_TYPE, ANCHOR_ICON_MAP, MAX_MESSAGE, COLORS } from '../../service/const'
-import { getPriceProperties, wait } from '../../service/util'
+import { getPriceProperties, wait, INTERACT_TYPE, ANCHOR_ICON_MAP, DEFAULT_FACE } from '@tokine/shared'
+import { Message, DmStyle } from '@tokine/shared/types.js'
+
 import PromiseQueue from '../../service/promise-queue'
 import GiftTag from '@tokine/shared/components/GiftTag.vue'
 import GiftTagExpand from '@tokine/shared/components/GiftTagExpand.vue'
@@ -198,6 +199,9 @@ import { sse } from '../../service/sse-client'
 import config from '../../service/config'
 
 defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
+
+const MAX_MESSAGE = 150
+const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
 
 let promiseQueue: PromiseQueue | null = null
 
