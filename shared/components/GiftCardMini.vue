@@ -40,7 +40,10 @@ const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
 const color1 = computed(() => priceProperties?.value?.colors[0])
 const color2 = computed(() => priceProperties?.value?.colors[1])
 
-const formattedPrice = computed(() => `¥${totalPrice.value}`)
+const formattedPrice = computed(() => {
+  const price = totalPrice.value
+  return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
+})
 </script>
 
 <style scoped>

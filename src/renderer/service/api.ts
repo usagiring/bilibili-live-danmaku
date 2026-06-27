@@ -61,6 +61,7 @@ export interface MessageQuery {
   coinType?: string | string[]
   sendAtGte?: number
   sendAtLte?: number
+  order?: string
   totalPriceGte?: number
   totalPriceLte?: number
   limit?: number

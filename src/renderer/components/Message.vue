@@ -81,113 +81,104 @@
         <template #left>
           <div
             id="split-left"
-            class="split-pane"
-            style="flex: 1; min-height: 0">
-            <Scroll
-              :on-reach-edge="handleReachEdgeMessage"
-              :height="scrollHeightLeft"
-              :distance-to-edge="[10, 10]">
-              <template
-                v-for="(msg, i) in messages"
-                :key="i">
-                <div class="comment-content">
+            class="split-pane scroll-box"
+            @wheel="onWheelMessage">
+            <template
+              v-for="msg in messages"
+              :key="msg.id">
+              <div class="comment-content">
+                <span
+                  v-if="isShowSendAt"
+                  class="date-style">
+                  {{ dateFormat(msg.sendAt) }}
+                </span>
+                <FanMedal
+                  v-if="msg.medal"
+                  class="margin-lr-1px vertical-align-middle"
+                  :medal="msg.medal"
+                  :anchorIcon="msg.anchorIcon" />
+                <template v-if="msg.category === 'comment'">
+                  <span class="space-left-2">{{ `${msg.username}` }}</span>
                   <span
-                    v-if="isShowSendAt"
-                    class="date-style"
-                    >{{ dateFormat(msg.sendAt) }}</span
-                  >
-                  <FanMedal
-                    v-if="msg.medal"
-                    class="margin-lr-1px vertical-align-middle"
-                    :medal="msg.medal"
-                    :anchorIcon="msg.anchorIcon" />
-                  <template v-if="msg.category === 'comment'">
-                    <span class="space-left-2">{{ `${msg.username}` }}</span>
-                    <span
-                      v-if="isShowUserId && msg.userId"
-                      class="user-link"
-                      @click="openBiliUserSpace(msg.userId)">
-                      {{ `(${msg.userId})` }}
-                    </span>
-                    <span>：</span>
-                    <img
-                      v-if="msg.emojiUrl"
-                      :style="{ 'vertical-align': 'middle', height: '20px' }"
-                      :src="msg.emojiUrl" />
-                    <span
-                      v-else-if="msg.emots"
-                      class="vertical-align-middle">
-                      <template
-                        v-for="(str, index) of msg.splitContent"
-                        :key="index">
-                        <template v-if="msg.emots[str]">
-                          <img
-                            class="vertical-align-middle"
-                            :src="msg.emots[str].url"
-                            :style="{ height: `${msg.emots[str].height || 20}px` }" />
-                        </template>
-                        <template v-else>{{ str }}</template>
+                    v-if="isShowUserId && msg.userId"
+                    class="user-link"
+                    @click="openBiliUserSpace(msg.userId)">
+                    {{ `(${msg.userId})` }}
+                  </span>
+                  <span>：</span>
+                  <img
+                    v-if="msg.emojiUrl"
+                    :style="{ 'vertical-align': 'middle', height: '20px' }"
+                    :src="msg.emojiUrl" />
+                  <span
+                    v-else-if="msg.emots"
+                    class="vertical-align-middle">
+                    <template
+                      v-for="(str, index) of msg.splitContent"
+                      :key="index">
+                      <template v-if="msg.emots[str]">
+                        <img
+                          class="vertical-align-middle"
+                          :src="msg.emots[str].url"
+                          :style="{ height: `${msg.emots[str].height || 20}px` }" />
                       </template>
-                    </span>
-                    <span v-else>{{ msg.content }}</span>
-                  </template>
-                  <template v-else>
-                    <span class="space-left-2">{{ `${msg.username}` }}</span>
-                    <span
-                      v-if="isShowUserId && msg.userId"
-                      class="user-link"
-                      @click="openBiliUserSpace(msg.userId)">
-                      {{ `(${msg.userId})` }}
-                    </span>
-                    <span>{{ msg.content }}</span>
-                  </template>
-                  <!-- <span
+                      <template v-else>{{ str }}</template>
+                    </template>
+                  </span>
+                  <span v-else>{{ msg.content }}</span>
+                </template>
+                <template v-else>
+                  <span class="space-left-2">{{ `${msg.username}` }}</span>
+                  <span
+                    v-if="isShowUserId && msg.userId"
+                    class="user-link"
+                    @click="openBiliUserSpace(msg.userId)">
+                    {{ `(${msg.userId})` }}
+                  </span>
+                  <span>{{ msg.content }}</span>
+                </template>
+                <!-- <span
                       v-if="msg.voiceUrl"
                       class="voice-container"
                       @click="playAudio(msg.voiceUrl)">
                       <Icon type="md-play" />
                       <span>{{ `${msg.fileDuration}"` }}</span>
                     </span> -->
-                </div>
-              </template>
-            </Scroll>
+              </div>
+            </template>
           </div>
         </template>
         <template #right>
           <div
             id="split-right"
-            class="split-pane">
-            <Scroll
-              :on-reach-edge="handleReachEdgeGift"
-              :height="scrollHeightRight"
-              :distance-to-edge="[10, 10]">
-              <template
-                v-for="(msg, i) in gifts"
-                :key="i">
-                <div :style="{ padding: '0 10px' }">
-                  <template v-if="msg.category === 'superchat'">
-                    <GiftCardMini
-                      :gift="msg.gift"
-                      :username="`${msg.username}：`"
-                      :face="msg.face"
-                      :sendAt="msg.sendAt"
-                      :isShowSendAt="true">
-                      {{ `${msg.content}` }}
-                    </GiftCardMini>
-                  </template>
-                  <template v-else>
-                    <GiftCardMini
-                      :gift="msg.gift"
-                      :username="msg.username"
-                      :face="msg.face"
-                      :sendAt="msg.sendAt"
-                      :isShowSendAt="isShowSendAt">
-                      {{ ` 赠送了 ${msg.gift!.count}个 ${msg.gift!.name}` }}
-                    </GiftCardMini>
-                  </template>
-                </div>
-              </template>
-            </Scroll>
+            class="split-pane scroll-box"
+            @wheel="onWheelGift">
+            <template
+              v-for="msg in gifts"
+              :key="msg.id">
+              <div :style="{ padding: '0 10px' }">
+                <template v-if="msg.category === 'superchat'">
+                  <GiftCardMini
+                    :gift="msg.gift"
+                    :username="`${msg.username}：`"
+                    :face="msg.face"
+                    :sendAt="msg.sendAt"
+                    :isShowSendAt="true">
+                    {{ `${msg.content}` }}
+                  </GiftCardMini>
+                </template>
+                <template v-else>
+                  <GiftCardMini
+                    :gift="msg.gift"
+                    :username="msg.username"
+                    :face="msg.face"
+                    :sendAt="msg.sendAt"
+                    :isShowSendAt="isShowSendAt">
+                    {{ ` 赠送了 ${msg.gift!.count}个 ${msg.gift!.name}` }}
+                  </GiftCardMini>
+                </template>
+              </div>
+            </template>
           </div>
         </template>
       </Split>
@@ -196,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRef, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, toRef, computed, onMounted, onBeforeUnmount, triggerRef } from 'vue'
 import { useConfigStore } from '../store'
 import { getPriceProperties, dateFormat, wait, INTERACT_TYPE, getAnchorIcon } from '@tokine/shared'
 import { MessageQuery, queryMessages, updateClientConfig } from '../service/api'
@@ -205,6 +196,9 @@ import FanMedal from '@tokine/shared/components/FanMedal.vue'
 import { sse } from '../service/sse-client'
 import config from '../service/config'
 import { Message } from '@tokine/shared/types.js'
+
+const MAX_MESSAGE_LIST_COUNT = 150
+const MAX_GIFT_LIST_COUNT = 150
 
 const store = useConfigStore()
 
@@ -216,8 +210,8 @@ const split1 = ref(0.6)
 const dateRange = ref<Date[]>([])
 const messages = ref<Message[]>([])
 const gifts = ref<Message[]>([])
-const scrollHeightLeft = ref(1000)
-const scrollHeightRight = ref(1000)
+const loadingMessage = ref(false)
+const loadingGift = ref(false)
 
 const isShowUserId = toRef(config.messageConfig!, 'isShowUserId')
 const isShowInteract = toRef(config.messageConfig!, 'isShowInteract')
@@ -236,16 +230,19 @@ async function searchAll() {
   const msgs = await searchMessage({ type: 'message' })
   messages.value = msgs
   const gfs = await searchMessage({ type: 'gift' })
-  console.log(gfs)
   gifts.value = gfs
 }
 
 async function searchMessage({
   type,
   scrollToken,
+  order,
+  limit = 50,
 }: {
   type?: 'message' | 'gift'
   scrollToken?: string
+  order?: string
+  limit?: number
 } = {}) {
   if (!room.value) return []
   const query: MessageQuery = {
@@ -277,14 +274,16 @@ async function searchMessage({
   if (totalPriceGte.value != null) query.totalPriceGte = totalPriceGte.value
   if (totalPriceLte.value != null) query.totalPriceLte = totalPriceLte.value
 
-  const { data } = await queryMessages({
-    ...query,
-    limit: 40,
-  })
+  if (order) query.order = order
+  if (limit) query.limit = limit
+
+  const { data } = await queryMessages(query)
 
   for (const msg of data) {
     formatMessage(msg)
   }
+
+  console.log(data)
 
   return data
 }
@@ -307,48 +306,87 @@ function formatMessage(msg: Message) {
   if (['gift', 'superchat'].includes(msg.category) && msg.gift) {
     const gift = msg.gift
     gift.priceProperties = getPriceProperties(Number(gift.totalPrice))
-    console.log(gift.priceProperties)
   }
 }
 
-function handleReachEdgeMessage(direct: number) {
-  return new Promise(async resolve => {
-    if (direct > 0) {
-      const first = messages.value[0]
-      const list = await searchMessage({ type: 'message', scrollToken: `sendAtGte:${first.sendAt}` })
-      // setTimeout(() => {
-      messages.value = [...list, ...messages.value]
-      // }, 500)
+async function onWheelMessage(e: WheelEvent) {
+  if (loadingMessage.value) return
+  const el = e.currentTarget as HTMLElement
+  if (e.deltaY < 0 && el.scrollTop <= 0) {
+    loadingMessage.value = true
+
+    const first = messages.value[0]
+    if (first) {
+      const list = await searchMessage({
+        type: 'message',
+        scrollToken: `sendAtGte:${first.sendAt}`,
+        order: 'sendAt:asc',
+        limit: 10,
+      })
+      list.reverse()
+      messages.value = [...list, ...messages.value].slice(0, MAX_MESSAGE_LIST_COUNT)
     }
-    if (direct < 0) {
-      const last = messages.value[messages.value.length - 1]
-      const list = await searchMessage({ type: 'message', scrollToken: `sendAtLte:${last.sendAt}` })
-      // setTimeout(() => {
-      messages.value = [...messages.value, ...list]
-      // }, 700)
+
+    await wait(100)
+    loadingMessage.value = false
+  }
+
+  if (e.deltaY > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
+    loadingMessage.value = true
+
+    const last = messages.value[messages.value.length - 1]
+    if (last) {
+      const list = await searchMessage({
+        type: 'message',
+        scrollToken: `sendAtLte:${last.sendAt}`,
+        limit: 10,
+      })
+      messages.value = [...messages.value, ...list].slice(-MAX_MESSAGE_LIST_COUNT)
     }
-    resolve(undefined)
-  })
+
+    await wait(100)
+    loadingMessage.value = false
+  }
 }
 
-function handleReachEdgeGift(direct: number) {
-  return new Promise(async resolve => {
-    if (direct > 0) {
-      const first = gifts.value[0]
-      const list = await searchMessage({ type: 'gift', scrollToken: `sendAtGte:${first.sendAt}` })
-      // setTimeout(() => {
-      gifts.value = [...list, ...gifts.value]
-      // }, 700)
+async function onWheelGift(e: WheelEvent) {
+  if (loadingGift.value) return
+  const el = e.currentTarget as HTMLElement
+
+  if (e.deltaY < 0 && el.scrollTop <= 0) {
+    loadingGift.value = true
+
+    const first = gifts.value[0]
+    if (first) {
+      const list = await searchMessage({
+        type: 'gift',
+        scrollToken: `sendAtGte:${first.sendAt}`,
+        order: 'sendAt:asc',
+        limit: 10,
+      })
+      list.reverse()
+      gifts.value = [...list, ...gifts.value].slice(0, MAX_GIFT_LIST_COUNT)
     }
-    if (direct < 0) {
-      const last = gifts.value[gifts.value.length - 1]
-      const list = await searchMessage({ type: 'gift', scrollToken: `sendAtLte:${last.sendAt}` })
-      // setTimeout(() => {
-      gifts.value = [...gifts.value, ...list]
-      // }, 700)
+
+    await wait(100)
+    loadingGift.value = false
+  }
+
+  if (e.deltaY > 0 && el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
+    loadingGift.value = true
+    const last = gifts.value[gifts.value.length - 1]
+    if (last) {
+      const list = await searchMessage({
+        type: 'gift',
+        scrollToken: `sendAtLte:${last.sendAt}`,
+        limit: 10,
+      })
+      gifts.value = [...gifts.value, ...list].slice(-MAX_GIFT_LIST_COUNT)
     }
-    resolve(undefined)
-  })
+
+    await wait(100)
+    loadingGift.value = false
+  }
 }
 
 function clearDateRange() {
@@ -360,18 +398,6 @@ function clearDateRange() {
 function openBiliUserSpace(userId: string) {
   window.openExternal(`https://space.bilibili.com/${userId}`)
 }
-
-function onResize() {
-  const elLeft = document.getElementById('split-left')
-  scrollHeightLeft.value = elLeft?.clientHeight || 300
-  const elRight = document.getElementById('split-right')
-  scrollHeightRight.value = elRight?.clientHeight || 1000
-}
-
-// function playAudio(url: string) {
-//   const audio = new Audio(url)
-//   audio.play()
-// }
 
 async function changeIsRealTimeMode() {
   isRealTimeMode.value = !isRealTimeMode.value
@@ -431,6 +457,7 @@ function onMessage(message: Message) {
 
 // ── lifecycle ──
 onMounted(async () => {
+  // setTimeout(() => onResize(), 0)
   await searchAll()
   if (isRealTimeMode.value) listenStart()
 })
@@ -451,6 +478,20 @@ onBeforeUnmount(() => {
 .split-pane {
   height: 100%;
   overflow: auto;
+}
+
+.scroll-box {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.scroll-box::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scroll-box::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 2px;
 }
 
 #split-left-top,
