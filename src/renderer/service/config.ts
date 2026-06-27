@@ -14,6 +14,13 @@ const config: ClientConfig = reactive({
   refreshToken: '',
   waitingSpeakerCount: 0,
 
+  messageConfig: {
+    isRealTimeMode: false,
+    isShowUserId: true,
+    isShowSendAt: true,
+    isShowInteract: true,
+  },
+
   set(path: string, value: any) {
     _set(this, path, value)
   },

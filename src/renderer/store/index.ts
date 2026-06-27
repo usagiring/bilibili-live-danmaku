@@ -1,20 +1,27 @@
 import { createPinia, defineStore } from 'pinia'
 import { computed, reactive, toRefs, toRaw } from 'vue'
 import { set as _set } from 'lodash'
-import { ClientConfig, Room } from '../types'
+import { ClientConfig, Room, StoreConfig } from '../types'
 
 export const useConfigStore = defineStore('config', () => {
   // ── State ──
-  const state = reactive<ClientConfig>({
+  const state = reactive<StoreConfig>({
     id: '',
     rooms: [],
-    windows: [],
-    providers: [],
+    // windows: [],
+    // providers: [],
 
-    signInMessage: '...',
-    isNeedRefreshCookieCache: false,
-    refreshToken: '',
-    waitingSpeakerCount: 0,
+    // messageConfig: {
+    //   isRealTimeMode: false,
+    //   isShowUserId: true,
+    //   isShowSendAt: true,
+    //   isShowInteract: true,
+    // },
+
+    // signInMessage: '...',
+    // isNeedRefreshCookieCache: false,
+    // refreshToken: '',
+    // waitingSpeakerCount: 0,
   })
 
   // ── Getters ──

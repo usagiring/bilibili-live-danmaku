@@ -36,8 +36,8 @@ import { computed, toRefs } from 'vue'
 
 const props = defineProps(['username', 'gift', 'face', 'content', 'contentJPN', 'isShowSuperChatJpn'])
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties.value?.colors[0] ?? 'transparent')
-const color2 = computed(() => priceProperties.value?.colors[1] ?? 'transparent')
+const color1 = computed(() => priceProperties?.value?.colors[0])
+const color2 = computed(() => priceProperties?.value?.colors[1])
 
 const formattedPrice = computed(() => {
   const price = totalPrice.value

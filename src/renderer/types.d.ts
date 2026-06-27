@@ -165,11 +165,16 @@ export interface ClientConfig {
   dmStyle?: DmStyle
   dmRawStyle?: DmRawStyle
   liveConfig?: LiveConfig
-  messageConfig?: MessageConfig
+  messageConfig: MessageConfig
   recordConfig?: RecordConfig
   asrConfig?: AsrConfig
   mtConfig?: MtConfig
   chartConfig?: ChartConfig
+}
+
+export interface StoreConfig {
+  id: string
+  rooms: Room[]
 }
 
 interface RoomState {

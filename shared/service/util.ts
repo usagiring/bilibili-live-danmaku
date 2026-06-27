@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
-import { PRICE_PROPERTIES } from './const'
+import { ANCHOR_ICON_MAP, PRICE_PROPERTIES } from './const'
+import { Message } from '../types'
 
 export function dateFormat(date: number | string | Date, formatter = 'YYYY-MM-DD HH:mm:ss') {
   return dayjs(date).format(formatter)
@@ -28,4 +29,10 @@ export function getPriceProperties(price: number) {
 
 export async function wait(ms = 1000) {
   await new Promise(resolve => setTimeout(resolve, ms))
+}
+
+export function getAnchorIcon(msg: Message): string | undefined {
+  for (const role of msg.roles || []) {
+    if (ANCHOR_ICON_MAP[role]) return ANCHOR_ICON_MAP[role]
+  }
 }

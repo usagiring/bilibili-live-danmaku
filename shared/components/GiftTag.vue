@@ -21,8 +21,8 @@ import { computed, ref, onMounted, onUnmounted, toRefs } from 'vue'
 
 const props = defineProps<{ gift: any; face?: string; sendAt: number }>()
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties.value?.colors[0])
-const color2 = computed(() => priceProperties.value?.colors[1])
+const color1 = computed(() => priceProperties?.value?.colors[0])
+const color2 = computed(() => priceProperties?.value?.colors[1])
 
 const existsTime = ref(0)
 let timer: ReturnType<typeof setInterval>

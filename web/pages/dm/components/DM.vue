@@ -184,7 +184,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { getPriceProperties, wait, INTERACT_TYPE, ANCHOR_ICON_MAP, DEFAULT_FACE } from '@tokine/shared'
+import { getPriceProperties, wait, INTERACT_TYPE, ANCHOR_ICON_MAP, DEFAULT_FACE, getAnchorIcon } from '@tokine/shared'
 import { Message, DmStyle } from '@tokine/shared/types.js'
 
 import PromiseQueue from '../../service/promise-queue'
@@ -447,11 +447,8 @@ function onMessage(msg: Message) {
 
   // gift
   if (msg.category === 'gift' && msg.gift) {
-    const totalPrice = msg.gift?.count * msg.gift?.price
-    msg.gift.totalPrice = totalPrice
-
     if (!isShowSilverGift.value && msg.gift?.coinType !== 'gold') return
-    msg.gift.priceProperties = getPriceProperties(totalPrice)
+    msg.gift.priceProperties = getPriceProperties(Number(msg.gift.totalPrice))
     addToHeadline(msg)
 
     const exist = messages.value.find((m: any) => m.id === msg.id)
@@ -459,7 +456,7 @@ function onMessage(msg: Message) {
       exist.gift = msg.gift
     }
 
-    if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
+    if (Number(msg.gift.totalPrice) < showGiftCardThreshold.value) isAddMessage = false
   }
 
   if (msg.category === 'interact') {
@@ -468,12 +465,10 @@ function onMessage(msg: Message) {
   }
 
   if (msg.category === 'superchat' && msg.gift) {
-    const totalPrice = msg.gift.count * msg.gift.price
-    msg.gift.totalPrice = totalPrice
-    msg.gift.priceProperties = getPriceProperties(totalPrice)
+    msg.gift.priceProperties = getPriceProperties(Number(msg.gift.totalPrice))
 
     addToHeadline(msg)
-    if (totalPrice < showGiftCardThreshold.value) isAddMessage = false
+    if (Number(msg.gift.totalPrice) < showGiftCardThreshold.value) isAddMessage = false
   }
 
   if (isAddMessage) {
@@ -579,11 +574,7 @@ function unhoverHeadline(id: number) {
 function giftScroll(e: WheelEvent) {
   document.getElementById('gift-headline-wrapper')!.scrollLeft += e.deltaY
 }
-function getAnchorIcon(msg: Message): string | undefined {
-  for (const role of msg.roles || []) {
-    if (ANCHOR_ICON_MAP[role]) return ANCHOR_ICON_MAP[role]
-  }
-}
+
 function getIsAdmin(msg: Message) {
   return msg.roles?.some(role => role >= 99)
 }

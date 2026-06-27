@@ -61,14 +61,14 @@
         <div class="search-row">
           <span class="filter-label">礼物价格</span>
           <Input
-            v-model="priceGte"
+            v-model="totalPriceGte"
             placeholder="最低"
             size="small"
             :number="true"
             style="width: 80px" />
           <span class="filter-sep">—</span>
           <Input
-            v-model="priceLte"
+            v-model="totalPriceLte"
             placeholder="最高"
             size="small"
             :number="true"
@@ -77,9 +77,7 @@
       </div>
     </div>
     <div class="content-wrapper">
-      <Split
-        v-model="split1"
-        @on-moving="onResize">
+      <Split v-model="split1">
         <template #left>
           <div
             id="split-left"
@@ -90,7 +88,7 @@
               :height="scrollHeightLeft"
               :distance-to-edge="[10, 10]">
               <template
-                v-for="(msg, i) in filteredMessages"
+                v-for="(msg, i) in messages"
                 :key="i">
                 <div class="comment-content">
                   <span
@@ -198,9 +196,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, toRef, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useConfigStore } from '../store'
-import { getPriceProperties, dateFormat, wait, INTERACT_TYPE } from '@tokine/shared'
+import { getPriceProperties, dateFormat, wait, INTERACT_TYPE, getAnchorIcon } from '@tokine/shared'
 import { MessageQuery, queryMessages, updateClientConfig } from '../service/api'
 import GiftCardMini from '@tokine/shared/components/GiftCardMini.vue'
 import FanMedal from '@tokine/shared/components/FanMedal.vue'
@@ -212,43 +210,43 @@ const store = useConfigStore()
 
 // ── state ──
 const q = ref('')
-const priceGte = ref<number | null>(0.1)
-const priceLte = ref<number | null>(null)
+const totalPriceGte = ref<number | null>(0.1)
+const totalPriceLte = ref<number | null>(null)
 const split1 = ref(0.6)
 const dateRange = ref<Date[]>([])
 const messages = ref<Message[]>([])
 const gifts = ref<Message[]>([])
-const scrollHeightLeft = ref(300)
+const scrollHeightLeft = ref(1000)
 const scrollHeightRight = ref(1000)
 
-const isShowUserId = ref(config.messageConfig?.isShowUserId)
-const isShowInteract = ref(config.messageConfig?.isShowInteract)
-const isShowSendAt = ref(config.messageConfig?.isShowSendAt)
-const isRealTimeMode = ref(config.messageConfig?.isRealTimeMode)
+const isShowUserId = toRef(config.messageConfig!, 'isShowUserId')
+const isShowInteract = toRef(config.messageConfig!, 'isShowInteract')
+const isShowSendAt = toRef(config.messageConfig!, 'isShowSendAt')
+const isRealTimeMode = toRef(config.messageConfig!, 'isRealTimeMode')
 
 const room = computed(() => store.activeRoom)
 const clientId = computed(() => store.id)
-
-const filteredMessages = computed(() => {
-  if (isShowInteract.value) return messages.value
-  return messages.value.filter(m => m.category !== 'interact')
-})
 
 // ── methods ──
 function changeDateRange([startTime, endTime]: string[]) {
   dateRange.value = [new Date(startTime), new Date(endTime)]
 }
 
-async function searchAll(options?: any) {
-  const msgs = await searchMessage(options)
+async function searchAll() {
+  const msgs = await searchMessage({ type: 'message' })
   messages.value = msgs
-  const gfs = await searchGift(options)
+  const gfs = await searchMessage({ type: 'gift' })
+  console.log(gfs)
   gifts.value = gfs
-
-  console.log(msgs)
 }
 
-async function searchMessage({ sort, scrollToken }: { sort?: string; scrollToken?: string } = {}) {
+async function searchMessage({
+  type,
+  scrollToken,
+}: {
+  type?: 'message' | 'gift'
+  scrollToken?: string
+} = {}) {
   if (!room.value) return []
   const query: MessageQuery = {
     roomId: room.value!.id,
@@ -262,92 +260,69 @@ async function searchMessage({ sort, scrollToken }: { sort?: string; scrollToken
     query.search = q.value
   }
   if (scrollToken) {
-    // const [scrollKey, scrollValue] = scrollToken.split(':')
-    // query.sendAt = query.sendAt || {}
-    // query.sendAt[scrollKey] = Number(scrollValue)
+    const [scrollKey, scrollValue] = scrollToken.split(':')
+    query[scrollKey] = scrollValue
   }
+
+  if (type === 'gift') {
+    query.category = ['gift', 'superchat']
+  } else {
+    if (isShowInteract.value) {
+      query.category = ['comment', 'interact']
+    } else {
+      query.category = ['comment']
+    }
+  }
+
+  if (totalPriceGte.value != null) query.totalPriceGte = totalPriceGte.value
+  if (totalPriceLte.value != null) query.totalPriceLte = totalPriceLte.value
+
   const { data } = await queryMessages({
     ...query,
-    category: ['comment', 'interact'],
     limit: 40,
   })
 
   for (const msg of data) {
-    if (msg.category === 'interact') {
-      msg.content = `${INTERACT_TYPE[msg.type]}直播间`
-    }
-
-    if (msg.emots) {
-      const regstr = Object.keys(msg.emots)
-        .map((k: string) => k.replace(/\[|\]/g, ''))
-        .map((k: string) => '\[' + k + '\]')
-        .join('|')
-      msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
-    }
+    formatMessage(msg)
   }
 
   return data
 }
 
-async function searchGift({ sort, scrollToken }: { sort?: string; scrollToken?: string } = {}) {
-  if (!room.value) return []
-  const query: MessageQuery = {
-    roomId: room.value!.id,
+function formatMessage(msg: Message) {
+  msg.anchorIcon = getAnchorIcon(msg)
+
+  if (msg.category === 'interact') {
+    msg.content = `${INTERACT_TYPE[Number(msg.type)]}直播间`
   }
 
-  if (dateRange.value.length) {
-    query.sendAtGte = dateRange.value[0].getTime()
-    query.sendAtLte = dateRange.value[1].getTime()
-  }
-  if (q.value) {
-    query.search = q.value
-  }
-
-  if (scrollToken) {
-    // const [scrollKey, scrollValue] = scrollToken.split(':')
-    // query.sendAt = query.sendAt || {}
-    // query.sendAt[scrollKey] = Number(scrollValue)
+  if (msg.emots) {
+    const regstr = Object.keys(msg.emots)
+      .map((k: string) => k.replace(/\[|\]/g, ''))
+      .map((k: string) => '\[' + k + '\]')
+      .join('|')
+    msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
   }
 
-  // if (!isShowSilverGift.value) {
-  //   query.coinType = 'gold'
-  // }
-  if (priceGte.value != null) query.priceGte = priceGte.value
-  if (priceLte.value != null) query.priceLte = priceLte.value
-
-  const { data } = await queryMessages({
-    ...query,
-    category: ['gift', 'superchat'],
-    limit: 40,
-  })
-
-  for (const msg of data) {
-    formatGift(msg)
+  if (['gift', 'superchat'].includes(msg.category) && msg.gift) {
+    const gift = msg.gift
+    gift.priceProperties = getPriceProperties(Number(gift.totalPrice))
+    console.log(gift.priceProperties)
   }
-
-  return data
-}
-
-function formatGift(msg: Message) {
-  const gift = msg.gift
-  if (!gift) return
-  const totalPrice = (gift.count || 1) * gift.price
-  gift.totalPrice = totalPrice
-  gift.priceProperties = getPriceProperties(gift.totalPrice)
 }
 
 function handleReachEdgeMessage(direct: number) {
   return new Promise(async resolve => {
     if (direct > 0) {
       const first = messages.value[0]
-      const list = await searchMessage({ scrollToken: `sendAtGte:${first.sendAt}` })
+      const list = await searchMessage({ type: 'message', scrollToken: `sendAtGte:${first.sendAt}` })
       // setTimeout(() => {
       messages.value = [...list, ...messages.value]
       // }, 500)
     }
     if (direct < 0) {
       const last = messages.value[messages.value.length - 1]
-      const list = await searchMessage({ scrollToken: `sendAtLte:${last.sendAt}` })
+      const list = await searchMessage({ type: 'message', scrollToken: `sendAtLte:${last.sendAt}` })
       // setTimeout(() => {
       messages.value = [...messages.value, ...list]
       // }, 700)
@@ -360,14 +335,14 @@ function handleReachEdgeGift(direct: number) {
   return new Promise(async resolve => {
     if (direct > 0) {
       const first = gifts.value[0]
-      const list = await searchGift({ scrollToken: `sendAtGte:${first.sendAt}` })
+      const list = await searchMessage({ type: 'gift', scrollToken: `sendAtGte:${first.sendAt}` })
       // setTimeout(() => {
       gifts.value = [...list, ...gifts.value]
       // }, 700)
     }
     if (direct < 0) {
       const last = gifts.value[gifts.value.length - 1]
-      const list = await searchGift({ scrollToken: `sendAtLte:${last.sendAt}` })
+      const list = await searchMessage({ type: 'gift', scrollToken: `sendAtLte:${last.sendAt}` })
       // setTimeout(() => {
       gifts.value = [...gifts.value, ...list]
       // }, 700)
@@ -416,6 +391,7 @@ async function changeIsShowUserId() {
 
 async function changeIsShowInteract() {
   isShowInteract.value = !isShowInteract.value
+  await searchMessage()
   await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowInteract', value: isShowInteract.value }] })
 }
 
@@ -433,13 +409,16 @@ function listenStop() {
 }
 
 function onMessage(message: Message) {
+  if (message.category === 'interact' && !isShowInteract.value) return
+
+  formatMessage(message)
+
   if (['comment', 'interact'].includes(message.category)) {
     if (messages.value.length > 1000) messages.value.pop()
     messages.value = [message, ...messages.value]
   }
 
   if (['gift', 'superchat'].includes(message.category)) {
-    formatGift(message)
     const exist = gifts.value.find(g => g.id === message.id)
     if (exist) {
       exist.gift = message.gift
@@ -452,15 +431,11 @@ function onMessage(message: Message) {
 
 // ── lifecycle ──
 onMounted(async () => {
-  setTimeout(() => onResize(), 0)
   await searchAll()
   if (isRealTimeMode.value) listenStart()
 })
 
-window.addEventListener('resize', onResize)
-
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onResize)
   listenStop()
 })
 </script>

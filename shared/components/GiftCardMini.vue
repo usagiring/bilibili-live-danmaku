@@ -37,8 +37,8 @@ import { dateFormat } from '../service/util'
 const props = defineProps(['gift', 'face', 'username', 'isShowSendAt', 'sendAt'])
 
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties.value?.colors[0])
-const color2 = computed(() => priceProperties.value?.colors[1])
+const color1 = computed(() => priceProperties?.value?.colors[0])
+const color2 = computed(() => priceProperties?.value?.colors[1])
 
 const formattedPrice = computed(() => `¥${totalPrice.value}`)
 </script>

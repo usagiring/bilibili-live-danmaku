@@ -4,10 +4,8 @@
       v-if="anchorIcon"
       class="anchor-icon"
       :src="`${anchorIcon}`" />
-
     <span :style="getStyle()">
-      {{ medal?.name }}
-      <span :style="getLevelStyle()"> {{ getLevelText(medal?.level) }}</span>
+      {{ medal?.name }}<span :style="getLevelStyle()">{{ getLevelText(medal?.level) }}</span>
     </span>
   </div>
 </template>
@@ -29,7 +27,7 @@ function getStyle() {
     border: `solid 0.5px ${props.medal?.color?.border}`,
     'font-size': '12px',
     'border-radius': '9px',
-    padding: `2px 2.5px 2px ${props.anchorIcon ? 15 : 4}px`,
+    padding: `2px 3px 2px ${props.anchorIcon ? 15 : 3}px`,
   }
 }
 function getLevelStyle() {
@@ -39,9 +37,8 @@ function getLevelStyle() {
     color: '#FFFFFF',
     'font-weight': 'bold',
     // background: '#FFFFFF',
-    'font-size': '12px',
     // padding: '1px 2px 1px 1px',
-    'margin-left': '-2.5px',
+    'margin-left': '1.5px',
   }
 }
 </script>
