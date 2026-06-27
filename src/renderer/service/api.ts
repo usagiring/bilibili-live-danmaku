@@ -62,6 +62,7 @@ export interface MessageQuery {
   sendAtGte?: number
   sendAtLte?: number
   order?: string
+  cursor?: string
   totalPriceGte?: number
   totalPriceLte?: number
   limit?: number

@@ -235,12 +235,12 @@ async function searchAll() {
 
 async function searchMessage({
   type,
-  scrollToken,
+  cursor,
   order,
   limit = 50,
 }: {
   type?: 'message' | 'gift'
-  scrollToken?: string
+  cursor?: string
   order?: string
   limit?: number
 } = {}) {
@@ -256,9 +256,8 @@ async function searchMessage({
   if (q.value) {
     query.search = q.value
   }
-  if (scrollToken) {
-    const [scrollKey, scrollValue] = scrollToken.split(':')
-    query[scrollKey] = scrollValue
+  if (cursor) {
+    query.cursor = cursor
   }
 
   if (type === 'gift') {
@@ -282,8 +281,6 @@ async function searchMessage({
   for (const msg of data) {
     formatMessage(msg)
   }
-
-  console.log(data)
 
   return data
 }
@@ -319,11 +316,9 @@ async function onWheelMessage(e: WheelEvent) {
     if (first) {
       const list = await searchMessage({
         type: 'message',
-        scrollToken: `sendAtGte:${first.sendAt}`,
-        order: 'sendAt:asc',
+        cursor: `prev$sendAt:${first.sendAt},id:${first.id}`,
         limit: 10,
       })
-      list.reverse()
       messages.value = [...list, ...messages.value].slice(0, MAX_MESSAGE_LIST_COUNT)
     }
 
@@ -338,7 +333,7 @@ async function onWheelMessage(e: WheelEvent) {
     if (last) {
       const list = await searchMessage({
         type: 'message',
-        scrollToken: `sendAtLte:${last.sendAt}`,
+        cursor: `next$sendAt:${last.sendAt},id:${last.id}`,
         limit: 10,
       })
       messages.value = [...messages.value, ...list].slice(-MAX_MESSAGE_LIST_COUNT)
@@ -360,11 +355,9 @@ async function onWheelGift(e: WheelEvent) {
     if (first) {
       const list = await searchMessage({
         type: 'gift',
-        scrollToken: `sendAtGte:${first.sendAt}`,
-        order: 'sendAt:asc',
+        cursor: `prev$sendAt:${first.sendAt},id:${first.id}`,
         limit: 10,
       })
-      list.reverse()
       gifts.value = [...list, ...gifts.value].slice(0, MAX_GIFT_LIST_COUNT)
     }
 
@@ -378,7 +371,7 @@ async function onWheelGift(e: WheelEvent) {
     if (last) {
       const list = await searchMessage({
         type: 'gift',
-        scrollToken: `sendAtLte:${last.sendAt}`,
+        cursor: `next$sendAt:${last.sendAt},id:${last.id}`,
         limit: 10,
       })
       gifts.value = [...gifts.value, ...list].slice(-MAX_GIFT_LIST_COUNT)
