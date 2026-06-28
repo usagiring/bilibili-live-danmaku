@@ -308,6 +308,7 @@ function formatMessage(msg: Message) {
 
 async function onWheelMessage(e: WheelEvent) {
   if (loadingMessage.value) return
+  if (isRealTimeMode.value) return
   const el = e.currentTarget as HTMLElement
   if (e.deltaY < 0 && el.scrollTop <= 0) {
     loadingMessage.value = true
@@ -346,6 +347,7 @@ async function onWheelMessage(e: WheelEvent) {
 
 async function onWheelGift(e: WheelEvent) {
   if (loadingGift.value) return
+  if (isRealTimeMode.value) return
   const el = e.currentTarget as HTMLElement
 
   if (e.deltaY < 0 && el.scrollTop <= 0) {
@@ -433,7 +435,7 @@ function onMessage(message: Message) {
   formatMessage(message)
 
   if (['comment', 'interact'].includes(message.category)) {
-    if (messages.value.length > 1000) messages.value.pop()
+    if (messages.value.length > MAX_MESSAGE_LIST_COUNT) messages.value.pop()
     messages.value = [message, ...messages.value]
   }
 
@@ -442,7 +444,7 @@ function onMessage(message: Message) {
     if (exist) {
       exist.gift = message.gift
     } else {
-      if (gifts.value.length > 500) gifts.value.pop()
+      if (gifts.value.length > MAX_GIFT_LIST_COUNT) gifts.value.pop()
       gifts.value = [message, ...gifts.value]
     }
   }
@@ -476,6 +478,7 @@ onBeforeUnmount(() => {
 .scroll-box {
   overflow-y: auto;
   height: 100%;
+  padding: 8px 0;
 }
 
 .scroll-box::-webkit-scrollbar {
@@ -485,6 +488,16 @@ onBeforeUnmount(() => {
 .scroll-box::-webkit-scrollbar-thumb {
   background: #ddd;
   border-radius: 2px;
+}
+
+.comment-content {
+  font-size: 14px;
+  padding: 1px 12px;
+  line-height: 1.5;
+}
+
+.comment-content:hover {
+  background: #f8f9fb;
 }
 
 #split-left-top,
@@ -582,6 +595,12 @@ onBeforeUnmount(() => {
 
 .comment-content {
   font-size: 14px;
+  padding: 1px 12px;
+  line-height: 1.5;
+}
+
+.comment-content:hover {
+  background: #f8f9fb;
 }
 .user-link {
   cursor: pointer;
@@ -597,6 +616,7 @@ onBeforeUnmount(() => {
   font-size: 12px;
   font-family: unset;
   font-weight: bold;
+  padding: 0px 1px;
 }
 .voice-container {
   padding: 0 4px;

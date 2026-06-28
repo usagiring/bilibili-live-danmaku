@@ -222,8 +222,8 @@ export async function generateQRCode() {
   return res.data
 }
 
-export async function pollQRCode(qrCodeKey: string) {
-  const res = await axios.get(`${baseUrl}/api/login/qr-code/poll`, { params: { qrCodeKey } })
+export async function pollQRCode({ clientId, qrCodeKey }: { clientId: string; qrCodeKey: string }) {
+  const res = await axios.get(`${baseUrl}/api/login/qr-code/poll`, { params: { clientId, qrCodeKey } })
   return res.data
 }
 

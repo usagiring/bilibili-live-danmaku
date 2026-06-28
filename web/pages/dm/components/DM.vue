@@ -41,16 +41,16 @@
         tag="div"
         class="message-content">
         <div
-          v-for="message in messages"
-          :key="message.id">
+          v-for="msg in messages"
+          :key="msg.id">
           <!-- 弹幕评论 -->
-          <template v-if="message.category === 'comment' || message.category === 'interact'">
+          <template v-if="msg.category === 'comment' || msg.category === 'interact'">
             <span
               :class="!isBorderAdaptContent ? 'max-width' : ''"
               class="border-image-default"
-              :style="{ ...borderImageStyle, ...getContainerStyle(message) }">
+              :style="{ ...borderImageStyle, ...getContainerStyle(msg) }">
               <!-- 管理员图标 -->
-              <template v-if="adminIcon && message.isAdmin">
+              <template v-if="adminIcon && msg.isAdmin">
                 <Icon
                   :type="adminIcon"
                   class="admin-icon"
@@ -64,37 +64,37 @@
                 <Avatar
                   v-if="s.type === 'face' && s.isShow"
                   class="margin-lr-1px"
-                  :src="message.face"
+                  :src="msg.face"
                   :style="{ ...faceSizeStyle }" />
                 <FanMedal
-                  v-if="s.type === 'medal' && s.isShow && message.medal"
+                  v-if="s.type === 'medal' && s.isShow && msg.medal"
                   class="margin-lr-1px vertical-align-middle"
-                  :medal="message.medal"
-                  :anchorIcon="message.anchorIcon" />
+                  :medal="msg.medal"
+                  :anchorIcon="msg.anchorIcon" />
                 <span
-                  v-if="s.type === 'name' && s.isShow && message.category !== 'interact'"
+                  v-if="s.type === 'name' && s.isShow"
                   class="vertical-align-middle"
-                  :style="{ ...fontStyle, ...getNameStyle(message), ...getTextShadow(message, 'name') }">
-                  {{ `${message.username}${isShowColon ? '：' : ''}` }}
+                  :style="{ ...fontStyle, ...getNameStyle(msg), ...getTextShadow(msg, 'name') }">
+                  {{ `${msg.username}${msg.category !== 'interact' && isShowColon ? '：' : ' '}` }}
                 </span>
                 <span v-if="s.type === 'comment' && s.isShow">
                   <img
-                    v-if="message.emojiUrl"
+                    v-if="msg.emojiUrl"
                     class="vertical-align-middle"
-                    :src="message.emojiUrl"
+                    :src="msg.emojiUrl"
                     :style="{ height: `${emojiSize}px` }" />
                   <span
-                    v-else-if="message.emots"
+                    v-else-if="msg.emots"
                     class="vertical-align-middle"
-                    :style="{ ...fontStyle, ...getCommentStyle(message), ...getTextShadow(message, 'comment') }">
+                    :style="{ ...fontStyle, ...getCommentStyle(msg), ...getTextShadow(msg, 'comment') }">
                     <template
-                      v-for="(str, index) of message.splitContent"
+                      v-for="(str, index) of msg.splitContent"
                       :key="index">
-                      <template v-if="message.emots[str]">
+                      <template v-if="msg.emots[str]">
                         <img
                           class="vertical-align-middle"
-                          :src="message.emots[str].url"
-                          :style="{ height: `${message.emots[str].height || 20}px` }" />
+                          :src="msg.emots[str].url"
+                          :style="{ height: `${msg.emots[str].height || 20}px` }" />
                       </template>
                       <template v-else>{{ str }}</template>
                     </template>
@@ -104,76 +104,76 @@
                     class="vertical-align-middle"
                     :style="{
                       ...fontStyle,
-                      ...getCommentStyle(message),
-                      ...getTextShadow(message, 'comment'),
+                      ...getCommentStyle(msg),
+                      ...getTextShadow(msg, 'comment'),
                     }"
-                    >{{ message.content }}</span
+                    >{{ msg.content }}</span
                   >
                   <!-- 语音 -->
                   <span
-                    v-if="message.voiceUrl"
+                    v-if="msg.voiceUrl"
                     class="voice-container"
-                    @click="playAudio(message.voiceUrl)">
+                    @click="playAudio(msg.voiceUrl)">
                     <Icon type="md-play" />
-                    <span>{{ message.fileDuration ? `${message.fileDuration}"` : '' }}</span>
+                    <span>{{ msg.fileDuration ? `${msg.fileDuration}"` : '' }}</span>
                   </span>
                 </span>
               </template>
 
               <!-- 相似评论标记 -->
               <SimilarCommentBadge
-                v-if="message.similar! > 0"
+                v-if="msg.similar! > 0"
                 class="vertical-align-middle"
-                :number="message.similar!"
-                :color="message.similarColor!"
+                :number="msg.similar!"
+                :color="msg.similarColor!"
                 :style="{ 'margin-left': '5px' }" />
             </span>
           </template>
 
           <!-- SuperChat -->
-          <template v-else-if="message.category === 'superchat'">
+          <template v-else-if="msg.category === 'superchat'">
             <GiftCard
               v-if="!isUseMiniGiftCard"
-              :gift="message.gift"
-              :username="message.username"
-              :face="message.face">
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face">
               <div :style="{ padding: '10px' }">
-                {{ message.content }}
-                <template v-if="message.contentJPN && isShowSuperChatJPN">
+                {{ msg.content }}
+                <template v-if="msg.contentJPN && isShowSuperChatJPN">
                   <div class="divider" />
-                  {{ message.contentJPN }}
+                  {{ msg.contentJPN }}
                 </template>
               </div>
             </GiftCard>
             <GiftCardMini
               v-else
-              :gift="message.gift"
-              :username="message.username"
-              :face="message.face">
-              {{ `: ${message.content}` }}
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face">
+              {{ `: ${msg.content}` }}
             </GiftCardMini>
           </template>
 
           <!-- 礼物 -->
-          <template v-else-if="message.category === 'gift' && message.gift">
+          <template v-else-if="msg.category === 'gift' && msg.gift">
             <GiftCard
               v-if="!isUseMiniGiftCard"
-              :gift="message.gift"
-              :username="message.username"
-              :face="message.face">
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face">
               <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
-                {{ `${message.username} 赠送了 ${message.gift.count} 个 ${message.gift.name}` }}
+                {{ `${msg.username} 赠送了 ${msg.gift.count} 个 ${msg.gift.name}` }}
               </span>
               <img
-                :src="giftGifMap[message.gift.id] && giftGifMap[message.gift.id].webp"
+                :src="giftGifMap[msg.gift.id] && giftGifMap[msg.gift.id].webp"
                 :style="{ 'vertical-align': 'middle', width: '35px' }" />
             </GiftCard>
             <GiftCardMini
               v-else
-              :gift="message.gift"
-              :username="message.username"
-              :face="message.face">
-              {{ ` 赠送了 ${message.gift.count}个 ${message.gift.name}` }}
+              :gift="msg.gift"
+              :username="msg.username"
+              :face="msg.face">
+              {{ ` 赠送了 ${msg.gift.count}个 ${msg.gift.name}` }}
             </GiftCardMini>
           </template>
         </div>
@@ -255,6 +255,7 @@ const dmStyle = reactive<DmStyle>({
   messageUsername99: {},
   messageComment99: {},
   messageContainerInteract: {},
+  messageUsernameInteract: {},
   messageCommentInteract: {},
 })
 
@@ -460,7 +461,7 @@ function onMessage(msg: Message) {
   }
 
   if (msg.category === 'interact') {
-    msg.content = msg.content || INTERACT_TYPE[msg.type || 1]
+    msg.content = `${INTERACT_TYPE[msg.type || 1]}直播间`
     if (!isShowInteractInfo.value) isAddMessage = false
   }
 
@@ -528,7 +529,7 @@ function styleBySuffix(suffix?: string) {
   if (suffix === 'interact')
     return {
       container: dmStyle.messageContainerInteract,
-      username: dmStyle.messageUsername0,
+      username: dmStyle.messageUsernameInteract,
       comment: dmStyle.messageCommentInteract,
     }
   return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }

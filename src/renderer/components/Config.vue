@@ -146,15 +146,12 @@
           style="margin-left: 8px"
           >背景色</span
         >
-        <label class="color-pick">
-          <span
-            class="color-dot"
-            :style="{ background: dmStyle?.windowBackground || '#1e1e28' }"></span>
-          <input
-            type="color"
-            :value="dmStyle?.windowBackground || '#1e1e28'"
-            @change="setVal('dmStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
-        </label>
+        <ColorPicker
+          :model-value="dmStyle?.windowBackground || '#1e1e28'"
+          transfer
+          alpha
+          size="small"
+          @on-active-change="(v: string) => setVal('dmStyle.windowBackground', v)" />
       </div>
       <div class="section-row">
         <span class="label">字体</span>
@@ -304,20 +301,13 @@
           >
         </div>
         <div class="section-row">
-          <span
-            class="label"
-            style="min-width: auto">
-            背景色
-          </span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.bgColor || '#000' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.bgColor || '#000000'"
-              @change="setLevelStyleColor('bg', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <span class="hint">背景色</span>
+          <ColorPicker
+            :model-value="currentLevelStyle?.bgColor || '#000000'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('bg', v)" />
           <span class="hint">边框宽</span>
           <InputNumber
             size="small"
@@ -327,15 +317,12 @@
             :min="0"
             @on-change="(v: number) => setLevelStyle('borderWidth', v)" />
           <span class="hint">边框色</span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.borderColor || 'transparent' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.borderColor || '#000000'"
-              @change="setLevelStyleColor('border', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <ColorPicker
+            :model-value="currentLevelStyle?.borderColor || '#000000'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('border', v)" />
           <span class="hint">圆角</span>
           <InputNumber
             size="small"
@@ -386,16 +373,13 @@
               </div>
             </div>
           </div>
-          <label
-            v-if="activeLevel === '99'"
-            class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: dmStyle?.adminIconColor || '#ff9900' }"></span>
-            <input
-              type="color"
-              :value="dmStyle?.adminIconColor || '#ff9900'"
-              @change="setVal('dmStyle.adminIconColor', ($event.target as HTMLInputElement).value)" />
+          <label v-if="activeLevel === '99'">
+            <ColorPicker
+              :model-value="dmStyle?.adminIconColor || '#ff9900'"
+              transfer
+              alpha
+              size="small"
+              @on-active-change="(v: string) => setVal('dmStyle.adminIconColor', v)" />
           </label>
         </div>
         <div class="section-row">
@@ -413,15 +397,12 @@
             :max="48"
             @on-change="(v: number) => setLevelStyle('userFontSize', v)" />
           <span class="hint">颜色</span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.usernameColor || '#66ccff' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.usernameColor || '#66ccff'"
-              @change="setLevelStyleColor('user', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <ColorPicker
+            :model-value="currentLevelStyle?.usernameColor || '#66ccff'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('user', v)" />
           <span class="hint">描边宽</span>
           <InputNumber
             size="small"
@@ -431,15 +412,12 @@
             :step="0.2"
             @on-change="(v: number) => setLevelStyle('userStrokeWidth', v)" />
           <span class="hint">描边色</span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.usernameStrokeColor || '#000' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.usernameStrokeColor || '#000000'"
-              @change="setLevelStyleColor('userStroke', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <ColorPicker
+            :model-value="currentLevelStyle?.usernameStrokeColor || '#000000'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('userStroke', v)" />
         </div>
         <div class="section-row">
           <span
@@ -456,15 +434,12 @@
             :max="48"
             @on-change="(v: number) => setLevelStyle('commentFontSize', v)" />
           <span class="hint">颜色</span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.commentColor || '#fff' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.commentColor || '#ffffff'"
-              @change="setLevelStyleColor('comment', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <ColorPicker
+            :model-value="currentLevelStyle?.commentColor || '#ffffff'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('comment', v)" />
           <span class="hint">描边宽</span>
           <InputNumber
             size="small"
@@ -474,15 +449,12 @@
             :step="0.2"
             @on-change="(v: number) => setLevelStyle('commentStrokeWidth', v)" />
           <span class="hint">描边色</span>
-          <label class="color-pick">
-            <span
-              class="color-dot"
-              :style="{ background: currentLevelStyle?.commentStrokeColor || '#000' }"></span>
-            <input
-              type="color"
-              :value="currentLevelStyle?.commentStrokeColor || '#000000'"
-              @change="setLevelStyleColor('commentStroke', ($event.target as HTMLInputElement).value)" />
-          </label>
+          <ColorPicker
+            :model-value="currentLevelStyle?.commentStrokeColor || '#000000'"
+            transfer
+            alpha
+            size="small"
+            @on-active-change="(v: string) => setLevelStyleColor('commentStroke', v)" />
         </div>
       </div>
     </div>
@@ -519,15 +491,12 @@
           style="margin-left: 8px"
           >背景色</span
         >
-        <label class="color-pick">
-          <span
-            class="color-dot"
-            :style="{ background: dmRawStyle?.windowBackground || '#1e1e28' }"></span>
-          <input
-            type="color"
-            :value="dmRawStyle?.windowBackground || '#1e1e28'"
-            @change="setVal('dmRawStyle.windowBackground', ($event.target as HTMLInputElement).value)" />
-        </label>
+        <ColorPicker
+          :model-value="dmRawStyle?.windowBackground || '#1e1e28'"
+          transfer
+          alpha
+          size="small"
+          @on-change="(v: string) => setVal('dmRawStyle.windowBackground', v)" />
       </div>
       <div class="section-row">
         <span class="label">方向</span>
@@ -772,12 +741,14 @@
     <Modal
       v-model="showQrModal"
       title="扫码登录"
-      width="300">
+      width="300"
+      @on-ok="loginFromQrCode">
       <div style="text-align: center">
         <canvas
           id="qrcode"
           width="200"
-          height="200"></canvas>
+          height="200">
+        </canvas>
         <p
           v-if="qrError"
           style="color: red; margin-top: 8px">
@@ -807,11 +778,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
-import { updateClientConfig, restoreDmStyle, generateQRCode, sendDM, clearDM as clearDMApi } from '../service/api'
+import { updateClientConfig, restoreDmStyle, generateQRCode, sendDM, clearDM as clearDMApi, pollQRCode } from '../service/api'
 import { IPC_GET_VERSION } from '../../service/const'
 import globalVar from '../../service/global'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
+import { Message as $Message } from 'view-ui-plus'
 
 const dmStyle = computed(() => config.dmStyle)
 const dmRawStyle = computed(() => config.dmRawStyle)
@@ -821,10 +793,14 @@ const chartConfig = computed(() => config.chartConfig)
 const clientId = computed(() => config.id)
 
 // ── Cookie ──
-const cookieInput = ref('')
+const cookieInput = computed({
+  get: () => config.user?.cookie || '',
+  set: (val: string) => setVal('user.cookie', val),
+})
 const showQrModal = ref(false)
 const qrError = ref('')
 const showDrawTip = ref(false)
+const qrCodeKey = ref('')
 
 // ── 等级样式 ──
 const activeLevel = ref('0')
@@ -911,6 +887,7 @@ function onSlotDragEnd() {
   setVal('dmStyle.messageSlots', slotItems.value)
 }
 
+// TODO 防抖
 function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke' | 'border', color: string) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
@@ -1062,13 +1039,27 @@ async function showQrCodeLoginModal() {
   qrError.value = ''
   try {
     const res = await generateQRCode()
-    const { url } = res.data
+    const { url, qrcode_key } = res.data
+    qrCodeKey.value = qrcode_key
     setTimeout(() => {
       const canvas = document.getElementById('qrcode') as HTMLCanvasElement
       if (canvas) QRCode.toCanvas(canvas, url)
     }, 100)
   } catch {
     qrError.value = '二维码加载失败'
+  }
+}
+
+async function loginFromQrCode() {
+  const data = await pollQRCode({ clientId: clientId.value, qrCodeKey: qrCodeKey.value })
+  if (!data.code) {
+    const user = {
+      cookie: data.cookie,
+      refreshToken: data.refresh_token,
+    }
+    config.user = user
+  } else {
+    $Message.error('登陆失败')
   }
 }
 

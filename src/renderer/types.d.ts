@@ -35,9 +35,10 @@ interface Room {
 }
 
 interface User {
-  id: string
-  face: string
+  id?: string
+  face?: string
   cookie: string
+  refreshToken: string
 }
 
 interface Window {
@@ -155,7 +156,6 @@ export interface ClientConfig {
   id: string
   signInMessage: string
   isNeedRefreshCookieCache: boolean
-  refreshToken: string
   waitingSpeakerCount: number
   user?: User
   rooms: Room[]

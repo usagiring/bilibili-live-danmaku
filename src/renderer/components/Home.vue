@@ -258,8 +258,7 @@
           type="md-desktop"
           size="16"
           color="#2d8cf0" />
-        <span class="modal-window-label">弹幕窗</span>
-        <span class="modal-window-id">id:{{ win.id }}</span>
+        <span class="modal-window-label">弹幕窗 #{{ win.id }}</span>
         <span class="modal-window-room">直播间 {{ win.roomId }}</span>
         <span
           class="modal-window-close"
@@ -919,7 +918,7 @@ function hideToTray() {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 8px;
+  /* border-radius: 8px; */
   cursor: pointer;
   transition: 0.15s;
   position: relative;

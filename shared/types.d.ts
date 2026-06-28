@@ -45,6 +45,7 @@ export interface DmStyle {
   messageUsername99: StyleValue
   messageComment99: StyleValue
   messageContainerInteract: StyleValue
+  messageUsernameInteract: StyleValue
   messageCommentInteract: StyleValue
 }
 
