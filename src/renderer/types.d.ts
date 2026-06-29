@@ -1,3 +1,5 @@
+import { LiveConfig } from '@tokine/shared/types.js'
+
 type StyleValue = Record<string, string>
 
 interface Provider {
@@ -114,13 +116,13 @@ interface DmRawStyle {
   ignoreMouseEvent: boolean
 }
 
-interface LiveConfig {
-  isWindowAlwaysOnTop: boolean
-  windowOpacity: number
-  windowBackground: string
-  isWithCookie: boolean
-  volume: number
-}
+// interface LiveConfig {
+//   isWindowAlwaysOnTop: boolean
+//   windowOpacity: number
+//   windowBackground: string
+//   isWithCookie: boolean
+//   ignoreMouseEvent?: boolean
+// }
 
 interface MessageConfig {
   isRealTimeMode: boolean
@@ -148,7 +150,7 @@ interface ChartConfig {
 
 interface RecordConfig {
   savePath: string
-  quality: string
+  quality: number
   isAutoRecord: boolean
 }
 

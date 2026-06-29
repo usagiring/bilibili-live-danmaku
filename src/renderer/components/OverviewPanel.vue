@@ -122,6 +122,7 @@ function formatNumber(n?: number): string {
   gap: 10px;
   overflow-y: auto;
   height: 100%;
+  user-select: none;
 }
 
 .overview-panel::-webkit-scrollbar {

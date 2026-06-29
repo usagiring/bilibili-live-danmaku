@@ -111,3 +111,10 @@ export interface Message {
   fileDuration?: number | null
   voiceUrl?: string | null
 }
+
+export interface LiveConfig {
+  isWindowAlwaysOnTop: boolean
+  windowOpacity: number
+  isWithCookie: boolean
+  ignoreMouseEvent: boolean
+}

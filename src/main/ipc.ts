@@ -137,7 +137,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   )
 
   // 按元数据查找窗口
-  ipcMain.handle(IPC_WINDOW_FIND, async (event, { id, type }: { id?: number; type?: string }) => {
+  ipcMain.handle(IPC_WINDOW_FIND, async (event, { id, type }: { id?: number; type?: string } = {}) => {
     const metas = getWindowMetas({ id, type })
     const result: WindowMeta[] = []
     for (const meta of metas) {

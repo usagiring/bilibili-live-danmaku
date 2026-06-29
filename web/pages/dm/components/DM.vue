@@ -588,7 +588,8 @@ function getRandomColor() {
   return COLORS[idx]
 }
 
-document.getElementsByTagName('body')[0].setAttribute('style', 'background-color:rgba(0,0,0,0);')
+// set window transparent
+document.getElementsByTagName('body')[0].setAttribute('style', 'background:transparent;')
 </script>
 
 <style scoped>

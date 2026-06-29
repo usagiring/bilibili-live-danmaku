@@ -136,6 +136,7 @@
         <InputNumber
           size="small"
           style="width: 50px"
+          :step="10"
           :model-value="Math.round((dmStyle?.windowOpacity ?? 1) * 100)"
           :min="0"
           :max="100"
@@ -481,6 +482,7 @@
         <InputNumber
           size="small"
           style="width: 50px"
+          :step="10"
           :model-value="Math.round((dmRawStyle?.windowOpacity ?? 1) * 100)"
           :min="0"
           :max="100"
@@ -557,19 +559,32 @@
         <span
           class="chip"
           :class="{ on: liveConfig?.isWithCookie === true }"
-          @click="toggle('liveConfig.isWithCookie')"
-          >携带Cookie</span
-        >
+          @click="toggle('liveConfig.isWithCookie')">
+          携带Cookie
+        </span>
+        <span
+          class="chip"
+          :class="{ on: liveConfig?.isWindowAlwaysOnTop === true }"
+          @click="toggle('liveConfig.isWindowAlwaysOnTop')">
+          窗口置顶
+        </span>
+        <span
+          class="chip"
+          :class="{ on: liveConfig?.ignoreMouseEvent === true }"
+          @click="toggle('liveConfig.ignoreMouseEvent')">
+          鼠标穿透
+        </span>
       </div>
       <div class="section-row">
-        <span class="label">音量</span>
+        <span class="label">透明度</span>
         <InputNumber
           size="small"
           style="width: 50px"
-          :model-value="liveConfig?.volume ?? 60"
+          :step="10"
+          :model-value="Math.round((liveConfig?.windowOpacity ?? 1) * 100)"
           :min="0"
           :max="100"
-          @on-change="(v: number) => setVal('liveConfig.volume', v)" />
+          @on-change="(v: number) => setVal('liveConfig.windowOpacity', v / 100)" />
         <span class="input-unit">%</span>
       </div>
       <div class="section-row">
@@ -591,17 +606,13 @@
         <span class="label">画质</span>
         <span class="segmented">
           <span
+            v-for="[label, qn] in qualityOptions"
+            :key="label"
             class="seg-item"
-            :class="{ on: (recordConfig?.quality || '原画') === '原画' }"
-            @click="setVal('recordConfig.quality', '原画')"
-            >原画</span
-          >
-          <span
-            class="seg-item"
-            :class="{ on: recordConfig?.quality === '高清' }"
-            @click="setVal('recordConfig.quality', '高清')"
-            >高清</span
-          >
+            :class="{ on: recordConfig?.quality === qn }"
+            @click="setVal('recordConfig.quality', qn)">
+            {{ label }}
+          </span>
         </span>
       </div>
     </div>
@@ -779,7 +790,7 @@ import { ref, computed, onMounted } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
 import { updateClientConfig, restoreDmStyle, generateQRCode, sendDM, clearDM as clearDMApi, pollQRCode } from '../service/api'
-import { IPC_GET_VERSION } from '../../service/const'
+import { IPC_GET_VERSION, QUALITY_MAP } from '../../service/const'
 import globalVar from '../../service/global'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
@@ -791,6 +802,8 @@ const liveConfig = computed(() => config.liveConfig)
 const recordConfig = computed(() => config.recordConfig)
 const chartConfig = computed(() => config.chartConfig)
 const clientId = computed(() => config.id)
+
+const qualityOptions = Object.entries(QUALITY_MAP)
 
 // ── Cookie ──
 const cookieInput = computed({

@@ -1,22 +1,24 @@
 <template>
-  <div class="player-container">
+  <div
+    class="player-container"
+    :style="{ opacity: windowOpacity }">
     <video
       id="player"
       class="full-video" />
-    <!-- 中间播放/暂停按钮 + 音量 -->
+    <!-- 中间播放按钮（未播放时显示） -->
     <div
-      class="center-overlay"
-      :class="{ 'pause-overlay': isPlaying }">
-      <!-- v-if="!isPlaying" 调试 -->
-      <div
-        v-if="!isPlaying"
-        class="play-btn"
-        @click="isPlaying ? pausePlay() : startPlay()">
+      v-if="!isPlaying"
+      class="play-overlay"
+      @click="startPlay">
+      <div class="play-btn">
         <Icon
-          :type="isPlaying ? 'md-pause' : 'md-play'"
+          type="md-play"
           size="56"
           color="#fff" />
       </div>
+    </div>
+    <!-- 音量条（hover 显示） -->
+    <div class="volume-overlay">
       <div class="volume-wrap">
         <Icon
           type="md-volume-up"
@@ -28,8 +30,7 @@
           min="0"
           max="100"
           :value="currentVolume * 100"
-          @input="onVolumeChange"
-          @click.stop />
+          @input="onVolumeChange" />
       </div>
     </div>
     <!-- 底部控制栏（hover 显示，仅播放后） -->
@@ -60,11 +61,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, toRefs, reactive } from 'vue'
 import flvjs from 'flv.js'
 import axios from 'axios'
 import { getClientConfig, getPlayUrl as getPlayUrlApi } from '../service/api'
 import config from '../service/config'
+import { LiveConfig } from '@tokine/shared/types.js'
+import { sse } from '../service/sse-client'
 
 const params = new URLSearchParams(window.location.search)
 const port = params.get('port') || window.location.port || '30031'
@@ -72,10 +75,17 @@ const clientId = params.get('clientId') || ''
 const roomId = params.get('roomId') || ''
 
 const cookie = ref('')
-const isWithCookie = ref(false)
 
 const isPlaying = ref(false)
 const currentVolume = ref(0.6)
+const liveConfig = reactive<LiveConfig>({
+  isWindowAlwaysOnTop: false,
+  isWithCookie: false,
+  ignoreMouseEvent: false,
+  windowOpacity: 1,
+})
+
+const { isWithCookie, ignoreMouseEvent, windowOpacity } = toRefs(liveConfig)
 
 // ── flv 播放器 ──
 let playerDOM: HTMLVideoElement | null = null
@@ -87,13 +97,18 @@ onMounted(async () => {
 
   try {
     const { data } = await getClientConfig({ clientId })
-    isWithCookie.value = data.liveConfig?.isWithCookie
+    Object.assign(liveConfig, data.liveConfig)
     cookie.value = data.user?.cookie
   } catch {
     /* ignore */
   }
 
   playerDOM = document.getElementById('player') as HTMLVideoElement | null
+
+  sse.connect(config.baseUrl, clientId)
+  sse.on('LIVE_CONFIG', data => {
+    Object.assign(liveConfig, data)
+  })
 })
 
 onUnmounted(() => {
@@ -162,13 +177,6 @@ async function startPlay() {
   isPlaying.value = true
 }
 
-function pausePlay() {
-  if (flvPlayer) {
-    flvPlayer.pause()
-    isPlaying.value = false
-  }
-}
-
 function onVolumeChange(e: Event) {
   const val = Number((e.target as HTMLInputElement).value) / 100
 
@@ -203,17 +211,22 @@ async function sendMessage() {
     isSending.value = false
   }
 }
+
+// set window transparent
+document.getElementsByTagName('body')[0].setAttribute('style', 'background:transparent;')
 </script>
 
 <style scoped>
 .player-container {
   position: fixed;
   inset: 0;
-  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  -webkit-app-region: drag;
+  background: rgba(0, 0, 0, 0.3);
+  user-select: none;
 }
 
 .full-video {
@@ -222,24 +235,31 @@ async function sendMessage() {
   object-fit: contain;
 }
 
-/* 中间播放/暂停按钮 */
-.center-overlay {
+/* 中间播放按钮（未播放时始终显示） */
+.play-overlay {
   position: absolute;
-  inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 36px;
   z-index: 2;
+  -webkit-app-region: no-drag;
 }
 
-.pause-overlay {
+/* 音量条（hover 显示） */
+.volume-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 2;
   opacity: 0;
   transition: opacity 0.2s;
+  -webkit-app-region: no-drag;
 }
 
-.player-container:hover .pause-overlay {
+.volume-overlay:hover {
   opacity: 1;
 }
 

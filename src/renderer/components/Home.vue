@@ -285,7 +285,7 @@
           type="md-desktop"
           size="16"
           color="#2d8cf0" />
-        <span class="modal-window-label">弹幕窗 #{{ win.id }}</span>
+        <span class="modal-window-label">{{ winTypeLabel(win.type) }} #{{ win.id }}</span>
         <span class="modal-window-room">直播间 {{ win.roomId }}</span>
         <span
           class="modal-window-close"
@@ -316,7 +316,7 @@ import {
   cancelRecord,
   getRecordState,
 } from '../service/api'
-import { DEFAULT_FACE } from '../../service/const'
+import { DEFAULT_FACE, QUALITY_MAP } from '../../service/const'
 import globalVar from '../../service/global'
 import config from '../service/config'
 import { Message as $Message } from 'view-ui-plus'
@@ -566,14 +566,6 @@ async function handleShowLiveWindow() {
   fetchWindows()
 }
 
-const qualityMap: Record<string, number> = {
-  原画: 10000,
-  蓝光: 400,
-  超清: 250,
-  高清: 150,
-  流畅: 80,
-}
-
 function dateFormat(date: Date, fmt: string) {
   const o: Record<string, number> = {
     YYYY: date.getFullYear(),
@@ -609,7 +601,7 @@ async function handleToggleRecord() {
       await record({
         roomId: room.id,
         output,
-        qn: qualityMap['超清'] || 400,
+        qn: QUALITY_MAP['超清'] || 400,
         withCookie: config.liveConfig?.isWithCookie || false,
       })
       isRecording.value = true
@@ -629,8 +621,17 @@ const dmWindows = ref<WindowItem[]>([])
 const showWindowList = ref(false)
 
 async function fetchWindows() {
-  const list = (await window.ipcRenderer.invoke(IPC_WINDOW_FIND, { type: 'dm' })) as WindowItem[]
+  const list = (await window.ipcRenderer.invoke(IPC_WINDOW_FIND)) as WindowItem[]
   dmWindows.value = list || []
+}
+
+function winTypeLabel(type: string) {
+  const map: Record<string, string> = {
+    dm: '弹幕窗',
+    'dm-raw': '仿原弹幕窗',
+    live: '直播窗',
+  }
+  return map[type] || '窗口'
 }
 
 async function focusWindow(id: number) {
@@ -664,6 +665,28 @@ watch(
   async val => {
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
+      action: 'setAlwaysOnTop',
+      value: [val, 'floating'],
+    })
+  },
+)
+
+watch(
+  () => config.liveConfig?.ignoreMouseEvent,
+  async val => {
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'live',
+      action: 'setIgnoreMouseEvents',
+      value: [val, { forward: true }],
+    })
+  },
+)
+
+watch(
+  () => config.liveConfig?.isWindowAlwaysOnTop,
+  async val => {
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'live',
       action: 'setAlwaysOnTop',
       value: [val, 'floating'],
     })
