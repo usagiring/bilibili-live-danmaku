@@ -2,12 +2,14 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
+const pagesDir = resolve(__dirname, 'pages')
+
 export default defineConfig({
   plugins: [vue()],
-  root: resolve(__dirname, 'pages'),
+  root: pagesDir,
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'pages'),
+      '@': pagesDir,
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.vue'],
   },
@@ -19,6 +21,7 @@ export default defineConfig({
       input: {
         'dm/index': resolve(__dirname, 'pages/dm/index.html'),
         'dm-raw-style/index': resolve(__dirname, 'pages/dm-raw-style/index.html'),
+        'live-player/index': resolve(__dirname, 'pages/live-player/index.html'),
       },
     },
   },

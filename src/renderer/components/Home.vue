@@ -198,6 +198,33 @@
                       size="13" />
                     弹幕窗
                   </Button>
+                  <Button
+                    class="btn-danmaku"
+                    size="small"
+                    @click="handleShowRawDanmaku()">
+                    <Icon
+                      type="md-text"
+                      size="13" />
+                    仿原弹幕窗
+                  </Button>
+                  <Button
+                    class="btn-danmaku"
+                    size="small"
+                    @click="handleShowLiveWindow()">
+                    <Icon
+                      type="md-play"
+                      size="13" />
+                    直播窗
+                  </Button>
+                  <Button
+                    class="btn-danmaku"
+                    size="small"
+                    @click="handleToggleRecord()">
+                    <Icon
+                      :type="isRecording ? 'md-square' : 'md-recording'"
+                      size="13" />
+                    {{ isRecording ? '停止录制' : '录制' }}
+                  </Button>
                 </div>
               </div>
               <!-- Tab 导航 -->
@@ -275,11 +302,20 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 import { useConfigStore } from '../store'
-import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE } from '../../service/const'
+import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE, IPC_GET_EXE_PATH } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Message from './Message.vue'
 import Config from './Config.vue'
-import { connect as connectApi, disconnect as disconnectApi, updateClientConfig, getRoomInfoV2, getUserInfoV2 } from '../service/api'
+import {
+  connect as connectApi,
+  disconnect as disconnectApi,
+  updateClientConfig,
+  getRoomInfoV2,
+  getUserInfoV2,
+  record,
+  cancelRecord,
+  getRecordState,
+} from '../service/api'
 import { DEFAULT_FACE } from '../../service/const'
 import globalVar from '../../service/global'
 import config from '../service/config'
@@ -301,6 +337,7 @@ const isRoomPanelCollapsed = ref(false)
 const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
+const isRecording = ref(false)
 const clientId = computed(() => store.id)
 
 function toggleRoomPanel() {
@@ -489,6 +526,97 @@ async function handleShowDanmaku() {
     clientId: clientId.value,
   })
   fetchWindows()
+}
+
+async function handleShowRawDanmaku() {
+  const room = activeRoom.value
+  if (!room) return
+  const url = `http://127.0.0.1:${globalVar.port}/dm-raw-style?clientId=${clientId.value}&roomId=${room.id}`
+  await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
+    url,
+    width: 440,
+    height: 600,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: false,
+    type: 'dm-raw',
+    roomId: room.id,
+    clientId: clientId.value,
+  })
+  fetchWindows()
+}
+
+async function handleShowLiveWindow() {
+  const room = activeRoom.value
+  if (!room) return
+  const url = `http://127.0.0.1:${globalVar.port}/live-player?clientId=${clientId.value}&roomId=${room.id}`
+  await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
+    url,
+    width: 640,
+    height: 360,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: false,
+    type: 'live',
+    roomId: room.id,
+    clientId: clientId.value,
+  })
+  fetchWindows()
+}
+
+const qualityMap: Record<string, number> = {
+  原画: 10000,
+  蓝光: 400,
+  超清: 250,
+  高清: 150,
+  流畅: 80,
+}
+
+function dateFormat(date: Date, fmt: string) {
+  const o: Record<string, number> = {
+    YYYY: date.getFullYear(),
+    MM: date.getMonth() + 1,
+    DD: date.getDate(),
+    HH: date.getHours(),
+    mm: date.getMinutes(),
+    ss: date.getSeconds(),
+  }
+  return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, m => String(o[m]).padStart(2, '0'))
+}
+
+let recordTimer: ReturnType<typeof setInterval> | null = null
+
+async function handleToggleRecord() {
+  const room = activeRoom.value
+  if (!room) return
+  try {
+    if (isRecording.value) {
+      const { data } = await getRecordState({ roomId: room.id })
+      const recordId = data.recordId
+      if (recordId) {
+        await cancelRecord({ roomId: room.id, recordId })
+      }
+      isRecording.value = false
+      if (recordTimer) {
+        clearInterval(recordTimer)
+        recordTimer = null
+      }
+    } else {
+      const recordDir = config.recordConfig?.savePath || ''
+      const output = `${recordDir}/${room.id}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
+      await record({
+        roomId: room.id,
+        output,
+        qn: qualityMap['超清'] || 400,
+        withCookie: config.liveConfig?.isWithCookie || false,
+      })
+      isRecording.value = true
+    }
+  } catch (e: any) {
+    $Message.error(`录制操作失败: ${e.message}`)
+  }
 }
 
 // ── 标题栏窗口列表 ──
