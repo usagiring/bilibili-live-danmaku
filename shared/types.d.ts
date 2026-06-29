@@ -118,3 +118,15 @@ export interface LiveConfig {
   isWithCookie: boolean
   ignoreMouseEvent: boolean
 }
+
+export interface DmRawStyle {
+  isWindowAlwaysOnTop: boolean
+  windowOpacity: number
+  windowBackground: string
+  direction: 'RL' | 'LR'
+  emojiSize: number
+  styleExtend: 'bilibili' | 'self'
+  duration: number
+  ignoreMouseEvent: boolean
+  fontSize: number
+}

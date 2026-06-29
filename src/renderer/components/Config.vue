@@ -144,9 +144,9 @@
         <span class="input-unit">%</span>
         <span
           class="label"
-          style="margin-left: 8px"
-          >背景色</span
-        >
+          style="margin-left: 8px">
+          背景色
+        </span>
         <ColorPicker
           :model-value="dmStyle?.windowBackground || '#1e1e28'"
           transfer
@@ -461,7 +461,7 @@
     </div>
 
     <!-- ═══ dmRawStyle — 原生弹幕窗样式 ═══ -->
-    <div class="divider">原生弹幕窗样式</div>
+    <div class="divider">仿原生弹幕窗样式</div>
     <div class="section">
       <div class="chips">
         <span
@@ -490,31 +490,31 @@
         <span class="input-unit">%</span>
         <span
           class="label"
-          style="margin-left: 8px"
-          >背景色</span
-        >
+          style="margin-left: 8px">
+          背景色
+        </span>
         <ColorPicker
           :model-value="dmRawStyle?.windowBackground || '#1e1e28'"
           transfer
           alpha
           size="small"
-          @on-change="(v: string) => setVal('dmRawStyle.windowBackground', v)" />
+          @on-active-change="(v: string) => setVal('dmRawStyle.windowBackground', v)" />
       </div>
       <div class="section-row">
         <span class="label">方向</span>
         <span class="segmented">
           <span
             class="seg-item"
-            :class="{ on: (dmRawStyle?.direction || 'RL') === 'LR' }"
-            @click="setVal('dmRawStyle.direction', 'LR')"
-            >向左</span
-          >
+            :class="{ on: (dmRawStyle?.direction || 'RL') === 'RL' }"
+            @click="setVal('dmRawStyle.direction', 'RL')">
+            向左
+          </span>
           <span
             class="seg-item"
-            :class="{ on: (dmRawStyle?.direction || 'RL') === 'RL' }"
-            @click="setVal('dmRawStyle.direction', 'RL')"
-            >向右</span
-          >
+            :class="{ on: (dmRawStyle?.direction || 'RL') === 'LR' }"
+            @click="setVal('dmRawStyle.direction', 'LR')">
+            向右
+          </span>
         </span>
       </div>
       <div class="section-row">
@@ -543,12 +543,13 @@
         <span class="label">弹幕持续时间</span>
         <InputNumber
           size="small"
-          style="width: 50px"
+          style="width: 70px"
           :model-value="dmRawStyle?.duration ?? 15"
-          :min="1"
-          :max="60"
+          :min="1000"
+          :max="60000"
+          :step="1000"
           @on-change="(v: number) => setVal('dmRawStyle.duration', v)" />
-        <span class="input-unit">s</span>
+        <span class="input-unit">ms</span>
       </div>
     </div>
 

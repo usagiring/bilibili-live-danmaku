@@ -1,4 +1,4 @@
-import { LiveConfig } from '@tokine/shared/types.js'
+import { DmRawStyle, LiveConfig } from '@tokine/shared/types.js'
 
 type StyleValue = Record<string, string>
 
@@ -101,19 +101,6 @@ interface DmStyle {
   messageComment99: StyleValue
   messageContainerInteract: StyleValue
   messageCommentInteract: StyleValue
-}
-
-interface DmRawStyle {
-  isWindowAlwaysOnTop: boolean
-  windowOpacity: number
-  windowBackground: string
-  direction: 'RL' | 'LR'
-  emojiSize: number
-  styleExtend: 'bilibili' | 'self'
-  duration: number
-  windowOnTopLevel: string
-  isWindowOnTopForce: boolean
-  ignoreMouseEvent: boolean
 }
 
 // interface LiveConfig {

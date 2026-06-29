@@ -1,15 +1,15 @@
 <template>
-  <Danmaku />
+  <DMRaw />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import Danmaku from './components/Danmaku.vue'
+import DMRaw from './components/DMRaw.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    Danmaku,
+    DMRaw,
   },
 })
 </script>

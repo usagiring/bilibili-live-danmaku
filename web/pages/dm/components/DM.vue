@@ -184,7 +184,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { getPriceProperties, wait, INTERACT_TYPE, ANCHOR_ICON_MAP, DEFAULT_FACE, getAnchorIcon } from '@tokine/shared'
+import { getPriceProperties, wait, INTERACT_TYPE, DEFAULT_FACE, getAnchorIcon } from '@tokine/shared'
 import { Message, DmStyle } from '@tokine/shared/types.js'
 
 import PromiseQueue from '../../service/promise-queue'
