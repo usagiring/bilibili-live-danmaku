@@ -2,15 +2,21 @@
   <div class="disable-user-select">
     <div :style="{ padding: '10px 20px 0 20px' }">
       <Alert type="info">
-        <Icon type="md-information-circle" :style="{ 'font-size': '16px' }" />
+        <Icon
+          type="md-information-circle"
+          :style="{ 'font-size': '16px' }" />
         <span> 未设置Cookie时，弹幕回复不生效 </span>
       </Alert>
     </div>
 
     <div :style="{ padding: '0 20px 0 20px' }">
       <div class="tag-container">
-        <draggable :list="tags" :group="{ name: 'tags', pull: 'clone', put: false }"
-          :sort="false" item-key="id" :clone="cloneTag"
+        <draggable
+          :list="tags"
+          :group="{ name: 'tags', pull: 'clone', put: false }"
+          :sort="false"
+          item-key="id"
+          :clone="cloneTag"
           class="tag-draggable-source">
           <template #item="{ element: tag }">
             <div :class="tag.class ? `draggable-tag ${tag.class}` : 'draggable-tag'">
@@ -24,19 +30,30 @@
     <Row :style="{ padding: '10px 10px 5px 10px' }">
       <i-col span="1">
         <div class="col-header">
-          <Tooltip max-width="600" transfer placement="right">
-            <Icon type="md-help" class="info-icon" />
+          <Tooltip
+            max-width="600"
+            transfer
+            placement="right">
+            <Icon
+              type="md-help"
+              class="info-icon" />
             <template #content>
               <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
                 <p>● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。</p>
                 <p>
                   ● 每一条规则应该要有至少一条<span :style="{ color: 'aquamarine' }">执行规则</span>，可以有若干条<span
-                    :style="{ color: 'violet' }">限制规则</span>。
-                  <span :style="{ color: 'pink' }">拖拽</span>上面「标签」到规则栏！
+                    :style="{ color: 'violet' }"
+                    >限制规则</span
+                  >。 <span :style="{ color: 'pink' }">拖拽</span>上面「标签」到规则栏！
                 </p>
-                <p>● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。
-                  模版占位符将被替换为实际内容！</p>
-                <p>● 例如：触发类型：弹幕，回复文字模版：{user}说 {comment}，规则：佩戴粉丝牌，语音播放。 表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)</p>
+                <p>
+                  ● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。
+                  模版占位符将被替换为实际内容！
+                </p>
+                <p>
+                  ● 例如：触发类型：弹幕，回复文字模版：{user}说 {comment}，规则：佩戴粉丝牌，语音播放。
+                  表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)
+                </p>
                 <!-- <p>
                 例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
               </p> -->
@@ -62,7 +79,10 @@
       </i-col>
       <i-col span="1" />
     </Row>
-    <draggable :list="rules" group="rules" handle=".column-drag-handler"
+    <draggable
+      :list="rules"
+      group="rules"
+      handle=".column-drag-handler"
       @change="onRuleDragChange">
       <template #item="{ element: rule, index }">
         <Row class="line-container">
@@ -71,36 +91,61 @@
             <!-- <Icon class="flex-center column-drag-handler" type="ios-move" /> -->
             <span class="flex-center column-drag-handler">&#x2630;</span>
           </i-col>
-          <i-col span="1" :style="{ 'text-align': 'center' }">
-            <Checkbox :model-value="rule.enable" class="flex-center" :style="{ 'margin-left': '8px' }"
+          <i-col
+            span="1"
+            :style="{ 'text-align': 'center' }">
+            <Checkbox
+              :model-value="rule.enable"
+              class="flex-center"
+              :style="{ 'margin-left': '8px' }"
               @on-change="changeEnable(index, $event)" />
           </i-col>
           <i-col span="2">
-            <Select :model-value="rule.type" :style="{ padding: '0 7px' }" transfer size="small"
+            <Select
+              :model-value="rule.type"
+              :style="{ padding: '0 7px' }"
+              transfer
+              size="small"
               @on-change="onChangeRuleType(index, $event)">
-              <Option v-for="(option, index1) in types" :key="index1" :value="option.key" :label="option.label">
+              <Option
+                v-for="(option, index1) in types"
+                :key="index1"
+                :value="option.key"
+                :label="option.label">
                 <span>{{ option.value }}</span>
               </Option>
             </Select>
           </i-col>
           <i-col span="6">
-            <Input :model-value="rule.text" placeholder="回复内容..." :style="{ padding: '0 7px' }" size="small"
+            <Input
+              :model-value="rule.text"
+              placeholder="回复内容..."
+              :style="{ padding: '0 7px' }"
+              size="small"
               @on-change="debouncedChangeText(index, $event)" />
           </i-col>
           <i-col span="13">
-            <draggable :list="rule.tags" :group="{ name: 'tags', pull: false, put: true }"
-              :sort="false" item-key="id" ghost-class="drop-preview"
+            <draggable
+              :list="rule.tags"
+              :group="{ name: 'tags', pull: false, put: true }"
+              :sort="false"
+              item-key="id"
+              ghost-class="drop-preview"
               :style="{ display: 'flex', 'align-items': 'center' }"
-              @change="(e) => onTagChange(index, e)"
-              :move="(e) => onTagMove(index, e)">
+              @change="e => onTagChange(index, e)"
+              :move="e => onTagMove(index, e)">
               <template #item="{ element: tag, index: tagIndex }">
                 <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'">
                   <template v-if="tag.template">
-                    <Poptip placement="bottom" transfer>
+                    <Poptip
+                      placement="bottom"
+                      transfer>
                       <span>{{ fillDisplay(tag) }} </span>
                       <template #content>
                         <div>
-                          <TagContent :template="tag.template" :data="tag.data"
+                          <TagContent
+                            :template="tag.template"
+                            :data="tag.data"
                             @value-change="onDataChange(index, tagIndex, $event)" />
                         </div>
                       </template>
@@ -109,34 +154,48 @@
                   <template v-else>
                     <span>{{ fillDisplay(tag) }} </span>
                   </template>
-                  <Icon type="md-remove" class="remove-button" @click="removeTag(index, tagIndex)" />
+                  <Icon
+                    type="md-remove"
+                    class="remove-button"
+                    @click="removeTag(index, tagIndex)" />
                 </div>
               </template>
             </draggable>
           </i-col>
-          <i-col span="1" class="remove-button-container">
-            <Icon type="md-remove" class="remove-button flex-center" @click="removeRule(index)" />
+          <i-col
+            span="1"
+            class="remove-button-container">
+            <Icon
+              type="md-remove"
+              class="remove-button flex-center"
+              @click="removeRule(index)" />
           </i-col>
         </Row>
       </template>
     </draggable>
     <div :style="{ padding: '5px 20px' }">
-      <Button type="primary" long @click="addRule">
-        <Icon :style="{ 'font-weight': 'bold' }" type="md-add" />
+      <Button
+        type="primary"
+        long
+        @click="addRule">
+        <Icon
+          :style="{ 'font-weight': 'bold' }"
+          type="md-add" />
       </Button>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { cloneDeep, debounce } from 'lodash'
 import { computed, inject, reactive } from 'vue'
 import { useConfigStore } from '../store'
-const globalValue = inject('globalValue')
+import config from '../service/config'
+import { updateClientConfig, getGiftConfig } from '../service/api'
+const globalValue = inject<any>('globalValue', {})
 
 import draggable from 'vuedraggable'
 import TagContent from './TagContent.vue'
-import { updateSetting, getGiftConfig } from '../service/api'
 
 const synth = window.speechSynthesis
 
@@ -358,46 +417,47 @@ const tags = reactive([
   },
 ])
 
-const realRoomId = computed(() => {
-  return store.realRoomId
-})
+const clientId = computed(() => store.id)
+const realRoomId = computed(() => store.activeRoom?.realId || store.activeRoom?.id || '')
 
-const rules = computed(() => {
-  return store.autoReplyRules
-})
+const rules = computed(() => config.autoReplyRules.filter(r => r.roomId === realRoomId.value))
 
 const debouncedChangeText = debounce(changeText, 500)
 
-// function onMounted() {
-//   debouncedChangeText = debounce(changeText, 500)
-// }
+function saveRules(_rules: any[]) {
+  // 合并：保留其他房间的规则，替换当前房间的规则
+  const otherRules = config.autoReplyRules.filter(r => r.roomId !== realRoomId.value)
+  config.autoReplyRules = [...otherRules, ..._rules]
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'autoReplyRules', value: config.autoReplyRules }],
+  }).catch(() => {})
+}
 
-async function onTagChange(ruleIndex, evt) {
+async function onTagChange(ruleIndex: number, evt: any) {
   if (!evt.added) return
   const { element: tag, newIndex: addedIndex } = evt.added
-  const _rules = cloneDeep(rules.value)
-  const clonedTag = cloneDeep(tag)
+  const _rules: any[] = cloneDeep(rules.value)
+  const clonedTag: any = cloneDeep(tag)
   if (clonedTag.key === 'SPEAK_REPLY') {
     const options =
-      globalValue?.voices?.map((voice) => {
-        return {
-          key: voice.name,
-          value: voice.name,
-          label: voice.name,
-        }
-      }) || []
+      globalValue?.voices?.map((voice: any) => ({
+        key: voice.name,
+        value: voice.name,
+        label: voice.name,
+      })) || []
     clonedTag.template.rows[0].options = options
   }
 
   if (clonedTag.key === 'GIFT') {
     const { data: giftConfig } = await getGiftConfig(realRoomId.value)
-    const giftOptions = []
-    for (const [key, { name, webp }] of Object.entries(giftConfig)) {
+    const giftOptions: any[] = []
+    for (const [key, val] of Object.entries(giftConfig as Record<string, any>)) {
       giftOptions.push({
-        key: key,
-        value: name,
-        label: name,
-        webp: webp,
+        key,
+        value: val.name,
+        label: val.name,
+        webp: val.webp,
       })
     }
     clonedTag.template.rows[0].options = giftOptions
@@ -405,161 +465,114 @@ async function onTagChange(ruleIndex, evt) {
   _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
   _rules[ruleIndex].tags.splice(addedIndex, 0, clonedTag)
 
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function onRuleDragChange(evt) {
+function onRuleDragChange(evt: any) {
   if (!evt.moved) return
   const { oldIndex, newIndex } = evt.moved
-  const _rules = cloneDeep(rules.value)
+  const _rules: any[] = cloneDeep(rules.value)
   const itemToAdd = _rules.splice(oldIndex, 1)[0]
   _rules.splice(newIndex, 0, itemToAdd)
-  // rules.forEach((rule, index) => {
-  //   rule.priority = index
-  // })
 
-  const data = {
-    autoReplyRules: _rules,
-  }
-  console.log(data)
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function cloneTag(tag) {
+function cloneTag(tag: any) {
   return cloneDeep(tag)
 }
 
-function onTagMove(ruleIndex, evt) {
+function onTagMove(ruleIndex: number, evt: any) {
   const tag = evt.draggedContext.element
   const dropRule = rules.value[ruleIndex]
   if (!dropRule?.type) return false
-  if (!dropAcceptRules[dropRule.type].includes(tag.key)) return false
-  if (dropRule.tags.find((t) => t.key === tag.key)) return false
+  if (!dropAcceptRules[dropRule.type as keyof typeof dropAcceptRules]?.includes(tag.key)) return false
+  if (dropRule.tags.find((t: any) => t.key === tag.key)) return false
   return true
 }
-// transfer 函数映射表，替代 <script setup> 中不可用的 this
-const transferFns = { roleNames, giftName }
 
-function fillDisplay(tag) {
-  let display = tag.content
-  const match = tag.content.matchAll(/{.*}/g)
-  const map = Array.from(match).reduce((map, next) => {
-    const substr = next[0].substring(1, next[0].length - 1)
-    let value = tag.data[substr]
-    if (~substr.indexOf('transfer')) {
-      const [, func] = substr.split(':')
-      console.log(func, tag)
-      value = transferFns[func]?.(tag) ?? ''
-    }
-    return Object.assign(map, {
-      [next[0]]: value,
-    })
-  }, {})
+const transferFns: Record<string, (tag: any) => string> = { roleNames, giftName }
+
+function fillDisplay(tag: any) {
+  let display: string = tag.content
+  const match: IterableIterator<RegExpMatchArray> = tag.content.matchAll(/{.*}/g)
+  const map: Record<string, any> = Array.from(match).reduce(
+    (acc: Record<string, any>, next: RegExpMatchArray) => {
+      const substr = next[0].substring(1, next[0].length - 1)
+      let value = tag.data[substr]
+      if (~substr.indexOf('transfer')) {
+        const [, func] = substr.split(':')
+        value = transferFns[func]?.(tag) ?? ''
+      }
+      return Object.assign(acc, { [next[0]]: value })
+    },
+    {} as Record<string, any>,
+  )
 
   for (const key in map) {
-    const value = map[key]
-    display = display.replace(key, value)
+    display = display.replace(key, map[key])
   }
   return display
 }
 
-function roleNames(tag) {
-  const roleKeys = tag.data.roles
-  return roleKeys.map((key) => roleOptions.find((o) => o.key === key).value).join(',')
+function roleNames(tag: any) {
+  const roleKeys: number[] = tag.data.roles
+  return roleKeys.map(key => roleOptions.find(o => o.key === key)?.value).join(',')
 }
 
-function giftName(tag) {
-  const giftIds = tag.data.giftIds
-  return giftIds.map((key) => (tag?.template?.rows?.[0]?.options?.find((o) => o.key === key) || {}).value).join(',')
+function giftName(tag: any) {
+  const giftIds: string[] = tag.data.giftIds
+  return giftIds.map(key => (tag?.template?.rows?.[0]?.options as any[])?.find((o: any) => o.key === key)?.value || '').join(',')
 }
 
-function removeTag(ruleIndex, tagIndex) {
-  const _rules = cloneDeep(rules.value)
+function removeTag(ruleIndex: number, tagIndex: number) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules[ruleIndex].tags.splice(tagIndex, 1)
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function removeRule(ruleIndex) {
-  const _rules = cloneDeep(rules.value)
+function removeRule(ruleIndex: number) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules.splice(ruleIndex, 1)
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
 function addRule() {
-  const _rules = cloneDeep(rules.value)
-  // const lastRule = rules.slice(-1)[0]
+  const _rules: any[] = cloneDeep(rules.value)
   _rules.push({
+    roomId: realRoomId.value,
     type: '',
     text: '',
     enable: true,
-    // priority: lastRule ? lastRule.priority + 1 : 0,
     tags: [],
   })
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function changeEnable(index, status) {
-  const _rules = cloneDeep(rules.value)
+function changeEnable(index: number, status: boolean) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules[index].enable = status
-  const data = {
-    autoReplyRules: _rules,
-  }
-  console.log(data)
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function onChangeRuleType(index, type) {
-  const _rules = cloneDeep(rules.value)
+function onChangeRuleType(index: number, type: string) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules[index].type = type
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-// tag 里发出的数据变更事件
-function onDataChange(ruleIndex, tagIndex, payload) {
-  const _rules = cloneDeep(rules.value)
+function onDataChange(ruleIndex: number, tagIndex: number, payload: any) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules[ruleIndex].tags[tagIndex].data = _rules[ruleIndex].tags[tagIndex].data || {}
   _rules[ruleIndex].tags[tagIndex].data = Object.assign(_rules[ruleIndex].tags[tagIndex].data, payload)
-
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
 
-function changeText(ruleIndex, e) {
-  const _rules = cloneDeep(rules.value)
+function changeText(ruleIndex: number, e: any) {
+  const _rules: any[] = cloneDeep(rules.value)
   _rules[ruleIndex].text = e.target.value
-  const data = {
-    autoReplyRules: _rules,
-  }
-  updateSetting(data)
-  store.updateConfig(data)
+  saveRules(_rules)
 }
-
-
 </script>
 
 <style scoped>

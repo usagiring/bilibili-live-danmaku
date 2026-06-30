@@ -253,6 +253,12 @@
                   @click="activeTab = 'stats'">
                   <Icon type="md-podium" /> 统计
                 </div>
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'autoreply' }"
+                  @click="activeTab = 'autoreply'">
+                  <Icon type="md-chatbubbles" /> 回复
+                </div>
               </div>
             </div>
           </div>
@@ -263,6 +269,7 @@
             <Message v-if="activeTab === 'message'" />
             <Vote v-if="activeTab === 'vote'" />
             <Stats v-if="activeTab === 'stats'" />
+            <AutoReply v-if="activeTab === 'autoreply'" />
           </div>
         </template>
 
@@ -322,6 +329,7 @@ import Message from './Message.vue'
 import Config from './Config.vue'
 import Vote from './Vote.vue'
 import Stats from './Stats.vue'
+import AutoReply from './AutoReply.vue'
 import {
   connect as connectApi,
   disconnect as disconnectApi,
@@ -342,7 +350,7 @@ const activeRoom = computed(() => store.activeRoom)
 const activeTab = ref('overview')
 const showAddRoom = ref(false)
 const newRoomId = ref('')
-const isRoomPanelCollapsed = ref(false)
+const isRoomPanelCollapsed = ref(config.isRoomPanelCollapsed)
 const addRoomBtn = ref<HTMLElement | null>(null)
 const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
@@ -351,6 +359,11 @@ const clientId = computed(() => store.id)
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
+  config.isRoomPanelCollapsed = isRoomPanelCollapsed.value
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'isRoomPanelCollapsed', value: isRoomPanelCollapsed.value }],
+  }).catch(() => {})
 }
 
 function toggleAddRoom() {
@@ -471,9 +484,6 @@ async function handleAddRoom() {
   store.rooms.push({
     id: roomId,
     userId: '',
-    isAutoReply: false,
-    autoReplyRules: [],
-    voteOptions: [],
     isActive: true,
   })
 

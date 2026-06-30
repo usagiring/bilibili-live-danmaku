@@ -136,6 +136,11 @@ export async function exportFile({ roomId, startTime, endTime }: { roomId: strin
   return res.data
 }
 
+export async function getGiftConfig(roomId: string = '0') {
+  const res = await axios.get(`${baseUrl}/api/room/${roomId}/gift/map`)
+  return res.data
+}
+
 // ==================== ASR ====================
 
 export async function initialASR(body: { appKey: string; accessKeyId: string; accessKeySecret: string }) {

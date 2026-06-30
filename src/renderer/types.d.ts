@@ -13,9 +13,6 @@ interface Provider {
 interface Room {
   id: string
   userId: string
-  isAutoReply: boolean
-  autoReplyRules: any[]
-  voteOptions: Array<{ keyword: string; value: string }>
   realId?: string
   username?: string
   displayId?: string
@@ -151,11 +148,21 @@ export interface VoteConfig {
   duration: number
 }
 
+export interface AutoReplyRule {
+  roomId: string
+  type: string
+  text: string
+  isEnable: boolean
+  tags: any[]
+}
+
 export interface ClientConfig {
   id: string
   signInMessage: string
   isNeedRefreshCookieCache: boolean
   waitingSpeakerCount: number
+  isRoomPanelCollapsed?: boolean
+
   user?: User
   rooms: Room[]
   isRecording?: boolean
@@ -170,6 +177,7 @@ export interface ClientConfig {
   mtConfig?: MtConfig
   chartConfig?: ChartConfig
   voteConfig: VoteConfig
+  autoReplyRules: AutoReplyRule[]
 }
 
 export interface StoreConfig {

@@ -8,20 +8,6 @@ export const useConfigStore = defineStore('config', () => {
   const state = reactive<StoreConfig>({
     id: '',
     rooms: [],
-    // windows: [],
-    // providers: [],
-
-    // messageConfig: {
-    //   isRealTimeMode: false,
-    //   isShowUserId: true,
-    //   isShowSendAt: true,
-    //   isShowInteract: true,
-    // },
-
-    // signInMessage: '...',
-    // isNeedRefreshCookieCache: false,
-    // refreshToken: '',
-    // waitingSpeakerCount: 0,
   })
 
   // ── Getters ──

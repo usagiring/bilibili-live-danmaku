@@ -28,6 +28,10 @@ const config: ClientConfig & { set: (p: string, v: string) => void } = reactive(
     duration: 60,
   },
 
+  isRoomPanelCollapsed: false,
+
+  autoReplyRules: [],
+
   set(path: string, value: any) {
     _set(this, path, value)
   },
