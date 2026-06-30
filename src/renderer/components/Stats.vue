@@ -1,65 +1,74 @@
 <template>
-  <div :style="{ height: '100%' }">
+  <div class="stats-page">
+    <!-- 搜索栏 -->
     <div class="searcher-wrapper">
-      <Input
-        v-model="roomId"
-        placeholder="房间号"
-        clearable
-        style="width: 120px"
-        size="small" />
-      <DatePicker
-        class="space-left-5px"
-        type="datetimerange"
-        format="yyyy-MM-dd HH:mm"
-        placeholder="选择时间范围"
-        style="width: 280px"
-        size="small"
-        :model-value="dateRange"
-        @on-change="changeDateRange"
-        @on-clear="clearDateRange" />
-      <Button
-        class="space-left-5px"
-        type="primary"
-        shape="circle"
-        icon="ios-search"
-        :disabled="!roomId"
-        @click="stats" />
+      <div class="search-row">
+        <span class="filter-label">时间范围</span>
+        <DatePicker
+          type="datetimerange"
+          format="yyyy-MM-dd HH:mm"
+          placeholder="选择时间范围"
+          style="width: 280px"
+          size="small"
+          :model-value="dateRange"
+          @on-change="changeDateRange"
+          @on-clear="clearDateRange" />
+        <Button
+          type="primary"
+          shape="circle"
+          icon="ios-search"
+          style="width: 28px; height: 28px"
+          :disabled="!roomId"
+          @click="stats" />
+        <span class="row-sep"></span>
+        <button
+          class="btn btn-default"
+          :disabled="!roomId"
+          @click="generateWordCloud">
+          <Icon
+            type="md-cloud"
+            size="12" />
+          弹幕词云
+        </button>
+        <button
+          class="btn btn-default"
+          :disabled="!roomId"
+          @click="download">
+          <Icon
+            type="md-download"
+            size="12" />
+          礼物导出
+        </button>
+      </div>
     </div>
-    <div :style="{ padding: '10px 20px 0 20px' }">
-      <Alert type="info">
+
+    <!-- 提示 -->
+    <div class="action-bar">
+      <Alert
+        type="info"
+        style="flex: 1; margin: 0">
         <Icon
           type="md-information-circle"
           :style="{ 'font-size': '16px' }" />
-        <span> 数据仅供参考，实际数据请以官方数据为准。请注意舰长未区分续费与原价，统一以原价计算。未设置Cookie时，部分数据不支持。 </span>
+        <span> 数据仅供参考，实际数据请以官方数据为准。</span>
       </Alert>
     </div>
 
-    <div :style="{ padding: '0px 25px 0 25px' }">
-      <Button
-        type="primary"
-        class="workclound-button"
-        shape="circle"
-        icon="md-cloud"
-        @click="generateWordCloud"
-        >生成词云</Button
-      >
-      <Button
-        class="space-left-5px"
-        shape="circle"
-        icon="md-download"
-        :disabled="!roomId"
-        @click="download"
-        >礼物导出</Button
-      >
-    </div>
-
+    <!-- 统计卡片 + 图表 -->
     <div class="main-container">
-      <div
-        class="text-container"
-        :style="{ width: '300px' }">
-        <p>获得金瓜子: {{ totalGold }}</p>
-        <p>弹幕数: {{ totalComment }}</p>
-        <p>送礼人数: {{ totalSendGiftUser }}</p>
+      <div class="stats-cards">
+        <div class="stat-card">
+          <div class="stat-value">{{ totalGold }}</div>
+          <div class="stat-label"><Icon type="md-cash" /> 金瓜子</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalComment }}</div>
+          <div class="stat-label"><Icon type="md-chatboxes" /> 弹幕数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalSendGiftUser }}</div>
+          <div class="stat-label"><Icon type="md-people" /> 送礼人数</div>
+        </div>
       </div>
 
       <div id="chart" />
@@ -105,9 +114,11 @@ let wordCloudChart: echarts.ECharts | null = null
 
 onMounted(async () => {
   roomId.value = String(store.activeRoom?.realId || store.activeRoom?.id || '')
-  const start = dayjs().startOf('day').toDate()
-  const end = dayjs().endOf('day').toDate()
-  dateRange.value = [start, end]
+  const now = dayjs()
+  const today4am = now.startOf('day').add(4, 'hour')
+  const start = now.isBefore(today4am) ? today4am.subtract(1, 'day') : today4am
+  const end = start.add(1, 'day')
+  dateRange.value = [start.toDate(), end.toDate()]
   await stats()
 })
 
@@ -292,23 +303,115 @@ async function download() {
 </script>
 
 <style scoped>
+.stats-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── 搜索栏（参考 Message 页）── */
 .searcher-wrapper {
-  height: 35px;
+  height: 30px;
+  overflow: visible;
   position: relative;
-  padding: 0px 30px;
-  border-bottom: 1px solid lightgray;
+  z-index: 3;
+  padding: 0 14px;
+  background: #fff;
 }
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+}
+
+.filter-label {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+  min-width: 52px;
+}
+
+.row-sep {
+  width: 1px;
+  height: 14px;
+  background: #ddd;
+  flex-shrink: 0;
+}
+
+/* ── 方形按钮（参考 Config 页）── */
+.btn {
+  height: 22px;
+  border: 1px solid #2d8cf0;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.btn-default {
+  background: #fff;
+  color: #2d8cf0;
+}
+
+.btn-default:hover {
+  background: rgba(45, 140, 240, 0.06);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── 提示 ── */
+.action-bar {
+  padding: 10px 14px 6px;
+}
+
+/* ── 主体 ── */
 .main-container {
-  position: relative;
-  padding: 10px 20px 0 20px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
 }
-.text-container {
-  display: inline-block;
-  vertical-align: top;
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.text-container > p {
-  padding: 10px;
+
+.stat-card {
+  padding: 12px 10px;
+  background: #fff;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
 }
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
 #chart {
   width: 100%;
   height: 300px;
@@ -322,15 +425,5 @@ async function download() {
   display: inline-block;
   height: 500px;
   width: 800px;
-}
-
-/* .workclound-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-} */
-.space-left-5px {
-  margin-left: 5px;
 }
 </style>

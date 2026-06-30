@@ -19,9 +19,9 @@
 import { ref, onBeforeMount, onBeforeUnmount } from 'vue'
 import { touch, registryClient, getClientConfig, getRoomStatus, getRoomInfoByIds } from './service/api'
 import { sse } from './service/sse-client'
-import { wait } from './service/util'
 import { useConfigStore } from './store'
 import config from './service/config'
+import { wait } from '@tokine/shared'
 
 const store = useConfigStore()
 const isLoading = ref(true)

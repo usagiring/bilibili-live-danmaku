@@ -5,21 +5,24 @@
       <!-- Row 1: 操作栏 -->
       <div class="vote-toolbar">
         <div class="toolbar-left">
-          <Button
-            type="primary"
-            size="small"
-            class="btn-xs"
+          <button
+            class="btn btn-primary"
             :disabled="isWatching"
             @click="start">
-            <Icon type="md-play" /> 开始
-          </Button>
-          <Button
-            size="small"
-            class="btn-xs"
+            <Icon
+              type="md-play"
+              size="12" />
+            开始
+          </button>
+          <button
+            class="btn btn-danger"
             :disabled="!isWatching"
             @click="stop">
-            <Icon type="md-square" /> 停止
-          </Button>
+            <Icon
+              type="md-square"
+              size="12" />
+            停止
+          </button>
           <span
             v-if="isWatching && duration > 0"
             class="countdown-area">
@@ -29,12 +32,14 @@
             {{ countdown }}
           </span>
         </div>
-        <Button
-          size="small"
-          class="btn-xs"
+        <button
+          class="btn btn-default"
           @click="showVoteRecord">
-          <Icon type="md-list" /> 记录
-        </Button>
+          <Icon
+            type="md-list"
+            size="12" />
+          记录
+        </button>
       </div>
 
       <!-- Row 2: 定时 + 设置芯片 -->
@@ -499,7 +504,7 @@ function changeDuration(val: number) {
 <style scoped>
 /* ── 页面容器 ── */
 .vote-page {
-  padding: 14px 18px;
+  padding: 12px 14px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -509,10 +514,10 @@ function changeDuration(val: number) {
 /* ── 顶部区域 ── */
 .vote-header {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 12px 16px 8px;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  margin-bottom: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
 }
 
 /* ── Row 1: 操作栏 ── */
@@ -522,12 +527,55 @@ function changeDuration(val: number) {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.btn-xs {
-  padding: 3px 12px;
-  font-size: 12px;
-  height: 24px;
-  line-height: 1;
+
+/* ── 方形按钮（参考 Config 页）── */
+.btn {
+  height: 22px;
+  border: 1px solid #2d8cf0;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
 }
+
+.btn-primary {
+  background: #2d8cf0;
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #2b85e4;
+}
+
+.btn-default {
+  background: #fff;
+  color: #2d8cf0;
+}
+
+.btn-default:hover {
+  background: rgba(45, 140, 240, 0.06);
+}
+
+.btn-danger {
+  background: #fff;
+  color: #ed4014;
+  border-color: #ed4014;
+}
+
+.btn-danger:hover {
+  background: rgba(237, 64, 20, 0.06);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .toolbar-left {
   display: flex;
   align-items: center;
@@ -537,13 +585,14 @@ function changeDuration(val: number) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  height: 22px;
+  padding: 0 8px;
   color: #ed4014;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
-  padding: 2px 8px;
   background: rgba(237, 64, 20, 0.06);
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .toolbar-label {
   font-size: 11px;
@@ -604,7 +653,7 @@ function changeDuration(val: number) {
 }
 .side-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 12px 14px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
 }
@@ -684,7 +733,7 @@ function changeDuration(val: number) {
 .chart-card {
   height: 100%;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
