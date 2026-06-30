@@ -1,15 +1,3 @@
-export const DEFAULT_FACE = 'https://static.hdslb.com/images/member/noface.gif'
-
-export const GUARD_ICON_1 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard1.png'
-export const GUARD_ICON_2 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard2.png'
-export const GUARD_ICON_3 = 'https://i0.hdslb.com/bfs/activity-plat/static/20200716/1d0c5a1b042efb59f46d4ba1286c6727/icon-guard3.png'
-
-export const GUARD_ICON_MAP = {
-  1: GUARD_ICON_1,
-  2: GUARD_ICON_2,
-  3: GUARD_ICON_3,
-}
-
 export const INTERACT_TYPE = {
   1: '进入',
   2: '关注',
@@ -24,7 +12,7 @@ export const QUALITY_MAP = {
   流畅: 80,
 }
 
-export const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+export const COLORS = ['crimson', 'darkorange', 'gold', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
 
 export const DEFAULT_FONTS = ['inherit', 'initial', 'unset']
 
@@ -43,7 +31,7 @@ export const IPC_GET_EXE_PATH = 'IPC_GET_EXE_PATH'
 export const IPC_ENABLE_WEB_CONTENTS = 'IPC_ENABLE_WEB_CONTENTS'
 export const IPC_LIVE_WINDOW_ON_TOP = 'IPC_LIVE_WINDOW_ON_TOP'
 export const IPC_CHOOSE_DIRECTORY = 'IPC_CHOOSE_DIRECTORY'
-export const IPC_SAVE_FILE = 'IPC_SAVE_FILE'
+export const IPC_GIFT_STATS_EXPORT = 'IPC_GIFT_STATS_EXPORT'
 export const IPC_WINDOW_CREATE = 'IPC_WINDOW_CREATE'
 export const IPC_WINDOW_CLOSE = 'IPC_WINDOW_CLOSE'
 export const IPC_WINDOW_FIND = 'IPC_WINDOW_FIND'

@@ -1,448 +1,763 @@
 <template>
-  <div class="disable-user-select">
-    <div :style="{ padding: '10px 20px 0 20px' }">
-      <Alert type="info">
-        <Icon type="md-information-circle" :style="{ 'font-size': '16px' }" />
-        <span> 未设置Cookie时，仅以弹幕内容作为依据，允许多次投票 </span>
-      </Alert>
-    </div>
-
-    <div class="left-container">
-      <div>
-        <Button class="vote-button" :disabled="isWatching || !isConnected" @click="start">开始</Button>
-        <Button class="vote-button" :disabled="!isWatching" @click="stop">停止</Button>
-        <Button class="vote-button" @click="showVoteRecord">投票记录</Button>
+  <div class="vote-page">
+    <!-- 顶部区域（白色背景） -->
+    <div class="vote-header">
+      <!-- Row 1: 操作栏 -->
+      <div class="vote-toolbar">
+        <div class="toolbar-left">
+          <Button
+            type="primary"
+            size="small"
+            class="btn-xs"
+            :disabled="isWatching"
+            @click="start">
+            <Icon type="md-play" /> 开始
+          </Button>
+          <Button
+            size="small"
+            class="btn-xs"
+            :disabled="!isWatching"
+            @click="stop">
+            <Icon type="md-square" /> 停止
+          </Button>
+          <span
+            v-if="isWatching && duration > 0"
+            class="countdown-area">
+            <Icon
+              type="md-timer"
+              size="14" />
+            {{ countdown }}
+          </span>
+        </div>
+        <Button
+          size="small"
+          class="btn-xs"
+          @click="showVoteRecord">
+          <Icon type="md-list" /> 记录
+        </Button>
       </div>
 
-      <div :style="{ margin: '10px 0 10px 0' }">
-        <Tooltip placement="bottom" transfer>
-          <Checkbox :model-value="isAccurateMatch" :disabled="isWatching" @on-change="changeIsAccurateMatch">精确匹配</Checkbox>
+      <!-- Row 2: 定时 + 设置芯片 -->
+      <div class="vote-chips">
+        <span class="timer-inline">
+          <span class="toolbar-label">定时</span>
+          <InputNumber
+            size="small"
+            :style="{ width: '46px' }"
+            :model-value="duration"
+            :min="0"
+            :step="10"
+            :disabled="isWatching"
+            @on-change="changeDuration" />
+          <span class="toolbar-unit">秒</span>
+        </span>
+        <Tooltip
+          placement="bottom"
+          transfer>
+          <span
+            class="chip"
+            :class="{ on: isAccurateMatch }"
+            :style="{ pointerEvents: isWatching ? 'none' : 'auto', opacity: isWatching ? 0.5 : 1 }"
+            @click="changeIsAccurateMatch">
+            精确匹配
+          </span>
           <template #content> 弹幕与关键字必须完全一致 </template>
         </Tooltip>
-        <Tooltip placement="bottom" transfer>
-          <Checkbox :model-value="allowReVote" :disabled="isWatching" @on-change="changeAllowReVote">允许改票</Checkbox>
+        <Tooltip
+          placement="bottom"
+          transfer>
+          <span
+            class="chip"
+            :class="{ on: isAllowReVote }"
+            :style="{ pointerEvents: isWatching ? 'none' : 'auto', opacity: isWatching ? 0.5 : 1 }"
+            @click="changeAllowReVote"
+            >允许改票</span
+          >
           <template #content> 同一位用户投票记录以最后一次为准 </template>
         </Tooltip>
+        <!-- <Button
+          size="small"
+          class="btn-xs"
+          :disabled="!isWatching"
+          style="margin-left: auto"
+          @click="sendTestDanmaku">
+          测试弹幕
+        </Button> -->
       </div>
-      <div>
-        <div class="keyword-container">关键字</div>
-        <div class="content-container">描述</div>
-      </div>
-      <template v-for="(item, index) in options" :key="index">
-        <div>
-          <div class="keyword-container">
-            <Input :model-value="item.keyword" :disabled="isWatching" @on-change="changeOptionKeyword(index, $event)" />
+    </div>
+
+    <!-- 主体: 侧边栏 + 图 -->
+    <div class="vote-body">
+      <!-- 左侧边栏 -->
+      <div class="vote-sidebar">
+        <div class="side-card">
+          <div class="side-card-title">投票关键词</div>
+          <div class="keyword-list">
+            <div
+              v-for="(item, index) in options"
+              :key="index"
+              class="keyword-row">
+              <span
+                class="kw-dot"
+                :style="{ background: chartColors[index] }"></span>
+              <div class="kw-inputs">
+                <Input
+                  :model-value="item.value"
+                  :disabled="isWatching"
+                  size="small"
+                  placeholder="关键字"
+                  @on-change="changeOptionKeyword(index, $event)" />
+              </div>
+              <Icon
+                v-if="!isWatching"
+                type="md-close-circle"
+                size="16"
+                color="#ed4014"
+                class="kw-remove"
+                @click="removeOption(index)" />
+            </div>
           </div>
-          <div class="content-container">
-            <Input :model-value="item.value" :disabled="isWatching" @on-change="changeOptionContent(index, $event)" />
-          </div>
-          <div class="remove-icon-container">
-            <Icon type="md-remove" @click="removeOption(index)" />
-          </div>
+          <Button
+            type="dashed"
+            long
+            size="small"
+            :disabled="isWatching"
+            @click="addOption"
+            style="margin-top: 6px">
+            <Icon type="md-add" /> 添加
+          </Button>
         </div>
-      </template>
 
-      <div :style="{ 'margin-top': '5px' }">
-        <Button type="primary" long :disabled="isWatching" @click="addOption">
-          <Icon :style="{ 'font-weight': 'bold' }" type="md-add" />
-        </Button>
+        <div class="side-card side-info">
+          <div class="side-card-title">说明</div>
+          <p>⚠️ 未设置Cookie时，仅以弹幕内容作为投票依据，同一用户可多次投票。</p>
+        </div>
+      </div>
+
+      <!-- 右侧单图 -->
+      <div class="vote-charts">
+        <div class="chart-card">
+          <div class="chart-top-bar">
+            <span class="segmented">
+              <span
+                class="seg-item"
+                :class="{ on: chartType === 'pie' }"
+                @click="toggleChartType('pie')"
+                >饼图</span
+              >
+              <span
+                class="seg-item"
+                :class="{ on: chartType === 'bar' }"
+                @click="toggleChartType('bar')"
+                >柱状图</span
+              >
+            </span>
+            <div class="chart-stats">
+              <span class="stat-item"
+                >总票 <b>{{ totalVotes }}</b></span
+              >
+              <span class="stat-sep">|</span>
+              <span class="stat-item"
+                ><b>{{ totalUsers }}</b> 人</span
+              >
+              <span class="stat-sep">|</span>
+              <span class="stat-item"
+                >运行 <b>{{ elapsedDisplay }}</b></span
+              >
+            </div>
+          </div>
+          <div
+            id="chart"
+            class="chart-body"></div>
+        </div>
       </div>
     </div>
-    <div class="right-container">
-      <ButtonGroup size="default" :style="{ 'padding-top': '5px' }">
-        <Button :disabled="!isWatching" @click="makeBarChart">
-          <Icon type="md-podium" />
-        </Button>
-        <Button :disabled="!isWatching" @click="makePieChart">
-          <Icon type="md-pie" />
-        </Button>
-      </ButtonGroup>
-      <div id="chart" />
-    </div>
 
-    <Modal v-model="isShowVoteRecord" title="投票记录" scrollable footer-hide lock-scroll transfer :styles="{ height: '70%', overflow: 'auto' }">
-      <template v-for="(value, uid, index) in userMap" :key="index">
-        <p>{{ value.message }}</p>
-      </template>
+    <!-- 投票记录弹窗 -->
+    <Modal
+      v-model="isShowVoteRecord"
+      title="投票记录"
+      scrollable
+      footer-hide
+      transfer
+      :styles="{ height: '70%', overflow: 'auto' }">
+      <div
+        v-if="!Object.keys(userMap).length"
+        style="text-align: center; color: #ccc; padding: 40px">
+        暂无投票数据
+      </div>
+      <table
+        v-else
+        class="record-table">
+        <thead>
+          <tr>
+            <th class="col-opt">选项</th>
+            <th class="col-msg">弹幕</th>
+            <th class="col-time">时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(item, uid) in userMap"
+            :key="uid">
+            <td class="col-opt">
+              <span
+                class="kw-tag"
+                :style="{ background: chartColors[item.index], color: '#fff' }"
+                >{{ item.keyword }}</span
+              >
+            </td>
+            <td class="col-msg">{{ item.username }}: {{ item.content }}</td>
+            <td class="col-time">{{ item.time }}</td>
+          </tr>
+        </tbody>
+      </table>
     </Modal>
   </div>
 </template>
 
-<script lang="ts">
-import { useConfigStore } from '../store'
-import { toRaw } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onBeforeMount, onBeforeUnmount, toRefs } from 'vue'
 import * as echarts from 'echarts'
+import { shuffle } from 'lodash'
+import { sse } from '../service/sse-client'
+import { COLORS } from '../../service/const'
+import config from '../service/config'
+import { updateClientConfig } from '../service/api'
+import { Message } from '@tokine/shared/types.js'
+import { dateFormat } from '@tokine/shared'
 
-// ISSUE: echart 5.0.2 按需引入 electron 打包报错
-// https://github.com/apache/echarts/issues/14321
-
-// import * as echarts from "echarts/core";
-// import { BarChart, PieChart } from "echarts/charts";
-// import {
-//   TitleComponent,
-//   TooltipComponent,
-//   GridComponent,
-// } from "echarts/components";
-// import { CanvasRenderer } from "echarts/renderers";
-// echarts.use([
-//   TitleComponent,
-//   TooltipComponent,
-//   GridComponent,
-//   BarChart,
-//   PieChart,
-//   CanvasRenderer,
-// ]);
-
-// Module-level state for vue-tsc 3.x compat
+// ── module-level state ──
 let chartData: any[] = []
 let keywords: string[] = []
 let optionRegexps: RegExp[] = []
-let colorPool: string[] = []
+let colorPool: string[] = shuffle(COLORS)
+let chartRef: echarts.EChartsType | null = null
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+let countdownEnd = 0
+let elapsedTimer: ReturnType<typeof setInterval> | null = null
 
-import { shuffle, cloneDeep } from 'lodash'
-import { sse } from '../service/sse-client'
-import { COLORS } from '../../service/const'
-import { dateFormat } from '../service/util'
+const { options, isAccurateMatch, isAllowReVote, duration } = toRefs(config.voteConfig)
+const clientId = computed(() => config.id)
+// ── local reactive state ──
+const isWatching = ref(false)
+const isShowVoteRecord = ref(false)
+const userMap = ref<Record<string, any>>({})
+const countdown = ref('')
+const chartType = ref<'pie' | 'bar'>('pie')
+const totalVotes = ref(0)
+const totalUsers = ref(0)
+const activeOptions = ref(0)
+const elapsedSeconds = ref(0)
 
-const chartRef: any = { current: null }
+// ── computed ──
+// const isConnected = computed(() => store.isConnected)
+// const options = computed(() => store.voteOptions)
 
-export default {
-  data() {
-    return {
-      isWatching: false,
-      type: 'bar',
-      isShowVoteRecord: false,
-      userMap: {},
-    }
-  },
-  computed: {
-    isConnected() {
-      return useConfigStore().isConnected
-    },
-    options() {
-      return useConfigStore().voteOptions
-    },
-    isAccurateMatch() {
-      return useConfigStore().isAccurateMatch
-    },
-    allowReVote() {
-      return useConfigStore().allowReVote
-    },
-    colors() {
-      return useConfigStore().colors.length ? useConfigStore().colors : COLORS
-    },
-  },
-  beforeMount() {
-    colorPool = shuffle(this.colors)
-  },
-  beforeUnmount() {
-    this.stop()
-    if (chartRef.current) {
-      chartRef.current.clear()
-      chartRef.current = null
-    }
-  },
-  methods: {
-    initChart() {
-      this.userMap = {}
-      const chartDOM = document.getElementById('chart')
-      if (!chartRef.current) {
-        chartRef.current = echarts.init(chartDOM)
-      }
-      this.type === 'bar' ? this.makeBarChart() : this.makePieChart()
-    },
+const chartColors = computed(() => {
+  const pool = COLORS
+  return options.value.map((_: any, i: number) => pool[i % pool.length])
+})
+const elapsedDisplay = computed(() => {
+  const m = Math.floor(elapsedSeconds.value / 60)
+  const s = elapsedSeconds.value % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+})
 
-    start() {
-      this.isWatching = true
-      keywords = this.options.map((option) => option.keyword).filter(Boolean)
-      optionRegexps = keywords.map((keyword) => new RegExp(keyword, 'i'))
-      chartData = keywords.map((keyword, index) => {
-        return {
-          name: keyword,
-          value: 0,
-          itemStyle: {
-            color: this.randomPickColor(),
-          },
-        }
-      })
+// ── lifecycle ──
+onBeforeMount(() => {})
 
-      this.initChart()
+onBeforeUnmount(() => {
+  stop()
+  if (chartRef) {
+    chartRef.dispose()
+    chartRef = null
+  }
+})
 
-      sse.on('COMMENT', this.onVoteMessage)
-      // emitter.on("message", this.onVoteMessage);
+// ── methods ──
+function initChart() {
+  const dom = document.getElementById('chart')
+  if (dom && !chartRef) chartRef = echarts.init(dom)
+  makeChart()
+}
 
-      // setInterval(() => {
-      //   for (let i = 0; i < chartData.length; i++) {
-      //     chartData[i].value = chartData[i].value + Math.floor(Math.random() * 10)
-      //   }
-      //   this.updateChartData()
-      // }, 3000)
-    },
-    stop() {
-      this.isWatching = false
-      sse.off('COMMENT', this.onVoteMessage)
-    },
+function start() {
+  isWatching.value = true
+  keywords = options.value.map((o: any) => o.value).filter(Boolean)
+  optionRegexps = keywords.map((k: string) => new RegExp(k, 'i'))
+  chartData = keywords.map((keyword: string, i: number) => ({
+    name: keyword,
+    value: 0,
+    itemStyle: { color: chartColors.value[i] || randomPickColor() },
+  }))
 
-    makePieChart() {
-      this.type = 'pie'
-      chartRef.current.clear()
+  totalVotes.value = 0
+  totalUsers.value = 0
+  activeOptions.value = keywords.length
+  elapsedSeconds.value = 0
+  userMap.value = {}
 
-      const option = {
-        tooltip: {
-          trigger: 'item',
-        },
-        // legend: {
-        //   top: '5%',
-        //   left: 'center'
-        // },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-        },
-        series: [
-          {
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: '#fff',
-              borderWidth: 2,
-            },
-            label: {
-              show: false,
-              position: 'center',
-            },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: '30',
-                fontWeight: 'bold',
-                formatter: '{b}: {d}%',
-              },
-            },
-            labelLine: {
-              show: false,
-            },
-            data: chartData,
-          },
-        ],
-      }
+  initChart()
+  sse.on('MESSAGE', onMessage)
 
-      chartRef.current.setOption(option)
-    },
+  elapsedTimer = setInterval(() => {
+    elapsedSeconds.value++
+  }, 1000)
 
-    makeBarChart() {
-      this.type = 'bar'
-      chartRef.current.clear()
-      // this.chart.resize({
-      //   height: 160 + keywords.length * 30,
-      // })
+  if (duration.value > 0) {
+    countdownEnd = Date.now() + duration.value * 1000
+    tickCountdown()
+    countdownTimer = setInterval(tickCountdown, 1000)
+  }
+}
 
-      const option = {
-        xAxis: {
-          max: 'dataMax',
-        },
-        yAxis: {
-          type: 'category',
-          data: keywords,
-          // data: ['A', 'B', 'C', 'D', 'E'],
-          inverse: true,
-          animationDuration: 300,
-          animationDurationUpdate: 300,
-          // max: 2 // only the largest 3 bars will be displayed
-        },
-        series: [
-          {
-            realtimeSort: true,
-            // name: 'X',
-            type: 'bar',
-            data: chartData,
-            label: {
-              show: true,
-              position: 'right',
-              valueAnimation: true,
-            },
-          },
-        ],
-        legend: {
-          show: false,
-        },
-        animationDuration: 0,
-        animationDurationUpdate: 3000,
-        animationEasing: 'linear',
-        animationEasingUpdate: 'linear',
-      }
+function stop() {
+  isWatching.value = false
+  sse.off('MESSAGE', onMessage)
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+    countdown.value = ''
+  }
+  if (elapsedTimer) {
+    clearInterval(elapsedTimer)
+    elapsedTimer = null
+  }
+}
 
-      chartRef.current.setOption(option)
-    },
+function tickCountdown() {
+  const remaining = Math.max(0, Math.ceil((countdownEnd - Date.now()) / 1000))
+  if (remaining <= 0) {
+    countdown.value = ''
+    stop()
+    return
+  }
+  const m = Math.floor(remaining / 60)
+  const s = remaining % 60
+  countdown.value = `${m}:${String(s).padStart(2, '0')}`
+}
 
-    updateChartData() {
-      chartRef.current.setOption({
-        series: [
-          {
-            data: chartData,
-          },
-        ],
-      })
-    },
+function toggleChartType(type: 'pie' | 'bar') {
+  if (chartType.value === type) return
+  chartType.value = type
+  makeChart()
+}
 
-    showVoteRecord() {
-      this.isShowVoteRecord = true
-    },
-    randomPickColor() {
-      const color = colorPool.shift()!
-      colorPool.push(color)
-      return color
-    },
-    onVoteMessage: async function (data: any) {
-      const comment = data.payload
+function makeChart() {
+  if (!chartRef) return
+  chartRef.clear()
+  chartRef.setOption(chartType.value === 'pie' ? pieOption() : barOption(), true)
+}
 
-      // 未登录时
-      if (!comment.uid) {
-      }
+function pieOption() {
+  return {
+    tooltip: { trigger: 'item' },
+    legend: { orient: 'vertical', left: 'left', top: 'center' },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+        label: { show: false },
+        emphasis: { label: { show: true, fontSize: '24', fontWeight: 'bold', formatter: '{b}: {d}%' } },
+        labelLine: { show: false },
+        data: chartData,
+      },
+    ],
+  }
+}
 
-      if (comment.uid) {
-        if (this.userMap[comment.uid]) {
-          // 如果允许改票...
-          if (this.allowReVote) {
-            const index = this.userMap[comment.uid].index
-            chartData[index].value--
-          } else {
-            // 已经记录过的用户不再重复统计
-            return
-          }
-        }
-      }
+function barOption() {
+  return {
+    xAxis: { max: 'dataMax' },
+    yAxis: { type: 'category', data: keywords, inverse: true },
+    series: [
+      {
+        realtimeSort: true,
+        type: 'bar',
+        data: chartData,
+        label: { show: true, position: 'right', valueAnimation: true },
+      },
+    ],
+    legend: { show: false },
+    animationDuration: 300,
+    animationDurationUpdate: 500,
+  }
+}
 
-      let index
-      if (this.isAccurateMatch) {
-        index = keywords.findIndex((keyword) => {
-          return keyword === comment.content
-        })
+function updateChart() {
+  if (chartRef) chartRef.setOption({ series: [{ data: chartData }] })
+  totalVotes.value = chartData.reduce((sum, d) => sum + d.value, 0)
+  totalUsers.value = Object.keys(userMap.value).length
+  activeOptions.value = chartData.filter(d => d.value > 0).length
+}
+
+function showVoteRecord() {
+  isShowVoteRecord.value = true
+}
+
+function sendTestDanmaku() {
+  if (!keywords.length) return
+  const kw = keywords[Math.floor(Math.random() * keywords.length)]
+  const testNames = ['小明', '小红', '小刚', '阿强', '丽丽', '大壮', '花花', '阿杰']
+  onMessage({
+    id: Math.floor(Math.random() * 100000),
+    // userId: String(Math.floor(Math.random() * 100000)),
+    userId: '0',
+    username: testNames[Math.floor(Math.random() * testNames.length)],
+    content: kw,
+    sendAt: Date.now(),
+    category: 'comment',
+    roomId: '*',
+  } as Message)
+}
+
+function randomPickColor() {
+  const c = colorPool.shift()!
+  colorPool.push(c)
+  return c
+}
+
+function onMessage(msg: Message) {
+  if (msg.category !== 'comment') return
+  if (msg.userId) {
+    if (userMap.value[msg.userId]) {
+      if (isAllowReVote.value) {
+        chartData[userMap.value[msg.userId].index].value--
       } else {
-        index = optionRegexps.findIndex((regexp) => {
-          return regexp.test(comment.content)
-        })
+        return
       }
-      if (!~index) return
+    }
+  }
 
-      // 记录统计
-      // 如果未登录时，以 _id 为 key
-      this.userMap[comment.uid || comment._id] = {
-        index,
-        message: `${keywords[index]} | ${comment.uname}:${comment.content} | ${dateFormat(comment.sendAt)} `,
-      }
-      // 输入图表
-      chartData[index].value++
-      this.updateChartData()
-    },
+  const idx = isAccurateMatch.value ? keywords.findIndex(k => k === msg.content) : optionRegexps.findIndex(r => r.test(msg.content))
+  if (!~idx) return
 
-    addOption() {
-      const options = [
-        ...this.options.map(toRaw),
-        {
-          keyword: '',
-          value: '',
-        },
-      ]
-      useConfigStore().updateConfig({
-        voteOptions: options,
-      })
-    },
+  userMap.value[msg.userId || String(msg.id)] = {
+    index: idx,
+    keyword: keywords[idx],
+    username: msg.username,
+    content: msg.content,
+    time: dateFormat(msg.sendAt),
+  }
+  chartData[idx].value++
+  updateChart()
+}
 
-    removeOption(index) {
-      if (this.isWatching) return
-      const options = [...this.options.map(toRaw)]
-      options.splice(index, 1)
-      useConfigStore().updateConfig({
-        voteOptions: options,
-      })
-    },
+// ── 持久化 ──
+function saveVoteConfig(key: string, value: any) {
+  const path = `voteConfig.${key}`
+  config.set(path, value)
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: path, value }],
+  }).catch((e: any) => console.error(e))
+}
 
-    changeOptionKeyword(index, e) {
-      const options = cloneDeep(this.options)
-      options[index].keyword = e.target.value
-      useConfigStore().updateConfig({
-        voteOptions: options,
-      })
-    },
+function addOption() {
+  const opts = [...options.value, { value: '', description: '' }]
+  config.voteConfig.options = opts
+  saveVoteConfig('options', opts)
+}
 
-    changeOptionContent(index, e) {
-      const options = cloneDeep(this.options)
-      options[index].content = e.target.value
-      useConfigStore().updateConfig({
-        voteOptions: options,
-      })
-    },
+function removeOption(index: number) {
+  if (isWatching.value) return
+  const opts = [...options.value]
+  opts.splice(index, 1)
+  config.voteConfig.options = opts
+  saveVoteConfig('options', opts)
+}
 
-    changeIsAccurateMatch(value) {
-      const data = {
-        isAccurateMatch: value,
-      }
-      // updateSetting(data)
-      useConfigStore().updateConfig(data)
-    },
+function changeOptionKeyword(index: number, val: any) {
+  const v = typeof val === 'string' ? val : (val?.target?.value ?? '')
+  const opts = [...options.value]
+  opts[index] = { ...opts[index], value: v }
+  config.voteConfig.options = opts
+  saveVoteConfig('options', opts)
+}
 
-    changeAllowReVote(value) {
-      const data = {
-        allowReVote: value,
-      }
-      // updateSetting(data)
-      useConfigStore().updateConfig(data)
-    },
-  },
+function changeIsAccurateMatch() {
+  const val = !config.voteConfig.isAccurateMatch
+  config.voteConfig.isAccurateMatch = val
+  saveVoteConfig('isAccurateMatch', val)
+}
+
+function changeAllowReVote() {
+  const val = !config.voteConfig.isAllowReVote
+  config.voteConfig.isAllowReVote = val
+  saveVoteConfig('isAllowReVote', val)
+}
+
+function changeDuration(val: number) {
+  config.voteConfig.duration = val
+  saveVoteConfig('duration', val)
 }
 </script>
 
 <style scoped>
-.description-text {
-  white-space: normal;
+/* ── 页面容器 ── */
+.vote-page {
+  padding: 14px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-#chart {
-  width: 600px;
-  height: 600px;
+/* ── 顶部区域 ── */
+.vote-header {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 16px 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
-.vote-button {
-  margin: 5px 10px 0 0;
+/* ── Row 1: 操作栏 ── */
+.vote-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
-
-.option-input {
-  vertical-align: top;
-  display: inline-block;
+.btn-xs {
+  padding: 3px 12px;
+  font-size: 12px;
+  height: 24px;
+  line-height: 1;
 }
-.left-container {
-  margin: 10px 0 0 25px;
-  width: 325px;
-  display: inline-block;
-  vertical-align: top;
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.keyword-container {
-  width: 60px;
-  display: inline-block;
-  text-align: center;
-  margin: 0px 5px 5px 0px;
-}
-.content-container {
-  width: 220px;
-  display: inline-block;
-  text-align: center;
-}
-.remove-icon-container {
-  color: crimson;
+.countdown-area {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ed4014;
   font-weight: bold;
-  display: inline-block;
-  vertical-align: middle;
-  cursor: pointer;
-  font-size: 20px;
-  margin-left: 10px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  background: rgba(237, 64, 20, 0.06);
+  border-radius: 6px;
+}
+.toolbar-label {
+  font-size: 11px;
+  color: #808695;
+}
+.toolbar-unit {
+  font-size: 10px;
+  color: #bbb;
 }
 
-.right-container {
+/* ── Row 2: 芯片 + 定时 ── */
+.vote-chips {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.timer-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.chip {
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  border: 1px solid #ddd;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #666;
+  user-select: none;
+  transition: 0.15s;
+}
+.chip.on {
+  background: rgba(45, 140, 240, 0.08);
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+}
+
+/* ── 主体 ── */
+.vote-body {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── 侧边栏 ── */
+.vote-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+.side-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+.side-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.keyword-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.keyword-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kw-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.kw-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.kw-remove {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.side-info p {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── 图表区 ── */
+/* ── 分段胶囊切换（参考 Config.vue）── */
+.segmented {
+  display: inline-flex;
+  background: #f0f2f5;
+  border-radius: 11px;
+  padding: 2px;
+}
+.seg-item {
+  height: 20px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #999;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.15s;
+  user-select: none;
+}
+.seg-item.on {
+  background: #fff;
+  color: #2d8cf0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* ── 图表区 ── */
+.vote-charts {
+  flex: 1;
+  min-height: 0;
+}
+.chart-card {
+  height: 100%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chart-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.chart-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #999;
+}
+.stat-item b {
+  color: #333;
+  font-weight: 600;
+}
+.stat-sep {
+  color: #e0e0e0;
+}
+.chart-body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── 弹窗 ── */
+.record-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.record-table thead th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid #e8eaec;
+  color: #808695;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.record-table tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  color: #515a6e;
+}
+.record-table tbody tr:hover td {
+  background: #f8f9fb;
+}
+.col-opt {
+  width: 80px;
+}
+.col-msg {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col-time {
+  width: 120px;
+  white-space: nowrap;
+}
+.kw-tag {
   display: inline-block;
-  vertical-align: top;
-  margin: 10px 0 0 20px;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
 }
 </style>

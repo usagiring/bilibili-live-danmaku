@@ -14,10 +14,10 @@ const routes = [
     path: '/speech-to-danmaku',
     component: () => import('../components/SpeechToDanmaku.vue'),
   },
-  {
-    path: '/live-window',
-    component: () => import('../components/LiveWindow.vue'),
-  },
+  // {
+  //   path: '/live-window',
+  //   component: () => import('../components/LiveWindow.vue'),
+  // },
   // {
   //   path: '/danmaku-scroll',
   //   component: () => import('../components/Danmaku-Scroll.vue')

@@ -241,6 +241,18 @@
                   @click="activeTab = 'message'">
                   <Icon type="md-chatboxes" /> 弹幕
                 </div>
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'vote' }"
+                  @click="activeTab = 'vote'">
+                  <Icon type="md-stats" /> 投票
+                </div>
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'stats' }"
+                  @click="activeTab = 'stats'">
+                  <Icon type="md-podium" /> 统计
+                </div>
               </div>
             </div>
           </div>
@@ -249,6 +261,8 @@
           <div class="tab-content">
             <OverviewPanel v-if="activeTab === 'overview'" />
             <Message v-if="activeTab === 'message'" />
+            <Vote v-if="activeTab === 'vote'" />
+            <Stats v-if="activeTab === 'stats'" />
           </div>
         </template>
 
@@ -306,6 +320,8 @@ import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE
 import OverviewPanel from './OverviewPanel.vue'
 import Message from './Message.vue'
 import Config from './Config.vue'
+import Vote from './Vote.vue'
+import Stats from './Stats.vue'
 import {
   connect as connectApi,
   disconnect as disconnectApi,
@@ -316,17 +332,10 @@ import {
   cancelRecord,
   getRecordState,
 } from '../service/api'
-import { DEFAULT_FACE, QUALITY_MAP } from '../../service/const'
 import globalVar from '../../service/global'
 import config from '../service/config'
 import { Message as $Message } from 'view-ui-plus'
-// TODO: 逐模块重构，暂时注释
-// import StyleSetting from './StyleSetting.vue'
-// import Vote from './Vote.vue'
-// import Lottery from './Lottery.vue'
-// import Live from './Live.vue'
-// import AutoReply from './AutoReply.vue'
-// import Config from './Config.vue'
+import { DEFAULT_FACE } from '@tokine/shared'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -566,50 +575,9 @@ async function handleShowLiveWindow() {
   fetchWindows()
 }
 
-function dateFormat(date: Date, fmt: string) {
-  const o: Record<string, number> = {
-    YYYY: date.getFullYear(),
-    MM: date.getMonth() + 1,
-    DD: date.getDate(),
-    HH: date.getHours(),
-    mm: date.getMinutes(),
-    ss: date.getSeconds(),
-  }
-  return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, m => String(o[m]).padStart(2, '0'))
-}
-
 let recordTimer: ReturnType<typeof setInterval> | null = null
 
-async function handleToggleRecord() {
-  const room = activeRoom.value
-  if (!room) return
-  try {
-    if (isRecording.value) {
-      const { data } = await getRecordState({ roomId: room.id })
-      const recordId = data.recordId
-      if (recordId) {
-        await cancelRecord({ roomId: room.id, recordId })
-      }
-      isRecording.value = false
-      if (recordTimer) {
-        clearInterval(recordTimer)
-        recordTimer = null
-      }
-    } else {
-      const recordDir = config.recordConfig?.savePath || ''
-      const output = `${recordDir}/${room.id}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.flv`
-      await record({
-        roomId: room.id,
-        output,
-        qn: QUALITY_MAP['超清'] || 400,
-        withCookie: config.liveConfig?.isWithCookie || false,
-      })
-      isRecording.value = true
-    }
-  } catch (e: any) {
-    $Message.error(`录制操作失败: ${e.message}`)
-  }
-}
+async function handleToggleRecord() {}
 
 // ── 标题栏窗口列表 ──
 interface WindowItem {

@@ -1,45 +1,9 @@
-import dayjs from 'dayjs'
-import { GUARD_ICON_MAP, INTERACT_TYPE } from '../../service/const'
-
-export function getGuardIcon(level) {
-  return GUARD_ICON_MAP[level]
-}
-
-export function getInteractType(type) {
-  return INTERACT_TYPE[type]
-}
-
 const units = ['B/s', 'KB/s', 'MB/s']
 export function parseDownloadRate(value, unitIndex = 0) {
   if (value < 1024) return `${value} ${units[unitIndex]}`
   value = (value / 1024).toFixed(1)
   return parseDownloadRate(value, ++unitIndex)
 }
-
-export function parseHexColor(colorNumber) {
-  return `#${colorNumber.toString(16).padStart(6, '0')}`
-}
-
-export function dateFormat(date, formatter = 'YYYY-MM-DD HH:mm:ss') {
-  return dayjs(date).format(formatter)
-}
-
-export async function wait(ms = 1000) {
-  await new Promise(resolve => setTimeout(resolve, ms))
-}
-
-// export function setGiftConfigMap(gifts) {
-//   const giftConfigMap = gifts.reduce((map, gift) => {
-//     return Object.assign(map, {
-//       [gift.id]: {
-//         webp: gift.webp,
-//         name: gift.name,
-//         price: gift.price
-//       }
-//     })
-//   }, {})
-//   fs.writeFileSync('gift_config', JSON.stringify(giftConfigMap))
-// }
 
 // [{ ... , probability: number }]
 export function getRandomItem(items) {

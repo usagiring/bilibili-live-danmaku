@@ -3,7 +3,7 @@ import { reactive } from 'vue'
 import { ClientConfig } from '../types'
 
 // 全局共享的客户端配置（响应式，任何组件 import 后读写即生效）
-const config: ClientConfig = reactive({
+const config: ClientConfig & { set: (p: string, v: string) => void } = reactive({
   id: '',
   rooms: [],
   windows: [],
@@ -11,7 +11,7 @@ const config: ClientConfig = reactive({
 
   signInMessage: '...',
   isNeedRefreshCookieCache: false,
-  refreshToken: '',
+
   waitingSpeakerCount: 0,
 
   messageConfig: {
@@ -19,6 +19,13 @@ const config: ClientConfig = reactive({
     isShowUserId: true,
     isShowSendAt: true,
     isShowInteract: true,
+  },
+
+  voteConfig: {
+    options: [],
+    isAccurateMatch: false,
+    isAllowReVote: false,
+    duration: 60,
   },
 
   set(path: string, value: any) {

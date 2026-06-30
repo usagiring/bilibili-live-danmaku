@@ -115,19 +115,23 @@ export async function addLotteryHistory(body: any) {
 
 // ==================== Statistic ====================
 
-export async function statistic(body: { roomId: number; start: string; end: string }) {
-  const res = await axios.post(`${baseUrl}/api/statistic`, body)
+export async function getStats({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+  const res = await axios.get(`${baseUrl}/api/stats`, {
+    params: { roomId, startTime, endTime },
+  })
   return res.data
 }
 
-export async function commentWordExtract(body: { roomId: number; start: string; end: string }) {
-  const res = await axios.post(`${baseUrl}/api/statistic/comment/keyword-extract`, body)
+export async function commentWordExtract({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+  const res = await axios.get(`${baseUrl}/api/stats/comment/keyword-extract`, {
+    params: { roomId, startTime, endTime },
+  })
   return res.data
 }
 
-export async function exportFile(body: { roomId: number; start: string; end: string }) {
-  const res = await axios.post(`${baseUrl}/api/statistic/gift/export`, body, {
-    transitional: { forcedJSONParsing: false },
+export async function exportFile({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+  const res = await axios.get(`${baseUrl}/api/stats/gift/export`, {
+    params: { roomId, startTime, endTime },
   })
   return res.data
 }

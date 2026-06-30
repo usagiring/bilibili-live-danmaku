@@ -13,7 +13,7 @@ import {
   IPC_LIVE_WINDOW_ON_TOP,
   IPC_LIVE_WINDOW_CLOSE,
   IPC_CHOOSE_DIRECTORY,
-  IPC_SAVE_FILE,
+  IPC_GIFT_STATS_EXPORT,
   IPC_WINDOW_CREATE,
   IPC_WINDOW_CLOSE,
   IPC_SHOW_OPEN_DIALOG,
@@ -255,19 +255,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
   // ---- 文件保存 ----
 
-  ipcMain.handle(IPC_SAVE_FILE, async (_event, { filePath, roomId, start, end, fileName }) => {
-    const res = await axios.post(
-      `${globalVar.baseUrl}/api/statistic/gift/export`,
-      {
-        roomId,
-        start,
-        end,
-      },
-      {
-        responseType: 'text',
-        transitional: { forcedJSONParsing: false },
-      },
-    )
+  ipcMain.handle(IPC_GIFT_STATS_EXPORT, async (_event, { filePath, roomId, startTime, endTime, fileName }) => {
+    const res = await axios.get(`${globalVar.baseUrl}/api/stats/gift/export`, {
+      params: { roomId, startTime, endTime },
+      responseType: 'text',
+    })
 
     if (!fs.existsSync(filePath)) {
       fs.mkdirSync(filePath, { recursive: true })

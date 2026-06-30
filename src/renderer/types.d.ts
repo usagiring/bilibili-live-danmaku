@@ -141,6 +141,16 @@ interface RecordConfig {
   isAutoRecord: boolean
 }
 
+export interface VoteConfig {
+  options: {
+    value: string
+    description: string
+  }[]
+  isAccurateMatch: boolean
+  isAllowReVote: boolean
+  duration: number
+}
+
 export interface ClientConfig {
   id: string
   signInMessage: string
@@ -159,6 +169,7 @@ export interface ClientConfig {
   asrConfig?: AsrConfig
   mtConfig?: MtConfig
   chartConfig?: ChartConfig
+  voteConfig: VoteConfig
 }
 
 export interface StoreConfig {

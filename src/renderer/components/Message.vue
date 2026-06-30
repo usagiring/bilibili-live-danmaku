@@ -163,7 +163,7 @@
                     :username="`${msg.username}：`"
                     :face="msg.face"
                     :sendAt="msg.sendAt"
-                    :isShowSendAt="true">
+                    :isShowSendAt="isShowSendAt">
                     {{ `${msg.content}` }}
                   </GiftCardMini>
                 </template>
@@ -473,6 +473,7 @@ onBeforeUnmount(() => {
 .split-pane {
   height: 100%;
   overflow: auto;
+  background: #fff;
 }
 
 .scroll-box {
