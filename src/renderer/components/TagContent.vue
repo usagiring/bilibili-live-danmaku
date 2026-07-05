@@ -23,7 +23,7 @@
     </template>
 
     <!-- FILTER: 文本匹配 -->
-    <template v-if="tagKey === 'FILTER'">
+    <template v-else-if="tagKey === 'FILTER'">
       <div class="tc-row">
         <span class="tc-label">规则</span>
         <Input
@@ -36,7 +36,7 @@
     </template>
 
     <!-- GIFT: 指定礼物 -->
-    <template v-if="tagKey === 'GIFT'">
+    <template v-else-if="tagKey === 'GIFT'">
       <div class="tc-row">
         <span class="tc-label">礼物</span>
         <Select
@@ -62,7 +62,7 @@
     </template>
 
     <!-- PRICE: 金额区间 -->
-    <template v-if="tagKey === 'PRICE'">
+    <template v-else-if="tagKey === 'PRICE'">
       <div class="tc-row">
         <span class="tc-label">最低</span>
         <InputNumber
@@ -76,7 +76,7 @@
     </template>
 
     <!-- TEXT_REPLY: 弹幕回复说明 -->
-    <template v-if="tagKey === 'TEXT_REPLY'">
+    <template v-else-if="tagKey === 'TEXT_REPLY'">
       <div class="tc-note">
         <p>需要在设置里输入用户Cookie</p>
         <p>默认要求Cookie用户是当前直播间主播</p>
@@ -91,7 +91,7 @@
     </template>
 
     <!-- SPEAK_REPLY: 语音播放 -->
-    <template v-if="tagKey === 'SPEAK_REPLY'">
+    <template v-else-if="tagKey === 'SPEAK_REPLY'">
       <div class="tc-row">
         <span class="tc-label">声音</span>
         <Select

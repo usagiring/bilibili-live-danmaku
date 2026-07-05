@@ -11,7 +11,7 @@
     <!-- Rule Cards -->
     <div class="ar-cards">
       <div
-        v-for="(rule, index) in localRules"
+        v-for="(rule, index) in rules"
         :key="rule.id"
         class="rule-card"
         :class="{ disabled: !rule.isEnable }">
@@ -21,7 +21,7 @@
             <input
               type="checkbox"
               :checked="rule.isEnable"
-              @change="toggleEnable(index)" />
+              @change="toggleEnable(rule.id)" />
             <span class="track-sm"><span class="thumb-sm"></span></span>
           </label>
           <span
@@ -31,7 +31,7 @@
           </span>
           <button
             class="btn-del"
-            @click="removeRule(index)">
+            @click="removeRule(rule.id)">
             ×
           </button>
         </div>
@@ -43,7 +43,7 @@
               :model-value="rule.type"
               size="small"
               style="width: 120px"
-              @on-change="(v: string) => changeRuleType(index, v)">
+              @on-change="(key: string) => changeRuleType(rule.id, key)">
               <Option
                 v-for="t in triggerTypes"
                 :key="t.key"
@@ -72,7 +72,7 @@
                     {{ conditionLabel(tag) }}
                     <span
                       class="chip-close"
-                      @click.stop="removeTag(index, ti)">
+                      @click.stop="removeTag(rule.id, ti)">
                       ×
                     </span>
                   </span>
@@ -82,7 +82,7 @@
                       :data="tag.data"
                       :gift-options="giftOpts[ti] || undefined"
                       :voice-options="voiceOptions"
-                      @value-change="(payload: any) => onTagSettingChange(index, ti, payload)" />
+                      @value-change="(payload: any) => onRuleTagChange(rule.id, ti, payload)" />
                   </template>
                 </Poptip>
                 <span
@@ -91,7 +91,7 @@
                   {{ conditionLabel(tag) }}
                   <span
                     class="chip-close"
-                    @click.stop="removeTag(index, ti)"
+                    @click.stop="removeTag(rule.id, ti)"
                     >×</span
                   >
                 </span>
@@ -108,7 +108,7 @@
                       v-for="ct in conditionTagDefs"
                       :key="ct.key"
                       class="pop-item"
-                      @click="addCondition(index, ct.key)">
+                      @click="addRuleTag(rule.id, ct.key)">
                       <span class="pop-dot cond"></span> {{ ct.name }}
                     </div>
                   </div>
@@ -127,16 +127,10 @@
                 class="chip chip-action">
                 {{ actionLabel(tag) }}
                 <span
-                  class="chip-gear"
-                  v-if="tag.key === 'SPEAK_REPLY'"
-                  @click.stop="toggleSpeechSettings(index)"
-                  >⚙</span
-                >
-                <span
                   class="chip-close"
-                  @click.stop="removeTag(index, ti)"
-                  >×</span
-                >
+                  @click.stop="removeTag(rule.id, ti)">
+                  ×
+                </span>
               </span>
               <Poptip
                 trigger="click"
@@ -149,53 +143,12 @@
                       v-for="at in actionTagDefs"
                       :key="at.key"
                       class="pop-item"
-                      @click="addAction(index, at.key)">
+                      @click="addRuleTag(rule.id, at.key)">
                       <span class="pop-dot act"></span> {{ at.name }}
                     </div>
                   </div>
                 </template>
               </Poptip>
-            </div>
-          </div>
-
-          <!-- 语音播放子设置 -->
-          <div
-            v-if="ruleHasSpeech(rule) && speechExpanded[index]"
-            class="rule-row sub-row">
-            <span class="label"></span>
-            <div class="sub-settings">
-              <div class="sub-item">
-                <span class="sub-label">声音</span>
-                <Select
-                  :model-value="getSpeechData(rule).voice"
-                  size="small"
-                  style="width: 140px"
-                  @on-change="(v: string) => updateSpeechData(index, { voice: v })">
-                  <Option
-                    v-for="vo in voiceOptions"
-                    :key="vo.key"
-                    :value="vo.key"
-                    :label="vo.label">
-                    {{ vo.value }}
-                  </Option>
-                </Select>
-              </div>
-              <div class="sub-item">
-                <span class="sub-label">语速</span>
-                <span class="speed-ctl">
-                  <button
-                    class="speed-btn"
-                    @click="changeSpeed(index, -0.1)">
-                    −
-                  </button>
-                  <span class="speed-val">{{ getSpeechData(rule).speed || 1.0 }}</span>
-                  <button
-                    class="speed-btn"
-                    @click="changeSpeed(index, +0.1)">
-                    +
-                  </button>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -207,7 +160,7 @@
               placeholder="回复内容，支持 {user} {comment} 占位符..."
               size="small"
               style="flex: 1"
-              @on-change="(e: any) => changeText(index, e.target.value)" />
+              @on-change="(e: any) => changeText(rule.id, e.target.value)" />
           </div>
         </div>
       </div>
@@ -229,6 +182,7 @@ import { useConfigStore } from '../store'
 import config from '../service/config'
 import { updateClientConfig, getGiftConfig } from '../service/api'
 import TagContent from './TagContent.vue'
+import { AutoReplyRule, ReplyRuleTag } from '../types'
 
 const globalValue = inject<any>('globalValue', {})
 const store = useConfigStore()
@@ -253,7 +207,7 @@ const actionTagDefs = [
   { key: 'SPEAK_REPLY', name: '语音播放' },
 ]
 
-const tagDefMap: Record<string, any> = {
+const tagDefMap: Record<string, ReplyRuleTag> = {
   ROLE: { key: 'ROLE', name: '舰队', data: { roles: [] } },
   FILTER: { key: 'FILTER', name: '包含文本', data: { filter: '' } },
   GIFT: { key: 'GIFT', name: '指定礼物', data: { giftIds: [] } },
@@ -288,7 +242,7 @@ const dropAcceptRules: Record<string, string[]> = {
 // ── State ──
 const clientId = computed(() => store.id)
 const roomId = computed(() => store.activeRoom!.id)
-const localRules = computed(() => Object.values(config.autoReplyRule).filter((r: any) => r.roomId === roomId.value))
+const rules = computed(() => Object.values(config.autoReplyRule).filter(r => r.roomId === roomId.value))
 
 // Convert rules array to object for save
 function rulesToObj(rules: any[]) {
@@ -297,7 +251,7 @@ function rulesToObj(rules: any[]) {
   return obj
 }
 
-const speechExpanded = reactive<Record<number, boolean>>({})
+const speechExpanded = reactive<Record<string, boolean>>({})
 
 const voiceOptions = computed(() => globalValue?.voices?.map((v: any) => ({ key: v.name, label: v.name, value: v.name })) || [])
 
@@ -355,149 +309,115 @@ function makeTag(key: string) {
 }
 
 // ── Save ──
-function save() {
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ...cloneDeep(rulesToObj(localRules.value)) }
+function upsert(rule: AutoReplyRule) {
+  config.autoReplyRule[rule.id] = rule
   updateClientConfig({
     clientId: clientId.value,
-    kvs: [{ key: 'autoReplyRule', value: config.autoReplyRule }],
+    kvs: [{ key: `autoReplyRule.${rule.id}`, value: rule }],
+  }).catch(() => {})
+}
+
+function remove(id: string) {
+  delete config.autoReplyRule[id]
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: `autoReplyRule`, value: config.autoReplyRule }],
   }).catch(() => {})
 }
 
 // ── Actions ──
 function addRule() {
-  const _rules = cloneDeep(rulesToObj(localRules.value))
   const id = uid()
-  _rules[id] = { id, roomId: roomId.value, type: '', text: '', isEnable: false, tags: [] }
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ..._rules }
-  save()
+  const rule: AutoReplyRule = { id, roomId: roomId.value, type: '', text: '', isEnable: false, tags: [] }
+  upsert(rule)
 }
 
-function removeRule(index: number) {
-  const _rules = cloneDeep(rulesToObj(localRules.value))
-  delete _rules[localRules.value[index].id]
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ..._rules }
-  save()
+function removeRule(id: string) {
+  remove(id)
 }
 
-function toggleEnable(index: number) {
-  const _rules = cloneDeep(rulesToObj(localRules.value))
-  const id = localRules.value[index].id
-  _rules[id].isEnable = !_rules[id].isEnable
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ..._rules }
-  save()
+function toggleEnable(id: string) {
+  const rule = config.autoReplyRule[id]
+  upsert({ ...rule, isEnable: !rule.isEnable })
 }
 
-function changeRuleType(index: number, type: string) {
-  const _rules = cloneDeep(rulesToObj(localRules.value))
-  const id = localRules.value[index].id
-  _rules[id].type = type
-  const allowed = dropAcceptRules[type] || []
-  _rules[id].tags = (_rules[id].tags || []).filter((t: any) => allowed.includes(t.key))
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ..._rules }
-  save()
+function changeRuleType(id: string, type: string) {
+  const rule = config.autoReplyRule[id]
+  upsert({ ...rule, type })
 }
 
-function changeText(index: number, val: string) {
-  const _rules = cloneDeep(rulesToObj(localRules.value))
-  const id = localRules.value[index].id
-  _rules[id].text = val
-  const other: Record<string, any> = {}
-  for (const r of Object.values(config.autoReplyRule)) {
-    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
-  }
-  config.autoReplyRule = { ...other, ..._rules }
-  save()
+function changeText(id: string, text: string) {
+  const rule = config.autoReplyRule[id]
+  upsert({ ...rule, text })
 }
 
-async function addCondition(ruleIndex: number, key: string) {
-  const _rules: any[] = cloneDeep(localRules.value)
-  const tag = makeTag(key)
-  const tagIndex = (_rules[ruleIndex].tags || []).length
-  if (key === 'GIFT') {
-    try {
-      const { data: gc } = await getGiftConfig(roomId.value)
-      const opts: any[] = []
-      for (const [k, v] of Object.entries(gc as Record<string, any>)) {
-        opts.push({ key: k, value: v.name, label: v.name, webp: v.webp })
-      }
-      giftOpts[tagIndex] = opts
-    } catch {
-      /* ignore */
-    }
-  }
-  _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
-  _rules[ruleIndex].tags.push(tag)
-  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-  save()
+async function addRuleTag(ruleId: string, key: string) {
+  const tag: ReplyRuleTag = cloneDeep(tagDefMap[key])
+
+  // const tagIndex = (_rules[ruleIndex].tags || []).length
+  // if (key === 'GIFT') {
+  //   try {
+  //     const { data: gc } = await getGiftConfig(roomId.value)
+  //     const opts: any[] = []
+  //     for (const [k, v] of Object.entries(gc as Record<string, any>)) {
+  //       opts.push({ key: k, value: v.name, label: v.name, webp: v.webp })
+  //     }
+  //     giftOpts[tagIndex] = opts
+  //   } catch {
+  //     /* ignore */
+  //   }
+  // }
+  const rule = config.autoReplyRule[ruleId]
+  const tags = rule.tags || []
+  tags.push(tag)
+
+  upsert({ ...rule, tags: rule.tags })
 }
 
-async function addAction(ruleIndex: number, key: string) {
-  const _rules: any[] = cloneDeep(localRules.value)
-  const tag = makeTag(key)
-  _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
-  _rules[ruleIndex].tags.push(tag)
-  if (key === 'SPEAK_REPLY') speechExpanded[ruleIndex] = true
-  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-  save()
+// async function addAction(ruleIndex: number, key: string) {
+//   const _rules: any[] = cloneDeep(rules.value)
+//   const tag = makeTag(key)
+//   _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
+//   _rules[ruleIndex].tags.push(tag)
+//   if (key === 'SPEAK_REPLY') speechExpanded[ruleIndex] = true
+//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+//   upsert()
+// }
+
+function removeTag(ruleId: string, tagIndex: number) {
+  const rule = config.autoReplyRule[ruleId]
+  if (!rule) return
+  const tags = [...(rule.tags || [])]
+  tags.splice(tagIndex, 1)
+  upsert({ ...rule, tags })
 }
 
-function removeTag(ruleIndex: number, tagIndex: number) {
-  const _rules: any[] = cloneDeep(localRules.value)
-  _rules[ruleIndex].tags.splice(tagIndex, 1)
-  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-  save()
+function onRuleTagChange(ruleId: string, tagIndex: number, data: any) {
+  const rule = config.autoReplyRule[ruleId]
+  const tags = rule.tags || []
+  const tag = tags[tagIndex]
+  tag.data = { ...tag.data, ...data }
+  upsert({ ...rule, tags })
 }
 
-function onTagSettingChange(ruleIndex: number, tagIndex: number, payload: any) {
-  // const _rules: any[] = cloneDeep(localRules.value)
-  const tag = localRules[ruleIndex].tags[tagIndex]
-  tag.data = { ...tag.data, ...payload }
-  // config.autoReplyRule = [...config.autoReplyRule.filter((r: any) => r.roomId !== realRoomId.value), ..._rules]
-  save()
-}
+// function updateSpeechData(index: number, data: any) {
+//   const _rules: any[] = cloneDeep(rules.value)
+//   const tag = getSpeechTag(_rules[index])
+//   if (tag) tag.data = { ...tag.data, ...data }
+//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+//   upsert()
+// }
 
-function toggleSpeechSettings(index: number) {
-  speechExpanded[index] = !speechExpanded[index]
-}
-
-function updateSpeechData(index: number, data: any) {
-  const _rules: any[] = cloneDeep(localRules.value)
-  const tag = getSpeechTag(_rules[index])
-  if (tag) tag.data = { ...tag.data, ...data }
-  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-  save()
-}
-
-function changeSpeed(index: number, delta: number) {
-  const _rules: any[] = cloneDeep(localRules.value)
-  const tag = getSpeechTag(_rules[index])
-  if (tag) {
-    const sp = Math.max(0.1, Math.min(2.0, (tag.data.speed || 1.0) + delta))
-    tag.data.speed = Math.round(sp * 10) / 10
-  }
-  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-  save()
-}
+// function changeSpeed(index: number, delta: number) {
+//   const _rules: any[] = cloneDeep(rules.value)
+//   const tag = getSpeechTag(_rules[index])
+//   if (tag) {
+//     const sp = Math.max(0.1, Math.min(2.0, (tag.data.speed || 1.0) + delta))
+//     tag.data.speed = Math.round(sp * 10) / 10
+//   }
+//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+//   upsert()
+// }
 
 // ── Transfer fns ──
 function roleNames(tag: any) {

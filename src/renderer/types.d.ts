@@ -148,12 +148,11 @@ export interface VoteConfig {
   duration: number
 }
 
-interface ReplyRuleTag {
-  id: string
+export interface ReplyRuleTag {
   key: string
   name: string
-  description: string
-  data: any
+  description?: string
+  data?: any
 }
 
 export interface AutoReplyRule {
