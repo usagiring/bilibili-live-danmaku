@@ -49,42 +49,40 @@
           <div class="room-panel-header">
             <h3>直播间</h3>
             <div class="add-room-wrapper">
-              <button
-                ref="addRoomBtn"
-                class="add-room-btn"
-                title="添加直播间"
-                @click.stop="toggleAddRoom">
-                <Icon type="md-add" />
-              </button>
+              <Poptip
+                v-model="showAddRoom"
+                trigger="click"
+                placement="bottom-start"
+                transfer
+                width="240">
+                <button
+                  class="add-room-btn"
+                  title="添加直播间">
+                  <Icon type="md-add" />
+                </button>
+                <template #content>
+                  <div class="popover-label">直播间号</div>
+                  <Input
+                    v-model="newRoomId"
+                    placeholder="请输入直播间号"
+                    size="small"
+                    @on-enter="handleAddRoom" />
+                  <div class="popover-actions">
+                    <Button
+                      size="small"
+                      @click="showAddRoom = false">
+                      取消
+                    </Button>
+                    <Button
+                      size="small"
+                      type="primary"
+                      @click="handleAddRoom">
+                      连接
+                    </Button>
+                  </div>
+                </template>
+              </Poptip>
             </div>
-            <!-- 弹出面板（Teleport 到 body 避免被裁剪） -->
-            <Teleport to="body">
-              <div
-                v-if="showAddRoom"
-                class="add-room-popover"
-                :style="popoverStyle"
-                @click.stop>
-                <div class="popover-label">直播间号</div>
-                <Input
-                  v-model="newRoomId"
-                  placeholder="请输入直播间号"
-                  size="small"
-                  @on-enter="handleAddRoom" />
-                <div class="popover-actions">
-                  <Button
-                    size="small"
-                    @click="showAddRoom = false"
-                    >取消</Button
-                  >
-                  <Button
-                    size="small"
-                    type="primary"
-                    @click="handleAddRoom"
-                    >连接</Button
-                  >
-                </div>
-              </div>
-            </Teleport>
             <span style="flex: 1"></span>
           </div>
           <div class="room-list">
@@ -321,7 +319,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useConfigStore } from '../store'
 import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE, IPC_GET_EXE_PATH } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
@@ -353,8 +351,6 @@ const activeTab = ref('overview')
 const showAddRoom = ref(false)
 const newRoomId = ref('')
 const isRoomPanelCollapsed = ref(config.isRoomPanelCollapsed)
-const addRoomBtn = ref<HTMLElement | null>(null)
-const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
 const isRecording = ref(false)
 const clientId = computed(() => store.id)
@@ -370,44 +366,13 @@ function toggleRoomPanel() {
   }).catch(() => {})
 }
 
-function toggleAddRoom() {
-  showAddRoom.value = !showAddRoom.value
-  if (showAddRoom.value) {
-    nextTick(() => {
-      updatePopoverPosition()
-    })
-  }
-}
-
-function updatePopoverPosition() {
-  if (!addRoomBtn.value) return
-  const rect = addRoomBtn.value.getBoundingClientRect()
-  popoverStyle.top = rect.bottom + 8 + 'px'
-  popoverStyle.left = rect.left + 'px'
-}
-
-function handleClickOutside(e: MouseEvent) {
-  const target = e.target as Node
-  const insideBtn = addRoomBtn.value?.contains(target)
-  const popover = document.querySelector('.add-room-popover')
-  const insidePopover = popover?.contains(target)
-  if (!insideBtn && !insidePopover) {
-    showAddRoom.value = false
-  }
-}
-
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
   sse.on('SPEAK', speaker => {
     // 超过数量清空待读列表，不处理过期数据
     if (waitingSpeakers.length > 100) waitingSpeakers = []
     waitingSpeakers.push(speaker)
     speakRunner()
   })
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 
 function speakRunner() {
@@ -1032,16 +997,6 @@ function hideToTray() {
   border-color: #2d8cf0;
   color: #2d8cf0;
   background: rgba(45, 140, 240, 0.06);
-}
-
-.add-room-popover {
-  position: fixed;
-  width: 240px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  padding: 14px;
-  z-index: 1000;
 }
 
 .popover-label {
