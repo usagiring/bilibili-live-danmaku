@@ -151,8 +151,10 @@ export interface VoteConfig {
 export interface ReplyRuleTag {
   key: string
   name: string
+  kind: 'condition' | 'action'
   description?: string
   data?: any
+  display?: string
 }
 
 export interface AutoReplyRule {
