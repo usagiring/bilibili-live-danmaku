@@ -149,6 +149,7 @@ export interface VoteConfig {
 }
 
 export interface ReplyRuleTag {
+  id: string
   key: string
   name: string
   kind: 'condition' | 'action'

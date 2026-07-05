@@ -136,8 +136,8 @@ export async function exportFile({ roomId, startTime, endTime }: { roomId: strin
   return res.data
 }
 
-export async function getGiftConfig(roomId: string = '0') {
-  const res = await axios.get(`${baseUrl}/api/room/${roomId}/gift/map`)
+export async function getGiftList({ roomId, roomUserId }: { roomId: string; roomUserId: string }) {
+  const res = await axios.get(`${baseUrl}/api/room/gift/list`, { params: { roomId, roomUserId } })
   return res.data
 }
 

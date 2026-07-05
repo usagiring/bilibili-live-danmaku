@@ -20,7 +20,7 @@
             :model-value="tag.data.roles"
             style="width: 220px"
             filterable
-            @on-change="v => emitC({ roles: v })"
+            @on-change="v => changeRole(v)"
             ><Option
               v-for="r in roleOptions"
               :key="r.key"
@@ -39,30 +39,31 @@
             :model-value="tag.data.filter"
             placeholder="支持正则表达式..."
             style="width: 200px"
-            @on-change="e => emitC({ filter: (e.target as any).value })" />
+            @on-change="e => changeFilter((e.target as any).value)" />
         </div>
       </template>
       <template v-else-if="tag.key === 'GIFT'"
         ><div class="tc-row">
-          <span class="tc-label">礼物</span
-          ><Select
+          <span class="tc-label">礼物</span>
+          <Select
             size="small"
             multiple
             :model-value="tag.data.giftIds"
             style="width: 200px"
             filterable
-            @on-change="v => emitC({ giftIds: v })"
-            ><Option
+            @on-change="v => changeGift(v)">
+            <Option
               v-for="g in giftOptions"
               :key="g.key"
               :value="g.key"
-              :label="g.label"
-              ><img
+              :label="g.value">
+              <img
                 v-if="g.webp"
                 :src="g.webp"
-                style="vertical-align: middle; width: 20px; margin-right: 4px" /><span>{{ g.value }}</span></Option
-            ></Select
-          >
+                style="vertical-align: middle; width: 20px; margin-right: 4px" />
+              <span>{{ g.value }}</span>
+            </Option>
+          </Select>
         </div>
       </template>
       <template v-else-if="tag.key === 'PRICE'"
@@ -74,20 +75,20 @@
             :min="0"
             :step="100"
             style="width: 60px"
-            @on-change="v => emitC({ priceMin: v })" />
+            @on-change="v => changePrice(v)" />
         </div>
       </template>
       <template v-else-if="tag.key === 'TEXT_REPLY'"
         ><div class="tc-note">
-          <p>需要在设置里输入用户Cookie</p>
-          <p>默认要求Cookie用户是当前直播间主播</p>
+          <p>弹幕回复需要在设置里输入用户Cookie</p>
+          <p>默认要求用户Cookie是当前直播间主播</p>
         </div>
         <div class="tc-row">
           <Checkbox
-            :model-value="tag.data.allowAllUserDanmakuReply"
-            @on-change="v => emitC({ allowAllUserDanmakuReply: v })"
-            >允许任意用户回复</Checkbox
-          >
+            :model-value="tag.data.allowAllUserDMReply"
+            @on-change="v => changeTextReply(v)">
+            允许任意用户回复
+          </Checkbox>
         </div>
       </template>
       <template v-else-if="tag.key === 'SPEAK_REPLY'"
@@ -96,27 +97,27 @@
           ><Select
             size="small"
             :model-value="tag.data.voice"
-            style="width: 160px"
-            @on-change="v => emitC({ voice: v })"
-            ><Option
+            style="width: 150px"
+            @on-change="v => changeVoice(v)">
+            <Option
               v-for="vo in voiceOptions"
               :key="vo.key"
               :value="vo.key"
-              :label="vo.label"
-              >{{ vo.value }}</Option
-            >
+              :label="vo.label">
+              {{ vo.value }}
+            </Option>
           </Select>
         </div>
         <div class="tc-row">
-          <span class="tc-label">语速</span
-          ><InputNumber
+          <span class="tc-label">语速</span>
+          <InputNumber
             size="small"
             :model-value="tag.data.speed"
             :min="0.1"
             :max="2.0"
             :step="0.1"
             style="width: 70px"
-            @on-change="v => emitC({ speed: v })" /></div
+            @on-change="v => changeVoiceSpeed(v)" /></div
       ></template>
     </template>
   </Poptip>
@@ -128,7 +129,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent, h } from 'vue'
+import { defineComponent, h } from 'vue'
+import { ReplyRuleTag } from '../types'
 
 const ChipSpan = defineComponent({
   props: {
@@ -162,22 +164,50 @@ const props = defineProps<{
   voiceOptions?: { key: string; value: string; label: string }[]
 }>()
 
-import { ReplyRuleTag } from '../types'
+const emit = defineEmits<{ 'value-change': [payload: Record<string, any>]; remove: [] }>()
 
 const roleOptions = [
-  { key: 1, label: '总督', value: '总督' },
+  { key: 3, label: '总督', value: '总督' },
   { key: 2, label: '提督', value: '提督' },
-  { key: 3, label: '舰长', value: '舰长' },
+  { key: 1, label: '舰长', value: '舰长' },
 ]
 
 function hasSettings(k: string) {
   return ['ROLE', 'FILTER', 'GIFT', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(k)
 }
 
-const emit = defineEmits<{ 'value-change': [payload: Record<string, any>]; remove: [] }>()
+function changeRole(v: number[]) {
+  const labels = roleOptions.filter(r => v.includes(r.key)).map(r => r.value)
+  const display = `舰队成员：${labels.length ? labels.join('，') : '未设置'}`
+  emit('value-change', { display, data: { roles: v } })
+}
 
-function emitC(p: Record<string, any>) {
-  emit('value-change', p)
+function changeFilter(filter: string) {
+  const display = `文本包含：${filter}`
+  emit('value-change', { display, data: { filter } })
+}
+
+function changeGift(giftIds: string[]) {
+  const labels = props.giftOptions?.filter(g => giftIds.includes(g.key)).map(g => g.value) || []
+  const display = `指定礼物：${labels.length ? labels.join('，') : '未设置'}`
+  emit('value-change', { display, data: { giftIds } })
+}
+
+function changePrice(priceMin: number) {
+  const display = `金额 ≥ ${priceMin}`
+  emit('value-change', { display, data: { priceMin } })
+}
+
+function changeTextReply(allowAllUserDMReply: boolean) {
+  emit('value-change', { data: { allowAllUserDMReply } })
+}
+
+function changeVoice(voice: string) {
+  emit('value-change', { data: { voice } })
+}
+
+function changeVoiceSpeed(speed: number) {
+  emit('value-change', { data: { speed } })
 }
 </script>
 

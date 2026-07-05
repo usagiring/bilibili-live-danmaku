@@ -1,13 +1,5 @@
 <template>
   <div class="ar-page">
-    <!-- Alert -->
-    <div class="ar-alert">
-      <Icon
-        type="md-information-circle"
-        :style="{ 'font-size': '16px', flexShrink: 0 }" />
-      <span> 未设置Cookie时，弹幕回复不生效。可用占位符：{user} {gift} {comment} {superchat} {@user} </span>
-    </div>
-
     <!-- Rule Cards -->
     <div class="ar-cards">
       <div
@@ -59,15 +51,15 @@
             <span class="label">条件</span>
             <div class="chip-row">
               <template
-                v-for="(tag, ti) in rule.tags.filter(t => t.kind === 'condition')"
-                :key="ti">
+                v-for="tag in rule.tags.filter(t => t.kind === 'condition')"
+                :key="tag.id">
                 <ReplyRuleTag
                   :tag="tag"
                   tag-kind="condition"
-                  :gift-options="giftOpts[ti] || undefined"
+                  :gift-options="giftOptions"
                   :voice-options="voiceOptions"
-                  @value-change="(payload: any) => onRuleTagChange(rule.id, ti, payload)"
-                  @remove="removeTag(rule.id, ti)" />
+                  @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
+                  @remove="removeTag(rule.id, tag.id)" />
               </template>
               <Poptip
                 trigger="click"
@@ -78,7 +70,7 @@
                 <template #content>
                   <div class="pop-menu">
                     <div
-                      v-for="ct of conditionTagDefs"
+                      v-for="ct of getTagOption({ kind: 'condition', type: rule.type, tags: rule.tags })"
                       :key="ct.key"
                       class="pop-item"
                       @click="addRuleTag(rule.id, ct.key)">
@@ -96,13 +88,13 @@
             <div class="chip-row">
               <template
                 v-for="(tag, ti) in rule.tags.filter(t => t.kind === 'action')"
-                :key="ti">
+                :key="tag.id">
                 <ReplyRuleTag
                   :tag="tag"
                   tag-kind="action"
                   :voice-options="voiceOptions"
-                  @value-change="(payload: any) => onRuleTagChange(rule.id, ti, payload)"
-                  @remove="removeTag(rule.id, ti)" />
+                  @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
+                  @remove="removeTag(rule.id, tag.id)" />
               </template>
               <Poptip
                 trigger="click"
@@ -112,7 +104,7 @@
                 <template #content>
                   <div class="pop-menu">
                     <div
-                      v-for="at in actionTagDefs"
+                      v-for="at in getTagOption({ kind: 'action', type: rule.type, tags: rule.tags })"
                       :key="at.key"
                       class="pop-item"
                       @click="addRuleTag(rule.id, at.key)">
@@ -148,10 +140,10 @@
 
 <script setup lang="ts">
 import { cloneDeep } from 'lodash'
-import { computed, inject, reactive, ref } from 'vue'
+import { computed, inject, reactive, onBeforeMount } from 'vue'
 import { useConfigStore } from '../store'
 import config from '../service/config'
-import { updateClientConfig, getGiftConfig } from '../service/api'
+import { updateClientConfig, getGiftList } from '../service/api'
 import ReplyRuleTag from './ReplyRuleTag.vue'
 import type { AutoReplyRule, ReplyRuleTag as IReplyRuleTag } from '../types'
 
@@ -159,20 +151,14 @@ const globalValue = inject<any>('globalValue', {})
 const store = useConfigStore()
 
 const tagDefs: IReplyRuleTag[] = [
-  { key: 'ROLE', name: '舰队', kind: 'condition', display: '舰队: 未设置', data: { roles: [] } },
-  { key: 'FILTER', name: '包含文本', kind: 'condition', display: '包含文本: 未设置', data: { filter: '' } },
-  { key: 'GIFT', name: '指定礼物', kind: 'condition', display: '指定礼物: 未设置', data: { giftIds: [] } },
-  { key: 'MEDAL', name: '佩戴粉丝牌', kind: 'condition', display: '佩戴粉丝牌' },
-  { key: 'PRICE', name: '金额阈值', kind: 'condition', display: '金额阈值: 0', data: { priceMin: 0 } },
-  { key: 'TEXT_REPLY', name: '弹幕回复', kind: 'action', display: '弹幕回复', data: { allowAllUserDanmakuReply: false } },
-  { key: 'SPEAK_REPLY', name: '语音播放', kind: 'action', display: '语音播放', data: { voice: '', speed: 1.0 } },
+  { id: '', key: 'ROLE', name: '舰队成员', kind: 'condition', display: '舰队成员：未设置', data: { roles: [] } },
+  { id: '', key: 'FILTER', name: '包含文本', kind: 'condition', display: '包含文本：未设置', data: { filter: '' } },
+  { id: '', key: 'GIFT', name: '指定礼物', kind: 'condition', display: '指定礼物：未设置', data: { giftIds: [] } },
+  { id: '', key: 'MEDAL', name: '佩戴粉丝牌', kind: 'condition', display: '佩戴粉丝牌' },
+  { id: '', key: 'PRICE', name: '金额', kind: 'condition', display: '金额 ≥ 0', data: { priceMin: 0 } },
+  { id: '', key: 'TEXT_REPLY', name: '弹幕回复', kind: 'action', display: '弹幕回复', data: { allowAllUserDanmakuReply: false } },
+  { id: '', key: 'SPEAK_REPLY', name: '语音播放', kind: 'action', display: '语音播放', data: { voice: '', speed: 1.0 } },
 ]
-
-const conditionTagDefs = tagDefs.filter(t => t.kind === 'condition')
-const actionTagDefs = tagDefs.filter(t => t.kind === 'action')
-
-// gift options cache per condition chip
-const giftOpts = reactive<Record<number, any[]>>({})
 
 const triggerTypes = [
   { key: 'comment', label: '弹幕', value: '弹幕' },
@@ -181,27 +167,56 @@ const triggerTypes = [
   { key: 'interact', label: '入场', value: '入场' },
 ]
 
-// ── State ──
+function getTagOption({ kind, type, tags }: { kind: 'condition' | 'action'; type: string; tags?: IReplyRuleTag[] }) {
+  let options = cloneDeep(tagDefs)
+  options = options.filter(t => !tags?.some(tag => tag.key === t.key))
+  if (kind === 'condition') {
+    options = options.filter(t => t.kind === 'condition')
+  } else {
+    options = options.filter(t => t.kind === 'action')
+  }
+  if (type === 'comment') {
+    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'gift') {
+    options = options.filter(t => ['ROLE', 'GIFT', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'superchat') {
+    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'interact') {
+    options = options.filter(t => ['ROLE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  }
+
+  return options
+}
+
+const giftOptions = reactive<any[]>([])
+
 const clientId = computed(() => store.id)
-const roomId = computed(() => store.activeRoom!.id)
-const rules = computed(() => Object.values(config.autoReplyRule).filter(r => r.roomId === roomId.value))
+const room = computed(() => store.activeRoom)
+const rules = computed(() => Object.values(config.autoReplyRule).filter(r => r.roomId === room.value!.id))
+
+onBeforeMount(async () => {
+  const data = await getGiftList({ roomId: room.value!.id, roomUserId: room.value!.userId })
+  const gifts = data.data
+  for (const option of gifts) {
+    option.label = option.id
+    option.key = option.id
+    option.value = option.name
+    giftOptions.push(option)
+  }
+  // Object.assign(giftOptions, data)
+})
 
 const voiceOptions = computed(() => globalValue?.voices?.map((v: any) => ({ key: v.name, label: v.name, value: v.name })) || [])
 
-// ── Helpers ──
-
 function ruleSummary(rule: any) {
-  return ''
-  // if (!rule.type) return ''
-  // const trigger = triggerTypes.find(t => t.key === rule.type)?.value || rule.type
-  // const conds = (rule.tags || []).filter(isConditionTag).map(conditionLabel)
-  // const acts = (rule.tags || []).filter(isActionTag).map(actionLabel)
-  // const tmpl = rule.text ? ' ' + rule.text : ''
-  // let s = `当「${trigger}」`
-  // if (conds.length) s += '满足' + conds.map(c => `「${c}」`).join('')
-  // if (acts.length) s += '时，触发' + acts.map(a => `「${a}」`).join('')
-  // s += tmpl
-  // return s
+  if (!rule.type) return ''
+  const trigger = triggerTypes.find(t => t.key === rule.type)?.value || rule.type
+  const conds = (rule.tags || []).filter(tag => tag.kind === 'condition').map(tag => tag.display)
+  const acts = (rule.tags || []).filter(tag => tag.kind === 'action').map(tag => tag.display)
+  let s = `当收到「${trigger}」`
+  if (conds.length) s += '满足' + conds.map(c => `「${c}」`).join('')
+  if (acts.length) s += '时，触发' + acts.map(a => `「${a}」`).join('')
+  return s
 }
 
 function uid() {
@@ -227,7 +242,7 @@ function remove(id: string) {
 // ── Actions ──
 function addRule() {
   const id = uid()
-  const rule: AutoReplyRule = { id, roomId: roomId.value, type: '', text: '', isEnable: false, tags: [] }
+  const rule: AutoReplyRule = { id, roomId: room.value!.id, type: '', text: '', isEnable: false, tags: [] }
   upsert(rule)
 }
 
@@ -250,9 +265,10 @@ function changeText(id: string, text: string) {
   upsert({ ...rule, text })
 }
 
-async function addRuleTag(ruleId: string, key: string) {
+function addRuleTag(ruleId: string, key: string) {
   const tag: IReplyRuleTag = cloneDeep(tagDefs.find(t => t.key === key))
 
+  tag.id = uid()
   // const tagIndex = (_rules[ruleIndex].tags || []).length
   // if (key === 'GIFT') {
   //   try {
@@ -283,19 +299,22 @@ async function addRuleTag(ruleId: string, key: string) {
 //   upsert()
 // }
 
-function removeTag(ruleId: string, tagIndex: number) {
+function removeTag(ruleId: string, tagId: string) {
   const rule = config.autoReplyRule[ruleId]
   if (!rule) return
-  const tags = [...(rule.tags || [])]
-  tags.splice(tagIndex, 1)
+  const tags = [...(rule.tags || [])].filter(t => t.id !== tagId)
   upsert({ ...rule, tags })
 }
 
-function onRuleTagChange(ruleId: string, tagIndex: number, data: any) {
+function onRuleTagChange(ruleId: string, tagId: string, payload: Partial<IReplyRuleTag>) {
   const rule = config.autoReplyRule[ruleId]
   const tags = rule.tags || []
-  const tag = tags[tagIndex]
-  tag.data = { ...tag.data, ...data }
+  const tag = tags.find(t => t.id === tagId) || {}
+  Object.assign(tag, payload)
+  // tag = { ...tag, ...payload }
+
+  console.log(tag, payload)
+  console.log(rule)
   upsert({ ...rule, tags })
 }
 
