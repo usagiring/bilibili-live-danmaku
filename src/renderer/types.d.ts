@@ -217,3 +217,9 @@ interface RoomState {
   medalId: number | null
   medalName: string
 }
+
+export interface Speaker {
+  text: string
+  voice: string
+  speed: number
+}

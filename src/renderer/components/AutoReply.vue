@@ -153,8 +153,8 @@ import { updateClientConfig, getGiftList } from '../service/api'
 import ReplyRuleTag from './ReplyRuleTag.vue'
 import type { AutoReplyRule, ReplyRuleTag as IReplyRuleTag } from '../types'
 
-const globalValue = inject<any>('globalValue', {})
 const store = useConfigStore()
+const synth = window.speechSynthesis
 
 const tagDefs: IReplyRuleTag[] = [
   { id: '', key: 'ROLE', name: '舰队成员', kind: 'condition', display: '舰队成员：未设置', data: { roles: [] } },
@@ -172,27 +172,6 @@ const triggerTypes = [
   { key: 'superchat', label: '醒目留言', value: '醒目留言' },
   { key: 'interact', label: '入场', value: '入场' },
 ]
-
-function getTagOption({ kind, type, tags }: { kind: 'condition' | 'action'; type: string; tags?: IReplyRuleTag[] }) {
-  let options = cloneDeep(tagDefs)
-  options = options.filter(t => !tags?.some(tag => tag.key === t.key))
-  if (kind === 'condition') {
-    options = options.filter(t => t.kind === 'condition')
-  } else {
-    options = options.filter(t => t.kind === 'action')
-  }
-  if (type === 'comment') {
-    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
-  } else if (type === 'gift') {
-    options = options.filter(t => ['ROLE', 'GIFT', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
-  } else if (type === 'superchat') {
-    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
-  } else if (type === 'interact') {
-    options = options.filter(t => ['ROLE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
-  }
-
-  return options
-}
 
 const giftOptions = reactive<any[]>([])
 
@@ -240,7 +219,17 @@ onBeforeMount(async () => {
   // Object.assign(giftOptions, data)
 })
 
-const voiceOptions = computed(() => globalValue?.voices?.map((v: any) => ({ key: v.name, label: v.name, value: v.name })) || [])
+const voiceOptions = ref<{ key: string; label: string; value: string }[]>([])
+
+loadVoices()
+synth.onvoiceschanged = loadVoices
+
+function loadVoices() {
+  const voices = synth.getVoices()
+  if (voices.length) {
+    voiceOptions.value = voices.map(v => ({ key: v.name, label: v.name, value: `${v.name} (${v.lang})` }))
+  }
+}
 
 function ruleSummary(rule: any) {
   if (!rule.type) return ''
@@ -251,6 +240,27 @@ function ruleSummary(rule: any) {
   if (conds.length) s += '满足' + conds.map(c => `「${c}」`).join('')
   if (acts.length) s += '时，触发' + acts.map(a => `「${a}」`).join('')
   return s
+}
+
+function getTagOption({ kind, type, tags }: { kind: 'condition' | 'action'; type: string; tags?: IReplyRuleTag[] }) {
+  let options = cloneDeep(tagDefs)
+  options = options.filter(t => !tags?.some(tag => tag.key === t.key))
+  if (kind === 'condition') {
+    options = options.filter(t => t.kind === 'condition')
+  } else {
+    options = options.filter(t => t.kind === 'action')
+  }
+  if (type === 'comment') {
+    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'gift') {
+    options = options.filter(t => ['ROLE', 'GIFT', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'superchat') {
+    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  } else if (type === 'interact') {
+    options = options.filter(t => ['ROLE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+  }
+
+  return options
 }
 
 function uid() {

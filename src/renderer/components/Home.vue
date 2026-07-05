@@ -344,6 +344,8 @@ import globalVar from '../../service/global'
 import config from '../service/config'
 import { Message as $Message } from 'view-ui-plus'
 import { DEFAULT_FACE } from '@tokine/shared'
+import { sse } from '../service/sse-client.ts'
+import { Speaker } from '../types'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -356,6 +358,8 @@ const popoverStyle = reactive({ top: '0px', left: '0px' })
 const connecting = ref(false)
 const isRecording = ref(false)
 const clientId = computed(() => store.id)
+const synth = window.speechSynthesis
+let waitingSpeakers: Speaker[] = []
 
 function toggleRoomPanel() {
   isRoomPanelCollapsed.value = !isRoomPanelCollapsed.value
@@ -394,11 +398,37 @@ function handleClickOutside(e: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  sse.on('SPEAK', speaker => {
+    // 超过数量清空待读列表，不处理过期数据
+    if (waitingSpeakers.length > 100) waitingSpeakers = []
+    waitingSpeakers.push(speaker)
+    speakRunner()
+  })
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
+
+function speakRunner() {
+  if (synth.speaking) return
+  const speaker = waitingSpeakers.shift()
+  if (!speaker) return
+
+  const utter = new SpeechSynthesisUtterance()
+  utter.text = speaker.text
+  if (speaker.voice) {
+    const voices = synth.getVoices()
+    const voice = voices.find(v => v.name === speaker.voice)
+    if (voice) utter.voice = voice
+  }
+  if (speaker.speed) utter.rate = speaker.speed
+  utter.onend = () => {
+    speakRunner()
+  }
+
+  synth.speak(utter)
+}
 
 // const isRecording = computed(() => store.isRecording)
 
