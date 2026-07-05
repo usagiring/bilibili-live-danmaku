@@ -1447,6 +1447,7 @@ function hideToTray() {
 .tab-content {
   flex: 1;
   overflow: clip;
+  position: relative;
 }
 
 .empty-state {

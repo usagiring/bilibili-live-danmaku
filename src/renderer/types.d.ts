@@ -163,6 +163,7 @@ export interface AutoReplyRule {
   roomId: string
   type: string
   text: string
+  sortOrder?: number
   isEnable: boolean
   tags: ReplyRuleTag[]
 }

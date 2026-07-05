@@ -2,132 +2,137 @@
   <div class="ar-page">
     <!-- Rule Cards -->
     <div class="ar-cards">
-      <div
-        v-for="(rule, index) in rules"
-        :key="rule.id"
-        class="rule-card"
-        :class="{ disabled: !rule.isEnable }">
-        <div class="rule-header">
-          <span class="drag-handle">☰</span>
-          <label class="toggle-sm">
-            <input
-              type="checkbox"
-              :checked="rule.isEnable"
-              @change="toggleEnable(rule.id)" />
-            <span class="track-sm"><span class="thumb-sm"></span></span>
-          </label>
-          <span
-            class="rule-summary"
-            :class="{ empty: !ruleSummary(rule) }">
-            {{ ruleSummary(rule) || '未配置触发条件和回复方式' }}
-          </span>
-          <button
-            class="btn-del"
-            @click="removeRule(rule.id)">
-            ×
-          </button>
-        </div>
-        <div class="rule-body">
-          <!-- 触发类型 -->
-          <div class="rule-row">
-            <span class="label">触发</span>
-            <Select
-              :model-value="rule.type"
-              size="small"
-              style="width: 120px"
-              @on-change="(key: string) => changeRuleType(rule.id, key)">
-              <Option
-                v-for="t in triggerTypes"
-                :key="t.key"
-                :value="t.key"
-                :label="t.label">
-                {{ t.value }}
-              </Option>
-            </Select>
-          </div>
+      <draggable
+        v-model="rulesLocal"
+        handle=".drag-handle"
+        item-key="id"
+        ghost-class="rule-card--ghost"
+        @change="onDragChange">
+        <template #item="{ element: rule }">
+          <div class="rule-card">
+            <div class="rule-header">
+              <span class="drag-handle">☰</span>
+              <label class="toggle-sm">
+                <input
+                  type="checkbox"
+                  :checked="rule.isEnable"
+                  @change="toggleEnable(rule.id)" />
+                <span class="track-sm"><span class="thumb-sm"></span></span>
+              </label>
+              <span
+                class="rule-summary"
+                :class="{ empty: !ruleSummary(rule) }">
+                {{ ruleSummary(rule) || '未配置触发条件和回复方式' }}
+              </span>
+              <button
+                class="btn-del"
+                @click="removeRule(rule.id)">
+                ×
+              </button>
+            </div>
+            <div class="rule-body">
+              <!-- 触发类型 -->
+              <div class="rule-row">
+                <span class="label">触发</span>
+                <Select
+                  :model-value="rule.type"
+                  size="small"
+                  style="width: 120px"
+                  @on-change="(key: string) => changeRuleType(rule.id, key)">
+                  <Option
+                    v-for="t in triggerTypes"
+                    :key="t.key"
+                    :value="t.key"
+                    :label="t.label">
+                    {{ t.value }}
+                  </Option>
+                </Select>
+              </div>
 
-          <!-- 条件 chips -->
-          <div class="rule-row">
-            <span class="label">条件</span>
-            <div class="chip-row">
-              <template
-                v-for="tag in rule.tags.filter(t => t.kind === 'condition')"
-                :key="tag.id">
-                <ReplyRuleTag
-                  :tag="tag"
-                  tag-kind="condition"
-                  :gift-options="giftOptions"
-                  :voice-options="voiceOptions"
-                  @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
-                  @remove="removeTag(rule.id, tag.id)" />
-              </template>
-              <Poptip
-                trigger="click"
-                placement="bottom-start"
-                width="100"
-                transfer>
-                <span class="add-chip">+ 条件</span>
-                <template #content>
-                  <div class="pop-menu">
-                    <div
-                      v-for="ct of getTagOption({ kind: 'condition', type: rule.type, tags: rule.tags })"
-                      :key="ct.key"
-                      class="pop-item"
-                      @click="addRuleTag(rule.id, ct.key)">
-                      <span class="pop-dot cond"></span> {{ ct.name }}
-                    </div>
-                  </div>
-                </template>
-              </Poptip>
+              <!-- 条件 chips -->
+              <div class="rule-row">
+                <span class="label">条件</span>
+                <div class="chip-row">
+                  <template
+                    v-for="tag in rule.tags.filter(t => t.kind === 'condition')"
+                    :key="tag.id">
+                    <ReplyRuleTag
+                      :tag="tag"
+                      tag-kind="condition"
+                      :gift-options="giftOptions"
+                      :voice-options="voiceOptions"
+                      @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
+                      @remove="removeTag(rule.id, tag.id)" />
+                  </template>
+                  <Poptip
+                    trigger="click"
+                    placement="bottom-start"
+                    width="100"
+                    transfer>
+                    <span class="add-chip">+ 条件</span>
+                    <template #content>
+                      <div class="pop-menu">
+                        <div
+                          v-for="ct of getTagOption({ kind: 'condition', type: rule.type, tags: rule.tags })"
+                          :key="ct.key"
+                          class="pop-item"
+                          @click="addRuleTag(rule.id, ct.key)">
+                          <span class="pop-dot cond"></span> {{ ct.name }}
+                        </div>
+                      </div>
+                    </template>
+                  </Poptip>
+                </div>
+              </div>
+
+              <!-- 回复方式 chips -->
+              <div class="rule-row">
+                <span class="label">回复</span>
+                <div class="chip-row">
+                  <template
+                    v-for="(tag, ti) in rule.tags.filter(t => t.kind === 'action')"
+                    :key="tag.id">
+                    <ReplyRuleTag
+                      :tag="tag"
+                      tag-kind="action"
+                      :voice-options="voiceOptions"
+                      @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
+                      @remove="removeTag(rule.id, tag.id)" />
+                  </template>
+                  <Poptip
+                    trigger="click"
+                    placement="bottom-start"
+                    transfer>
+                    <span class="add-chip">+ 回复</span>
+                    <template #content>
+                      <div class="pop-menu">
+                        <div
+                          v-for="at in getTagOption({ kind: 'action', type: rule.type, tags: rule.tags })"
+                          :key="at.key"
+                          class="pop-item"
+                          @click="addRuleTag(rule.id, at.key)">
+                          <span class="pop-dot act"></span> {{ at.name }}
+                        </div>
+                      </div>
+                    </template>
+                  </Poptip>
+                </div>
+              </div>
+
+              <!-- 回复模板 -->
+              <div class="rule-row">
+                <span class="label">模板</span>
+                <Input
+                  :model-value="rule.text"
+                  placeholder="回复内容，支持 {user} {comment} 占位符..."
+                  size="small"
+                  style="flex: 1"
+                  @on-change="(e: any) => changeText(rule.id, e.target.value)" />
+              </div>
             </div>
           </div>
-
-          <!-- 回复方式 chips -->
-          <div class="rule-row">
-            <span class="label">回复</span>
-            <div class="chip-row">
-              <template
-                v-for="(tag, ti) in rule.tags.filter(t => t.kind === 'action')"
-                :key="tag.id">
-                <ReplyRuleTag
-                  :tag="tag"
-                  tag-kind="action"
-                  :voice-options="voiceOptions"
-                  @value-change="(payload: any) => onRuleTagChange(rule.id, tag.id, payload)"
-                  @remove="removeTag(rule.id, tag.id)" />
-              </template>
-              <Poptip
-                trigger="click"
-                placement="bottom-start"
-                transfer>
-                <span class="add-chip">+ 回复</span>
-                <template #content>
-                  <div class="pop-menu">
-                    <div
-                      v-for="at in getTagOption({ kind: 'action', type: rule.type, tags: rule.tags })"
-                      :key="at.key"
-                      class="pop-item"
-                      @click="addRuleTag(rule.id, at.key)">
-                      <span class="pop-dot act"></span> {{ at.name }}
-                    </div>
-                  </div>
-                </template>
-              </Poptip>
-            </div>
-          </div>
-
-          <!-- 回复模板 -->
-          <div class="rule-row">
-            <span class="label">模板</span>
-            <Input
-              :model-value="rule.text"
-              placeholder="回复内容，支持 {user} {comment} 占位符..."
-              size="small"
-              style="flex: 1"
-              @on-change="(e: any) => changeText(rule.id, e.target.value)" />
-          </div>
-        </div>
-      </div>
+        </template>
+      </draggable>
 
       <button
         class="btn-add-rule"
@@ -140,7 +145,8 @@
 
 <script setup lang="ts">
 import { cloneDeep } from 'lodash'
-import { computed, inject, reactive, onBeforeMount } from 'vue'
+import { computed, inject, reactive, onBeforeMount, ref, watch } from 'vue'
+import draggable from 'vuedraggable'
 import { useConfigStore } from '../store'
 import config from '../service/config'
 import { updateClientConfig, getGiftList } from '../service/api'
@@ -192,7 +198,35 @@ const giftOptions = reactive<any[]>([])
 
 const clientId = computed(() => store.id)
 const room = computed(() => store.activeRoom)
-const rules = computed(() => Object.values(config.autoReplyRule).filter(r => r.roomId === room.value!.id))
+const rules = computed(() =>
+  Object.values(config.autoReplyRule)
+    .filter(r => r.roomId === room.value!.id)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+)
+
+// ── Drag & Drop (vuedraggable) ──
+const rulesLocal = ref<AutoReplyRule[]>([])
+
+watch(
+  rules,
+  val => {
+    rulesLocal.value = [...val]
+  },
+  { immediate: true },
+)
+
+function onDragChange() {
+  rulesLocal.value.forEach((r, i) => {
+    if (config.autoReplyRule[r.id]?.sortOrder !== i) {
+      config.autoReplyRule[r.id] = { ...r, sortOrder: i }
+    }
+  })
+  // Persist the full object so all rules are synced
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'autoReplyRule', value: config.autoReplyRule }],
+  }).catch(() => {})
+}
 
 onBeforeMount(async () => {
   const data = await getGiftList({ roomId: room.value!.id, roomUserId: room.value!.userId })
@@ -239,10 +273,9 @@ function remove(id: string) {
   }).catch(() => {})
 }
 
-// ── Actions ──
 function addRule() {
   const id = uid()
-  const rule: AutoReplyRule = { id, roomId: room.value!.id, type: '', text: '', isEnable: false, tags: [] }
+  const rule: AutoReplyRule = { id, roomId: room.value!.id, type: '', text: '', isEnable: false, tags: [], sortOrder: rules.value.length }
   upsert(rule)
 }
 
@@ -267,38 +300,13 @@ function changeText(id: string, text: string) {
 
 function addRuleTag(ruleId: string, key: string) {
   const tag: IReplyRuleTag = cloneDeep(tagDefs.find(t => t.key === key))
-
   tag.id = uid()
-  // const tagIndex = (_rules[ruleIndex].tags || []).length
-  // if (key === 'GIFT') {
-  //   try {
-  //     const { data: gc } = await getGiftConfig(roomId.value)
-  //     const opts: any[] = []
-  //     for (const [k, v] of Object.entries(gc as Record<string, any>)) {
-  //       opts.push({ key: k, value: v.name, label: v.name, webp: v.webp })
-  //     }
-  //     giftOpts[tagIndex] = opts
-  //   } catch {
-  //     /* ignore */
-  //   }
-  // }
   const rule = config.autoReplyRule[ruleId]
   const tags = rule.tags || []
   tags.push(tag)
 
   upsert({ ...rule, tags: rule.tags })
 }
-
-// async function addAction(ruleIndex: number, key: string) {
-//   const _rules: any[] = cloneDeep(rules.value)
-//   const tag = makeTag(key)
-//   _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
-//   _rules[ruleIndex].tags.push(tag)
-//   if (key === 'SPEAK_REPLY') speechExpanded[ruleIndex] = true
-//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-//   upsert()
-// }
-
 function removeTag(ruleId: string, tagId: string) {
   const rule = config.autoReplyRule[ruleId]
   if (!rule) return
@@ -311,40 +319,20 @@ function onRuleTagChange(ruleId: string, tagId: string, payload: Partial<IReplyR
   const tags = rule.tags || []
   const tag = tags.find(t => t.id === tagId) || {}
   Object.assign(tag, payload)
-  // tag = { ...tag, ...payload }
 
-  console.log(tag, payload)
-  console.log(rule)
   upsert({ ...rule, tags })
 }
-
-// function updateSpeechData(index: number, data: any) {
-//   const _rules: any[] = cloneDeep(rules.value)
-//   const tag = getSpeechTag(_rules[index])
-//   if (tag) tag.data = { ...tag.data, ...data }
-//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-//   upsert()
-// }
-
-// function changeSpeed(index: number, delta: number) {
-//   const _rules: any[] = cloneDeep(rules.value)
-//   const tag = getSpeechTag(_rules[index])
-//   if (tag) {
-//     const sp = Math.max(0.1, Math.min(2.0, (tag.data.speed || 1.0) + delta))
-//     tag.data.speed = Math.round(sp * 10) / 10
-//   }
-//   config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
-//   upsert()
-// }
 </script>
 
 <style scoped>
 .ar-page {
-  height: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: 12px 14px;
+  box-sizing: border-box;
 }
 
 /* ── Alert ── */
@@ -365,6 +353,7 @@ function onRuleTagChange(ruleId: string, tagId: string, payload: Partial<IReplyR
 /* ── Cards container ── */
 .ar-cards {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -376,13 +365,17 @@ function onRuleTagChange(ruleId: string, tagId: string, payload: Partial<IReplyR
   margin-bottom: 10px;
   overflow: hidden;
   border: 1px solid transparent;
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .rule-card:hover {
   border-color: #e8eaec;
 }
-.rule-card.disabled {
-  opacity: 0.55;
+.rule-card--ghost {
+  opacity: 0.4;
+  border-color: #2d8cf0;
+  box-shadow: 0 0 0 2px rgba(45, 140, 240, 0.15);
 }
 
 .rule-header {
