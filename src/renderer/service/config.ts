@@ -30,7 +30,7 @@ const config: ClientConfig & { set: (p: string, v: string) => void } = reactive(
 
   isRoomPanelCollapsed: false,
 
-  autoReplyRules: [],
+  autoReplyRule: {},
 
   set(path: string, value: any) {
     _set(this, path, value)

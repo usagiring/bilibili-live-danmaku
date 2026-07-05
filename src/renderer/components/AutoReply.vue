@@ -1,657 +1,863 @@
 <template>
-  <div class="disable-user-select">
-    <div :style="{ padding: '10px 20px 0 20px' }">
-      <Alert type="info">
-        <Icon
-          type="md-information-circle"
-          :style="{ 'font-size': '16px' }" />
-        <span> 未设置Cookie时，弹幕回复不生效 </span>
-      </Alert>
+  <div class="ar-page">
+    <!-- Alert -->
+    <div class="ar-alert">
+      <Icon
+        type="md-information-circle"
+        :style="{ 'font-size': '16px', flexShrink: 0 }" />
+      <span> 未设置Cookie时，弹幕回复不生效。可用占位符：{user} {gift} {comment} {superchat} {@user} </span>
     </div>
 
-    <div :style="{ padding: '0 20px 0 20px' }">
-      <div class="tag-container">
-        <draggable
-          :list="tags"
-          :group="{ name: 'tags', pull: 'clone', put: false }"
-          :sort="false"
-          item-key="id"
-          :clone="cloneTag"
-          class="tag-draggable-source">
-          <template #item="{ element: tag }">
-            <div :class="tag.class ? `draggable-tag ${tag.class}` : 'draggable-tag'">
-              {{ tag.name }}
+    <!-- Rule Cards -->
+    <div class="ar-cards">
+      <div
+        v-for="(rule, index) in localRules"
+        :key="rule.id"
+        class="rule-card"
+        :class="{ disabled: !rule.isEnable }">
+        <div class="rule-header">
+          <span class="drag-handle">☰</span>
+          <label class="toggle-sm">
+            <input
+              type="checkbox"
+              :checked="rule.isEnable"
+              @change="toggleEnable(index)" />
+            <span class="track-sm"><span class="thumb-sm"></span></span>
+          </label>
+          <span
+            class="rule-summary"
+            :class="{ empty: !ruleSummary(rule) }">
+            {{ ruleSummary(rule) || '未配置触发条件和回复方式' }}
+          </span>
+          <button
+            class="btn-del"
+            @click="removeRule(index)">
+            ×
+          </button>
+        </div>
+        <div class="rule-body">
+          <!-- 触发类型 -->
+          <div class="rule-row">
+            <span class="label">触发</span>
+            <Select
+              :model-value="rule.type"
+              size="small"
+              style="width: 120px"
+              @on-change="(v: string) => changeRuleType(index, v)">
+              <Option
+                v-for="t in triggerTypes"
+                :key="t.key"
+                :value="t.key"
+                :label="t.label">
+                {{ t.value }}
+              </Option>
+            </Select>
+          </div>
+
+          <!-- 条件 chips -->
+          <div class="rule-row">
+            <span class="label">条件</span>
+            <div class="chip-row">
+              <template
+                v-for="(tag, ti) in rule.tags.filter((t: any) => isConditionTag(t))"
+                :key="ti">
+                <Poptip
+                  v-if="hasSettings(tag.key)"
+                  trigger="click"
+                  placement="bottom-start"
+                  transfer
+                  word-wrap
+                  width="100%">
+                  <span class="chip chip-condition">
+                    {{ conditionLabel(tag) }}
+                    <span
+                      class="chip-close"
+                      @click.stop="removeTag(index, ti)">
+                      ×
+                    </span>
+                  </span>
+                  <template #content>
+                    <TagContent
+                      :tag-key="tag.key"
+                      :data="tag.data"
+                      :gift-options="giftOpts[ti] || undefined"
+                      :voice-options="voiceOptions"
+                      @value-change="(payload: any) => onTagSettingChange(index, ti, payload)" />
+                  </template>
+                </Poptip>
+                <span
+                  v-else
+                  class="chip chip-condition">
+                  {{ conditionLabel(tag) }}
+                  <span
+                    class="chip-close"
+                    @click.stop="removeTag(index, ti)"
+                    >×</span
+                  >
+                </span>
+              </template>
+              <Poptip
+                trigger="click"
+                placement="bottom-start"
+                width="100"
+                transfer>
+                <span class="add-chip">+ 条件</span>
+                <template #content>
+                  <div class="pop-menu">
+                    <div
+                      v-for="ct in conditionTagDefs"
+                      :key="ct.key"
+                      class="pop-item"
+                      @click="addCondition(index, ct.key)">
+                      <span class="pop-dot cond"></span> {{ ct.name }}
+                    </div>
+                  </div>
+                </template>
+              </Poptip>
             </div>
-          </template>
-        </draggable>
+          </div>
+
+          <!-- 回复方式 chips -->
+          <div class="rule-row">
+            <span class="label">回复</span>
+            <div class="chip-row">
+              <span
+                v-for="(tag, ti) in rule.tags.filter((t: any) => isActionTag(t))"
+                :key="ti"
+                class="chip chip-action">
+                {{ actionLabel(tag) }}
+                <span
+                  class="chip-gear"
+                  v-if="tag.key === 'SPEAK_REPLY'"
+                  @click.stop="toggleSpeechSettings(index)"
+                  >⚙</span
+                >
+                <span
+                  class="chip-close"
+                  @click.stop="removeTag(index, ti)"
+                  >×</span
+                >
+              </span>
+              <Poptip
+                trigger="click"
+                placement="bottom-start"
+                transfer>
+                <span class="add-chip">+ 回复</span>
+                <template #content>
+                  <div class="pop-menu">
+                    <div
+                      v-for="at in actionTagDefs"
+                      :key="at.key"
+                      class="pop-item"
+                      @click="addAction(index, at.key)">
+                      <span class="pop-dot act"></span> {{ at.name }}
+                    </div>
+                  </div>
+                </template>
+              </Poptip>
+            </div>
+          </div>
+
+          <!-- 语音播放子设置 -->
+          <div
+            v-if="ruleHasSpeech(rule) && speechExpanded[index]"
+            class="rule-row sub-row">
+            <span class="label"></span>
+            <div class="sub-settings">
+              <div class="sub-item">
+                <span class="sub-label">声音</span>
+                <Select
+                  :model-value="getSpeechData(rule).voice"
+                  size="small"
+                  style="width: 140px"
+                  @on-change="(v: string) => updateSpeechData(index, { voice: v })">
+                  <Option
+                    v-for="vo in voiceOptions"
+                    :key="vo.key"
+                    :value="vo.key"
+                    :label="vo.label">
+                    {{ vo.value }}
+                  </Option>
+                </Select>
+              </div>
+              <div class="sub-item">
+                <span class="sub-label">语速</span>
+                <span class="speed-ctl">
+                  <button
+                    class="speed-btn"
+                    @click="changeSpeed(index, -0.1)">
+                    −
+                  </button>
+                  <span class="speed-val">{{ getSpeechData(rule).speed || 1.0 }}</span>
+                  <button
+                    class="speed-btn"
+                    @click="changeSpeed(index, +0.1)">
+                    +
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 回复模板 -->
+          <div class="rule-row">
+            <span class="label">模板</span>
+            <Input
+              :model-value="rule.text"
+              placeholder="回复内容，支持 {user} {comment} 占位符..."
+              size="small"
+              style="flex: 1"
+              @on-change="(e: any) => changeText(index, e.target.value)" />
+          </div>
+        </div>
       </div>
     </div>
 
-    <Row :style="{ padding: '10px 10px 5px 10px' }">
-      <i-col span="1">
-        <div class="col-header">
-          <Tooltip
-            max-width="600"
-            transfer
-            placement="right">
-            <Icon
-              type="md-help"
-              class="info-icon" />
-            <template #content>
-              <div :style="{ 'white-space': 'normal', 'line-height': '24px' }">
-                <p>● 每一条回复规则由「触发类型」+「回复模版文本」+「规则」组成。</p>
-                <p>
-                  ● 每一条规则应该要有至少一条<span :style="{ color: 'aquamarine' }">执行规则</span>，可以有若干条<span
-                    :style="{ color: 'violet' }"
-                    >限制规则</span
-                  >。 <span :style="{ color: 'pink' }">拖拽</span>上面「标签」到规则栏！
-                </p>
-                <p>
-                  ● 目前可用<span :style="{ color: 'pink' }">模版占位符</span>有 {user} {gift} {comment} {superchat} {@user}。
-                  模版占位符将被替换为实际内容！
-                </p>
-                <p>
-                  ● 例如：触发类型：弹幕，回复文字模版：{user}说 {comment}，规则：佩戴粉丝牌，语音播放。
-                  表示在收到佩戴当前直播间粉丝牌的弹幕时播放语音：(用户名)说 (弹幕内容)
-                </p>
-                <!-- <p>
-                例如：感谢 {user.name} 赠送的 {gift.name}, 将替换为 感谢 (用户名) 赠送的 (礼物名)
-              </p> -->
-                <p>● 匹配<span :style="{ color: 'pink' }">优先级</span>从上到下逐渐降低，当高优先级规则匹配通过，低优先级不再触发。</p>
-                <p>● 部分标签可<span :style="{ color: 'pink' }">点击</span>打开下拉窗口，进一步设置。</p>
-                <p>● 部分不合逻辑，暂未支持的组合将无法拖拽。</p>
-              </div>
-            </template>
-          </Tooltip>
-        </div>
-      </i-col>
-      <i-col span="1">
-        <div class="col-header">启用</div>
-      </i-col>
-      <i-col span="2">
-        <div class="col-header">触发类型</div>
-      </i-col>
-      <i-col span="6">
-        <div class="col-header">回复文字模版</div>
-      </i-col>
-      <i-col span="13">
-        <div class="col-header">规则</div>
-      </i-col>
-      <i-col span="1" />
-    </Row>
-    <draggable
-      :list="rules"
-      group="rules"
-      handle=".column-drag-handler"
-      @change="onRuleDragChange">
-      <template #item="{ element: rule, index }">
-        <Row class="line-container">
-          <i-col span="1">
-            <!-- <span class="column-drag-handler">&#x2630;</span> -->
-            <!-- <Icon class="flex-center column-drag-handler" type="ios-move" /> -->
-            <span class="flex-center column-drag-handler">&#x2630;</span>
-          </i-col>
-          <i-col
-            span="1"
-            :style="{ 'text-align': 'center' }">
-            <Checkbox
-              :model-value="rule.enable"
-              class="flex-center"
-              :style="{ 'margin-left': '8px' }"
-              @on-change="changeEnable(index, $event)" />
-          </i-col>
-          <i-col span="2">
-            <Select
-              :model-value="rule.type"
-              :style="{ padding: '0 7px' }"
-              transfer
-              size="small"
-              @on-change="onChangeRuleType(index, $event)">
-              <Option
-                v-for="(option, index1) in types"
-                :key="index1"
-                :value="option.key"
-                :label="option.label">
-                <span>{{ option.value }}</span>
-              </Option>
-            </Select>
-          </i-col>
-          <i-col span="6">
-            <Input
-              :model-value="rule.text"
-              placeholder="回复内容..."
-              :style="{ padding: '0 7px' }"
-              size="small"
-              @on-change="debouncedChangeText(index, $event)" />
-          </i-col>
-          <i-col span="13">
-            <draggable
-              :list="rule.tags"
-              :group="{ name: 'tags', pull: false, put: true }"
-              :sort="false"
-              item-key="id"
-              ghost-class="drop-preview"
-              :style="{ display: 'flex', 'align-items': 'center' }"
-              @change="e => onTagChange(index, e)"
-              :move="e => onTagMove(index, e)">
-              <template #item="{ element: tag, index: tagIndex }">
-                <div :class="tag.class ? `rule-tag sub-${tag.class}` : 'rule-tag'">
-                  <template v-if="tag.template">
-                    <Poptip
-                      placement="bottom"
-                      transfer>
-                      <span>{{ fillDisplay(tag) }} </span>
-                      <template #content>
-                        <div>
-                          <TagContent
-                            :template="tag.template"
-                            :data="tag.data"
-                            @value-change="onDataChange(index, tagIndex, $event)" />
-                        </div>
-                      </template>
-                    </Poptip>
-                  </template>
-                  <template v-else>
-                    <span>{{ fillDisplay(tag) }} </span>
-                  </template>
-                  <Icon
-                    type="md-remove"
-                    class="remove-button"
-                    @click="removeTag(index, tagIndex)" />
-                </div>
-              </template>
-            </draggable>
-          </i-col>
-          <i-col
-            span="1"
-            class="remove-button-container">
-            <Icon
-              type="md-remove"
-              class="remove-button flex-center"
-              @click="removeRule(index)" />
-          </i-col>
-        </Row>
-      </template>
-    </draggable>
-    <div :style="{ padding: '5px 20px' }">
-      <Button
-        type="primary"
-        long
-        @click="addRule">
-        <Icon
-          :style="{ 'font-weight': 'bold' }"
-          type="md-add" />
-      </Button>
-    </div>
+    <!-- Add button -->
+    <button
+      class="btn-add-rule"
+      @click="addRule">
+      <span style="font-size: 18px">+</span> 添加规则
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { cloneDeep, debounce } from 'lodash'
-import { computed, inject, reactive } from 'vue'
+import { cloneDeep } from 'lodash'
+import { computed, inject, reactive, ref } from 'vue'
 import { useConfigStore } from '../store'
 import config from '../service/config'
 import { updateClientConfig, getGiftConfig } from '../service/api'
-const globalValue = inject<any>('globalValue', {})
-
-import draggable from 'vuedraggable'
 import TagContent from './TagContent.vue'
 
-const synth = window.speechSynthesis
-
+const globalValue = inject<any>('globalValue', {})
 const store = useConfigStore()
 
+// ── Tag definitions ──
 const roleOptions = [
-  {
-    key: 1,
-    label: '总督',
-    value: '总督',
-  },
-  {
-    key: 2,
-    label: '提督',
-    value: '提督',
-  },
-  {
-    key: 3,
-    label: '舰长',
-    value: '舰长',
-  },
+  { key: 1, label: '总督', value: '总督' },
+  { key: 2, label: '提督', value: '提督' },
+  { key: 3, label: '舰长', value: '舰长' },
 ]
 
-const dropAcceptRules = {
+const conditionTagDefs = [
+  { key: 'ROLE', name: '舰队成员' },
+  { key: 'FILTER', name: '包含文本' },
+  { key: 'GIFT', name: '指定礼物' },
+  { key: 'MEDAL', name: '佩戴粉丝牌' },
+  { key: 'PRICE', name: '金额阈值' },
+]
+
+const actionTagDefs = [
+  { key: 'TEXT_REPLY', name: '弹幕回复' },
+  { key: 'SPEAK_REPLY', name: '语音播放' },
+]
+
+const tagDefMap: Record<string, any> = {
+  ROLE: { key: 'ROLE', name: '舰队', data: { roles: [] } },
+  FILTER: { key: 'FILTER', name: '包含文本', data: { filter: '' } },
+  GIFT: { key: 'GIFT', name: '指定礼物', data: { giftIds: [] } },
+  MEDAL: { key: 'MEDAL', name: '佩戴粉丝牌' },
+  PRICE: { key: 'PRICE', name: '金额阈值', data: { priceMin: 0 } },
+  TEXT_REPLY: { key: 'TEXT_REPLY', name: '弹幕回复', data: { allowAllUserDanmakuReply: false } },
+  SPEAK_REPLY: { key: 'SPEAK_REPLY', name: '语音播放', data: { voice: '', speed: 1.0 } },
+}
+
+const tagsWithSettings = ['ROLE', 'FILTER', 'GIFT', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY']
+function hasSettings(key: string) {
+  return tagsWithSettings.includes(key)
+}
+
+// gift options cache per condition chip
+const giftOpts = reactive<Record<number, any[]>>({})
+
+const triggerTypes = [
+  { key: 'comment', label: '弹幕', value: '弹幕' },
+  { key: 'gift', label: '礼物', value: '礼物' },
+  { key: 'superchat', label: '醒目留言', value: '醒目留言' },
+  { key: 'interact', label: '入场', value: '入场' },
+]
+
+const dropAcceptRules: Record<string, string[]> = {
   comment: ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'],
-  gift: ['ROLE', 'GIFT', 'GOLD', 'SILVER', 'TEXT_REPLY', 'SPEAK_REPLY'],
+  gift: ['ROLE', 'GIFT', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'],
   superchat: ['FILTER', 'TEXT_REPLY', 'SPEAK_REPLY'],
   interact: ['MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'],
 }
 
-const giftOptions = reactive([])
-const types = reactive([
-  {
-    key: 'comment',
-    label: '弹幕',
-    value: '弹幕',
-  },
-  {
-    key: 'gift',
-    label: '礼物',
-    value: '礼物',
-  },
-  {
-    key: 'superchat',
-    label: '醒目留言',
-    value: '醒目留言',
-  },
-  {
-    key: 'interact',
-    label: '交互',
-    value: '交互',
-  },
-])
-const tags = reactive([
-  // {
-  //   id: '1',
-  //   key: 'LEVEL', // TODO ?
-  //   name: '等级',
-  //   content: '等级 > {level}',
-  //   data: {
-  //     level: 1
-  //   },
-  //   template: {
-  //     title: '等级限制',
-  //     rows: [
-  //       {
-  //         key: 'level',
-  //         display: '等级',
-  //         value: 1,
-  //         type: 'InputNumber',
-  //         step: 1,
-  //         min: 1,
-  //         max: 40
-  //       }
-  //     ]
-  //   }
-  // },
-  {
-    id: 2,
-    key: 'ROLE',
-    name: '舰队',
-    content: '舰队: {transfer:roleNames}',
-    data: {
-      roles: [],
-    },
-    template: {
-      title: '舰队',
-      rows: [
-        {
-          key: 'roles',
-          display: '舰队',
-          value: [],
-          type: 'MultiSelect',
-          options: roleOptions,
-        },
-      ],
-    },
-  },
-  {
-    id: 3,
-    key: 'FILTER',
-    name: '文本匹配',
-    content: '文本匹配: {filter}',
-    data: {
-      filter: '',
-    },
-    template: {
-      title: '文本匹配',
-      rows: [
-        {
-          key: 'filter',
-          display: '过滤规则',
-          placeholder: '支持正则表达式...',
-          value: '',
-          type: 'Input',
-        },
-      ],
-    },
-  },
-  {
-    id: 4,
-    key: 'GIFT',
-    name: '指定礼物',
-    content: '指定礼物: {transfer:giftName}',
-    data: {
-      giftIds: [],
-    },
-    template: {
-      title: '礼物',
-      rows: [
-        {
-          key: 'giftIds',
-          display: '礼物',
-          value: '',
-          type: 'MultiSelect',
-          options: giftOptions,
-        },
-      ],
-    },
-  },
-  {
-    id: 5,
-    key: 'MEDAL',
-    name: '佩戴粉丝牌',
-    content: '佩戴粉丝牌',
-  },
-  {
-    id: 6,
-    key: 'GOLD',
-    name: '仅金瓜子',
-    content: '仅金瓜子',
-  },
-  {
-    id: 7,
-    key: 'SILVER',
-    name: '仅银瓜子',
-    content: '仅银瓜子',
-  },
-  {
-    id: 8,
-    key: 'TEXT_REPLY',
-    name: '弹幕回复',
-    content: '弹幕回复',
-    class: 'process-tag',
-    data: {
-      allowAllUserDanmakuReply: false,
-    },
-    template: {
-      title: '弹幕回复说明',
-      rows: [
-        {
-          type: 'Text',
-          value: '需要在设置里输入用户Cookie',
-        },
-        {
-          type: 'Text',
-          value: '默认要求Cookie用户是当前直播间主播，如果需要使用其他Cookie用户回复，请打开下面开关',
-        },
-        {
-          type: 'Checkbox',
-          display: '允许任意用户回复',
-          key: 'allowAllUserDanmakuReply',
-          value: false,
-        },
-      ],
-    },
-  },
-  {
-    id: 9,
-    key: 'SPEAK_REPLY',
-    name: '语音播放',
-    content: '语音播放',
-    data: {
-      voice: '',
-      speed: 1.0,
-    },
-    class: 'process-tag',
-    template: {
-      title: '语音播放',
-      rows: [
-        {
-          key: 'voice',
-          display: '声音',
-          value: '',
-          type: 'Select',
-          options: [],
-        },
-        {
-          key: 'speed',
-          display: '语速',
-          value: 0,
-          type: 'InputNumber',
-          step: 0.1,
-          min: 0.1,
-          max: 2.0,
-        },
-      ],
-    },
-  },
-])
-
+// ── State ──
 const clientId = computed(() => store.id)
-const realRoomId = computed(() => store.activeRoom?.realId || store.activeRoom?.id || '')
+const roomId = computed(() => store.activeRoom!.id)
+const localRules = computed(() => Object.values(config.autoReplyRule).filter((r: any) => r.roomId === roomId.value))
 
-const rules = computed(() => config.autoReplyRules.filter(r => r.roomId === realRoomId.value))
+// Convert rules array to object for save
+function rulesToObj(rules: any[]) {
+  const obj: Record<string, any> = {}
+  for (const r of rules) obj[r.id] = r
+  return obj
+}
 
-const debouncedChangeText = debounce(changeText, 500)
+const speechExpanded = reactive<Record<number, boolean>>({})
 
-function saveRules(_rules: any[]) {
-  // 合并：保留其他房间的规则，替换当前房间的规则
-  const otherRules = config.autoReplyRules.filter(r => r.roomId !== realRoomId.value)
-  config.autoReplyRules = [...otherRules, ..._rules]
+const voiceOptions = computed(() => globalValue?.voices?.map((v: any) => ({ key: v.name, label: v.name, value: v.name })) || [])
+
+// ── Helpers ──
+function isConditionTag(tag: any) {
+  return conditionTagDefs.some(d => d.key === tag.key)
+}
+function isActionTag(tag: any) {
+  return actionTagDefs.some(d => d.key === tag.key)
+}
+function ruleHasSpeech(rule: any) {
+  return rule.tags?.some((t: any) => t.key === 'SPEAK_REPLY')
+}
+function getSpeechTag(rule: any) {
+  return rule.tags?.find((t: any) => t.key === 'SPEAK_REPLY')
+}
+function getSpeechData(rule: any) {
+  return getSpeechTag(rule)?.data || { voice: '', speed: 1.0 }
+}
+
+function conditionLabel(tag: any) {
+  if (tag.key === 'ROLE') return '舰队：' + (roleNames(tag) || '未设置')
+  if (tag.key === 'FILTER') return '包含文本：' + (tag.data?.filter || '未设置')
+  if (tag.key === 'GIFT') return '指定礼物：' + (giftName(tag) || '未设置')
+  if (tag.key === 'MEDAL') return '佩戴粉丝牌'
+  if (tag.key === 'PRICE') return `金额阈值：${tag.data?.priceMin || 0} 元`
+  return tag.name
+}
+
+function actionLabel(tag: any) {
+  if (tag.key === 'TEXT_REPLY') return '弹幕回复'
+  if (tag.key === 'SPEAK_REPLY') return '语音播放'
+  return tag.name
+}
+
+function ruleSummary(rule: any) {
+  if (!rule.type) return ''
+  const trigger = triggerTypes.find(t => t.key === rule.type)?.value || rule.type
+  const conds = (rule.tags || []).filter(isConditionTag).map(conditionLabel)
+  const acts = (rule.tags || []).filter(isActionTag).map(actionLabel)
+  const tmpl = rule.text ? ' ' + rule.text : ''
+  let s = `当「${trigger}」`
+  if (conds.length) s += '满足' + conds.map(c => `「${c}」`).join('')
+  if (acts.length) s += '时，触发' + acts.map(a => `「${a}」`).join('')
+  s += tmpl
+  return s
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+}
+
+function makeTag(key: string) {
+  return { id: uid(), ...cloneDeep(tagDefMap[key]) }
+}
+
+// ── Save ──
+function save() {
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
+  }
+  config.autoReplyRule = { ...other, ...cloneDeep(rulesToObj(localRules.value)) }
   updateClientConfig({
     clientId: clientId.value,
-    kvs: [{ key: 'autoReplyRules', value: config.autoReplyRules }],
+    kvs: [{ key: 'autoReplyRule', value: config.autoReplyRule }],
   }).catch(() => {})
 }
 
-async function onTagChange(ruleIndex: number, evt: any) {
-  if (!evt.added) return
-  const { element: tag, newIndex: addedIndex } = evt.added
-  const _rules: any[] = cloneDeep(rules.value)
-  const clonedTag: any = cloneDeep(tag)
-  if (clonedTag.key === 'SPEAK_REPLY') {
-    const options =
-      globalValue?.voices?.map((voice: any) => ({
-        key: voice.name,
-        value: voice.name,
-        label: voice.name,
-      })) || []
-    clonedTag.template.rows[0].options = options
+// ── Actions ──
+function addRule() {
+  const _rules = cloneDeep(rulesToObj(localRules.value))
+  const id = uid()
+  _rules[id] = { id, roomId: roomId.value, type: '', text: '', isEnable: false, tags: [] }
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
   }
+  config.autoReplyRule = { ...other, ..._rules }
+  save()
+}
 
-  if (clonedTag.key === 'GIFT') {
-    const { data: giftConfig } = await getGiftConfig(realRoomId.value)
-    const giftOptions: any[] = []
-    for (const [key, val] of Object.entries(giftConfig as Record<string, any>)) {
-      giftOptions.push({
-        key,
-        value: val.name,
-        label: val.name,
-        webp: val.webp,
-      })
+function removeRule(index: number) {
+  const _rules = cloneDeep(rulesToObj(localRules.value))
+  delete _rules[localRules.value[index].id]
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
+  }
+  config.autoReplyRule = { ...other, ..._rules }
+  save()
+}
+
+function toggleEnable(index: number) {
+  const _rules = cloneDeep(rulesToObj(localRules.value))
+  const id = localRules.value[index].id
+  _rules[id].isEnable = !_rules[id].isEnable
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
+  }
+  config.autoReplyRule = { ...other, ..._rules }
+  save()
+}
+
+function changeRuleType(index: number, type: string) {
+  const _rules = cloneDeep(rulesToObj(localRules.value))
+  const id = localRules.value[index].id
+  _rules[id].type = type
+  const allowed = dropAcceptRules[type] || []
+  _rules[id].tags = (_rules[id].tags || []).filter((t: any) => allowed.includes(t.key))
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
+  }
+  config.autoReplyRule = { ...other, ..._rules }
+  save()
+}
+
+function changeText(index: number, val: string) {
+  const _rules = cloneDeep(rulesToObj(localRules.value))
+  const id = localRules.value[index].id
+  _rules[id].text = val
+  const other: Record<string, any> = {}
+  for (const r of Object.values(config.autoReplyRule)) {
+    if ((r as any).roomId !== roomId.value) other[(r as any).id] = r
+  }
+  config.autoReplyRule = { ...other, ..._rules }
+  save()
+}
+
+async function addCondition(ruleIndex: number, key: string) {
+  const _rules: any[] = cloneDeep(localRules.value)
+  const tag = makeTag(key)
+  const tagIndex = (_rules[ruleIndex].tags || []).length
+  if (key === 'GIFT') {
+    try {
+      const { data: gc } = await getGiftConfig(roomId.value)
+      const opts: any[] = []
+      for (const [k, v] of Object.entries(gc as Record<string, any>)) {
+        opts.push({ key: k, value: v.name, label: v.name, webp: v.webp })
+      }
+      giftOpts[tagIndex] = opts
+    } catch {
+      /* ignore */
     }
-    clonedTag.template.rows[0].options = giftOptions
   }
   _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
-  _rules[ruleIndex].tags.splice(addedIndex, 0, clonedTag)
-
-  saveRules(_rules)
+  _rules[ruleIndex].tags.push(tag)
+  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+  save()
 }
 
-function onRuleDragChange(evt: any) {
-  if (!evt.moved) return
-  const { oldIndex, newIndex } = evt.moved
-  const _rules: any[] = cloneDeep(rules.value)
-  const itemToAdd = _rules.splice(oldIndex, 1)[0]
-  _rules.splice(newIndex, 0, itemToAdd)
-
-  saveRules(_rules)
-}
-
-function cloneTag(tag: any) {
-  return cloneDeep(tag)
-}
-
-function onTagMove(ruleIndex: number, evt: any) {
-  const tag = evt.draggedContext.element
-  const dropRule = rules.value[ruleIndex]
-  if (!dropRule?.type) return false
-  if (!dropAcceptRules[dropRule.type as keyof typeof dropAcceptRules]?.includes(tag.key)) return false
-  if (dropRule.tags.find((t: any) => t.key === tag.key)) return false
-  return true
-}
-
-const transferFns: Record<string, (tag: any) => string> = { roleNames, giftName }
-
-function fillDisplay(tag: any) {
-  let display: string = tag.content
-  const match: IterableIterator<RegExpMatchArray> = tag.content.matchAll(/{.*}/g)
-  const map: Record<string, any> = Array.from(match).reduce(
-    (acc: Record<string, any>, next: RegExpMatchArray) => {
-      const substr = next[0].substring(1, next[0].length - 1)
-      let value = tag.data[substr]
-      if (~substr.indexOf('transfer')) {
-        const [, func] = substr.split(':')
-        value = transferFns[func]?.(tag) ?? ''
-      }
-      return Object.assign(acc, { [next[0]]: value })
-    },
-    {} as Record<string, any>,
-  )
-
-  for (const key in map) {
-    display = display.replace(key, map[key])
-  }
-  return display
-}
-
-function roleNames(tag: any) {
-  const roleKeys: number[] = tag.data.roles
-  return roleKeys.map(key => roleOptions.find(o => o.key === key)?.value).join(',')
-}
-
-function giftName(tag: any) {
-  const giftIds: string[] = tag.data.giftIds
-  return giftIds.map(key => (tag?.template?.rows?.[0]?.options as any[])?.find((o: any) => o.key === key)?.value || '').join(',')
+async function addAction(ruleIndex: number, key: string) {
+  const _rules: any[] = cloneDeep(localRules.value)
+  const tag = makeTag(key)
+  _rules[ruleIndex].tags = _rules[ruleIndex].tags || []
+  _rules[ruleIndex].tags.push(tag)
+  if (key === 'SPEAK_REPLY') speechExpanded[ruleIndex] = true
+  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+  save()
 }
 
 function removeTag(ruleIndex: number, tagIndex: number) {
-  const _rules: any[] = cloneDeep(rules.value)
+  const _rules: any[] = cloneDeep(localRules.value)
   _rules[ruleIndex].tags.splice(tagIndex, 1)
-  saveRules(_rules)
+  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+  save()
 }
 
-function removeRule(ruleIndex: number) {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules.splice(ruleIndex, 1)
-  saveRules(_rules)
+function onTagSettingChange(ruleIndex: number, tagIndex: number, payload: any) {
+  // const _rules: any[] = cloneDeep(localRules.value)
+  const tag = localRules[ruleIndex].tags[tagIndex]
+  tag.data = { ...tag.data, ...payload }
+  // config.autoReplyRule = [...config.autoReplyRule.filter((r: any) => r.roomId !== realRoomId.value), ..._rules]
+  save()
 }
 
-function addRule() {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules.push({
-    roomId: realRoomId.value,
-    type: '',
-    text: '',
-    enable: true,
-    tags: [],
-  })
-  saveRules(_rules)
+function toggleSpeechSettings(index: number) {
+  speechExpanded[index] = !speechExpanded[index]
 }
 
-function changeEnable(index: number, status: boolean) {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules[index].enable = status
-  saveRules(_rules)
+function updateSpeechData(index: number, data: any) {
+  const _rules: any[] = cloneDeep(localRules.value)
+  const tag = getSpeechTag(_rules[index])
+  if (tag) tag.data = { ...tag.data, ...data }
+  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+  save()
 }
 
-function onChangeRuleType(index: number, type: string) {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules[index].type = type
-  saveRules(_rules)
+function changeSpeed(index: number, delta: number) {
+  const _rules: any[] = cloneDeep(localRules.value)
+  const tag = getSpeechTag(_rules[index])
+  if (tag) {
+    const sp = Math.max(0.1, Math.min(2.0, (tag.data.speed || 1.0) + delta))
+    tag.data.speed = Math.round(sp * 10) / 10
+  }
+  config.autoReplyRule = { ...cloneDeep(config.autoReplyRule), ...rulesToObj(_rules) }
+  save()
 }
 
-function onDataChange(ruleIndex: number, tagIndex: number, payload: any) {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules[ruleIndex].tags[tagIndex].data = _rules[ruleIndex].tags[tagIndex].data || {}
-  _rules[ruleIndex].tags[tagIndex].data = Object.assign(_rules[ruleIndex].tags[tagIndex].data, payload)
-  saveRules(_rules)
+// ── Transfer fns ──
+function roleNames(tag: any) {
+  const keys: number[] = tag.data?.roles || []
+  return keys
+    .map((k: number) => roleOptions.find(o => o.key === k)?.value)
+    .filter(Boolean)
+    .join(', ')
 }
 
-function changeText(ruleIndex: number, e: any) {
-  const _rules: any[] = cloneDeep(rules.value)
-  _rules[ruleIndex].text = e.target.value
-  saveRules(_rules)
+function giftName(tag: any) {
+  const ids: string[] = tag.data?.giftIds || []
+  // gift opts are stored by tag key, find matching names from giftOpts
+  const opts: any[] = []
+  for (const key of Object.keys(giftOpts)) {
+    opts.push(...(giftOpts[Number(key)] || []))
+  }
+  return ids
+    .map((k: string) => opts.find((o: any) => o.key === k)?.value || '')
+    .filter(Boolean)
+    .join(', ')
 }
 </script>
 
 <style scoped>
-.tag-container {
-  padding: 5px 10px 5px 10px;
-  border: 1px dashed silver;
-  border-radius: 10px;
-}
-
-.draggable-tag {
-  border: 1px solid violet;
-  border-radius: 10px;
-  padding: 3px 10px;
-  margin: 6px;
-  display: inline-block;
-  -webkit-user-select: none;
-  user-select: none;
-  cursor: move;
-}
-
-.process-tag {
-  border: 1px solid green !important;
-}
-
-.sub-process-tag {
-  border: 1px solid green !important;
-}
-
-.rule-tag {
-  border: 1px solid violet;
-  border-radius: 10px;
-  padding: 1px 6px;
-  margin: 0 3px;
-  display: inline-block;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-.remove-button {
-  font-size: 16px;
-  color: crimson;
-  cursor: pointer;
+.ar-page {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px 14px;
 }
 
-.col-header {
-  text-align: center;
+/* ── Alert ── */
+.ar-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #e8f4fd;
+  border: 1px solid #bbd4f5;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #515a6e;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
-.column-drag-handler {
-  cursor: move;
+/* ── Cards container ── */
+.ar-cards {
+  flex: 1;
+  overflow-y: auto;
 }
 
-.info-icon {
-  font-size: 16px;
+/* ── Rule Card ── */
+.rule-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.rule-card:hover {
+  border-color: #e8eaec;
+}
+.rule-card.disabled {
+  opacity: 0.55;
 }
 
-.remove-button-container {
+.rule-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f5f5f5;
+  background: #fafbfc;
+}
+.drag-handle {
+  color: #ccc;
+  cursor: grab;
+  font-size: 14px;
+  user-select: none;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.rule-summary {
+  flex: 1;
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.rule-summary.empty {
+  color: #ccc;
+  font-style: italic;
+}
+
+.btn-del {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
   cursor: pointer;
-  height: 100%;
+  color: #ccc;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.15s;
+}
+.btn-del:hover {
+  color: #ed4014;
+  background: rgba(237, 64, 20, 0.06);
 }
 
-.remove-button-container:hover {
-  border: 1px dashed crimson;
+.rule-body {
+  padding: 12px 14px;
+}
+
+.rule-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rule-row:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  min-width: 32px;
+}
+
+/* ── Toggle ── */
+.toggle-sm {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.toggle-sm input {
+  display: none;
+}
+.toggle-sm .track-sm {
+  position: absolute;
+  inset: 0;
+  background: #ddd;
   border-radius: 20px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+.toggle-sm .thumb-sm {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.toggle-sm input:checked + .track-sm {
+  background: #19be6b;
+}
+.toggle-sm input:checked + .track-sm .thumb-sm {
+  transform: translateX(16px);
 }
 
-.line-container {
-  padding: 5px 10px 5px 10px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
+/* ── Chips ── */
+.chip-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+.chip-condition {
+  background: #f3e8ff;
+  color: #7c3aed;
+  border: 1px solid #e4d4f8;
+}
+.chip-action {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
-.flex-center {
+.chip-close {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0.5;
+  transition: 0.1s;
+}
+.chip-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+}
+.chip-gear {
+  font-size: 10px;
+  opacity: 0.4;
+  cursor: pointer;
+}
+.chip-gear:hover {
+  opacity: 0.7;
+}
+
+.add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  border: 1px dashed #ccc;
+  color: #999;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.add-chip:hover {
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+}
+
+/* ── Popover menu ── */
+.pop-menu {
+  padding: 4px;
+  min-width: 140px;
+}
+.pop-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #555;
+  white-space: nowrap;
+}
+.pop-item:hover {
+  background: #f0f2f5;
+  color: #333;
+}
+.pop-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pop-dot.cond {
+  background: #7c3aed;
+}
+.pop-dot.act {
+  background: #16a34a;
+}
+
+/* ── Sub settings ── */
+.sub-row {
+  padding-left: 40px;
+  margin-top: -4px;
+}
+.sub-settings {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid #f0f0f0;
+}
+.sub-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sub-label {
+  font-size: 11px;
+  color: #999;
+}
+
+.speed-ctl {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.speed-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.speed-btn:hover {
+  background: #f0f2f5;
+}
+.speed-val {
+  width: 32px;
+  text-align: center;
+  font-size: 12px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* ── Add rule button ── */
+.btn-add-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 36px;
+  border: 1px dashed #ccc;
+  border-radius: 10px;
+  background: transparent;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.btn-add-rule:hover {
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+  background: rgba(45, 140, 240, 0.03);
 }
 </style>

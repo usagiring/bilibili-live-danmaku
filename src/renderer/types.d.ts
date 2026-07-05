@@ -148,12 +148,21 @@ export interface VoteConfig {
   duration: number
 }
 
+interface ReplyRuleTag {
+  id: string
+  key: string
+  name: string
+  description: string
+  data: any
+}
+
 export interface AutoReplyRule {
+  id: string
   roomId: string
   type: string
   text: string
   isEnable: boolean
-  tags: any[]
+  tags: ReplyRuleTag[]
 }
 
 export interface ClientConfig {
@@ -177,7 +186,7 @@ export interface ClientConfig {
   mtConfig?: MtConfig
   chartConfig?: ChartConfig
   voteConfig: VoteConfig
-  autoReplyRules: AutoReplyRule[]
+  autoReplyRule: Record<string, AutoReplyRule>
 }
 
 export interface StoreConfig {
