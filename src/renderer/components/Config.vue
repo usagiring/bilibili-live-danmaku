@@ -700,6 +700,72 @@
         </span>
       </div>
     </div>
+
+    <!-- ═══ 小工具 ═══ -->
+    <div class="divider">小工具</div>
+    <div class="section">
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: 52px"
+          >语音播放</span
+        >
+        <Input
+          v-model="speakText"
+          placeholder="输入要朗读的文本..."
+          size="small"
+          style="width: 200px" />
+        <Select
+          v-model="speakVoice"
+          size="small"
+          style="width: 150px"
+          placeholder="选择声音"
+          filterable>
+          <Option
+            v-for="v in voiceOptions"
+            :key="v.key"
+            :value="v.key"
+            :label="v.label"
+            style="padding: 6px 12px">
+            <span>{{ v.label }}</span>
+            <span style="color: #bbb; font-size: 10px; margin-left: 4px">{{ v.lang }}</span>
+          </Option>
+        </Select>
+        <span class="hint">语速</span>
+        <InputNumber
+          v-model="speakSpeed"
+          size="small"
+          style="width: 60px"
+          :min="0.1"
+          :max="2.0"
+          :step="0.1" />
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
+          @click="speak">
+          <Icon
+            type="md-volume-up"
+            size="14" />
+          播放
+        </button>
+      </div>
+      <div class="section-row">
+        <span
+          class="label"
+          style="min-width: 52px"
+          >一键签到</span
+        >
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px">
+          <Icon
+            type="md-checkmark-circle"
+            size="14" />
+          执行签到
+        </button>
+      </div>
+    </div>
+
     <div class="divider">关于</div>
     <div
       class="section"
@@ -1080,6 +1146,39 @@ async function loginFromQrCode() {
 // ── Cookie 提示 ──
 function showCookieTip() {
   showDrawTip.value = true
+}
+
+// ── 小工具 ──
+const synth = window.speechSynthesis
+const speakText = ref('')
+const speakVoice = ref('')
+const speakSpeed = ref(1.0)
+const voiceOptions = ref<{ key: string; label: string; value: string; lang: string }[]>([])
+
+function loadVoices() {
+  const voices = synth.getVoices()
+  if (voices.length) {
+    voiceOptions.value = voices.map(v => ({ key: v.name, label: v.name, value: v.name, lang: v.lang }))
+  }
+}
+
+loadVoices()
+synth.onvoiceschanged = loadVoices
+
+function speak() {
+  if (synth.speaking) return
+
+  const utter = new SpeechSynthesisUtterance()
+  utter.text = speakText.value
+  if (speakVoice.value) {
+    const voices = synth.getVoices()
+    console.log(voices)
+    const voice = voices.find(v => v.name === speakVoice.value)
+    if (voice) utter.voice = voice
+  }
+  if (speakSpeed.value) utter.rate = speakSpeed.value
+
+  synth.speak(utter)
 }
 
 // ── 关于 ──

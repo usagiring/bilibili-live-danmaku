@@ -159,7 +159,10 @@
             <div class="banner-overlay">
               <!-- 用户信息 + 连接 -->
               <div class="banner-profile">
-                <div class="banner-profile-row">
+                <div
+                  class="banner-profile-row"
+                  style="cursor: pointer"
+                  @click="openLiveRoom">
                   <img
                     class="banner-avatar"
                     :src="activeRoom?.face || DEFAULT_FACE" />
@@ -255,7 +258,7 @@
                   class="room-tab"
                   :class="{ active: activeTab === 'autoreply' }"
                   @click="activeTab = 'autoreply'">
-                  <Icon type="md-chatbubbles" /> 回复
+                  <Icon type="md-repeat" /> 回复
                 </div>
               </div>
             </div>
@@ -373,7 +376,54 @@ onMounted(() => {
     waitingSpeakers.push(speaker)
     speakRunner()
   })
+  sse.on('NINKI', onNinki)
+  sse.on('LIVE', onLive)
+  sse.on('PREPARING', onPreparing)
+  sse.on('WATCHED_CHANGE', onWatchedChange)
+  sse.on('LIKE_CHANGE', onLikeChange)
+  sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
+  sse.on('ONLINE_COUNT', onOnlineCount)
 })
+
+// ── SSE 回调 ──
+function onNinki(data: any) {
+  const { roomId, ninkiNumber } = data.payload
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.ninkiNumber = ninkiNumber
+  // store.UPDATE_ACTIVE_ROOM({ ninkiNumber: data.payload?.ninkiNumber ?? 0 })
+}
+function onLive() {
+  // store.UPDATE_ACTIVE_ROOM({ liveStatus: 1 })
+}
+function onPreparing() {
+  //  store.UPDATE_ACTIVE_ROOM({ liveStatus: 0 })
+}
+function onWatchedChange(data: any) {
+  const { roomId, watchedNumber } = data.payload
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.watchedNumber = watchedNumber
+}
+function onLikeChange(data: any) {
+  const { roomId, likeNumber } = data.payload
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.likeNumber = likeNumber
+}
+function onFansUpdate(data: any) {
+  const { roomId, fansNumber, fansClubNumber } = data.payload
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.fansNumber = fansNumber
+  room.fansclubNumber = fansClubNumber
+}
+function onOnlineCount(data: any) {
+  const { roomId, onlineNumber } = data.payload
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.onlineNumber = onlineNumber
+}
 
 function speakRunner() {
   if (synth.speaking) return
@@ -516,6 +566,12 @@ function toConfigTab() {
   store.rooms.forEach((room, i) => {
     room.isActive = false
   })
+}
+
+function openLiveRoom() {
+  const room = activeRoom.value
+  if (!room) return
+  window.openExternal(`https://live.bilibili.com/${room.displayId || room.id}`)
 }
 
 function handleConnect(_status: boolean) {
@@ -1210,7 +1266,7 @@ function hideToTray() {
   content: '';
   position: absolute;
   inset: auto 0 0 0;
-  height: 4px;
+  height: 20px;
   background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
   pointer-events: none;
 }
@@ -1226,8 +1282,8 @@ function hideToTray() {
 
 .room-tab {
   position: relative;
-  padding: 8px 18px;
-  font-size: 12px;
+  padding: 8px 18px 2px;
+  font-size: 13px;
   color: rgba(0, 0, 0, 0.8);
   cursor: pointer;
   border-bottom: 3px solid transparent;

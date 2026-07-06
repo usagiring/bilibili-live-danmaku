@@ -262,6 +262,9 @@ async function searchMessage({
 
   if (type === 'gift') {
     query.category = ['gift', 'superchat']
+
+    if (totalPriceGte.value != null) query.totalPriceGte = totalPriceGte.value
+    if (totalPriceLte.value != null) query.totalPriceLte = totalPriceLte.value
   } else {
     if (isShowInteract.value) {
       query.category = ['comment', 'interact']
@@ -269,9 +272,6 @@ async function searchMessage({
       query.category = ['comment']
     }
   }
-
-  if (totalPriceGte.value != null) query.totalPriceGte = totalPriceGte.value
-  if (totalPriceLte.value != null) query.totalPriceLte = totalPriceLte.value
 
   if (order) query.order = order
   if (limit) query.limit = limit

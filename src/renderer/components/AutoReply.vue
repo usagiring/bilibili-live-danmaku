@@ -219,7 +219,7 @@ onBeforeMount(async () => {
   // Object.assign(giftOptions, data)
 })
 
-const voiceOptions = ref<{ key: string; label: string; value: string }[]>([])
+const voiceOptions = ref<{ key: string; label: string; value: string; lang: string }[]>([])
 
 loadVoices()
 synth.onvoiceschanged = loadVoices
@@ -227,7 +227,7 @@ synth.onvoiceschanged = loadVoices
 function loadVoices() {
   const voices = synth.getVoices()
   if (voices.length) {
-    voiceOptions.value = voices.map(v => ({ key: v.name, label: v.name, value: `${v.name} (${v.lang})` }))
+    voiceOptions.value = voices.map(v => ({ key: v.name, label: v.name, value: v.name, lang: v.lang }))
   }
 }
 

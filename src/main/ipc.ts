@@ -258,7 +258,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle(IPC_GIFT_STATS_EXPORT, async (_event, { filePath, roomId, startTime, endTime, fileName }) => {
     const res = await axios.get(`${globalVar.baseUrl}/api/stats/gift/export`, {
       params: { roomId, startTime, endTime },
-      responseType: 'text',
+      responseType: 'arraybuffer',
     })
 
     if (!fs.existsSync(filePath)) {

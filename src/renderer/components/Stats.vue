@@ -80,13 +80,15 @@
       height="70"
       :closable="true"
       v-model="isShowWordCloud">
-      <div id="wordcloud-chart"></div>
+      <div
+        id="wordcloud-chart"
+        style="width: 100%; height: 100%"></div>
     </Drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { getStats, commentWordExtract, exportFile } from '../service/api'
 import { useConfigStore } from '../store'
@@ -241,6 +243,7 @@ async function generateWordCloud() {
 
   const chartData: { name: string; value: number }[] = []
   for (const key in data) {
+    if (data[key] < 3) continue
     chartData.push({
       name: key,
       value: data[key],
@@ -279,6 +282,9 @@ async function generateWordCloud() {
       },
     ],
   })
+
+  await nextTick()
+  wordCloudChart.resize()
 }
 
 async function download() {
@@ -286,7 +292,7 @@ async function download() {
     const filePath = await window.ipcRenderer.invoke(IPC_CHOOSE_DIRECTORY)
     if (!filePath) return
     const [start, end] = dateRange.value
-    const fileName = `${roomId.value}_${dateFormat(new Date(), 'YYYYMMDD_HHmmss')}.csv`
+    const fileName = `${roomId.value}_${Date.now()}.csv`
     await window.ipcRenderer.invoke(IPC_GIFT_STATS_EXPORT, {
       filePath,
       roomId: roomId.value,
@@ -418,12 +424,7 @@ async function download() {
 }
 
 #wordcloud-chart {
-  position: relative;
-  vertical-align: middle;
-  right: 0px;
-  top: 0px;
-  display: inline-block;
-  height: 500px;
-  width: 800px;
+  width: 100%;
+  height: 100%;
 }
 </style>

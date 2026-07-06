@@ -99,6 +99,7 @@
               size="small"
               :model-value="tag.data.voice"
               style="width: 150px"
+              filterable
               @on-change="v => changeVoice(v)">
               <Option
                 v-for="vo in voiceOptions"
@@ -106,6 +107,7 @@
                 :value="vo.key"
                 :label="vo.label">
                 {{ vo.value }}
+                <span style="color: #bbb; font-size: 10px">{{ vo.lang }}</span>
               </Option>
             </Select>
           </div>
@@ -164,7 +166,7 @@ const props = defineProps<{
   tag: ReplyRuleTag
   tagKind?: 'condition' | 'action'
   giftOptions?: { key: string; value: string; label: string; webp?: string }[]
-  voiceOptions?: { key: string; value: string; label: string }[]
+  voiceOptions?: { key: string; value: string; label: string; lang: string }[]
 }>()
 
 const emit = defineEmits<{ 'value-change': [payload: Record<string, any>]; remove: [] }>()

@@ -275,8 +275,18 @@ export async function getMedalList({ page, pageSize }: { page?: number; pageSize
   return res.data
 }
 
-export async function addLike({ roomId, ruid, count }: { roomId: number; ruid: number; count: number }) {
-  const res = await axios.post(`${baseUrl}/api/bilibili/room/like`, { roomId: String(roomId), ruid: String(ruid), count })
+export async function addLike({
+  clientId,
+  roomId,
+  roomUserId,
+  count,
+}: {
+  clientId: string
+  roomId: string
+  roomUserId: string
+  count: number
+}) {
+  const res = await axios.post(`${baseUrl}/api/bilibili/room/like`, { clientId, roomId, roomUserId, count })
   return res.data
 }
 

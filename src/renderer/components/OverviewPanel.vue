@@ -31,7 +31,34 @@
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
-          <div class="stat-label"><Icon type="md-thumbs-up" /> 点赞</div>
+          <Poptip
+            trigger="click"
+            v-model="isShowLikePoptip"
+            placement="bottom"
+            transfer
+            width="300">
+            <div class="stat-label stat-card--clickable"><Icon type="md-thumbs-up" /> 点赞</div>
+
+            <template #content>
+              <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap">
+                <span style="font-size: 12px; white-space: nowrap">我要给喜欢的主播点</span>
+                <InputNumber
+                  v-model="likeCount"
+                  size="small"
+                  :min="1"
+                  :max="1000"
+                  :step="10"
+                  style="width: 100px" />
+                <span style="font-size: 12px">次赞！</span>
+                <Button
+                  size="small"
+                  type="primary"
+                  @click="doLike">
+                  确定
+                </Button>
+              </div>
+            </template>
+          </Poptip>
         </div>
       </div>
     </template>
@@ -39,72 +66,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { computed, ref } from 'vue'
+import { addLike } from '../service/api'
 import { useConfigStore } from '../store'
-import { sse } from '../service/sse-client'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
+const likeCount = ref(1)
+const isShowLikePoptip = ref(false)
 
-onMounted(() => {
-  sse.on('NINKI', onNinki)
-  sse.on('LIVE', onLive)
-  sse.on('PREPARING', onPreparing)
-  sse.on('WATCHED_CHANGE', onWatchedChange)
-  sse.on('LIKE_CHANGE', onLikeChange)
-  sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
-  sse.on('ONLINE_COUNT', onOnlineCount)
-})
-
-onBeforeUnmount(() => {
-  sse.off('NINKI', onNinki)
-  sse.off('LIVE', onLive)
-  sse.off('PREPARING', onPreparing)
-  sse.off('WATCHED_CHANGE', onWatchedChange)
-  sse.off('LIKE_CHANGE', onLikeChange)
-  sse.off('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
-  sse.off('ONLINE_COUNT', onOnlineCount)
-})
-
-// ── SSE 回调 ──
-function onNinki(data: any) {
-  const { roomId, ninkiNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.ninkiNumber = ninkiNumber
-  // store.UPDATE_ACTIVE_ROOM({ ninkiNumber: data.payload?.ninkiNumber ?? 0 })
-}
-function onLive() {
-  // store.UPDATE_ACTIVE_ROOM({ liveStatus: 1 })
-}
-function onPreparing() {
-  //  store.UPDATE_ACTIVE_ROOM({ liveStatus: 0 })
-}
-function onWatchedChange(data: any) {
-  const { roomId, watchedNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.watchedNumber = watchedNumber
-  //  store.UPDATE_ACTIVE_ROOM({ watchedNumber: data.payload?.watchedNumber ?? 0 })
-}
-function onLikeChange(data: any) {
-  const { roomId, likeNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.likeNumber = likeNumber
-}
-function onFansUpdate(data: any) {
-  const { roomId, fansNumber, fansClubNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.fansNumber = fansNumber
-  room.fansclubNumber = fansClubNumber
-}
-function onOnlineCount(data: any) {
-  const { roomId, onlineNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.onlineNumber = onlineNumber
+async function doLike() {
+  if (!activeRoom?.value) return
+  await addLike({ clientId: store.id, roomId: activeRoom.value.id, roomUserId: activeRoom.value.userId, count: likeCount.value })
+  isShowLikePoptip.value = false
 }
 
 function formatNumber(n?: number): string {
@@ -163,6 +137,10 @@ function formatNumber(n?: number): string {
 
 .stat-card:hover {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.stat-card--clickable {
+  cursor: pointer;
 }
 
 .stat-value {
