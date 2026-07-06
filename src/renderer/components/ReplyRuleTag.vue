@@ -91,34 +91,37 @@
           </Checkbox>
         </div>
       </template>
-      <template v-else-if="tag.key === 'SPEAK_REPLY'"
-        ><div class="tc-row">
-          <span class="tc-label">声音</span
-          ><Select
-            size="small"
-            :model-value="tag.data.voice"
-            style="width: 150px"
-            @on-change="v => changeVoice(v)">
-            <Option
-              v-for="vo in voiceOptions"
-              :key="vo.key"
-              :value="vo.key"
-              :label="vo.label">
-              {{ vo.value }}
-            </Option>
-          </Select>
+      <template v-else-if="tag.key === 'SPEAK_REPLY'">
+        <div class="tc-col">
+          <div class="tc-row">
+            <span class="tc-label">声音</span
+            ><Select
+              size="small"
+              :model-value="tag.data.voice"
+              style="width: 150px"
+              @on-change="v => changeVoice(v)">
+              <Option
+                v-for="vo in voiceOptions"
+                :key="vo.key"
+                :value="vo.key"
+                :label="vo.label">
+                {{ vo.value }}
+              </Option>
+            </Select>
+          </div>
+          <div class="tc-row">
+            <span class="tc-label">语速</span>
+            <InputNumber
+              size="small"
+              :model-value="tag.data.speed"
+              :min="0.1"
+              :max="2.0"
+              :step="0.1"
+              style="width: 70px"
+              @on-change="v => changeVoiceSpeed(v)" />
+          </div>
         </div>
-        <div class="tc-row">
-          <span class="tc-label">语速</span>
-          <InputNumber
-            size="small"
-            :model-value="tag.data.speed"
-            :min="0.1"
-            :max="2.0"
-            :step="0.1"
-            style="width: 70px"
-            @on-change="v => changeVoiceSpeed(v)" /></div
-      ></template>
+      </template>
     </template>
   </Poptip>
   <ChipSpan
@@ -194,6 +197,7 @@ function changeGift(giftIds: string[]) {
 }
 
 function changePrice(priceMin: number) {
+  if (!priceMin || !Number.isFinite(priceMin)) priceMin = 0
   const display = `金额 ≥ ${priceMin}`
   emit('value-change', { display, data: { priceMin } })
 }
@@ -220,6 +224,10 @@ function changeVoiceSpeed(speed: number) {
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
+}
+.tc-col {
+  display: flex;
+  flex-direction: column;
 }
 .tc-row:last-child {
   margin-bottom: 0;

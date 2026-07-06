@@ -294,10 +294,10 @@ function formatMessage(msg: Message) {
 
   if (msg.emots) {
     const regstr = Object.keys(msg.emots)
-      .map((k: string) => k.replace(/\[|\]/g, ''))
-      .map((k: string) => '\[' + k + '\]')
+      .map((k: string) => k.replace(/[\[\]]/g, ''))
+      .map((k: string) => `\\[${k}\\]`)
       .join('|')
-    msg.splitContent = msg.content.split(new RegExp('(' + regstr + ')', 'g'))
+    msg.splitContent = msg.content.split(new RegExp(`(${regstr})`, 'g')).filter(Boolean)
   }
 
   if (['gift', 'superchat'].includes(msg.category) && msg.gift) {

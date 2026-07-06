@@ -88,6 +88,13 @@ function onMessage(msg: Message) {
   if (msg.category !== 'comment') return
   if (msg.type === 1 && !isShowType1.value) return
   if (msg.type === 2 && !isShowType2.value) return
+  // if (msg.emots) {
+  //   const regstr = Object.keys(msg.emots)
+  //     .map((k: string) => k.replace(/[\[\]]/g, ''))
+  //     .map((k: string) => `\\[${k}\\]`)
+  //     .join('|')
+  //   msg.splitContent = msg.content.split(new RegExp(`(${regstr})`, 'g')).filter(Boolean)
+  // }
   dispatchComments(msg)
 }
 
@@ -111,7 +118,7 @@ async function dispatchComments(msg: Message) {
   }
   const { width: windowWidth } = getWindowSize()
   const v = (w + windowWidth) / duration.value
-  const { top } = getDanmakuTopV3({ v, height: h })
+  const { top } = getDanmakuTop({ v, height: h })
   if (top === null || top === undefined) {
     console.log('not enable space')
     return
@@ -127,7 +134,7 @@ async function dispatchComments(msg: Message) {
   }, duration.value + 500)
 }
 
-function getDanmakuTopV3({ v: v2, top = 0, height, count = 0 }: { v: number; top?: number; height: number; count?: number }): any {
+function getDanmakuTop({ v: v2, top = 0, height, count = 0 }: { v: number; top?: number; height: number; count?: number }): any {
   if (count > 20) return { top: null }
 
   const filtered = blocks.value.filter(b => b.top <= top + height && b.top + b.height > top)
@@ -142,7 +149,7 @@ function getDanmakuTopV3({ v: v2, top = 0, height, count = 0 }: { v: number; top
   })
 
   if (!touchedBlock) return { top }
-  return getDanmakuTopV3({ v: v2, top: touchedBlock.top + touchedBlock.height, height, count: count + 1 })
+  return getDanmakuTop({ v: v2, top: touchedBlock.top + touchedBlock.height, height, count: count + 1 })
 }
 
 function clearMessage() {
