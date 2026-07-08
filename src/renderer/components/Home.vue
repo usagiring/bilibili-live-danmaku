@@ -24,7 +24,10 @@
         <div
           id="tray"
           @click="hideToTray">
-          <Icon type="md-arrow-dropdown" />
+          <span class="tray-icon">
+            <Icon type="ios-arrow-down" />
+            <Icon type="md-remove" />
+          </span>
         </div>
         <div
           id="minimize"
@@ -316,6 +319,15 @@
         <span class="modal-window-label">{{ winTypeLabel(win.type) }} #{{ win.id }}</span>
         <span class="modal-window-room">直播间 {{ win.roomId }}</span>
         <span
+          class="modal-window-pin"
+          :class="{ active: autoTopWindows.has(win.id) }"
+          @click.stop="toggleAutoTop(win.id)"
+          :title="autoTopWindows.has(win.id) ? '取消置顶' : '自动置顶'">
+          <Icon
+            :type="autoTopWindows.has(win.id) ? 'md-infinite' : 'md-infinite'"
+            size="14" />
+        </span>
+        <span
           class="modal-window-close"
           @click.stop="closeDmWindow(win.id)">
           <Icon
@@ -330,7 +342,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useConfigStore } from '../store'
-import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_WINDOW_CLOSE, IPC_GET_EXE_PATH } from '../../service/const'
+import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_MAIN_WINDOW_ACTION } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Message from './Message.vue'
 import Config from './Config.vue'
@@ -581,11 +593,6 @@ function openLiveRoom() {
   window.openExternal(`https://live.bilibili.com/${room.displayId || room.id}`)
 }
 
-function handleConnect(_status: boolean) {
-  // 由 OverviewPanel emit 上来触发连接
-  // TODO 状态变化
-}
-
 async function handleShowDanmaku() {
   const room = activeRoom.value
   if (!room) return
@@ -643,8 +650,6 @@ async function handleShowLiveWindow() {
   fetchWindows()
 }
 
-let recordTimer: ReturnType<typeof setInterval> | null = null
-
 async function handleToggleRecord() {}
 
 // ── 标题栏窗口列表 ──
@@ -655,6 +660,27 @@ interface WindowItem {
 }
 const dmWindows = ref<WindowItem[]>([])
 const showWindowList = ref(false)
+const autoTopWindows = ref(new Set<number>())
+const autoTopTimers = new Map<number, ReturnType<typeof setInterval>>()
+
+function toggleAutoTop(windowId: number) {
+  if (autoTopWindows.value.has(windowId)) {
+    autoTopWindows.value.delete(windowId)
+    clearInterval(autoTopTimers.get(windowId))
+    autoTopTimers.delete(windowId)
+  } else {
+    autoTopWindows.value.add(windowId)
+    const timer = setInterval(() => {
+      window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+        id: windowId,
+        action: 'setAlwaysOnTop',
+        args: [true, 'floating'],
+      })
+    }, 2000)
+    autoTopTimers.set(windowId, timer)
+  }
+  autoTopWindows.value = new Set(autoTopWindows.value)
+}
 
 async function fetchWindows() {
   const list = (await window.ipcRenderer.invoke(IPC_WINDOW_FIND)) as WindowItem[]
@@ -671,11 +697,17 @@ function winTypeLabel(type: string) {
 }
 
 async function focusWindow(id: number) {
-  await window.ipcRenderer.invoke('IPC_WINDOW_CONTROL', { windowId: id, method: 'moveTop' })
+  await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { id, action: 'moveTop' })
 }
 
 async function closeDmWindow(id: number) {
-  await window.ipcRenderer.invoke(IPC_WINDOW_CLOSE, { id })
+  autoTopWindows.value.delete(id)
+  const timer = autoTopTimers.get(id)
+  if (timer) {
+    clearInterval(timer)
+    autoTopTimers.delete(id)
+  }
+  await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { id, action: 'close' })
   fetchWindows()
 }
 
@@ -691,7 +723,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
       action: 'setIgnoreMouseEvents',
-      value: [val, { forward: true }],
+      args: [val, { forward: true }],
     })
   },
 )
@@ -702,7 +734,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
       action: 'setAlwaysOnTop',
-      value: [val, 'floating'],
+      args: [val, 'floating'],
     })
   },
 )
@@ -713,7 +745,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'live',
       action: 'setIgnoreMouseEvents',
-      value: [val, { forward: true }],
+      args: [val, { forward: true }],
     })
   },
 )
@@ -724,19 +756,19 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'live',
       action: 'setAlwaysOnTop',
-      value: [val, 'floating'],
+      args: [val, 'floating'],
     })
   },
 )
 
 function close() {
-  window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'close' })
+  window.ipcRenderer.invoke(IPC_MAIN_WINDOW_ACTION, { action: 'close' })
 }
 function minimize() {
-  window.ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'minimize' })
+  window.ipcRenderer.invoke(IPC_MAIN_WINDOW_ACTION, { action: 'minimize' })
 }
 function hideToTray() {
-  // ipcRenderer.invoke(IPC_WINDOW_ACTION, { action: 'hide' })
+  window.ipcRenderer.invoke(IPC_MAIN_WINDOW_ACTION, { action: 'hide' })
 }
 </script>
 
@@ -867,6 +899,21 @@ function hideToTray() {
 #close:hover {
   background: #ed4014 !important;
   color: #fff !important;
+}
+
+.tray-icon {
+  padding-top: 2px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+.tray-icon :deep(.ivu-icon) {
+  font-size: 15px;
+  line-height: 1;
+}
+.tray-icon :deep(.ivu-icon:last-child) {
+  margin-top: -11px;
 }
 
 #window {
@@ -1553,6 +1600,26 @@ function hideToTray() {
   font-size: 12px;
   color: #bbb;
   margin-right: 4px;
+}
+
+.modal-window-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+  color: #ccc;
+  transition: all 0.1s;
+  height: 16px;
+  width: 16px;
+}
+.modal-window-pin:hover {
+  color: #2d8cf0;
+  background: rgba(45, 140, 240, 0.08);
+}
+.modal-window-pin.active {
+  color: #2d8cf0;
+  background: rgba(45, 140, 240, 0.12);
 }
 
 .modal-window-close {

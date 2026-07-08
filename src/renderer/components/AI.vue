@@ -56,7 +56,7 @@
           </div>
           <div
             class="section-row"
-            style="padding-left: 44px">
+            style="padding-left: 15px">
             <button
               class="btn btn-primary"
               :disabled="initializing"
@@ -85,7 +85,7 @@
           </div>
           <div
             class="section-row"
-            style="padding-left: 44px">
+            style="padding-left: 15px">
             <button
               class="btn"
               @click="isInitialized = false">
@@ -114,12 +114,6 @@
             >直播流</span
           >
         </span>
-      </div>
-
-      <!-- 操作 -->
-      <div
-        class="section-row"
-        style="padding-left: 44px">
         <button
           v-if="!isInitialized"
           class="btn btn-disabled"
@@ -152,13 +146,12 @@
     </div>
 
     <!-- ═══ AI 对话 ═══ -->
-    <div class="divider">AI 对话</div>
+    <!-- <div class="divider">AI 对话</div>
     <div class="section">
       <div class="placeholder">
-        <div class="ph-icon">💬</div>
         <p>接入大语言模型，智能回复弹幕</p>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
