@@ -1,5 +1,6 @@
-import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent, netLog } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent, netLog, systemPreferences } from 'electron'
 import path from 'path'
+import fs from 'fs'
 import { autoUpdater } from 'electron-updater'
 import Store from 'electron-store'
 import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
@@ -89,6 +90,16 @@ app.on('ready', async () => {
     store.set('clientId', clientId)
   })
   ipcMain.handle('get-base-url', () => globalVar.baseUrl)
+  ipcMain.handle('get-speech-to-text-models', () => {
+    const modelsDir = import.meta.env.DEV ? '/Users/tokine/Tokine/bilibili-live-danmaku/models' : path.join(__dirname, '../models')
+    try {
+      const files: string[] = fs.readdirSync(modelsDir)
+      return files.filter(f => f.includes('sherpa-onnx-sense-voice'))
+    } catch (e) {
+      console.error(e)
+      return []
+    }
+  })
 
   // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启
   // if (import.meta.env.DEV) {
@@ -130,6 +141,34 @@ app.on('ready', async () => {
   //   details.responseHeaders!['Access-Control-Allow-Methods'] = ['GET, POST, PUT, DELETE, OPTIONS']
   //   details.responseHeaders!['Access-Control-Allow-Headers'] = ['*']
   //   callback({ responseHeaders: details.responseHeaders })
+  // })
+
+  // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+  //   const responseHeaders = details.responseHeaders || {}
+  //   // 强行注入跨域允许标签
+  //   responseHeaders['Access-Control-Allow-Origin'] = ['*']
+  //   callback({ cancel: false, responseHeaders })
+  // })
+
+  // 允许麦克风权限（macOS 需要先通过 systemPreferences 请求）
+  // session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+  //   if (permission === 'media') {
+  //     callback(true)
+  //   } else {
+  //     callback(false)
+  //   }
+  // })
+  // session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
+  //   return permission === 'media'
+  // })
+
+  // // IPC: 渲染进程触发请求麦克风权限
+  // ipcMain.handle('request-microphone-permission', async () => {
+  //   if (process.platform === 'darwin') {
+  //     const granted = await systemPreferences.askForMediaAccess('microphone')
+  //     return granted
+  //   }
+  //   return true
   // })
 
   createWindow()

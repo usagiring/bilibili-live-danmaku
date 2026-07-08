@@ -168,6 +168,20 @@ export interface AutoReplyRule {
   tags: ReplyRuleTag[]
 }
 
+interface AIConfig {
+  // roomId: string
+  speechToText: {
+    model: {
+      name: string
+    }
+    vad: {
+      minSpeechDuration: number
+      minSilenceDuration: number
+      maxSpeechDuration: number
+    }
+  }
+}
+
 export interface ClientConfig {
   id: string
   signInMessage: string
@@ -190,6 +204,7 @@ export interface ClientConfig {
   chartConfig?: ChartConfig
   voteConfig: VoteConfig
   autoReplyRule: Record<string, AutoReplyRule>
+  AIConfig: AIConfig
 }
 
 export interface StoreConfig {

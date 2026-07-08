@@ -141,76 +141,32 @@ export async function getGiftList({ roomId, roomUserId }: { roomId: string; room
   return res.data
 }
 
-// ==================== ASR ====================
-
-export async function initialASR(body: { appKey: string; accessKeyId: string; accessKeySecret: string }) {
-  const res = await axios.post(`${baseUrl}/api/automatic-speech-recognition/initial`, body)
-  return res.data
-}
-
-export async function startLiveStreamASR(body: { playUrl: string; ffmpegPath?: string }) {
-  const res = await axios.post(`${baseUrl}/api/automatic-speech-recognition/live/start`, body)
-  return res.data
-}
-
-export async function closeLiveStreamASR() {
-  const res = await axios.post(`${baseUrl}/api/automatic-speech-recognition/live/close`)
-  return res.data
-}
-
-export async function closeASR() {
-  const res = await axios.post(`${baseUrl}/api/automatic-speech-recognition/close`)
-  return res.data
-}
-
-export async function getASRStatus() {
-  const res = await axios.get(`${baseUrl}/api/automatic-speech-recognition/status`)
-  return res.data
-}
-
-export async function sendAudio(data: Int16Array) {
-  const res = await axios.post(`${baseUrl}/api/automatic-speech-recognition/audio`, { data })
-  return res.data
-}
-
-// ==================== Translate ====================
-
-export async function translateSentence(body: {
-  text: string
-  from?: string
-  to?: string
-  accessKeyId: string
-  accessKeySecret: string
-  payload?: any
+export async function speechToTextDecode({
+  clientId,
+  roomId,
+  buffer,
+}: {
+  clientId: string
+  roomId: string
+  buffer: Float32Array<ArrayBuffer>
 }) {
-  const res = await axios.post(`${baseUrl}/api/translate/sentence`, body)
+  const res = await axios.post(`${baseUrl}/api/speech-to-text/decode`, buffer.buffer, {
+    headers: { 'Content-Type': 'application/octet-stream' },
+    params: { clientId, roomId },
+  })
   return res.data
 }
 
-export async function translateOpen(body: { accessKeyId: string; accessKeySecret: string; fromLang: string; toLang: string }) {
-  const res = await axios.post(`${baseUrl}/api/translate/open`, body)
+export async function speechToTextInitial({ clientId, roomId }: { clientId: string; roomId: string }) {
+  const res = await axios.post(`${baseUrl}/api/speech-to-text/initial`, {
+    clientId,
+    roomId,
+  })
   return res.data
 }
 
-export async function translateClose() {
-  const res = await axios.post(`${baseUrl}/api/translate/close`)
-  return res.data
-}
-
-export async function getTranslateStatus() {
-  const res = await axios.get(`${baseUrl}/api/translate/status`)
-  return res.data
-}
-
-// ==================== Speech Recognition ====================
-
-export async function initialSpeechRecognition(body: { accessKeyId: string; accessKeySecret: string }) {
-  const res = await axios.post(`${baseUrl}/api/speech-recognition/initial`, body)
-  return res.data
-}
-
-export async function speechToText(body: { appKey: string; payload?: any }) {
-  const res = await axios.post(`${baseUrl}/api/speech-recognition/speech-to-text`, body)
+export async function speechToTextStatus({ clientId, roomId }: { clientId: string; roomId: string }) {
+  const res = await axios.get(`${baseUrl}/api/speech-to-text/status`, { params: { roomId, clientId } })
   return res.data
 }
 
@@ -320,5 +276,22 @@ export async function registryClient({ clientId }) {
 
 export async function touch() {
   const res = await axios.get(`${baseUrl}/api/touch`)
+  return res.data
+}
+
+export async function getPlayUrl({
+  roomId,
+  qn,
+  withCookie,
+  clientId,
+}: {
+  roomId: string
+  qn?: number
+  withCookie?: boolean
+  clientId: string
+}) {
+  const res = await axios.get(`${baseUrl}/api/bilibili/room/playurl`, {
+    params: { roomId, clientId, qn, withCookie },
+  })
   return res.data
 }

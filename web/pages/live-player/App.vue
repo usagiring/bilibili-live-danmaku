@@ -103,7 +103,8 @@ onMounted(async () => {
     /* ignore */
   }
 
-  playerDOM = document.getElementById('player') as HTMLVideoElement | null
+  playerDOM = document.getElementById('player') as HTMLVideoElement
+  playerDOM.crossOrigin = 'anonymous'
 
   sse.connect(config.baseUrl, clientId)
   sse.on('LIVE_CONFIG', data => {

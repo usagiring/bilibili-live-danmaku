@@ -31,6 +31,18 @@ const config: ClientConfig & { set: (p: string, v: string) => void } = reactive(
   isRoomPanelCollapsed: false,
 
   autoReplyRule: {},
+  AIConfig: {
+    speechToText: {
+      model: {
+        name: '',
+      },
+      vad: {
+        minSpeechDuration: 0.1,
+        minSilenceDuration: 0.1,
+        maxSpeechDuration: 5,
+      },
+    },
+  },
 
   set(path: string, value: any) {
     _set(this, path, value)

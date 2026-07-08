@@ -159,14 +159,13 @@
             <div class="banner-overlay">
               <!-- 用户信息 + 连接 -->
               <div class="banner-profile">
-                <div
-                  class="banner-profile-row"
-                  style="cursor: pointer"
-                  @click="openLiveRoom">
+                <div class="banner-profile-row">
                   <img
                     class="banner-avatar"
                     :src="activeRoom?.face || DEFAULT_FACE" />
-                  <div class="banner-info">
+                  <div
+                    class="banner-info"
+                    @click="openLiveRoom">
                     <div class="banner-name">{{ activeRoom?.username || '未连接' }}</div>
                     <div class="banner-id">
                       直播间 {{ activeRoom?.displayId || activeRoom?.id }}
@@ -260,6 +259,12 @@
                   @click="activeTab = 'autoreply'">
                   <Icon type="md-repeat" /> 回复
                 </div>
+                <div
+                  class="room-tab"
+                  :class="{ active: activeTab === 'ai' }"
+                  @click="activeTab = 'ai'">
+                  <Icon type="md-bulb" /> AI
+                </div>
               </div>
             </div>
           </div>
@@ -271,6 +276,7 @@
             <Vote v-if="activeTab === 'vote'" />
             <Stats v-if="activeTab === 'stats'" />
             <AutoReply v-if="activeTab === 'autoreply'" />
+            <AI v-if="activeTab === 'ai'" />
           </div>
         </template>
 
@@ -331,6 +337,7 @@ import Config from './Config.vue'
 import Vote from './Vote.vue'
 import Stats from './Stats.vue'
 import AutoReply from './AutoReply.vue'
+import AI from './AI.vue'
 import {
   connect as connectApi,
   disconnect as disconnectApi,
@@ -1266,7 +1273,7 @@ function hideToTray() {
   content: '';
   position: absolute;
   inset: auto 0 0 0;
-  height: 20px;
+  height: 4px;
   background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
   pointer-events: none;
 }
@@ -1311,7 +1318,7 @@ function hideToTray() {
 .room-tab.active {
   color: #222;
   font-weight: 600;
-  border-bottom-color: #fff;
+  border-bottom-color: #66ccff;
   text-shadow:
     white 1px 0 1px,
     white 0 1px 1px,
@@ -1344,7 +1351,8 @@ function hideToTray() {
 }
 
 .banner-info {
-  flex: 1;
+  /* flex: 1; */
+  cursor: pointer;
   min-width: 0;
 }
 

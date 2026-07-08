@@ -17,3 +17,5 @@ electron-vite-vue/
 web/dist/
 bin/
 db.sqlite*
+models/*
+models

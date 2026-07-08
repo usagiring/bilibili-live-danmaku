@@ -5,19 +5,19 @@
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.ninkiNumber) }}</div>
-          <div class="stat-label"><Icon type="md-eye" /> 热度</div>
+          <div class="stat-label"><Icon type="md-flame" /> 热度</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.fansNumber) }}</div>
-          <div class="stat-label"><Icon type="md-heart" /> 关注</div>
+          <div class="stat-label"><Icon type="md-star" /> 关注</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.fansclubNumber) }}</div>
-          <div class="stat-label"><Icon type="md-star" /> 粉丝团</div>
+          <div class="stat-label"><Icon type="md-heart" /> 粉丝团</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ activeRoom?.anchorNumber }}</div>
-          <div class="stat-label"><Icon type="md-flag" /> 舰队</div>
+          <div class="stat-label"><Icon type="md-cog" /> 舰队</div>
         </div>
       </div>
 
@@ -27,7 +27,7 @@
         style="grid-template-columns: repeat(2, 1fr)">
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
-          <div class="stat-label"><Icon type="md-person" /> 看过</div>
+          <div class="stat-label"><Icon type="md-eye" /> 看过</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
