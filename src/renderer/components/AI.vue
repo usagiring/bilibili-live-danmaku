@@ -432,6 +432,49 @@ function toggleSTT() {
     startMic()
   }
 }
+
+// function legacy() {
+//   const option: MediaStreamConstraints = {
+//     audio: true,
+//     video: false,
+//   }
+//   if (!this.audioDeviceId) {
+//     option.audio = {
+//       deviceId: this.audioDeviceId,
+//     } as any
+//   }
+//   const stream = await navigator.mediaDevices.getUserMedia(option)
+//   global.microphoneStream = stream
+//   const context = new AudioContext({
+//     sampleRate: 16000,
+//   })
+//   global.microphoneAudioContext = context
+//   const source = context.createMediaStreamSource(stream)
+
+//   // const processor = new Worker(new URL('../../service/processor.worklet.js', import.meta.url))
+//   // await context.audioWorklet.addModule(AudioWorklet(new URL("../../service/processor.worklet.js", import.meta.url)))
+//   await context.audioWorklet.addModule(processorUrl)
+//   const worklet = new AudioWorkletNode(context, 'worklet-processor')
+
+//   // let count = 0
+//   let sample8192 = []
+//   worklet.port.onmessage = e => {
+//     let sample128 = JSON.parse(e.data)
+//     sample8192 = sample8192.concat(sample128)
+
+//     if (sample8192.length >= 16384) {
+//       const payload = {
+//         event: 'AUDIO',
+//         data: JSON.stringify(sample8192),
+//       }
+//       sample8192 = []
+//       // ws.send(JSON.stringify(payload))
+//     }
+//   }
+
+//   source.connect(worklet)
+//   worklet.connect(context.destination)
+// }
 </script>
 
 <style scoped>
