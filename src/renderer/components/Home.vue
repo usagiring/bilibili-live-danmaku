@@ -395,7 +395,7 @@ onMounted(() => {
     waitingSpeakers.push(speaker)
     speakRunner()
   })
-  sse.on('NINKI', onNinki)
+  // sse.on('NINKI', onNinki)
   sse.on('LIVE', onLive)
   sse.on('PREPARING', onPreparing)
   sse.on('WATCHED_CHANGE', onWatchedChange)
@@ -405,13 +405,12 @@ onMounted(() => {
 })
 
 // ── SSE 回调 ──
-function onNinki(data: any) {
-  const { roomId, ninkiNumber } = data.payload
-  const room = store.rooms.find(room => room.id === roomId)
-  if (!room) return
-  room.ninkiNumber = ninkiNumber
-  // store.UPDATE_ACTIVE_ROOM({ ninkiNumber: data.payload?.ninkiNumber ?? 0 })
-}
+// function onNinki(data: any) {
+//   const { roomId, ninkiNumber } = data
+//   const room = store.rooms.find(room => room.id === roomId)
+//   if (!room) return
+//   room.ninkiNumber = ninkiNumber
+// }
 function onLive() {
   // store.UPDATE_ACTIVE_ROOM({ liveStatus: 1 })
 }
@@ -419,26 +418,26 @@ function onPreparing() {
   //  store.UPDATE_ACTIVE_ROOM({ liveStatus: 0 })
 }
 function onWatchedChange(data: any) {
-  const { roomId, watchedNumber } = data.payload
+  const { roomId, watchedNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.watchedNumber = watchedNumber
 }
 function onLikeChange(data: any) {
-  const { roomId, likeNumber } = data.payload
+  const { roomId, likeNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.likeNumber = likeNumber
 }
 function onFansUpdate(data: any) {
-  const { roomId, fansNumber, fansClubNumber } = data.payload
+  const { roomId, fansNumber, fansClubNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.fansNumber = fansNumber
   room.fansclubNumber = fansClubNumber
 }
 function onOnlineCount(data: any) {
-  const { roomId, onlineNumber } = data.payload
+  const { roomId, onlineNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.onlineNumber = onlineNumber
@@ -484,9 +483,6 @@ async function removeRoom(index: number) {
 
 async function initializeRoom({ roomId, force }: { roomId?: string; force?: boolean } = {}) {
   if (!activeRoom?.value) return
-  // if (!force && activeRoom.value.isInitialized) {
-  //   return
-  // }
 
   try {
     const roomId = activeRoom.value?.displayId || activeRoom.value?.id
@@ -498,6 +494,7 @@ async function initializeRoom({ roomId, force }: { roomId?: string; force?: bool
       return
     }
 
+    console.log(data)
     const userId = data.room_info?.uid
     const realRoomId = data.room_info?.room_id
     const liveStatus = data.room_info?.live_status
@@ -510,6 +507,7 @@ async function initializeRoom({ roomId, force }: { roomId?: string; force?: bool
     const ninkiNumber = data.room_info?.online
     const onlineNumber = data.room_rank_info?.user_rank_entry?.user_contribution_rank_entry?.count
     const anchorNumber = data.guard_info?.count
+    // const medalId = data.anchor_info?.medal_info?.medal_id
 
     const room = store.rooms.find(room => room.id === roomId)
     if (!room) throw new Error('房间未找到')
@@ -570,6 +568,7 @@ async function toggleConnect() {
     } else {
       await connectApi({ roomId: room.id, userId: room.userId, clientId: clientId.value })
       await initializeRoom()
+      await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
       room.isConnected = true
     }
   } catch {

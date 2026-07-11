@@ -2,11 +2,9 @@
   <div class="overview-panel">
     <template v-if="activeRoom">
       <!-- 统计条 -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-value">{{ formatNumber(activeRoom.ninkiNumber) }}</div>
-          <div class="stat-label"><Icon type="md-flame" /> 热度</div>
-        </div>
+      <div
+        class="stats-row"
+        style="grid-template-columns: repeat(4, 1fr)">
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.fansNumber) }}</div>
           <div class="stat-label"><Icon type="md-star" /> 关注</div>
@@ -19,16 +17,16 @@
           <div class="stat-value">{{ activeRoom?.anchorNumber }}</div>
           <div class="stat-label"><Icon type="md-cog" /> 舰队</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.onlineNumber) }}</div>
+          <div class="stat-label"><Icon type="md-people" /> 同接</div>
+        </div>
       </div>
 
       <!-- 观看/点赞 -->
       <div
         class="stats-row"
         style="grid-template-columns: repeat(2, 1fr)">
-        <div class="stat-card">
-          <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
-          <div class="stat-label"><Icon type="md-eye" /> 看过</div>
-        </div>
         <div class="stat-card">
           <div class="stat-value">{{ formatNumber(activeRoom.likeNumber) }}</div>
           <Poptip
@@ -59,6 +57,10 @@
               </div>
             </template>
           </Poptip>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ formatNumber(activeRoom.watchedNumber) }}</div>
+          <div class="stat-label"><Icon type="md-eye" /> 看过</div>
         </div>
       </div>
     </template>

@@ -745,24 +745,39 @@
           @click="speak">
           <Icon
             type="md-volume-up"
-            size="14" />
+            size="12" />
           播放
         </button>
       </div>
       <div class="section-row">
         <span
           class="label"
-          style="min-width: 52px"
-          >一键签到</span
-        >
-        <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px">
-          <Icon
-            type="md-checkmark-circle"
-            size="14" />
-          执行签到
-        </button>
+          style="min-width: 52px">
+          点亮牌子
+        </span>
+        <Poptip
+          trigger="hover"
+          transfer>
+          <button
+            class="btn btn-default"
+            style="font-size: 10px; height: 22px"
+            :disabled="lightMedalLoading"
+            @click="lightMedal">
+            <Icon
+              :type="lightMedalLoading ? 'ios-loading' : 'md-information-circle'"
+              :class="{ 'spin-icon': lightMedalLoading }"
+              size="12" />
+            {{ lightMedalLoading ? '点亮中…' : '一键点亮' }}
+          </button>
+          <template #content>
+            <span>当前<b>正在直播</b>或者<b>已点亮牌子</b>的直播间<b>点赞</b>30次</span>
+          </template>
+        </Poptip>
+        <span
+          v-if="lightMedalCount > 0"
+          class="medal-count">
+          已点亮 {{ lightMedalCount }} 个
+        </span>
       </div>
     </div>
 
@@ -856,12 +871,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { get as _get, set as _set } from 'lodash'
 import config from '../service/config'
-import { updateClientConfig, restoreDmStyle, generateQRCode, sendDM, clearDM as clearDMApi, pollQRCode } from '../service/api'
+import {
+  updateClientConfig,
+  restoreDmStyle,
+  generateQRCode,
+  sendDM,
+  clearDM as clearDMApi,
+  pollQRCode,
+  getMedalList,
+  addLike,
+} from '../service/api'
 import { IPC_GET_VERSION, QUALITY_MAP } from '../../service/const'
-import globalVar from '../../service/global'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
 import { Message as $Message } from 'view-ui-plus'
+import { wait } from '@tokine/shared/service/util.js'
 
 const dmStyle = computed(() => config.dmStyle)
 const dmRawStyle = computed(() => config.dmRawStyle)
@@ -869,6 +893,17 @@ const liveConfig = computed(() => config.liveConfig)
 const recordConfig = computed(() => config.recordConfig)
 const chartConfig = computed(() => config.chartConfig)
 const clientId = computed(() => config.id)
+
+const version = ref('')
+const obsDmUrl = ref('')
+const obsRawUrl = ref('')
+
+onMounted(async () => {
+  version.value = (await window.ipcRenderer.invoke(IPC_GET_VERSION)) as string
+  const baseUrl = await window.getBaseUrl()
+  obsDmUrl.value = `${baseUrl}/dm?clientId=${clientId.value}&roomId=*`
+  obsRawUrl.value = `${baseUrl}/dm-raw-style?clientId=${clientId.value}&roomId=*`
+})
 
 const qualityOptions = Object.entries(QUALITY_MAP)
 
@@ -1181,16 +1216,6 @@ function speak() {
   synth.speak(utter)
 }
 
-// ── 关于 ──
-const version = ref(0)
-const baseObsUrl = computed(() => `http://127.0.0.1:${(globalVar as any).port}`)
-const obsDmUrl = computed(() => `${baseObsUrl.value}/dm?clientId=${clientId.value}&roomId=*`)
-const obsRawUrl = computed(() => `${baseObsUrl.value}/dm-raw-style?clientId=${clientId.value}&roomId=*`)
-
-onMounted(async () => {
-  version.value = await (window as any).ipcRenderer.invoke(IPC_GET_VERSION)
-})
-
 function openGithub() {
   window.openExternal('https://github.com/usagiring/bilibili-live-danmaku/releases')
 }
@@ -1212,6 +1237,54 @@ function copyObsUrl(url: string) {
     document.execCommand('copy')
     document.body.removeChild(input)
   })
+  $Message.success('复制成功')
+}
+
+const lightMedalLoading = ref(false)
+const lightMedalCount = ref(0)
+
+async function lightMedal() {
+  lightMedalLoading.value = true
+  lightMedalCount.value = 0
+  let page = 1
+  let hasMore = true
+
+  try {
+    while (hasMore) {
+      const res = await getMedalList({ clientId: clientId.value, page, pageSize: 50 })
+      const list = res?.data?.list || []
+      const splist = res.data?.special_list || []
+      list.unshift(...splist)
+
+      for (const info of list) {
+        const medal = info.medal || info
+        const isLiving = info.room_info?.living_status === 1
+        if (medal.is_lighted || isLiving) {
+          const count = Math.floor(Math.random() * 11) + 30 // 30~40 随机
+          const roomId = info.room_info.room_id
+          const roomUserId = medal.target_id
+          await addLike({
+            clientId: clientId.value,
+            roomId: String(roomId),
+            roomUserId: String(roomUserId),
+            count,
+          })
+          lightMedalCount.value++
+          // 加点延迟避免请求过快
+          await wait(500)
+        }
+      }
+
+      await wait(500)
+
+      hasMore = res?.data?.page_info?.has_more || false
+      page = hasMore ? res?.data?.page_info?.next_page || page + 1 : page + 1
+    }
+
+    $Message.success(`点亮完成，共点亮 ${lightMedalCount.value} 个牌子`)
+  } finally {
+    lightMedalLoading.value = false
+  }
 }
 </script>
 
@@ -1384,6 +1457,24 @@ function copyObsUrl(url: string) {
 .btn-default {
   background: #fff;
   color: #2d8cf0;
+}
+
+.medal-count {
+  font-size: 11px;
+  color: #19be6b;
+  white-space: nowrap;
+}
+
+.spin-icon {
+  animation: config-spin 1s linear infinite;
+}
+@keyframes config-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 步进器 */

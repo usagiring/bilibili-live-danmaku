@@ -121,10 +121,32 @@
 
               <!-- 回复模板 -->
               <div class="rule-row">
-                <span class="label">模板</span>
+                <Poptip
+                  trigger="hover"
+                  transfer
+                  placement="top">
+                  <span class="label">
+                    模板
+                    <Icon
+                      type="md-information-circle"
+                      size="14"
+                      color="#BBB"
+                      :style="{ 'margin-left': '-2px' }" />
+                  </span>
+                  <template #content>
+                    <div style="font-size: 11px; line-height: 1.8">
+                      可用占位符：<br />
+                      <b>{user}</b> 用户名<br />
+                      <b>{comment}</b> 弹幕内容<br />
+                      <b>{gift}</b> 礼物名称<br />
+                      <b>{gift.count}</b> 礼物数量<br />
+                      <b>{superchat}</b> 醒目留言内容
+                    </div>
+                  </template>
+                </Poptip>
                 <Input
                   :model-value="rule.text"
-                  placeholder="回复内容，支持 {user} {comment} 占位符..."
+                  placeholder="回复内容，支持 {user} {comment} 等占位符..."
                   size="small"
                   style="flex: 1"
                   @on-change="(e: any) => changeText(rule.id, e.target.value)" />
@@ -160,8 +182,8 @@ const tagDefs: IReplyRuleTag[] = [
   { id: '', key: 'ROLE', name: '舰队成员', kind: 'condition', display: '舰队成员：未设置', data: { roles: [] } },
   { id: '', key: 'FILTER', name: '包含文本', kind: 'condition', display: '包含文本：未设置', data: { filter: '' } },
   { id: '', key: 'GIFT', name: '指定礼物', kind: 'condition', display: '指定礼物：未设置', data: { giftIds: [] } },
-  { id: '', key: 'MEDAL', name: '佩戴粉丝牌', kind: 'condition', display: '佩戴粉丝牌' },
-  { id: '', key: 'PRICE', name: '金额', kind: 'condition', display: '金额 ≥ 0', data: { priceMin: 0 } },
+  { id: '', key: 'MEDAL', name: '粉丝牌', kind: 'condition', display: '粉丝牌 ≥ 1 级', data: { level: 1 } },
+  { id: '', key: 'PRICE', name: '金额（元）', kind: 'condition', display: '金额 ≥ 0 元', data: { priceMin: 0 } },
   { id: '', key: 'TEXT_REPLY', name: '弹幕回复', kind: 'action', display: '弹幕回复', data: { allowAllUserDanmakuReply: false } },
   { id: '', key: 'SPEAK_REPLY', name: '语音播放', kind: 'action', display: '语音播放', data: { voice: '', speed: 1.0 } },
 ]
@@ -253,9 +275,9 @@ function getTagOption({ kind, type, tags }: { kind: 'condition' | 'action'; type
   if (type === 'comment') {
     options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
   } else if (type === 'gift') {
-    options = options.filter(t => ['ROLE', 'GIFT', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+    options = options.filter(t => ['ROLE', 'GIFT', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
   } else if (type === 'superchat') {
-    options = options.filter(t => ['ROLE', 'FILTER', 'MEDAL', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
+    options = options.filter(t => ['ROLE', 'FILTER', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
   } else if (type === 'interact') {
     options = options.filter(t => ['ROLE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(t.key))
   }
@@ -448,6 +470,7 @@ function onRuleTagChange(ruleId: string, tagId: string, payload: Partial<IReplyR
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
+  user-select: none;
 }
 .rule-row:last-child {
   margin-bottom: 0;

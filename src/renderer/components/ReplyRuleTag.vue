@@ -68,14 +68,26 @@
       </template>
       <template v-else-if="tag.key === 'PRICE'"
         ><div class="tc-row">
-          <span class="tc-label">最低</span
-          ><InputNumber
+          <span class="tc-label">金额 ≥ </span>
+          <InputNumber
             size="small"
             :model-value="tag.data.priceMin"
             :min="0"
-            :step="100"
+            :step="10"
             style="width: 60px"
             @on-change="v => changePrice(v)" />
+        </div>
+      </template>
+      <template v-else-if="tag.key === 'MEDAL'"
+        ><div class="tc-row">
+          <span class="tc-label">粉丝牌 ≥</span>
+          <InputNumber
+            size="small"
+            :model-value="tag.data?.level"
+            :min="1"
+            style="width: 60px"
+            placeholder="1"
+            @on-change="v => changeMedal(v)" />
         </div>
       </template>
       <template v-else-if="tag.key === 'TEXT_REPLY'"
@@ -178,7 +190,7 @@ const roleOptions = [
 ]
 
 function hasSettings(k: string) {
-  return ['ROLE', 'FILTER', 'GIFT', 'PRICE', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(k)
+  return ['ROLE', 'FILTER', 'GIFT', 'PRICE', 'MEDAL', 'TEXT_REPLY', 'SPEAK_REPLY'].includes(k)
 }
 
 function changeRole(v: number[]) {
@@ -200,8 +212,14 @@ function changeGift(giftIds: string[]) {
 
 function changePrice(priceMin: number) {
   if (!priceMin || !Number.isFinite(priceMin)) priceMin = 0
-  const display = `金额 ≥ ${priceMin}`
+  const display = `金额 ≥ ${priceMin} 元`
   emit('value-change', { display, data: { priceMin } })
+}
+
+function changeMedal(level: number) {
+  if (!level || !Number.isFinite(level) || level < 1) level = 1
+  const display = `粉丝牌 ≥ ${level} 级`
+  emit('value-change', { display, data: { level } })
 }
 
 function changeTextReply(allowAllUserDMReply: boolean) {

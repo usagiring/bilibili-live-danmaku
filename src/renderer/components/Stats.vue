@@ -58,8 +58,8 @@
     <div class="main-container">
       <div class="stats-cards">
         <div class="stat-card">
-          <div class="stat-value">{{ totalGold }}</div>
-          <div class="stat-label"><Icon type="md-cash" /> 金瓜子</div>
+          <div class="stat-value">{{ Number(totalPrice) * 10 }}</div>
+          <div class="stat-label"><Icon type="md-battery-charging" /> 电池</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">{{ totalComment }}</div>
@@ -105,7 +105,7 @@ const roomId = ref('')
 const dateRange = ref<Date[]>([])
 const isDateRangeChanged = ref(true)
 
-const totalGold = ref(0)
+const totalPrice = ref(0)
 const totalComment = ref(0)
 const totalSendGiftUser = ref(0)
 
@@ -134,7 +134,7 @@ async function stats() {
   // topSendGiftUser.value = data.topSendGiftUser
   // topCommentUser.value = data.topCommentUser
 
-  totalGold.value = data.totalGold
+  totalPrice.value = data.totalPrice
   totalSendGiftUser.value = data.totalSendGiftUser
   totalComment.value = data.totalComment
 

@@ -226,8 +226,8 @@ export async function wearMedal(medalId: number) {
   return res.data
 }
 
-export async function getMedalList({ page, pageSize }: { page?: number; pageSize?: number }) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/medal/list`, { params: { page, pageSize } })
+export async function getMedalList({ clientId, page, pageSize }: { clientId: string; page?: number; pageSize?: number }) {
+  const res = await axios.get(`${baseUrl}/api/bilibili/medal/list`, { params: { clientId, page, pageSize } })
   return res.data
 }
 

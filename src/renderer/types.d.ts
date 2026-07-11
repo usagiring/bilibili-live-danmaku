@@ -30,7 +30,7 @@ interface Room {
   likeNumber?: number
   onlineNumber?: number
   userSpaceBanner?: string
-  isInitialized?: boolean
+  medalId?: string
 }
 
 interface User {
