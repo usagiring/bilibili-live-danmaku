@@ -589,21 +589,6 @@
         <span class="input-unit">%</span>
       </div>
       <div class="section-row">
-        <span class="label">保存路径</span>
-        <input
-          class="input"
-          style="width: 230px"
-          :value="recordConfig?.savePath || ''"
-          disabled
-          placeholder="/path/to/save" />
-        <button
-          class="btn btn-default"
-          style="font-size: 10px"
-          @click="selectSavePath">
-          选择
-        </button>
-      </div>
-      <div class="section-row">
         <span class="label">画质</span>
         <span class="segmented">
           <span
@@ -615,6 +600,18 @@
             {{ label }}
           </span>
         </span>
+      </div>
+      <div class="section-row">
+        <span class="label">录制保存路径</span>
+        <span class="url-tag">
+          {{ recordConfig?.savePath || '请选择路径' }}
+        </span>
+        <button
+          class="btn btn-default"
+          style="font-size: 10px; height: 22px"
+          @click="selectSavePath">
+          选择
+        </button>
       </div>
     </div>
 
@@ -881,7 +878,7 @@ import {
   getMedalList,
   addLike,
 } from '../service/api'
-import { IPC_GET_VERSION, QUALITY_MAP } from '../../service/const'
+import { IPC_GET_VERSION, QUALITY_MAP, IPC_CHOOSE_DIRECTORY } from '../../service/const'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
 import { Message as $Message } from 'view-ui-plus'
@@ -1143,8 +1140,8 @@ async function restoreDmDefaults() {
 
 // ── 保存路径 ──
 function selectSavePath() {
-  ;(window as any).ipcRenderer.invoke('select-directory').then((path: string | null) => {
-    if (path) setVal('recordConfig.savePath', path)
+  window.ipcRenderer.invoke(IPC_CHOOSE_DIRECTORY).then((path: unknown) => {
+    if (typeof path === 'string' && path) setVal('recordConfig.savePath', path)
   })
 }
 

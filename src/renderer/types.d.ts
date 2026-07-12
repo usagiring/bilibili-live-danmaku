@@ -31,6 +31,8 @@ interface Room {
   onlineNumber?: number
   userSpaceBanner?: string
   medalId?: string
+  isRecording?: boolean
+  recordBps?: string
 }
 
 interface User {

@@ -151,7 +151,6 @@
         <!-- 配置页占满整个右侧 -->
         <Config v-if="activeTab === 'config'" />
 
-        <!-- 概览：需要活动房间 -->
         <template v-else-if="store.activeRoom">
           <!-- Banner 包裹区：用户信息 + 连接 + 路由 -->
           <div class="detail-banner">
@@ -221,12 +220,24 @@
                   </Button>
                   <Button
                     class="btn-danmaku"
+                    :class="{ 'btn-recording': activeRoom?.isRecording }"
                     size="small"
+                    :disabled="recordLoading"
                     @click="handleToggleRecord()">
                     <Icon
-                      :type="isRecording ? 'md-square' : 'md-recording'"
+                      :type="
+                        recordLoading
+                          ? 'ios-loading'
+                          : activeRoom?.isRecording
+                            ? 'md-square'
+                            : 'md-videocam'
+                      "
+                      :color="activeRoom?.isRecording ? '#ed4014' : undefined"
+                      :class="{ 'spin-icon': recordLoading }"
                       size="13" />
-                    {{ isRecording ? '停止录制' : '录制' }}
+                    {{
+                      recordLoading ? '' : activeRoom?.isRecording ? activeRoom.recordBps : '录制'
+                    }}
                   </Button>
                 </div>
               </div>
@@ -342,7 +353,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useConfigStore } from '../store'
-import { IPC_WINDOW_ACTION, IPC_WINDOW_CREATE, IPC_WINDOW_FIND, IPC_MAIN_WINDOW_ACTION } from '../../service/const'
+import {
+  IPC_WINDOW_ACTION,
+  IPC_WINDOW_CREATE,
+  IPC_WINDOW_FIND,
+  IPC_MAIN_WINDOW_ACTION,
+} from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Message from './Message.vue'
 import Config from './Config.vue'
@@ -356,9 +372,8 @@ import {
   updateClientConfig,
   getRoomInfoV2,
   getUserInfoV2,
-  record,
-  cancelRecord,
-  getRecordState,
+  startRecord as startRecordApi,
+  cancelRecord as cancelRecordApi,
 } from '../service/api'
 import globalVar from '../../service/global'
 import config from '../service/config'
@@ -366,6 +381,7 @@ import { Message as $Message } from 'view-ui-plus'
 import { DEFAULT_FACE } from '@tokine/shared'
 import { sse } from '../service/sse-client.ts'
 import { Speaker } from '../types'
+import { parseDownloadRate } from '../service/util.ts'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -374,7 +390,7 @@ const showAddRoom = ref(false)
 const newRoomId = ref('')
 const isRoomPanelCollapsed = ref(config.isRoomPanelCollapsed)
 const connecting = ref(false)
-const isRecording = ref(false)
+const recordLoading = ref(false)
 const clientId = computed(() => store.id)
 const synth = window.speechSynthesis
 let waitingSpeakers: Speaker[] = []
@@ -402,6 +418,7 @@ onMounted(() => {
   sse.on('LIKE_CHANGE', onLikeChange)
   sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
   sse.on('ONLINE_COUNT', onOnlineCount)
+  sse.on('RECORD_RATE', onRecordRate)
 })
 
 // ── SSE 回调 ──
@@ -417,26 +434,26 @@ function onLive() {
 function onPreparing() {
   //  store.UPDATE_ACTIVE_ROOM({ liveStatus: 0 })
 }
-function onWatchedChange(data: any) {
+function onWatchedChange(data: { roomId: string; watchedNumber: number }) {
   const { roomId, watchedNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.watchedNumber = watchedNumber
 }
-function onLikeChange(data: any) {
+function onLikeChange(data: { roomId: string; likeNumber: number }) {
   const { roomId, likeNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.likeNumber = likeNumber
 }
-function onFansUpdate(data: any) {
+function onFansUpdate(data: { roomId: string; fansNumber: number; fansClubNumber: number }) {
   const { roomId, fansNumber, fansClubNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
   room.fansNumber = fansNumber
   room.fansclubNumber = fansClubNumber
 }
-function onOnlineCount(data: any) {
+function onOnlineCount(data: { roomId: string; onlineNumber: number }) {
   const { roomId, onlineNumber } = data
   const room = store.rooms.find(room => room.id === roomId)
   if (!room) return
@@ -463,6 +480,13 @@ function speakRunner() {
   synth.speak(utter)
 }
 
+function onRecordRate(data: { roomId: string; bps: string }) {
+  const { roomId, bps } = data
+  const room = store.rooms.find(room => room.id === roomId)
+  if (!room) return
+  room.recordBps = parseDownloadRate(bps)
+}
+
 // const isRecording = computed(() => store.isRecording)
 
 async function selectRoom(index: number) {
@@ -472,13 +496,19 @@ async function selectRoom(index: number) {
 
   activeTab.value = 'overview'
 
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'rooms', value: store.rooms }],
+  })
 }
 
 async function removeRoom(index: number) {
   store.rooms.splice(index, 1)
 
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'rooms', value: store.rooms }],
+  })
 }
 
 async function initializeRoom({ roomId, force }: { roomId?: string; force?: boolean } = {}) {
@@ -554,7 +584,10 @@ async function handleAddRoom() {
   showAddRoom.value = false
   newRoomId.value = ''
 
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'rooms', value: store.rooms }],
+  })
 }
 
 async function toggleConnect() {
@@ -568,7 +601,10 @@ async function toggleConnect() {
     } else {
       await connectApi({ roomId: room.id, userId: room.userId, clientId: clientId.value })
       await initializeRoom()
-      await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'rooms', value: store.rooms }] })
+      await updateClientConfig({
+        clientId: clientId.value,
+        kvs: [{ key: 'rooms', value: store.rooms }],
+      })
       room.isConnected = true
     }
   } catch {
@@ -649,7 +685,34 @@ async function handleShowLiveWindow() {
   fetchWindows()
 }
 
-async function handleToggleRecord() {}
+async function handleToggleRecord() {
+  const room = activeRoom.value
+  if (!room || recordLoading.value) return
+  recordLoading.value = true
+  try {
+    if (room.isRecording) {
+      await cancelRecordApi({ clientId: clientId.value, roomId: room.id })
+      room.isRecording = false
+      room.recordBps = undefined
+    } else {
+      if (!config.recordConfig?.savePath) {
+        $Message.info('请先在配置里设置录像保存路径')
+        return
+      }
+      const output = `${config.recordConfig?.savePath}/${room.id}_${Date.now()}.flv`
+      await startRecordApi({
+        clientId: clientId.value,
+        roomId: room.id,
+        output: output,
+        qn: config.recordConfig?.quality || undefined,
+        withCookie: config.liveConfig?.isWithCookie || false,
+      })
+      room.isRecording = true
+    }
+  } finally {
+    recordLoading.value = false
+  }
+}
 
 // ── 标题栏窗口列表 ──
 interface WindowItem {
@@ -1452,6 +1515,23 @@ function hideToTray() {
   border-color: #fff !important;
   color: #222 !important;
   background: rgba(255, 255, 255, 0.9) !important;
+}
+.btn-recording {
+  background: rgba(237, 64, 20, 0.15) !important;
+  border-color: rgba(237, 64, 20, 0.4) !important;
+  color: #ed4014 !important;
+}
+
+.spin-icon {
+  animation: home-spin 1s linear infinite;
+}
+@keyframes home-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Switch 滑块 ── */

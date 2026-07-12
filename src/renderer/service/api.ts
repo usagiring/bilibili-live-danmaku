@@ -14,7 +14,15 @@ export async function getRoomInfoByIds({ roomIds }: { roomIds: string[] }) {
   return res.data
 }
 
-export async function connect({ roomId, userId, clientId }: { roomId: string; userId?: string; clientId: string }) {
+export async function connect({
+  roomId,
+  userId,
+  clientId,
+}: {
+  roomId: string
+  userId?: string
+  clientId: string
+}) {
   const res = await axios.post(`${baseUrl}/api/room/connect`, { roomId, userId, clientId })
   return res.data
 }
@@ -24,30 +32,59 @@ export async function disconnect({ roomId, clientId }: { roomId: string; clientI
   return res.data
 }
 
-export async function getRealTimeViewersCount({ roomId, startedAt }: { roomId: number; startedAt?: number }) {
-  const res = await axios.get(`${baseUrl}/api/room/real-time/viewer/count`, { params: { roomId: String(roomId), startedAt } })
+export async function getRealTimeViewersCount({
+  roomId,
+  startedAt,
+}: {
+  roomId: number
+  startedAt?: number
+}) {
+  const res = await axios.get(`${baseUrl}/api/room/real-time/viewer/count`, {
+    params: { roomId: String(roomId), startedAt },
+  })
   return res.data
 }
 
-export async function getRoomStatus({ roomIds, clientId }: { roomIds: string[]; clientId: string }) {
-  const res = await axios.get(`${baseUrl}/api/room/status`, { params: { roomIds: roomIds.join(','), clientId } })
+export async function getRoomStatus({
+  roomIds,
+  clientId,
+}: {
+  roomIds: string[]
+  clientId: string
+}) {
+  const res = await axios.get(`${baseUrl}/api/room/status`, {
+    params: { roomIds: roomIds.join(','), clientId },
+  })
   return res.data
 }
 
 // ==================== Record ====================
 
-export async function record(body: { roomId: number; output?: string; qn?: number; platform?: string; withCookie?: boolean }) {
-  const res = await axios.post(`${baseUrl}/api/room/record/start`, { ...body, roomId: String(body.roomId) })
+export async function startRecord({
+  clientId,
+  roomId,
+  output,
+  qn,
+  withCookie,
+}: {
+  clientId: string
+  roomId: string
+  output?: string
+  qn?: number
+  withCookie?: boolean
+}) {
+  const res = await axios.post(`${baseUrl}/api/room/record/start`, {
+    clientId,
+    roomId,
+    output,
+    qn,
+    withCookie,
+  })
   return res.data
 }
 
-export async function cancelRecord(body: { roomId: number; recordId: string }) {
-  const res = await axios.post(`${baseUrl}/api/room/record/cancel`, { ...body, roomId: String(body.roomId) })
-  return res.data
-}
-
-export async function getRecordState(body: { roomId?: number }) {
-  const res = await axios.get(`${baseUrl}/api/room/record/status`, { params: { roomId: body.roomId ? String(body.roomId) : undefined } })
+export async function cancelRecord({ clientId, roomId }: { clientId: string; roomId: string }) {
+  const res = await axios.post(`${baseUrl}/api/room/record/cancel`, { clientId, roomId })
   return res.data
 }
 
@@ -98,7 +135,12 @@ export async function sendDM({ clientId, data }: { clientId: string; data: any }
 
 // ==================== Lottery ====================
 
-export async function queryLotteryHistories(body: { roomId?: number; skip?: number; limit?: number; sort?: any }) {
+export async function queryLotteryHistories(body: {
+  roomId?: number
+  skip?: number
+  limit?: number
+  sort?: any
+}) {
   const res = await axios.post(`${baseUrl}/api/lottery/history/query`, body)
   return res.data
 }
@@ -115,21 +157,45 @@ export async function addLotteryHistory(body: any) {
 
 // ==================== Statistic ====================
 
-export async function getStats({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+export async function getStats({
+  roomId,
+  startTime,
+  endTime,
+}: {
+  roomId: string
+  startTime: number
+  endTime: number
+}) {
   const res = await axios.get(`${baseUrl}/api/stats`, {
     params: { roomId, startTime, endTime },
   })
   return res.data
 }
 
-export async function commentWordExtract({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+export async function commentWordExtract({
+  roomId,
+  startTime,
+  endTime,
+}: {
+  roomId: string
+  startTime: number
+  endTime: number
+}) {
   const res = await axios.get(`${baseUrl}/api/stats/comment/keyword-extract`, {
     params: { roomId, startTime, endTime },
   })
   return res.data
 }
 
-export async function exportFile({ roomId, startTime, endTime }: { roomId: string; startTime: number; endTime: number }) {
+export async function exportFile({
+  roomId,
+  startTime,
+  endTime,
+}: {
+  roomId: string
+  startTime: number
+  endTime: number
+}) {
   const res = await axios.get(`${baseUrl}/api/stats/gift/export`, {
     params: { roomId, startTime, endTime },
   })
@@ -157,7 +223,13 @@ export async function speechToTextDecode({
   return res.data
 }
 
-export async function speechToTextInitial({ clientId, roomId }: { clientId: string; roomId: string }) {
+export async function speechToTextInitial({
+  clientId,
+  roomId,
+}: {
+  clientId: string
+  roomId: string
+}) {
   const res = await axios.post(`${baseUrl}/api/speech-to-text/initial`, {
     clientId,
     roomId,
@@ -165,8 +237,16 @@ export async function speechToTextInitial({ clientId, roomId }: { clientId: stri
   return res.data
 }
 
-export async function speechToTextStatus({ clientId, roomId }: { clientId: string; roomId: string }) {
-  const res = await axios.get(`${baseUrl}/api/speech-to-text/status`, { params: { roomId, clientId } })
+export async function speechToTextStatus({
+  clientId,
+  roomId,
+}: {
+  clientId: string
+  roomId: string
+}) {
+  const res = await axios.get(`${baseUrl}/api/speech-to-text/status`, {
+    params: { roomId, clientId },
+  })
   return res.data
 }
 
@@ -188,30 +268,47 @@ export async function generateQRCode() {
 }
 
 export async function pollQRCode({ clientId, qrCodeKey }: { clientId: string; qrCodeKey: string }) {
-  const res = await axios.get(`${baseUrl}/api/login/qr-code/poll`, { params: { clientId, qrCodeKey } })
+  const res = await axios.get(`${baseUrl}/api/login/qr-code/poll`, {
+    params: { clientId, qrCodeKey },
+  })
   return res.data
 }
 
 // ==================== Bilibili Proxy ====================
 
 export async function getUserInfoInRoom(roomId: number) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/room/user/info`, { params: { roomId: String(roomId) } })
+  const res = await axios.get(`${baseUrl}/api/bilibili/room/user/info`, {
+    params: { roomId: String(roomId) },
+  })
   return res.data
 }
 
 export async function getGuardInfo({ roomId, userId }: { roomId: string; userId: string }) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/room/guard`, { params: { roomId, uid: userId } })
+  const res = await axios.get(`${baseUrl}/api/bilibili/room/guard`, {
+    params: { roomId, uid: userId },
+  })
   return res.data
 }
 
 export async function sendComment({ roomId, comment }: { roomId: number; comment: string }) {
-  const res = await axios.post(`${baseUrl}/api/bilibili/room/comment/send`, { roomId: String(roomId), comment })
+  const res = await axios.post(`${baseUrl}/api/bilibili/room/comment/send`, {
+    roomId: String(roomId),
+    comment,
+  })
   return res.data
 }
 
-export async function getRandomPlayUrl(body: { roomId: number; qn?: number; withCookie?: boolean }) {
+export async function getRandomPlayUrl(body: {
+  roomId: number
+  qn?: number
+  withCookie?: boolean
+}) {
   const res = await axios.get(`${baseUrl}/api/bilibili/room/playurl`, {
-    params: { roomId: String(body.roomId), qn: body.qn, withCookie: body.withCookie ? 'true' : undefined },
+    params: {
+      roomId: String(body.roomId),
+      qn: body.qn,
+      withCookie: body.withCookie ? 'true' : undefined,
+    },
   })
   return res.data
 }
@@ -226,8 +323,18 @@ export async function wearMedal(medalId: number) {
   return res.data
 }
 
-export async function getMedalList({ clientId, page, pageSize }: { clientId: string; page?: number; pageSize?: number }) {
-  const res = await axios.get(`${baseUrl}/api/bilibili/medal/list`, { params: { clientId, page, pageSize } })
+export async function getMedalList({
+  clientId,
+  page,
+  pageSize,
+}: {
+  clientId: string
+  page?: number
+  pageSize?: number
+}) {
+  const res = await axios.get(`${baseUrl}/api/bilibili/medal/list`, {
+    params: { clientId, page, pageSize },
+  })
   return res.data
 }
 
@@ -242,7 +349,12 @@ export async function addLike({
   roomUserId: string
   count: number
 }) {
-  const res = await axios.post(`${baseUrl}/api/bilibili/room/like`, { clientId, roomId, roomUserId, count })
+  const res = await axios.post(`${baseUrl}/api/bilibili/room/like`, {
+    clientId,
+    roomId,
+    roomUserId,
+    count,
+  })
   return res.data
 }
 
@@ -253,7 +365,13 @@ export async function getClientConfig(clientId: string) {
   return res.data
 }
 
-export async function updateClientConfig({ clientId, kvs }: { clientId: string; kvs: Array<{ key: string; value: any }> }) {
+export async function updateClientConfig({
+  clientId,
+  kvs,
+}: {
+  clientId: string
+  kvs: Array<{ key: string; value: any }>
+}) {
   const res = await axios.post(`${baseUrl}/api/client/config/update`, { clientId, kvs })
   return res.data
 }

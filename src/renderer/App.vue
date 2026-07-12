@@ -17,7 +17,13 @@
 
 <script setup lang="ts">
 import { ref, onBeforeMount, onBeforeUnmount } from 'vue'
-import { touch, registryClient, getClientConfig, getRoomStatus, getRoomInfoByIds } from './service/api'
+import {
+  touch,
+  registryClient,
+  getClientConfig,
+  getRoomStatus,
+  getRoomInfoByIds,
+} from './service/api'
 import { sse } from './service/sse-client'
 import { useConfigStore } from './store'
 import config from './service/config'
@@ -84,11 +90,22 @@ onBeforeMount(async () => {
 async function setRoomIsConnected() {
   const roomIds = store.rooms.map(room => room.id)
   const { data } = await getRoomStatus({ roomIds, clientId: store.id })
-  data.forEach(({ roomId, isConnected }: { roomId: string; isConnected: boolean }) => {
-    const room = store.rooms.find(room => room.id === roomId)
-    if (!room) return
-    room.isConnected = isConnected
-  })
+  data.forEach(
+    ({
+      roomId,
+      isConnected,
+      isRecording,
+    }: {
+      roomId: string
+      isConnected: boolean
+      isRecording: boolean
+    }) => {
+      const room = store.rooms.find(room => room.id === roomId)
+      if (!room) return
+      room.isConnected = isConnected
+      room.isRecording = isRecording
+    },
+  )
 }
 
 async function setRoomLiveStatus() {
