@@ -11,7 +11,7 @@
       <div class="gift-tag-expand-top-right">
         <p>{{ username }}</p>
         <p v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</p>
-        <p v-else-if="totalPrice">{{ formattedPrice }}</p>
+        <p v-else>{{ formattedPrice }}</p>
       </div>
     </div>
     <div
@@ -25,7 +25,7 @@
         </template>
       </template>
       <template v-else>
-        {{ `${username} 赠送了 ${count} 个 ${name}` }}
+        {{ `${username}赠送了${count}个${name}` }}
       </template>
     </div>
   </div>
@@ -34,13 +34,20 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
 
-const props = defineProps(['username', 'gift', 'face', 'content', 'contentJPN', 'isShowSuperChatJpn'])
+const props = defineProps([
+  'username',
+  'gift',
+  'face',
+  'content',
+  'contentJPN',
+  'isShowSuperChatJpn',
+])
 const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
 const color1 = computed(() => priceProperties?.value?.colors[0])
 const color2 = computed(() => priceProperties?.value?.colors[1])
 
 const formattedPrice = computed(() => {
-  const price = totalPrice.value
+  const price = totalPrice?.value || 0
   return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
 })
 </script>
@@ -54,15 +61,17 @@ const formattedPrice = computed(() => {
   position: relative;
   z-index: 9999;
   overflow: hidden;
+  font-family: monospace;
 }
 .gift-tag-expand-top {
   display: flex;
-  padding: 6px;
+  padding: 2px;
 }
 .gift-tag-expand-top-left {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  align-self: anchor-center;
 }
 .gift-tag-expand-top-right {
   margin-left: 6px;

@@ -86,7 +86,11 @@
                   <span
                     v-else-if="msg.emots"
                     class="vertical-align-middle"
-                    :style="{ ...fontStyle, ...getCommentStyle(msg), ...getTextShadow(msg, 'comment') }">
+                    :style="{
+                      ...fontStyle,
+                      ...getCommentStyle(msg),
+                      ...getTextShadow(msg, 'comment'),
+                    }">
                     <template
                       v-for="(str, index) of msg.splitContent"
                       :key="index">
@@ -162,10 +166,10 @@
               :username="msg.username"
               :face="msg.face">
               <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
-                {{ `${msg.username} 赠送了 ${msg.gift.count} 个 ${msg.gift.name}` }}
+                {{ `${msg.username}赠送了${msg.gift.count}个${msg.gift.name}` }}
               </span>
               <img
-                :src="giftGifMap[msg.gift.id] && giftGifMap[msg.gift.id].webp"
+                :src="msg.gift.webp"
                 :style="{ 'vertical-align': 'middle', width: '35px' }" />
             </GiftCard>
             <GiftCardMini
@@ -173,7 +177,7 @@
               :gift="msg.gift"
               :username="msg.username"
               :face="msg.face">
-              {{ ` 赠送了 ${msg.gift.count}个 ${msg.gift.name}` }}
+              {{ ` 赠送了${msg.gift.count}个${msg.gift.name}` }}
             </GiftCardMini>
           </template>
         </div>
@@ -184,7 +188,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, toRefs } from 'vue'
-import { getPriceProperties, wait, INTERACT_TYPE, DEFAULT_FACE, getAnchorIcon } from '@tokine/shared'
+import {
+  getPriceProperties,
+  wait,
+  INTERACT_TYPE,
+  DEFAULT_FACE,
+  getAnchorIcon,
+} from '@tokine/shared'
 import { Message, DmStyle } from '@tokine/shared/types.js'
 
 import PromiseQueue from '../../service/promise-queue'
@@ -201,12 +211,18 @@ import config from '../../service/config'
 defineProps<{ isPreview?: boolean; isSingleWindow?: boolean }>()
 
 const MAX_MESSAGE = 150
-const COLORS = ['crimson', 'darkorange', 'moccasin', 'forestgreen', 'darkcyan', 'dodgerblue', 'violet']
+const COLORS = [
+  'crimson',
+  'darkorange',
+  'moccasin',
+  'forestgreen',
+  'darkcyan',
+  'dodgerblue',
+  'violet',
+]
 
 let promiseQueue: PromiseQueue | null = null
 
-// TODO 卡片显示Gift图标
-const giftGifMap = ref<Record<string, any>>({})
 const roomId = ref<String>('')
 const headlines = ref<Message[]>([])
 
@@ -368,18 +384,23 @@ onMounted(async () => {
   setupSSE()
   sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {
-    headlines.value = headlines.value.filter((h: Message) => h.sendAt + h.gift?.priceProperties?.duration! > Date.now())
+    headlines.value = headlines.value.filter(
+      (h: Message) => h.sendAt + h.gift?.priceProperties?.duration! > Date.now(),
+    )
   }, 1000)
   setInterval(() => {
     if (!hiddenExpiredTime.value) return
-    messages.value = messages.value.filter((m: any) => m.sendAt + hiddenExpiredTime.value > Date.now())
+    messages.value = messages.value.filter(
+      (m: any) => m.sendAt + hiddenExpiredTime.value > Date.now(),
+    )
   }, 2000)
 })
 
 function setupSSE() {
   sse.on('DM_STYLE', data => onDMStyle(data))
   sse.on('MESSAGE', data => {
-    if (roomId.value && roomId.value !== '*' && data.roomId !== roomId.value && data.roomId !== '*') return
+    if (roomId.value && roomId.value !== '*' && data.roomId !== roomId.value && data.roomId !== '*')
+      return
 
     if (promiseQueue) {
       promiseQueue.push(async () => {
@@ -532,7 +553,11 @@ function styleBySuffix(suffix?: string) {
       username: dmStyle.messageUsernameInteract,
       comment: dmStyle.messageCommentInteract,
     }
-  return { container: dmStyle.messageContainer0, username: dmStyle.messageUsername0, comment: dmStyle.messageComment0 }
+  return {
+    container: dmStyle.messageContainer0,
+    username: dmStyle.messageUsername0,
+    comment: dmStyle.messageComment0,
+  }
 }
 
 function getContainerStyle(msg: Message) {

@@ -156,16 +156,18 @@
       </div>
       <div class="section-row">
         <span class="label">字体</span>
-        <select
-          class="select"
-          style="width: 90px"
-          :value="dmStyle?.font || 'auto'"
-          @change="setVal('dmStyle.font', ($event.target as HTMLSelectElement).value)">
-          <option value="auto">auto</option>
-          <option value="serif">serif</option>
-          <option value="sans-serif">sans-serif</option>
-          <option value="monospace">monospace</option>
-        </select>
+        <Select
+          size="small"
+          style="width: 160px"
+          :model-value="dmStyle?.font || 'auto'"
+          @on-change="(v: string) => setVal('dmStyle.font', v)">
+          <Option
+            v-for="f in fontOptions"
+            :key="f"
+            :value="f"
+            :label="f"
+            :style="{ fontFamily: f, padding: '6px 12px', fontSize: '13px', lineHeight: '1.6' }" />
+        </Select>
         <span
           class="label"
           style="margin-left: 8px"
@@ -661,7 +663,7 @@
         <span
           class="label"
           style="min-width: auto">
-          OBS 捕获 弹幕窗默认监听所有当前连接的直播间弹幕，如果需要指定直播间请修改 roomId={直播间号}
+          OBS 捕获 弹幕窗默认监听所有当前连接的直播间弹幕，如果需要指定直播间请修改roomId={直播间号}
         </span>
       </div>
       <div class="section-row">
@@ -855,10 +857,18 @@
       :closable="true"
       v-model="showDrawTip">
       <p>由于B站风控策略限制，未登录用户无法查看用户名、ID</p>
-      <p>您可以通过 <Icon type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）</p>
-      <p>获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，<strong>完整复制粘贴</strong>到设置中</p>
+      <p>
+        您可以通过
+        <Icon
+          type="md-settings" />设置页面，通过设置B站Cookie赋予登录态。（弹幕功能任意用户Cookie即可）
+      </p>
+      <p>
+        获取Cookie说明：打开浏览器控制台，点击任意B站请求，Headers中可查看Cookie，<strong>完整复制粘贴</strong>到设置中
+      </p>
       <p>目前已支持APP端扫码登录</p>
-      <p :style="{ color: 'crimson' }">Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie</p>
+      <p :style="{ color: 'crimson' }">
+        Cookie需要定时更新，如果遇到无法显示弹幕，可能是Cookie已过期，请更新或清空Cookie
+      </p>
       <img src="../assets/tip-01.png" />
     </Drawer>
   </div>
@@ -894,12 +904,28 @@ const clientId = computed(() => config.id)
 const version = ref('')
 const obsDmUrl = ref('')
 const obsRawUrl = ref('')
+const fontOptions = ref<string[]>(['auto', 'serif', 'sans-serif', 'monospace'])
+
+async function loadSystemFonts() {
+  try {
+    const available = await (window as any).queryLocalFonts()
+    const names: string[] = []
+    for (const f of available) {
+      if (!names.includes(f.family)) names.push(f.family)
+    }
+
+    fontOptions.value.push(...names.sort())
+  } catch {
+    // queryLocalFonts 不可用，保持默认选项
+  }
+}
 
 onMounted(async () => {
   version.value = (await window.ipcRenderer.invoke(IPC_GET_VERSION)) as string
   const baseUrl = await window.getBaseUrl()
   obsDmUrl.value = `${baseUrl}/dm?clientId=${clientId.value}&roomId=*`
   obsRawUrl.value = `${baseUrl}/dm-raw-style?clientId=${clientId.value}&roomId=*`
+  loadSystemFonts()
 })
 
 const qualityOptions = Object.entries(QUALITY_MAP)
@@ -944,13 +970,21 @@ const currentLevelStyle = computed((): LevelStyle => {
   const comment = (s as any)[`messageComment${suffix}`] || {}
   return {
     usernameColor: username['color'],
-    usernameFontSize: username['font-size'] ? parseFloat(username['font-size']) || undefined : undefined,
+    usernameFontSize: username['font-size']
+      ? parseFloat(username['font-size']) || undefined
+      : undefined,
     usernameStrokeColor: username['--textStrokeColor'],
-    usernameStrokeWidth: username['--textStrokeWidth'] ? parseFloat(username['--textStrokeWidth']) || 0 : 0,
+    usernameStrokeWidth: username['--textStrokeWidth']
+      ? parseFloat(username['--textStrokeWidth']) || 0
+      : 0,
     commentColor: comment['color'],
-    commentFontSize: comment['font-size'] ? parseFloat(comment['font-size']) || undefined : undefined,
+    commentFontSize: comment['font-size']
+      ? parseFloat(comment['font-size']) || undefined
+      : undefined,
     commentStrokeColor: comment['--textStrokeColor'],
-    commentStrokeWidth: comment['--textStrokeWidth'] ? parseFloat(comment['--textStrokeWidth']) || 0 : 0,
+    commentStrokeWidth: comment['--textStrokeWidth']
+      ? parseFloat(comment['--textStrokeWidth']) || 0
+      : 0,
     bgColor: container['background'],
     borderColor: container['border-color'],
     borderWidth: container['border-width'] ? parseFloat(container['border-width']) || 0 : 0,
@@ -988,7 +1022,12 @@ function toggleSlot(type: string) {
   }
 }
 
-const slotNameMap: Record<string, string> = { medal: '粉丝牌', face: '头像', name: '昵称', comment: '内容' }
+const slotNameMap: Record<string, string> = {
+  medal: '粉丝牌',
+  face: '头像',
+  name: '昵称',
+  comment: '内容',
+}
 
 const slotItems = computed({
   get: () => dmStyle.value?.messageSlots || [],
@@ -1000,7 +1039,10 @@ function onSlotDragEnd() {
 }
 
 // TODO 防抖
-function setLevelStyleColor(target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke' | 'border', color: string) {
+function setLevelStyleColor(
+  target: 'user' | 'comment' | 'bg' | 'userStroke' | 'commentStroke' | 'border',
+  color: string,
+) {
   const lv = activeLevel.value
   const suffix = lv === 'Interact' ? 'Interact' : lv
   if (target === 'user') {
@@ -1060,13 +1102,16 @@ function selectNoIcon() {
 }
 
 function getTestDMGift() {
+  const price = Math.floor(Math.random() * 100) // 0 ~ 100 元
   return {
     id: String(Math.floor(Date.now() * Math.random())),
     type: 'gift',
     name: '测试礼物',
-    price: Math.floor(Math.random() * 100), // 0 ~ 100 元
+    price: price,
     count: 1,
     coinType: 'gold',
+    totalPrice: price,
+    webp: 'https://i0.hdslb.com/bfs/live/32b799120e1614fa6275b6d15da7a52b21dd019d.webp',
   }
 }
 
@@ -1190,7 +1235,12 @@ const voiceOptions = ref<{ key: string; label: string; value: string; lang: stri
 function loadVoices() {
   const voices = synth.getVoices()
   if (voices.length) {
-    voiceOptions.value = voices.map(v => ({ key: v.name, label: v.name, value: v.name, lang: v.lang }))
+    voiceOptions.value = voices.map(v => ({
+      key: v.name,
+      label: v.name,
+      value: v.name,
+      lang: v.lang,
+    }))
   }
 }
 

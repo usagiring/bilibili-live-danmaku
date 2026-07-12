@@ -64,6 +64,7 @@ interface GiftExtra {
   }
   batchComboId?: string
   totalPrice?: number
+  webp?: string
 }
 
 export interface Message {

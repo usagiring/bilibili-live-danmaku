@@ -11,7 +11,7 @@
         :src="face"
         size="small" />
       <span v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</span>
-      <span v-else-if="totalPrice">{{ formattedPrice }}</span>
+      <span v-else>{{ formattedPrice }}</span>
     </div>
   </div>
 </template>
@@ -46,7 +46,7 @@ const width = computed(() => {
 })
 
 const formattedPrice = computed(() => {
-  const price = totalPrice.value
+  const price = totalPrice?.value || 0
   return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
 })
 </script>
@@ -61,19 +61,23 @@ const formattedPrice = computed(() => {
   position: relative;
   z-index: 1;
   overflow: hidden;
+  font-family: monospace;
+  font-size: 13px;
 }
 .gift-tag-progress {
   z-index: -1;
   position: absolute;
   height: 100%;
 }
-.gift-tag-avatar {
-  margin-top: -2px;
-}
 .gift-tag-content-wrapper {
   padding: 0 6px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  text-shadow:
+    0 0 1px blue,
+    0 0 1px green,
+    0 0 1px red,
+    0 0 1px gold;
 }
 </style>

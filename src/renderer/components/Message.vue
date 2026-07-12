@@ -402,23 +402,35 @@ async function changeIsRealTimeMode() {
   } else {
     listenStop()
   }
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isRealTimeMode', value: isRealTimeMode.value }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'messageConfig.isRealTimeMode', value: isRealTimeMode.value }],
+  })
 }
 
 async function changeIsShowUserId() {
   isShowUserId.value = !isShowUserId.value
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowUserId', value: isShowUserId.value }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'messageConfig.isShowUserId', value: isShowUserId.value }],
+  })
 }
 
 async function changeIsShowInteract() {
   isShowInteract.value = !isShowInteract.value
   await searchMessage()
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowInteract', value: isShowInteract.value }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'messageConfig.isShowInteract', value: isShowInteract.value }],
+  })
 }
 
 async function changeIsShowSendAt() {
   isShowSendAt.value = !isShowSendAt.value
-  await updateClientConfig({ clientId: clientId.value, kvs: [{ key: 'messageConfig.isShowSendAt', value: isShowSendAt.value }] })
+  await updateClientConfig({
+    clientId: clientId.value,
+    kvs: [{ key: 'messageConfig.isShowSendAt', value: isShowSendAt.value }],
+  })
 }
 
 function listenStart() {
@@ -430,6 +442,7 @@ function listenStop() {
 }
 
 function onMessage(message: Message) {
+  if (message.roomId !== room!.value!.id) return
   if (message.category === 'interact' && !isShowInteract.value) return
 
   formatMessage(message)
