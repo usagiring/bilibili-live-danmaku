@@ -2,6 +2,7 @@ import { ipcMain, dialog, BrowserWindow, app, Tray, Menu, nativeImage, shell } f
 import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
+import { debounce } from 'lodash'
 import globalVar from '../service/global'
 import {
   IPC_GET_USER_PATH,
@@ -14,6 +15,7 @@ import {
   IPC_WINDOW_ACTION,
   IPC_WINDOW_FIND,
   IPC_MAIN_WINDOW_ACTION,
+  IPC_WINDOW_LOCATION_UPDATE,
 } from '../service/const'
 
 function getRendererUrl(hash: string) {
@@ -56,7 +58,25 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
 
   ipcMain.handle(
     IPC_WINDOW_CREATE,
-    async (event, { hash, url, width, height, iconDataUrl, alwaysOnTop, resizable, frame, transparent, hasShadow, type, roomId }) => {
+    async (
+      event,
+      {
+        hash,
+        url,
+        width,
+        height,
+        iconDataUrl,
+        alwaysOnTop,
+        resizable,
+        frame,
+        transparent,
+        hasShadow,
+        type,
+        roomId,
+        x,
+        y,
+      },
+    ) => {
       const winURL = url || getRendererUrl(hash)
 
       const win = new BrowserWindow({
@@ -68,6 +88,8 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
         frame: frame ?? true,
         transparent: transparent ?? false,
         hasShadow: hasShadow ?? true,
+        x,
+        y,
         // roundedCorners: false, // mac 自带圆角
       })
 
@@ -76,6 +98,23 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
       }
 
       windowMetaMap[win.id] = { win, id: win.id, type, roomId }
+
+      const saveBounds = debounce(() => {
+        if (win.isDestroyed()) return
+        const bounds = win.getBounds()
+        const location = {
+          roomId,
+          type,
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: bounds.height,
+        }
+        mainWindow.webContents.send(IPC_WINDOW_LOCATION_UPDATE, location)
+      }, 300)
+
+      win.on('resize', saveBounds)
+      win.on('moved', saveBounds)
 
       win.on('closed', () => {
         delete windowMetaMap[win.id]
@@ -87,17 +126,20 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   )
 
   // 按元数据查找窗口
-  ipcMain.handle(IPC_WINDOW_FIND, async (event, { id, type }: { id?: number; type?: string } = {}) => {
-    const metas = getWindowMetas({ id, type })
-    const result: WindowMeta[] = []
-    for (const meta of metas) {
-      result.push({
-        ...meta,
-        win: undefined,
-      })
-    }
-    return result
-  })
+  ipcMain.handle(
+    IPC_WINDOW_FIND,
+    async (event, { id, type }: { id?: number; type?: string } = {}) => {
+      const metas = getWindowMetas({ id, type })
+      const result: WindowMeta[] = []
+      for (const meta of metas) {
+        result.push({
+          ...meta,
+          win: undefined,
+        })
+      }
+      return result
+    },
+  )
 
   ipcMain.handle(
     IPC_WINDOW_ACTION,
@@ -139,19 +181,22 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
     },
   )
 
-  ipcMain.handle(IPC_MAIN_WINDOW_ACTION, async (event, { action }: { action: 'minimize' | 'close' | 'hide' }) => {
-    const win = BrowserWindow.fromWebContents(event.sender)
-    if (!win) return
-    if (action === 'hide') {
-      win.hide()
-    }
-    if (action === 'minimize') {
-      win.minimize()
-    }
-    if (action === 'close') {
-      win.close()
-    }
-  })
+  ipcMain.handle(
+    IPC_MAIN_WINDOW_ACTION,
+    async (event, { action }: { action: 'minimize' | 'close' | 'hide' }) => {
+      const win = BrowserWindow.fromWebContents(event.sender)
+      if (!win) return
+      if (action === 'hide') {
+        win.hide()
+      }
+      if (action === 'minimize') {
+        win.minimize()
+      }
+      if (action === 'close') {
+        win.close()
+      }
+    },
+  )
 
   function getWindowMetas({ id, type }) {
     let result = Object.values(windowMetaMap)
@@ -186,23 +231,26 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
   })
 
   // ---- 文件保存 ----
-  ipcMain.handle(IPC_GIFT_STATS_EXPORT, async (_event, { filePath, roomId, startTime, endTime, fileName }) => {
-    const res = await axios.get(`${globalVar.baseUrl}/api/stats/gift/export`, {
-      params: { roomId, startTime, endTime },
-      responseType: 'arraybuffer',
-    })
+  ipcMain.handle(
+    IPC_GIFT_STATS_EXPORT,
+    async (_event, { filePath, roomId, startTime, endTime, fileName }) => {
+      const res = await axios.get(`${globalVar.baseUrl}/api/stats/gift/export`, {
+        params: { roomId, startTime, endTime },
+        responseType: 'arraybuffer',
+      })
 
-    if (!fs.existsSync(filePath)) {
-      fs.mkdirSync(filePath, { recursive: true })
-    } else {
-      const stat = fs.statSync(filePath)
-      if (!stat.isDirectory()) {
+      if (!fs.existsSync(filePath)) {
         fs.mkdirSync(filePath, { recursive: true })
+      } else {
+        const stat = fs.statSync(filePath)
+        if (!stat.isDirectory()) {
+          fs.mkdirSync(filePath, { recursive: true })
+        }
       }
-    }
 
-    const output = path.join(filePath, fileName)
-    fs.writeFileSync(output, res.data)
-    return true
-  })
+      const output = path.join(filePath, fileName)
+      fs.writeFileSync(output, res.data)
+      return true
+    },
+  )
 }

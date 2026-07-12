@@ -6,7 +6,7 @@ import { ClientConfig } from '../types'
 const config: ClientConfig & { set: (p: string, v: string) => void } = reactive({
   id: '',
   rooms: [],
-  windows: [],
+  window: {},
   providers: [],
 
   signInMessage: '...',

@@ -43,7 +43,6 @@ interface User {
 }
 
 interface Window {
-  id: string
   type: 'live' | 'dm' | 'dmRaw' | 'asr'
   roomId: number
 
@@ -194,7 +193,7 @@ export interface ClientConfig {
   user?: User
   rooms: Room[]
   isRecording?: boolean
-  windows: Window[]
+  window: Record<string, Window>
   providers: Provider[]
   dmStyle?: DmStyle
   dmRawStyle?: DmRawStyle

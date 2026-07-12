@@ -358,6 +358,7 @@ import {
   IPC_WINDOW_CREATE,
   IPC_WINDOW_FIND,
   IPC_MAIN_WINDOW_ACTION,
+  IPC_WINDOW_LOCATION_UPDATE,
 } from '../../service/const'
 import OverviewPanel from './OverviewPanel.vue'
 import Message from './Message.vue'
@@ -419,6 +420,22 @@ onMounted(() => {
   sse.on('ROOM_REAL_TIME_MESSAGE_UPDATE', onFansUpdate)
   sse.on('ONLINE_COUNT', onOnlineCount)
   sse.on('RECORD_RATE', onRecordRate)
+
+  window.ipcRenderer.on(IPC_WINDOW_LOCATION_UPDATE, (loc: any) => {
+    const { roomId, type } = loc
+    const key = `${roomId}${type}`
+    config.window[key] = loc
+
+    updateClientConfig({
+      clientId: clientId.value,
+      kvs: [
+        {
+          key: `window.${key}`,
+          value: loc,
+        },
+      ],
+    })
+  })
 })
 
 // ── SSE 回调 ──
@@ -632,10 +649,16 @@ async function handleShowDanmaku() {
   const room = activeRoom.value
   if (!room) return
   const url = `http://127.0.0.1:${globalVar.port}/dm?clientId=${clientId.value}&roomId=${room.id}`
+  const windowConfig = config.window[`${room.id}dm`]
+  const width = windowConfig?.width || 440
+  const height = windowConfig?.height || 600
+  const x = windowConfig?.x
+  const y = windowConfig?.y
+
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
-    width: 440,
-    height: 600,
+    width: width,
+    height: height,
     frame: false,
     transparent: true,
     resizable: true,
@@ -643,6 +666,8 @@ async function handleShowDanmaku() {
     type: 'dm',
     roomId: room.id,
     clientId: clientId.value,
+    x,
+    y,
   })
   fetchWindows()
 }
@@ -651,10 +676,16 @@ async function handleShowRawDanmaku() {
   const room = activeRoom.value
   if (!room) return
   const url = `http://127.0.0.1:${globalVar.port}/dm-raw-style?clientId=${clientId.value}&roomId=${room.id}`
+  const windowConfig = config.window[`${room.id}dm-raw`]
+  const width = windowConfig?.width || 600
+  const height = windowConfig?.height || 440
+  const x = windowConfig?.x
+  const y = windowConfig?.y
+
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
-    width: 440,
-    height: 600,
+    width: width,
+    height: height,
     frame: false,
     transparent: true,
     resizable: true,
@@ -662,6 +693,8 @@ async function handleShowRawDanmaku() {
     type: 'dm-raw',
     roomId: room.id,
     clientId: clientId.value,
+    x,
+    y,
   })
   fetchWindows()
 }
@@ -670,10 +703,16 @@ async function handleShowLiveWindow() {
   const room = activeRoom.value
   if (!room) return
   const url = `http://127.0.0.1:${globalVar.port}/live-player?clientId=${clientId.value}&roomId=${room.id}`
+  const windowConfig = config.window[`${room.id}live`]
+  const width = windowConfig?.width || 640
+  const height = windowConfig?.height || 360
+  const x = windowConfig?.x
+  const y = windowConfig?.y
+
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
-    width: 640,
-    height: 360,
+    width: width,
+    height: height,
     frame: false,
     transparent: true,
     resizable: true,
@@ -681,6 +720,8 @@ async function handleShowLiveWindow() {
     type: 'live',
     roomId: room.id,
     clientId: clientId.value,
+    x,
+    y,
   })
   fetchWindows()
 }
