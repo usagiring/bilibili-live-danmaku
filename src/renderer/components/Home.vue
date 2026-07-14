@@ -664,7 +664,8 @@ async function handleShowDanmaku() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: false,
+    alwaysOnTop: config.dmStyle?.isWindowAlwaysOnTop,
+    ignoreMouseEvent: config.dmStyle?.ignoreMouseEvent,
     type: 'dm',
     roomId: room.id,
     clientId: clientId.value,
@@ -691,7 +692,8 @@ async function handleShowRawDanmaku() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: false,
+    alwaysOnTop: config.dmRawStyle?.isWindowAlwaysOnTop,
+    ignoreMouseEvent: config.dmRawStyle?.ignoreMouseEvent,
     type: 'dm-raw',
     roomId: room.id,
     clientId: clientId.value,
@@ -718,7 +720,8 @@ async function handleShowLiveWindow() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: false,
+    alwaysOnTop: config.liveConfig?.isWindowAlwaysOnTop,
+    ignoreMouseEvent: config.liveConfig?.ignoreMouseEvent,
     type: 'live',
     roomId: room.id,
     clientId: clientId.value,
@@ -838,6 +841,28 @@ watch(
   async val => {
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
+      action: 'setAlwaysOnTop',
+      args: [val, 'floating'],
+    })
+  },
+)
+
+watch(
+  () => config.dmRawStyle?.ignoreMouseEvent,
+  async val => {
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'dm-raw',
+      action: 'setIgnoreMouseEvents',
+      args: [val, { forward: true }],
+    })
+  },
+)
+
+watch(
+  () => config.dmRawStyle?.isWindowAlwaysOnTop,
+  async val => {
+    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+      type: 'dm-raw',
       action: 'setAlwaysOnTop',
       args: [val, 'floating'],
     })

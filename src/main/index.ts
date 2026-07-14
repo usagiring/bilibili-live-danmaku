@@ -50,10 +50,10 @@ globalVar.clientId = clientId
 process.env.DB_PATH = path.join(app.getPath('userData'), 'db.sqlite')
 process.env.WEB_PATH = import.meta.env.DEV
   ? path.resolve(__dirname, '../../web/dist')
-  : path.join(__dirname, '../web')
+  : path.join(process.resourcesPath, 'web')
 process.env.MODEL_PATH = import.meta.env.DEV
   ? path.resolve(__dirname, '../models')
-  : path.join(__dirname, '../models')
+  : path.join(process.resourcesPath, 'models')
 
 async function initApp() {
   if (!import.meta.env.DEV) {
@@ -124,7 +124,7 @@ app.on('ready', async () => {
   ipcMain.handle('get-speech-to-text-models', () => {
     const modelsDir = import.meta.env.DEV
       ? '/Users/tokine/Tokine/bilibili-live-danmaku/models'
-      : path.join(__dirname, '../models')
+      : path.join(process.resourcesPath, 'models')
     try {
       const files: string[] = fs.readdirSync(modelsDir)
       return files.filter(f => f.includes('sherpa-onnx-sense-voice'))

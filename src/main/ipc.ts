@@ -67,6 +67,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
         height,
         iconDataUrl,
         alwaysOnTop,
+        ignoreMouseEvent,
         resizable,
         frame,
         transparent,
@@ -92,6 +93,10 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
         y,
         // roundedCorners: false, // mac 自带圆角
       })
+
+      if (ignoreMouseEvent) {
+        win.setIgnoreMouseEvents(true, { forward: true })
+      }
 
       if (iconDataUrl) {
         win.setIcon(nativeImage.createFromDataURL(iconDataUrl))
