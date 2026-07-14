@@ -1,17 +1,3 @@
 packages:
   - 'web'
   - 'shared'
-allowBuilds:
-  '@alicloud/openapi-core': false
-  bufferutil: false
-  core-js: true
-  electron: true
-  electron-winstaller: true
-  esbuild: true
-  highlight.js: false
-  koa: true
-  protobufjs: true
-  utf-8-validate: false
-blockExoticSubdeps: false
-overrides:
-  '@tokine/bilibili-bridge': link:../bilibili-bridge

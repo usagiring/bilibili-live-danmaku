@@ -19,3 +19,5 @@ bin/
 db.sqlite*
 models/*
 models
+.yalc/
+yalc.lock

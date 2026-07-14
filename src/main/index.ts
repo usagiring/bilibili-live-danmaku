@@ -10,7 +10,6 @@ import {
 import path from 'path'
 import fs from 'fs'
 import { autoUpdater } from 'electron-updater'
-import Store from 'electron-store'
 import {
   IPC_CHECK_FOR_UPDATE,
   IPC_DOWNLOAD_UPDATE,
@@ -36,10 +35,16 @@ process.on('uncaughtException', error => {
   console.error(error)
 })
 
-const store = new Store<{ clientId: string }>({ defaults: { clientId: '' } })
+// 1. 定义存储路径（保存在应用的数据目录下，绝对不触发钥匙串）
+const clientIdPath = path.join(app.getPath('userData'), 'client_id')
 
-// 恢复持久化的 clientId 到全局变量
-globalVar.clientId = store.get('clientId', '')
+// 3. 检查文件是否存在，如果不存在就创建它
+if (!fs.existsSync(clientIdPath)) {
+  fs.writeFileSync(clientIdPath, '', 'utf-8')
+}
+
+const clientId = fs.readFileSync(clientIdPath, 'utf-8').trim()
+globalVar.clientId = clientId
 
 // set PATH to env for bili-bridge
 process.env.DB_PATH = path.join(app.getPath('userData'), 'db.sqlite')
@@ -113,7 +118,7 @@ app.on('ready', async () => {
   ipcMain.handle('get-client-id', () => globalVar.clientId)
   ipcMain.handle('set-client-id', (_event, clientId: string) => {
     globalVar.clientId = clientId
-    store.set('clientId', clientId)
+    fs.writeFileSync(clientIdPath, clientId, 'utf-8')
   })
   ipcMain.handle('get-base-url', () => globalVar.baseUrl)
   ipcMain.handle('get-speech-to-text-models', () => {
@@ -129,75 +134,19 @@ app.on('ready', async () => {
     }
   })
 
-  // DevTools 在 nodeIntegration 模式下可能卡顿，按需开启
-  // if (import.meta.env.DEV) {
-  //   mainWindow?.webContents.openDevTools()
-  // }
-
   // 视频流需要加上referer
   // Modify the user agent for all requests to the following urls.
-  // const filter = {
-  //   urls: [
-  //     'https://*.bilivideo.com/*',
-  //     'https://*.bilibili.com/*',
-  //     "https://*.com/*"
-  //   ]
-  // }
+  const filter = {
+    urls: ['https://*.bilivideo.com/*'],
+  }
 
-  // session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-  //   // 模拟真实浏览器请求头（与 HAR 一致）
-  //   details.requestHeaders['User-Agent'] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
-  //   details.requestHeaders['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-  //   details.requestHeaders['Accept-Language'] = "zh-CN,zh;q=0.9"
-  //   details.requestHeaders['sec-ch-ua'] = "\"Google Chrome\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\""
-  //   details.requestHeaders['sec-ch-ua-mobile'] = "?0"
-  //   details.requestHeaders['sec-ch-ua-platform'] = "\"Windows\""
-  //   details.requestHeaders['sec-fetch-dest'] = "document"
-  //   details.requestHeaders['sec-fetch-mode'] = "navigate"
-  //   details.requestHeaders['sec-fetch-site'] = "none"
-  //   details.requestHeaders['sec-fetch-user'] = "?1"
-  //   details.requestHeaders['Referer'] = 'https://www.bilibili.com/'
-  //   details.requestHeaders['upgrade-insecure-requests'] = '1'
-  //   delete details.requestHeaders['Origin']
-
-  //   callback({ requestHeaders: details.requestHeaders })
-  // })
-
-  // // 拦截响应头，注入 CORS 头以绕过浏览器的跨域限制
-  // session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
-  //   details.responseHeaders!['Access-Control-Allow-Origin'] = ['*']
-  //   details.responseHeaders!['Access-Control-Allow-Methods'] = ['GET, POST, PUT, DELETE, OPTIONS']
-  //   details.responseHeaders!['Access-Control-Allow-Headers'] = ['*']
-  //   callback({ responseHeaders: details.responseHeaders })
-  // })
-
-  // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-  //   const responseHeaders = details.responseHeaders || {}
-  //   // 强行注入跨域允许标签
-  //   responseHeaders['Access-Control-Allow-Origin'] = ['*']
-  //   callback({ cancel: false, responseHeaders })
-  // })
-
-  // 允许麦克风权限（macOS 需要先通过 systemPreferences 请求）
-  // session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-  //   if (permission === 'media') {
-  //     callback(true)
-  //   } else {
-  //     callback(false)
-  //   }
-  // })
-  // session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
-  //   return permission === 'media'
-  // })
-
-  // // IPC: 渲染进程触发请求麦克风权限
-  // ipcMain.handle('request-microphone-permission', async () => {
-  //   if (process.platform === 'darwin') {
-  //     const granted = await systemPreferences.askForMediaAccess('microphone')
-  //     return granted
-  //   }
-  //   return true
-  // })
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    // 模拟真实浏览器请求头（与 HAR 一致）
+    details.requestHeaders['User-Agent'] =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36'
+    details.requestHeaders['Referer'] = 'https://api.live.bilibili.com/'
+    callback({ requestHeaders: details.requestHeaders })
+  })
 
   createWindow()
 

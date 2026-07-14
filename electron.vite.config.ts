@@ -1,29 +1,36 @@
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
+// import nodeExternals from 'rollup-plugin-node-externals'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [
+      // externalizeDepsPlugin(),
+      // nodeExternals({
+      //   // 🚨 关键配置：不要把你的项目 A (bilibili-bridge) 排除在外
+      //   // 这样 Vite 就会知道这是一个需要特殊处理的本地依赖
+      //   include: ['@tokine/bilibili-bridge'],
+      // }),
+    ],
     resolve: {
       alias: {
         '@': resolve('src/main'),
       },
     },
     build: {
+      externalizeDeps: true,
       rollupOptions: {
-        external: ['electron', 'electron/**', '@tokine/bilibili-bridge', /\.node$/],
-        output: {
-          format: 'es',
-        },
+        // external: ['electron', 'electron/**', /\.node$/],
       },
     },
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [],
     build: {
+      externalizeDeps: true,
       rollupOptions: {
-        external: ['electron'],
+        // external: ['electron'],
         output: {
           format: 'cjs',
           entryFileNames: 'index.cjs',

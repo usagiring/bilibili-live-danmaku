@@ -45,14 +45,12 @@ onBeforeMount(async () => {
     }
   }
 
-  // 从主进程 electron-store 读取持久化的 clientId
   const storedClientId = await window.getClientId()
 
   // 向 bridge 后端注册，获取最终 clientId
   const { data: regData } = await registryClient({ clientId: storedClientId })
   clientId.value = regData?.id || storedClientId
 
-  // 如果 clientId 有更新，回写到主进程 electron-store
   if (clientId.value && clientId.value !== storedClientId) {
     await window.setClientId(clientId.value)
   }

@@ -12,6 +12,9 @@ export async function start(maxRetries = 3): Promise<{ port: number }> {
 
   for (let i = 0; i < maxRetries; i++) {
     try {
+      ;(bridge as any).default
+        ? await (bridge as any).default({ port: currentPort })
+        : await bridge({ port: currentPort })
       await bridge({ port: currentPort })
       console.log(`[Bridge] 服务已启动，端口: ${currentPort}`)
 
