@@ -1,6 +1,5 @@
 import bridge from '@tokine/bilibili-bridge'
 import globalVar from './global'
-import { port } from './config-loader'
 
 /**
  * 启动 bilibili-bridge 服务
@@ -9,11 +8,11 @@ import { port } from './config-loader'
  * - 端口被占用时自动重试，每次随机选新端口
  */
 export async function start(maxRetries = 3): Promise<{ port: number }> {
-  let currentPort: number = port || getRandomPort()
+  let currentPort: number = getRandomPort()
 
   for (let i = 0; i < maxRetries; i++) {
     try {
-      await bridge({ port: currentPort, htmlPath: '' })
+      await bridge({ port: currentPort })
       console.log(`[Bridge] 服务已启动，端口: ${currentPort}`)
 
       globalVar.port = currentPort

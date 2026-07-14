@@ -1,10 +1,22 @@
-import { app, BrowserWindow, ipcMain, nativeImage, session, IpcMainEvent, netLog, systemPreferences } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  IpcMainEvent,
+  netLog,
+  systemPreferences,
+} from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { autoUpdater } from 'electron-updater'
 import Store from 'electron-store'
-import { IPC_CHECK_FOR_UPDATE, IPC_DOWNLOAD_UPDATE, IPC_UPDATE_AVAILABLE, IPC_DOWNLOAD_PROGRESS } from '../service/const'
-import { initialize, enable } from '@electron/remote/main'
+import {
+  IPC_CHECK_FOR_UPDATE,
+  IPC_DOWNLOAD_UPDATE,
+  IPC_UPDATE_AVAILABLE,
+  IPC_DOWNLOAD_PROGRESS,
+} from '../service/const'
 import { registerIpcHandlers } from './ipc'
 import globalVar from '../service/global'
 import { start as startBiliBridge } from '../service/bilibili-bridge'
@@ -19,8 +31,6 @@ if (import.meta.env.DEV) {
   app.disableHardwareAcceleration()
 }
 
-initialize()
-
 process.on('uncaughtException', error => {
   console.log('uncaughtException')
   console.error(error)
@@ -30,6 +40,15 @@ const store = new Store<{ clientId: string }>({ defaults: { clientId: '' } })
 
 // 恢复持久化的 clientId 到全局变量
 globalVar.clientId = store.get('clientId', '')
+
+// set PATH to env for bili-bridge
+process.env.DB_PATH = path.join(app.getPath('userData'), 'db.sqlite')
+process.env.WEB_PATH = import.meta.env.DEV
+  ? path.resolve(__dirname, '../../web/dist')
+  : path.join(__dirname, '../web')
+process.env.MODEL_PATH = import.meta.env.DEV
+  ? path.resolve(__dirname, '../models')
+  : path.join(__dirname, '../models')
 
 async function initApp() {
   if (!import.meta.env.DEV) {
@@ -48,9 +67,11 @@ if (!import.meta.env.DEV) {
 }
 
 let mainWindow: BrowserWindow | null = null
-const winURL = import.meta.env.DEV ? process.env.ELECTRON_RENDERER_URL! : `file://${path.join(__dirname, '../renderer/index.html')}`
+const winURL = import.meta.env.DEV
+  ? process.env.ELECTRON_RENDERER_URL!
+  : `file://${path.join(__dirname, '../renderer/index.html')}`
 
-const preloadPath = path.join(__dirname, '../preload/index.js')
+const preloadPath = path.join(__dirname, '../preload/index.cjs')
 
 function createWindow() {
   /**
@@ -66,7 +87,6 @@ function createWindow() {
     },
     // icon: path.join(__dirname, '../../build/icons/icon.ico')
   })
-  mainWindow.setIcon(nativeImage.createFromPath(path.join(__dirname, '../../build/icons/icon.ico')))
   mainWindow.setMenuBarVisibility(false)
 
   mainWindow.loadURL(winURL)
@@ -75,15 +95,21 @@ function createWindow() {
     mainWindow = null
     app.quit()
   })
-
-  enable(mainWindow.webContents)
 }
 
 app.on('ready', async () => {
+  console.log('[Main] ready event fired')
+
   // 等待 bridge / 初始化完成
-  await initApp()
+  try {
+    await initApp()
+    console.log('[Main] initApp completed, baseUrl:', globalVar.baseUrl)
+  } catch (err) {
+    console.error('[Main] initApp failed:', err)
+  }
 
   // 注册渲染进程需要的 IPC handlers（必须在 createWindow 之前，避免 invoke 时无 handler）
+  console.log('[Main] registering IPC handlers')
   ipcMain.handle('get-client-id', () => globalVar.clientId)
   ipcMain.handle('set-client-id', (_event, clientId: string) => {
     globalVar.clientId = clientId
@@ -91,7 +117,9 @@ app.on('ready', async () => {
   })
   ipcMain.handle('get-base-url', () => globalVar.baseUrl)
   ipcMain.handle('get-speech-to-text-models', () => {
-    const modelsDir = import.meta.env.DEV ? '/Users/tokine/Tokine/bilibili-live-danmaku/models' : path.join(__dirname, '../models')
+    const modelsDir = import.meta.env.DEV
+      ? '/Users/tokine/Tokine/bilibili-live-danmaku/models'
+      : path.join(__dirname, '../models')
     try {
       const files: string[] = fs.readdirSync(modelsDir)
       return files.filter(f => f.includes('sherpa-onnx-sense-voice'))

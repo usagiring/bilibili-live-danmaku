@@ -4,14 +4,16 @@
   "author": "其妙 <hling51325@163.com>",
   "description": "这是一个哔哩哔哩的直播弹幕应用",
   "license": "MIT",
+  "type": "module",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "npm run build:web && electron-vite build && mkdir -p out/web && cp -r web/dist/* out/web/ && electron-builder",
+    "build": "npm run build:web && electron-vite build && electron-builder",
     "build:main": "electron-vite build && electron-builder",
     "build:web": "cd web && npm run build",
     "build:dir": "electron-vite build && electron-builder --dir",
     "build:clean": "rm -rf out",
+    "build:mac": "npm run build && codesign --force --deep --sign - build/mac-arm64/bilive-dm.app",
     "pack": "electron-vite build",
     "release": "npm run build -- -p always"
   },
@@ -30,13 +32,17 @@
     "files": [
       "out/**/*"
     ],
-    "extraFiles": [
-      "config.yaml"
-    ],
     "extraResources": [
       {
         "from": "models",
         "to": "models",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "web/dist",
+        "to": "web",
         "filter": [
           "**/*"
         ]
@@ -89,7 +95,6 @@
     ]
   },
   "dependencies": {
-    "@electron/remote": "^2.1.3",
     "@tokine/bilibili-bridge": "0.2.24",
     "@tokine/shared": "workspace:*",
     "axios": "^1.16.1",
