@@ -19,9 +19,11 @@ export default defineConfig({
       },
     },
     build: {
-      externalizeDeps: true,
+      externalizeDeps: {
+        include: ['@tokine/bilibili-bridge']
+      },
       rollupOptions: {
-        // external: ['electron', 'electron/**', /\.node$/],
+        external: ['electron', '@tokine/bilibili-bridge'],
       },
     },
   },
@@ -30,7 +32,7 @@ export default defineConfig({
     build: {
       externalizeDeps: true,
       rollupOptions: {
-        // external: ['electron'],
+        external: ['electron'],
         output: {
           format: 'cjs',
           entryFileNames: 'index.cjs',

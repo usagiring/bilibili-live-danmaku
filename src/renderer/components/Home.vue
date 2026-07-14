@@ -376,7 +376,6 @@ import {
   startRecord as startRecordApi,
   cancelRecord as cancelRecordApi,
 } from '../service/api'
-import globalVar from '../../service/global'
 import config from '../service/config'
 import { Message as $Message } from 'view-ui-plus'
 import { DEFAULT_FACE } from '@tokine/shared'
@@ -393,6 +392,7 @@ const isRoomPanelCollapsed = ref(config.isRoomPanelCollapsed)
 const connecting = ref(false)
 const recordLoading = ref(false)
 const clientId = computed(() => store.id)
+const baseUrl = ref('')
 const synth = window.speechSynthesis
 let waitingSpeakers: Speaker[] = []
 
@@ -405,7 +405,7 @@ function toggleRoomPanel() {
   }).catch(() => {})
 }
 
-onMounted(() => {
+onMounted(async () => {
   sse.on('SPEAK', speaker => {
     // 超过数量清空待读列表，不处理过期数据
     if (waitingSpeakers.length > 100) waitingSpeakers = []
@@ -436,6 +436,8 @@ onMounted(() => {
       ],
     })
   })
+
+  baseUrl.value = await window.getBaseUrl()
 })
 
 // ── SSE 回调 ──
@@ -648,7 +650,7 @@ function openLiveRoom() {
 async function handleShowDanmaku() {
   const room = activeRoom.value
   if (!room) return
-  const url = `http://127.0.0.1:${globalVar.port}/dm?clientId=${clientId.value}&roomId=${room.id}`
+  const url = `${baseUrl.value}/dm?clientId=${clientId.value}&roomId=${room.id}`
   const windowConfig = config.window[`${room.id}dm`]
   const width = windowConfig?.width || 440
   const height = windowConfig?.height || 600
@@ -675,7 +677,7 @@ async function handleShowDanmaku() {
 async function handleShowRawDanmaku() {
   const room = activeRoom.value
   if (!room) return
-  const url = `http://127.0.0.1:${globalVar.port}/dm-raw-style?clientId=${clientId.value}&roomId=${room.id}`
+  const url = `${baseUrl.value}/dm-raw-style?clientId=${clientId.value}&roomId=${room.id}`
   const windowConfig = config.window[`${room.id}dm-raw`]
   const width = windowConfig?.width || 600
   const height = windowConfig?.height || 440
@@ -702,7 +704,7 @@ async function handleShowRawDanmaku() {
 async function handleShowLiveWindow() {
   const room = activeRoom.value
   if (!room) return
-  const url = `http://127.0.0.1:${globalVar.port}/live-player?clientId=${clientId.value}&roomId=${room.id}`
+  const url = `${baseUrl.value}/live-player?clientId=${clientId.value}&roomId=${room.id}`
   const windowConfig = config.window[`${room.id}live`]
   const width = windowConfig?.width || 640
   const height = windowConfig?.height || 360

@@ -8,7 +8,7 @@ import globalVar from './global'
  * - 端口被占用时自动重试，每次随机选新端口
  */
 export async function start(maxRetries = 3): Promise<{ port: number }> {
-  let currentPort: number = getRandomPort()
+  let currentPort: number = 30031
 
   for (let i = 0; i < maxRetries; i++) {
     try {

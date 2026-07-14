@@ -1,3 +1,7 @@
 packages:
   - 'web'
   - 'shared'
+allowBuilds:
+  core-js: true
+  electron-winstaller: true
+  esbuild: true
