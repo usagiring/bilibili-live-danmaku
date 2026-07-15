@@ -27,7 +27,8 @@ const dmRawStyle = reactive<DmRawStyle>({
   fontSize: 22,
 })
 
-const { windowOpacity, windowBackground, fontSize, direction, emojiSize, duration } = toRefs(dmRawStyle)
+const { windowOpacity, windowBackground, fontSize, direction, emojiSize, duration } =
+  toRefs(dmRawStyle)
 
 const comments = ref<any[]>([])
 const blocks = ref<any[]>([])
@@ -64,7 +65,8 @@ onUnmounted(() => {})
 function setupSSE() {
   sse.on('DM_RAW_STYLE', onRawStyle)
   sse.on('MESSAGE', data => {
-    if (roomId.value && roomId.value !== '*' && data.roomId !== roomId.value && data.roomId !== '*') return
+    if (roomId.value && roomId.value !== '*' && data.roomId !== roomId.value && data.roomId !== '*')
+      return
     onMessage(data)
   })
   sse.on('MESSAGE_CLEAR', clearMessage)
@@ -134,7 +136,17 @@ async function dispatchComments(msg: Message) {
   }, duration.value + 500)
 }
 
-function getDanmakuTop({ v: v2, top = 0, height, count = 0 }: { v: number; top?: number; height: number; count?: number }): any {
+function getDanmakuTop({
+  v: v2,
+  top = 0,
+  height,
+  count = 0,
+}: {
+  v: number
+  top?: number
+  height: number
+  count?: number
+}): any {
   if (count > 20) return { top: null }
 
   const filtered = blocks.value.filter(b => b.top <= top + height && b.top + b.height > top)
@@ -149,7 +161,12 @@ function getDanmakuTop({ v: v2, top = 0, height, count = 0 }: { v: number; top?:
   })
 
   if (!touchedBlock) return { top }
-  return getDanmakuTop({ v: v2, top: touchedBlock.top + touchedBlock.height, height, count: count + 1 })
+  return getDanmakuTop({
+    v: v2,
+    top: touchedBlock.top + touchedBlock.height,
+    height,
+    count: count + 1,
+  })
 }
 
 function clearMessage() {

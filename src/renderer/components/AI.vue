@@ -601,37 +601,29 @@ function toggleSTT() {
 
 /* ── Buttons ── */
 .btn {
-  height: 22px;
+  height: 26px;
   border: 1px solid #2d8cf0;
   border-radius: 4px;
   padding: 0 10px;
-  font-size: 10px;
+  font-size: 11px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   background: #fff;
   color: #2d8cf0;
-  transition: 0.15s;
 }
-.btn:hover {
-  background: rgba(45, 140, 240, 0.06);
-}
+
 .btn-primary {
   background: #2d8cf0;
   color: #fff;
   border: none;
 }
-.btn-primary:hover {
-  background: #2b85e4;
-}
+
 .btn-danger {
   background: #ed4014;
   color: #fff;
   border-color: #ed4014;
-}
-.btn-danger:hover {
-  background: #d83a12;
 }
 .btn-disabled {
   border-color: #ddd;

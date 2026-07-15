@@ -123,8 +123,8 @@ export async function countMessages(body: { roomId?: number; userId?: string; ca
 
 // ==================== DM (弹幕/礼物广播) ====================
 
-export async function clearDM() {
-  const res = await axios.post(`${baseUrl}/api/dm/clear`)
+export async function clearDM({ clientId }) {
+  const res = await axios.post(`${baseUrl}/api/dm/clear`,{ clientId })
   return res.data
 }
 

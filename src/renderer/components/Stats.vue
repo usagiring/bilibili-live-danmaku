@@ -349,11 +349,11 @@ async function download() {
 
 /* ── 方形按钮（参考 Config 页）── */
 .btn {
-  height: 22px;
+  height: 26px;
   border: 1px solid #2d8cf0;
   border-radius: 4px;
-  padding: 0 8px;
-  font-size: 10px;
+  padding: 0 10px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -364,10 +364,6 @@ async function download() {
 .btn-default {
   background: #fff;
   color: #2d8cf0;
-}
-
-.btn-default:hover {
-  background: rgba(45, 140, 240, 0.06);
 }
 
 .btn:disabled {

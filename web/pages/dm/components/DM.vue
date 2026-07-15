@@ -339,6 +339,7 @@ const rootStyle = computed(
       opacity: windowOpacity.value,
       '-webkit-user-select': 'none',
       '-webkit-app-region': 'drag',
+      overflow: 'hidden',
     }) as Record<string, string | number>,
 )
 

@@ -95,7 +95,7 @@
     ]
   },
   "dependencies": {
-    "@tokine/bilibili-bridge": "file:.yalc/@tokine/bilibili-bridge",
+    "@tokine/bilibili-bridge": "^1.0.1",
     "@tokine/shared": "workspace:*",
     "axios": "^1.16.1",
     "dayjs": "^1.11.20",

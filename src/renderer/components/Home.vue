@@ -80,7 +80,7 @@
                       size="small"
                       type="primary"
                       @click="handleAddRoom">
-                      连接
+                      添加
                     </Button>
                   </div>
                 </template>

@@ -5,15 +5,15 @@
       <!-- Row 1: 操作栏 -->
       <div class="vote-toolbar">
         <div class="toolbar-left">
-          <button
+          <Button
             class="btn btn-primary"
             :disabled="isWatching"
             @click="start">
             <Icon
               type="md-play"
-              size="12" />
+              size="13" />
             开始
-          </button>
+          </Button>
           <button
             class="btn btn-danger"
             :disabled="!isWatching"
@@ -135,7 +135,8 @@
 
         <div class="side-card side-info">
           <div class="side-card-title">说明</div>
-          <p>⚠️ 未设置Cookie时，仅以弹幕内容作为投票依据，同一用户可多次投票。</p>
+          <p>未设置Cookie时，仅以弹幕内容作为投票依据，同一用户可多次投票。</p>
+          <p>定时为 0 表示无时间限制。</p>
         </div>
       </div>
 
@@ -530,11 +531,11 @@ function changeDuration(val: number) {
 
 /* ── 方形按钮（参考 Config 页）── */
 .btn {
-  height: 22px;
+  height: 26px;
   border: 1px solid #2d8cf0;
   border-radius: 4px;
-  padding: 0 8px;
-  font-size: 10px;
+  padding: 0 10px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -548,17 +549,9 @@ function changeDuration(val: number) {
   border: none;
 }
 
-.btn-primary:hover {
-  background: #2b85e4;
-}
-
 .btn-default {
   background: #fff;
   color: #2d8cf0;
-}
-
-.btn-default:hover {
-  background: rgba(45, 140, 240, 0.06);
 }
 
 .btn-danger {

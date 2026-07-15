@@ -6,4 +6,5 @@ allowBuilds:
   electron-winstaller: true
   esbuild: true
 minimumReleaseAgeExclude:
+  - '@tokine/bilibili-bridge'
   - '@tokine/bilibili-recorder@1.0.0'

@@ -11,8 +11,7 @@
           placeholder="输入 B站 Cookie..."
           style="width: 280px; text-align: left; padding: 0 8px" />
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="showQrCodeLoginModal">
           扫码登录
         </button>
@@ -36,20 +35,17 @@
         class="section-row"
         style="gap: 4px">
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="sendTestDanmaku">
           生成测试弹幕
         </button>
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="clearDM">
           清空弹幕
         </button>
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="restoreDmDefaults">
           恢复默认
         </button>
@@ -524,9 +520,9 @@
         <InputNumber
           size="small"
           style="width: 50px"
-          :model-value="(dmRawStyle as any)?.fontSize ?? 14"
-          :min="8"
-          :max="48"
+          :model-value="(dmRawStyle as any)?.fontSize ?? 1"
+          :min="1"
+          :max="256"
           @on-change="(v: number) => setVal('dmRawStyle.fontSize', v)" />
         <span class="input-unit">px</span>
       </div>
@@ -535,9 +531,9 @@
         <InputNumber
           size="small"
           style="width: 50px"
-          :model-value="dmRawStyle?.emojiSize ?? 24"
-          :min="8"
-          :max="64"
+          :model-value="dmRawStyle?.emojiSize ?? 1"
+          :min="1"
+          :max="256"
           @on-change="(v: number) => setVal('dmRawStyle.emojiSize', v)" />
         <span class="input-unit">px</span>
       </div>
@@ -546,7 +542,7 @@
         <InputNumber
           size="small"
           style="width: 70px"
-          :model-value="dmRawStyle?.duration ?? 15"
+          :model-value="dmRawStyle?.duration ?? 1000"
           :min="1000"
           :max="60000"
           :step="1000"
@@ -609,8 +605,7 @@
           {{ recordConfig?.savePath || '请选择路径' }}
         </span>
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="selectSavePath">
           选择
         </button>
@@ -739,12 +734,11 @@
           :max="2.0"
           :step="0.1" />
         <button
-          class="btn btn-default"
-          style="font-size: 10px; height: 22px"
+          class="btn btn-default btn-sm"
           @click="speak">
           <Icon
             type="md-volume-up"
-            size="12" />
+            size="15" />
           播放
         </button>
       </div>
@@ -758,14 +752,13 @@
           trigger="hover"
           transfer>
           <button
-            class="btn btn-default"
-            style="font-size: 10px; height: 22px"
+            class="btn btn-default btn-sm"
             :disabled="lightMedalLoading"
             @click="lightMedal">
             <Icon
               :type="lightMedalLoading ? 'ios-loading' : 'md-information-circle'"
               :class="{ 'spin-icon': lightMedalLoading }"
-              size="12" />
+              size="15" />
             {{ lightMedalLoading ? '点亮中…' : '一键点亮' }}
           </button>
           <template #content>
@@ -1164,7 +1157,7 @@ async function sendTestDanmaku() {
 
 async function clearDM() {
   try {
-    await clearDMApi()
+    await clearDMApi({ clientId: clientId.value })
   } catch {
     /* ignore */
   }
@@ -1504,6 +1497,11 @@ async function lightMedal() {
 .btn-default {
   background: #fff;
   color: #2d8cf0;
+}
+
+.btn-sm {
+  font-size: 12px;
+  /* height: 22px; */
 }
 
 .medal-count {
