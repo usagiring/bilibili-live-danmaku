@@ -166,7 +166,7 @@
               :username="msg.username"
               :face="msg.face">
               <span :style="{ display: 'inline-block', padding: '10px 0px 10px 10px' }">
-                {{ `${msg.username}赠送了${msg.gift.count}个${msg.gift.name}` }}
+                {{ `${msg.username}赠送了${msg.gift.name}×${msg.gift.count}` }}
               </span>
               <img
                 :src="msg.gift.webp"
@@ -177,7 +177,7 @@
               :gift="msg.gift"
               :username="msg.username"
               :face="msg.face">
-              {{ ` 赠送了${msg.gift.count}个${msg.gift.name}` }}
+              {{ `赠送了${msg.gift.count}个${msg.gift.name}` }}
             </GiftCardMini>
           </template>
         </div>
