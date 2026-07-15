@@ -14,7 +14,8 @@
     "build:clean": "rm -rf out",
     "build:mac": "npm run build && codesign --force --deep --sign - build/mac-arm64/bilive-dm.app",
     "pack": "electron-vite build",
-    "release": "npm run build -- -p always"
+    "release": "npm run build -- -p always",
+    "release:only": "electron-builder --publish always"
   },
   "repository": {
     "type": "git",
