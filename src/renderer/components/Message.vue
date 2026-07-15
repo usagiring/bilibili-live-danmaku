@@ -174,7 +174,7 @@
                     :face="msg.face"
                     :sendAt="msg.sendAt"
                     :isShowSendAt="isShowSendAt">
-                    {{ ` 赠送了 ${msg.gift!.count}个 ${msg.gift!.name}` }}
+                    {{ `赠送了${msg.gift!.count}个${msg.gift!.name}` }}
                   </GiftCardMini>
                 </template>
               </div>

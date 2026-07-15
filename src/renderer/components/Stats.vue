@@ -42,18 +42,6 @@
       </div>
     </div>
 
-    <!-- 提示 -->
-    <div class="action-bar">
-      <Alert
-        type="info"
-        style="flex: 1; margin: 0">
-        <Icon
-          type="md-information-circle"
-          :style="{ 'font-size': '16px' }" />
-        <span> 数据仅供参考，实际数据请以官方数据为准。</span>
-      </Alert>
-    </div>
-
     <!-- 统计卡片 + 图表 -->
     <div class="main-container">
       <div class="stats-cards">
@@ -72,6 +60,18 @@
       </div>
 
       <div id="chart" />
+
+      <!-- 提示 -->
+      <div class="action-bar">
+        <Alert
+          type="info"
+          style="flex: 1; margin: 0">
+          <Icon
+            type="md-information-circle"
+            :style="{ 'font-size': '16px' }" />
+          <span> 数据仅供参考，实际数据请以官方数据为准。</span>
+        </Alert>
+      </div>
     </div>
 
     <Drawer
@@ -274,7 +274,13 @@ async function generateWordCloud() {
           fontWeight: 'bold',
           color: function () {
             return (
-              'rgb(' + [Math.round(Math.random() * 160), Math.round(Math.random() * 160), Math.round(Math.random() * 160)].join(',') + ')'
+              'rgb(' +
+              [
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160),
+                Math.round(Math.random() * 160),
+              ].join(',') +
+              ')'
             )
           },
         },

@@ -49,7 +49,7 @@ const width = computed(() => {
 
 const formattedPrice = computed(() => {
   const price = props.gift?.totalPrice || 0
-  return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
+  return `${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}元`
 })
 </script>
 

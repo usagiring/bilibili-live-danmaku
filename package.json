@@ -26,6 +26,7 @@
     "appId": "com.electron.bilive-dm",
     "npmRebuild": true,
     "asar": true,
+    "afterPack": "./build/afterPack.js",
     "directories": {
       "output": "build"
     },
@@ -78,6 +79,7 @@
         }
       ]
     },
+    "compression": "maximum",
     "linux": {
       "icon": "build/icons"
     },
@@ -86,7 +88,8 @@
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "differentialPackage": true
     },
     "publish": [
       {
@@ -103,7 +106,6 @@
     "echarts-wordcloud": "^2.1.0",
     "electron-updater": "^6.8.3",
     "flv.js": "^1.6.2",
-    "font-list": "^2.1.0",
     "lodash": "^4.18.1",
     "pinia": "^3.0.4",
     "qrcode": "^1.5.4",

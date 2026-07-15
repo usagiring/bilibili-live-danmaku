@@ -6,22 +6,6 @@ const routes = [
     name: 'Home',
     component: () => import('../components/Home.vue'),
   },
-  // {
-  //   path: '/asr-window',
-  //   component: () => import('../components/ASRWindow.vue'),
-  // },
-  // {
-  //   path: '/speech-to-danmaku',
-  //   component: () => import('../components/SpeechToDanmaku.vue'),
-  // },
-  // {
-  //   path: '/live-window',
-  //   component: () => import('../components/LiveWindow.vue'),
-  // },
-  // {
-  //   path: '/danmaku-scroll',
-  //   component: () => import('../components/Danmaku-Scroll.vue')
-  // },
   {
     path: '/:pathMatch(.*)*',
     component: () => import('../components/NotFound.vue'),
