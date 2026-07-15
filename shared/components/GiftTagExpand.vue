@@ -86,6 +86,9 @@ const formattedPrice = computed(() => {
   padding: 6px;
   font-size: 12px;
   color: white;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 .divider {
   border-top: 1px solid;
