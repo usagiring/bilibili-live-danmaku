@@ -471,13 +471,14 @@ function onMessage(msg: Message) {
   // gift
   if (msg.category === 'gift' && msg.gift) {
     if (!isShowSilverGift.value && msg.gift?.coinType !== 'gold') return
-    msg.gift.priceProperties = getPriceProperties(Number(msg.gift.totalPrice))
-    addToHeadline(msg)
-
     const exist = messages.value.find((m: any) => m.id === msg.id)
     if (exist) {
       exist.gift = msg.gift
+      isAddMessage = false
     }
+
+    msg.gift.priceProperties = getPriceProperties(Number(msg.gift.totalPrice))
+    addToHeadline(msg)
 
     if (Number(msg.gift.totalPrice) < showGiftCardThreshold.value) isAddMessage = false
   }
