@@ -16,16 +16,7 @@
         size="small" />
       <span class="username-style">{{ username }}</span>
       <slot />
-      <span
-        v-if="type === 'anchor'"
-        class="price-style space-left-2px">
-        {{ count === 1 ? name : `${name}×${count}` }}
-      </span>
-      <span
-        v-else
-        class="price-style space-left-2px"
-        >{{ formattedPrice }}</span
-      >
+      <span class="price-style space-left-2px">{{ formattedPrice }}</span>
     </div>
   </div>
 </template>

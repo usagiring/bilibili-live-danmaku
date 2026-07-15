@@ -11,8 +11,7 @@
         size="large" />
       <div class="gift-card-info">
         <p>{{ username }}</p>
-        <p v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</p>
-        <p v-else>{{ formattedPrice }}</p>
+        <p>{{ formattedPrice }}</p>
       </div>
     </div>
     <div

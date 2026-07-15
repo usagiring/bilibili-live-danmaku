@@ -10,8 +10,7 @@
         :src="face" />
       <div class="gift-tag-expand-top-right">
         <p>{{ username }}</p>
-        <p v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</p>
-        <p v-else>{{ formattedPrice }}</p>
+        <p>{{ formattedPrice }}</p>
       </div>
     </div>
     <div

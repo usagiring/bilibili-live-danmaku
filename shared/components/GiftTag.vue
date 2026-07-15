@@ -10,8 +10,7 @@
         class="gift-tag-avatar"
         :src="face"
         size="small" />
-      <span v-if="type === 'anchor'">{{ count === 1 ? name : `${name}×${count}` }}</span>
-      <span v-else>{{ formattedPrice }}</span>
+      <span>{{ formattedPrice }}</span>
     </div>
   </div>
 </template>
