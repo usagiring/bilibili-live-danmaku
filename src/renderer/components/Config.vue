@@ -36,7 +36,7 @@
         style="gap: 4px">
         <button
           class="btn btn-default btn-sm"
-          @click="sendTestDanmaku">
+          @click="sendTestDM">
           生成测试弹幕
         </button>
         <button
@@ -1108,7 +1108,7 @@ function getTestDMGift() {
   }
 }
 
-async function sendTestDanmaku() {
+async function sendTestDM() {
   try {
     const categories: Array<'comment' | 'gift' | 'superchat'> = ['comment', 'gift', 'superchat']
     const category = categories[Math.floor(Math.random() * categories.length)]
@@ -1141,7 +1141,7 @@ async function sendTestDanmaku() {
       data.content = '这是一条测试弹幕 🎉'
     } else if (category === 'gift') {
       const gift = getTestDMGift()
-      data.content = `${data.username} 赠送了 ${gift.count} 个 ${gift.name}`
+      data.content = ''
       data.gift = gift
     } else if (category === 'superchat') {
       const gift = getTestDMGift()
@@ -1154,6 +1154,48 @@ async function sendTestDanmaku() {
     /* ignore */
   }
 }
+
+// let gi = 0
+// async function sendTestGiftCombo() {
+//   try {
+//     const data: any = {
+//       id: 1,
+//       content: '',
+//       color: null,
+//       category: 'gift',
+//       type: null,
+//       sendAt: Date.now(),
+//       roomId: '*',
+//       clientId: clientId.value,
+//       userId: '0',
+//       username: '测试用户',
+//       usernameColor: null,
+//       roles: [Math.floor(Math.random() * 4)], // 随机 0~3
+//       face: null,
+//       emots: null,
+//       voiceUrl: null,
+//       fileDuration: null,
+//       emojiUrl: null,
+//       medal: null,
+//       interact: null,
+//       createdAt: Date.now(),
+//       gift: {
+//     id: String(Math.floor(Date.now() * Math.random())),
+//     type: 'gift',
+//     name: '测试礼物',
+//     price: 1,
+//     count: gi,
+//     coinType: 'gold',
+//     totalPrice: 1 * gi,
+//     webp: 'https://i0.hdslb.com/bfs/live/32b799120e1614fa6275b6d15da7a52b21dd019d.webp',
+//   }
+//     }
+
+//     await sendDM({ clientId: clientId.value, data })
+//   } catch {
+//     /* ignore */
+//   }
+// }
 
 async function clearDM() {
   try {

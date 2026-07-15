@@ -22,26 +22,27 @@
         {{ count === 1 ? name : `${name}×${count}` }}
       </span>
       <span
-        v-else-if="totalPrice"
+        v-else
         class="price-style space-left-2px"
-        >{{ formattedPrice }}</span
-      >
+        >{{ formattedPrice }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, toRefs } from 'vue'
+import { computed } from 'vue'
 import { dateFormat } from '../service/util'
 
 const props = defineProps(['gift', 'face', 'username', 'isShowSendAt', 'sendAt'])
 
-const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties?.value?.colors[0])
-const color2 = computed(() => priceProperties?.value?.colors[1])
+const color1 = computed(() => props.gift?.priceProperties?.colors?.[0])
+const color2 = computed(() => props.gift?.priceProperties?.colors?.[1])
+const name = computed(() => props.gift?.name)
+const count = computed(() => props.gift?.count)
+const type = computed(() => props.gift?.type)
 
 const formattedPrice = computed(() => {
-  const price = totalPrice.value
+  const price = props.gift?.totalPrice || 0
   return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
 })
 </script>

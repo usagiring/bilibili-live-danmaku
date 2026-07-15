@@ -17,12 +17,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, toRefs } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps<{ gift: any; face?: string; sendAt: number }>()
-const { priceProperties, totalPrice, name, count, type } = toRefs(props.gift)
-const color1 = computed(() => priceProperties?.value?.colors[0])
-const color2 = computed(() => priceProperties?.value?.colors[1])
+const color1 = computed(() => props.gift?.priceProperties?.colors?.[0])
+const color2 = computed(() => props.gift?.priceProperties?.colors?.[1])
+const type = computed(() => props.gift?.type)
+const name = computed(() => props.gift?.name)
+const count = computed(() => props.gift?.count)
 
 const existsTime = ref(0)
 let timer: ReturnType<typeof setInterval>
@@ -40,13 +42,13 @@ onUnmounted(() => {
 })
 
 const width = computed(() => {
-  const duration = priceProperties.value?.duration
+  const duration = props.gift?.priceProperties?.duration
   if (!existsTime.value || !duration) return 100
   return Math.max(0, Math.floor((1 - existsTime.value / duration) * 100))
 })
 
 const formattedPrice = computed(() => {
-  const price = totalPrice?.value || 0
+  const price = props.gift?.totalPrice || 0
   return `￥${Number.isSafeInteger(price) ? Number(price).toFixed(0) : Number(price).toFixed(1)}`
 })
 </script>
