@@ -6,6 +6,9 @@ import {
   IpcMainEvent,
   netLog,
   systemPreferences,
+  Tray,
+  Menu,
+  nativeImage,
 } from 'electron'
 import path from 'path'
 import fs from 'fs'
@@ -72,6 +75,7 @@ if (!import.meta.env.DEV) {
 }
 
 let mainWindow: BrowserWindow | null = null
+let tray: Tray | null = null
 const winURL = import.meta.env.DEV
   ? process.env.ELECTRON_RENDERER_URL!
   : `file://${path.join(__dirname, '../renderer/index.html')}`
@@ -98,6 +102,10 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    if (tray) {
+      tray.destroy()
+      tray = null
+    }
     app.quit()
   })
 }
@@ -149,6 +157,19 @@ app.on('ready', async () => {
   })
 
   createWindow()
+
+  // 创建系统托盘
+  const iconPath = import.meta.env.DEV
+    ? path.join(__dirname, '../../build/icons/icon.ico')
+    : path.join(process.resourcesPath, 'icon.ico')
+  tray = new Tray(nativeImage.createFromPath(iconPath))
+  tray.setToolTip('Bilive')
+  tray.on('click', () => {
+    if (mainWindow) {
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
 
   // 注册所有 IPC 处理器
   registerIpcHandlers(mainWindow!)
