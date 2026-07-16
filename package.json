@@ -92,7 +92,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "differentialPackage": true
+      "differentialPackage": true,
+      "deleteAppDataOnUninstall": true
     },
     "publish": [
       {
@@ -117,6 +118,10 @@
     "vue-router": "^5.0.7",
     "vuedraggable": "^4.1.0",
     "yaml": "^2.9.0"
+  },
+  "optionalDependencies": {
+    "@node-rs/jieba-win32-x64-msvc": "2.0.1",
+    "sherpa-onnx-win-x64": "1.13.4"
   },
   "devDependencies": {
     "@electron/devtron": "^2.0.0",
