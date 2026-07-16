@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tokine/bilibili-bridge':
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: ^1.0.2
+        version: 1.0.2
       '@tokine/shared':
         specifier: workspace:*
         version: link:shared
@@ -749,8 +749,8 @@ packages:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
     engines: {node: '>=10'}
 
-  '@tokine/bilibili-bridge@1.0.1':
-    resolution: {integrity: sha512-gksDqxFDhCeTAhzOc45znU9q87/TnHJB5K1rW7DuI0wlvTiebYVxgZM0Beam4ZK55iQwwZx2HCnQ6xmJqMulhw==}
+  '@tokine/bilibili-bridge@1.0.2':
+    resolution: {integrity: sha512-tkHlAjBISG7ktaNlQFsGBQlm9kUpibCjwi2HmT1Vr3mNT5YpNHMAmsL4Raxe3CjMpg/MYHo2fuAbPooH7EWBJg==}
 
   '@tokine/bilibili-recorder@1.0.0':
     resolution: {integrity: sha512-FHKfosV6Av/TNX0zuU5EywSzvpXTbG8Xm9rprpwuN4VyfEc89tyWzsnPMcs3JP0heVRWNqqY1zlSRWr0q0f/4Q==}
@@ -3542,7 +3542,7 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tokine/bilibili-bridge@1.0.1':
+  '@tokine/bilibili-bridge@1.0.2':
     dependencies:
       '@koa/cors': 5.0.0
       '@koa/router': 15.7.0(koa@3.2.1)

@@ -18,6 +18,6 @@ web/dist/
 bin/
 db.sqlite*
 models/*
-models
+!models/ten-vad.onnx
 .yalc/
 yalc.lock
