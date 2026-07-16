@@ -1,0 +1,357 @@
+<mxfile host="65bd71144e" pages="1">
+    <diagram id="er-v2" name="架构图">
+        <mxGraphModel dx="783" dy="792" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="app" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#333;fillColor=#f5f5f5;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="10" width="1260" height="830" as="geometry"/>
+                </mxCell>
+                <mxCell id="app-label" value="bilive-dm (Electron App)" style="text;strokeColor=none;fillColor=none;html=1;fontSize=22;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="20" width="300" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="main-window" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="80" width="250" height="520" as="geometry"/>
+                </mxCell>
+                <mxCell id="main-label" value="主窗口 (src/renderer/)" style="text;html=1;fontSize=13;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="88" width="190" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="home" value="🏠 Home 首页/房间管理" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="118" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="config" value="⚙ Config 配置/弹幕样式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="156" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="message" value="💬 Message 历史消息" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="194" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="stats" value="📊 Stats 统计/词云" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="232" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vote" value="🗳 Vote 投票/抽奖" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="270" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="autoreply" value="🤖 AutoReply 自动回复" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="308" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ai-vue" value="🎙 AI 语音识别" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="346" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="overview" value="📋 OverviewPanel" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="384" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="live-vue" value="📺 Live 直播流" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="422" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="store-pinia" value="📦 Pinia Store" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF3E0;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="465" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="sse-client" value="📡 SSE Client" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF3E0;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="503" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="preload-ipc" value="🔌 Preload (IPC 桥)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#E8EAF6;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="555" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="main-process" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="80" width="180" height="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="mp-label" value="主进程 (src/main/)" style="text;html=1;fontSize=13;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="88" width="160" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-starter" value="🚀 Bridge 启动器" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="118" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="window-mgr" value="🪟 窗口管理 (IPC)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="158" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="file-dialog" value="📁 文件对话框" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="198" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="autoupdater" value="🔄 自动更新" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="238" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="tray" value="📌 系统托盘" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="278" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="sub-windows" value="🖼 子窗口创建" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="318" width="152" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="path-config" value="📂 路径配置 (DB/WEB/MODEL)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#F3E5F5;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="358" width="152" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="80" width="340" height="490" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-label" value="Bridge (@tokine/bilibili-bridge)" style="text;html=1;fontSize=13;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="88" width="280" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-api" value="🌐 REST API (Koa)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="118" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-wss" value="🔗 WS Server" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="168" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-biliws" value="📡 Bilibili WS 客户端" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="218" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-db" value="🗄 SQLite (Drizzle)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="118" width="145" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-asr" value="🎧 语音识别 (Sherpa)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="168" width="145" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-record" value="⏺ 直播录制" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="218" width="145" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-auth" value="🔐 认证/Token" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="268" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-proto" value="📋 Protobuf 解析" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="268" width="145" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-serve" value="🌍 静态文件服务" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#C8E6C9;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="320" width="310" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-record-mgr" value="📼 录制管理器" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="368" width="150" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bridge-asr-mgr" value="🗣 ASR 管理器" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="368" width="145" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-pages" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="80" width="200" height="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-label" value="Web 页面 (web/pages/)" style="text;html=1;fontSize=12;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="88" width="180" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-dm" value="🎨 弹幕覆盖层 /dm" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF9C4;" parent="1" vertex="1">
+                    <mxGeometry x="944" y="118" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-raw" value="✏ 样式编辑 /dm-raw-style" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF9C4;" parent="1" vertex="1">
+                    <mxGeometry x="944" y="158" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-player" value="▶ 直播播放器 /live-player" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF9C4;" parent="1" vertex="1">
+                    <mxGeometry x="944" y="198" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="web-obs-ref" value="🔗 OBS 浏览器源接入" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#FFF9C4;" parent="1" vertex="1">
+                    <mxGeometry x="944" y="248" width="170" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="bilibili" value="Bilibili 服务器&#xa;(直播弹幕协议 / API)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#FFCDD2;strokeColor=#B71C1C;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="740" width="1090" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="obs" value="OBS 浏览器源" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#E1BEE7;strokeColor=#4A148C;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="120" width="90" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#006064;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="440" width="180" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-label" value="shared/ (共享模块)" style="text;html=1;fontSize=12;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="448" width="160" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-comp" value="GiftCard / FanMedal" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#E0F7FA;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="478" width="152" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-types" value="类型定义 (types.ts)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#E0F7FA;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="510" width="152" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-util" value="工具函数 (util.ts)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#E0F7FA;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="542" width="152" height="26" as="geometry"/>
+                </mxCell>
+                <mxCell id="shared-const" value="IPC 常量 (const.ts)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#E0F7FA;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="572" width="152" height="24" as="geometry"/>
+                </mxCell>
+                <mxCell id="models-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#880E4F;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="610" width="340" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="models-label" value="🧠 AI 模型 (extraResources → Resources/models/)" style="text;html=1;fontSize=11;fontStyle=1;align=center;fillColor=none;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="617" width="320" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="models-vad" value="silero_vad.onnx" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#FCE4EC;" parent="1" vertex="1">
+                    <mxGeometry x="565" y="645" width="120" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="models-sherpa" value="sherpa-onnx-sense-voice" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#FCE4EC;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="645" width="175" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-sse" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#2E7D32;" parent="1" source="sse-client" target="bridge-wss" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="300" y="518"/>
+                            <mxPoint x="300" y="183"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-sse-label" value="SSE 实时推送" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-sse" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint x="-5" y="-3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#1565C0;" parent="1" source="store-pinia" target="bridge-api" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="305" y="480"/>
+                            <mxPoint x="305" y="70"/>
+                            <mxPoint x="640" y="70"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-api-label" value="HTTP API 调用" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-api" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint x="-5" y="-3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-ipc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#7B1FA2;dashed=1;" parent="1" source="preload-ipc" target="window-mgr" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="315" y="570"/>
+                            <mxPoint x="315" y="173"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-ipc-label" value="IPC invoke" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-ipc" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint x="-5" y="-3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#7B1FA2;" parent="1" source="bridge-starter" target="bridge-api" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="525" y="133"/>
+                            <mxPoint x="525" y="133"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-start-label" value="spawn 子进程启动" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-start" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint y="-5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-ws-bili" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#2E7D32;" parent="1" source="bridge-wss" target="bridge-biliws" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-bili-db" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#2E7D32;" parent="1" source="bridge-biliws" target="bridge-db" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="720" y="233"/>
+                            <mxPoint x="720" y="133"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-bili-db-label" value="持久化" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-bili-db" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-6" relative="1" as="geometry">
+                        <mxPoint x="-5" y="-3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-api-db" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#2E7D32;" parent="1" source="bridge-api" target="bridge-db" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="695" y="133"/>
+                            <mxPoint x="695" y="133"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-api-db-label" value="CRUD" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-api-db" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint y="-5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-auth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#2E7D32;" parent="1" source="bridge-auth" target="bridge-api" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="610" y="210"/>
+                            <mxPoint x="610" y="210"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-serve" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#F57F17;" parent="1" source="bridge-serve" target="web-dm" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-serve-label" value="托管静态文件" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-serve" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint y="-5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-obs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.3;strokeColor=#4A148C;dashed=1;" parent="1" source="web-obs-ref" target="obs" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1170" y="263"/>
+                            <mxPoint x="1170" y="263"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-obs-label" value="localhost:{port}/dm" style="text;html=1;fontSize=8;labelBackgroundColor=#ffffff;" parent="e-obs" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-8" relative="1" as="geometry">
+                        <mxPoint x="-5" y="-3" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-web-ws" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#F57F17;dashed=1;" parent="1" source="web-dm" target="bridge-wss" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1160" y="133"/>
+                            <mxPoint x="1160" y="55"/>
+                            <mxPoint x="660" y="55"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-subweb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#7B1FA2;dashed=1;" parent="1" source="sub-windows" target="web-player" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="535" y="333"/>
+                            <mxPoint x="535" y="213"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-bili" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#B71C1C;" parent="1" source="bridge-biliws" target="bilibili" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="520" y="233"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-bili-label" value="WebSocket 连接弹幕服务器" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-bili" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-6" relative="1" as="geometry">
+                        <mxPoint x="-10" y="-5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-record" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#B71C1C;" parent="1" source="bridge-record" target="bilibili" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="900" y="233"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-record-label" value="HTTP 下载直播流" style="text;html=1;fontSize=9;labelBackgroundColor=#ffffff;" parent="e-record" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-6" relative="1" as="geometry">
+                        <mxPoint x="15" y="-5" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-models" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.3;strokeColor=#880E4F;dashed=1;" parent="1" source="bridge-asr" target="models-sherpa" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="802" y="183"/>
+                            <mxPoint x="802" y="600"/>
+                            <mxPoint x="740" y="600"/>
+                            <mxPoint x="740" y="656"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-models2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#880E4F;dashed=1;" parent="1" source="bridge-asr-mgr" target="models-vad" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="680" y="600"/>
+                            <mxPoint x="620" y="600"/>
+                            <mxPoint x="620" y="656"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-path" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1;strokeColor=#7B1FA2;dashed=1;" parent="1" source="path-config" target="bridge-serve" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="540" y="372"/>
+                            <mxPoint x="540" y="335"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
