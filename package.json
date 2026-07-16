@@ -15,7 +15,7 @@
     "build:mac": "npm run build && codesign --force --deep --sign - build/mac-arm64/bilive-dm.app",
     "pack": "electron-vite build",
     "release": "npm run build -- -p always",
-    "release:only": "electron-builder --publish always"
+    "publish:mac": "electron-builder --prepackaged build/mac-arm64/bilive-dm.app --publish always"
   },
   "repository": {
     "type": "git",
@@ -52,21 +52,6 @@
         ]
       }
     ],
-    "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
-    },
     "mac": {
       "icon": "build/icons/icon.icns",
       "target": "zip"
@@ -120,7 +105,9 @@
     "yaml": "^2.9.0"
   },
   "optionalDependencies": {
+    "@node-rs/jieba-darwin-arm64": "2.0.1",
     "@node-rs/jieba-win32-x64-msvc": "2.0.1",
+    "sherpa-onnx-darwin-arm64": "1.13.4",
     "sherpa-onnx-win-x64": "1.13.4"
   },
   "devDependencies": {
