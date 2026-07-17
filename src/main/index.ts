@@ -161,7 +161,7 @@ app.on('ready', async () => {
   // 创建系统托盘
   const iconPath = import.meta.env.DEV
     ? path.join(__dirname, '../../build/icons/icon.ico')
-    : path.join(process.resourcesPath, 'icon.ico')
+    : path.join(process.resourcesPath, 'icons/icon.ico')
   tray = new Tray(nativeImage.createFromPath(iconPath))
   tray.setToolTip('Bilive')
   tray.on('click', () => {

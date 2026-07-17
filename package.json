@@ -15,7 +15,8 @@
     "build:mac": "npm run build && codesign --force --deep --sign - build/mac-arm64/bilive-dm.app",
     "pack": "electron-vite build",
     "release": "npm run build -- -p always",
-    "publish:mac": "electron-builder --prepackaged build/mac-arm64/bilive-dm.app --publish always"
+    "publish:mac": "electron-builder --prepackaged build/mac-arm64/bilive-dm.app --publish always",
+    "publish:win": "electron-builder --prepackaged build/win-unpacked --publish always"
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,14 @@
         "to": "web",
         "filter": [
           "**/*"
+        ]
+      },
+      {
+        "from": "build/icons",
+        "to": "icons",
+        "filter": [
+          "icon.icns",
+          "icon.ico"
         ]
       }
     ],
