@@ -41,10 +41,11 @@ process.on('uncaughtException', error => {
   console.error(error)
 })
 
-// 1. 定义存储路径（保存在应用的数据目录下，绝对不触发钥匙串）
-const clientIdPath = path.join(app.getPath('userData'), 'client_id')
+const clientIdPath = path.join(
+  app.getPath('userData'),
+  import.meta.env.DEV ? 'client_id_dev' : 'client_id',
+)
 
-// 3. 检查文件是否存在，如果不存在就创建它
 if (!fs.existsSync(clientIdPath)) {
   fs.writeFileSync(clientIdPath, '', 'utf-8')
 }
