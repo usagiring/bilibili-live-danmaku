@@ -221,7 +221,7 @@ const COLORS = [
   'violet',
 ]
 
-let promiseQueue: PromiseQueue | null = null
+const promiseQueue: PromiseQueue | null = new PromiseQueue({ limit: 2 })
 
 const roomId = ref<String>('')
 const headlines = ref<Message[]>([])
@@ -381,7 +381,6 @@ onMounted(async () => {
 
   console.log(dmStyle)
 
-  // promiseQueue = new PromiseQueue({ limit: channelCount.value })
   setupSSE()
   sse.connect(`http://127.0.0.1:${port}`, clientId)
   setInterval(() => {
@@ -406,7 +405,7 @@ function setupSSE() {
     if (promiseQueue) {
       promiseQueue.push(async () => {
         onMessage(data)
-        await wait(channelDelayTime.value)
+        await wait(20)
       })
     } else {
       onMessage(data)

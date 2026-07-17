@@ -831,7 +831,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm',
       action: 'setIgnoreMouseEvents',
-      args: [val, { forward: true }],
+      args: [val, { forward: false }],
     })
   },
 )
@@ -853,7 +853,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'dm-raw',
       action: 'setIgnoreMouseEvents',
-      args: [val, { forward: true }],
+      args: [val, { forward: false }],
     })
   },
 )
@@ -875,7 +875,7 @@ watch(
     await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
       type: 'live',
       action: 'setIgnoreMouseEvents',
-      args: [val, { forward: true }],
+      args: [val, { forward: false }],
     })
   },
 )

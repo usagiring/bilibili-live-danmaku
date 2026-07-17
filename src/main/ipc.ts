@@ -83,7 +83,9 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
       const win = new BrowserWindow({
         width: width || 800,
         height: height || 600,
-        webPreferences: {},
+        webPreferences: {
+          // backgroundThrottling: false,
+        },
         alwaysOnTop: alwaysOnTop ?? false,
         resizable: resizable ?? true,
         frame: frame ?? true,
@@ -94,8 +96,11 @@ export function registerIpcHandlers(mainWindow: BrowserWindow) {
         // roundedCorners: false, // mac 自带圆角
       })
 
+      // 防止被遮挡后定时器被降频
+      // win.webContents.setBackgroundThrottling(false)
+
       if (ignoreMouseEvent) {
-        win.setIgnoreMouseEvents(true, { forward: true })
+        win.setIgnoreMouseEvents(true, { forward: false })
       }
 
       if (iconDataUrl) {

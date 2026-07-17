@@ -28,6 +28,9 @@ declare global {
   var __static: string
 }
 
+// 禁止 Chromium 在窗口被遮挡时停止渲染
+// app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
+
 // 开发模式下禁用硬件加速
 if (import.meta.env.DEV) {
   app.disableHardwareAcceleration()

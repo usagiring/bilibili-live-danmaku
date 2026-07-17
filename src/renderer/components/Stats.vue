@@ -97,13 +97,11 @@ import 'echarts-wordcloud'
 // import 'echarts-wordcloud/dist/echarts-wordcloud.min.js'
 import { Message as $Message } from 'view-ui-plus'
 import { IPC_CHOOSE_DIRECTORY, IPC_GIFT_STATS_EXPORT } from '../../service/const'
-import { dateFormat } from '@tokine/shared'
 
 const store = useConfigStore()
 
 const roomId = ref('')
 const dateRange = ref<Date[]>([])
-const isDateRangeChanged = ref(true)
 
 const totalPrice = ref(0)
 const totalComment = ref(0)
@@ -143,7 +141,6 @@ async function stats() {
 
 function changeDateRange([startTime, endTime]: [Date, Date]) {
   dateRange.value = [new Date(startTime), new Date(endTime)]
-  isDateRangeChanged.value = true
 }
 
 function clearDateRange() {
@@ -158,9 +155,31 @@ function generateChart(chartOption: any) {
     chart = echarts.init(chartDOM!)
   }
 
-  if (!isDateRangeChanged.value && chartOption.times && chartOption.times.length) return
+  if (!chartOption.times?.length) return
 
-  isDateRangeChanged.value = false
+  // 找到有数据的区间，将滑块定位到该区间
+  const dataLen = chartOption.data.length
+  let firstNonZero = 0
+  let lastNonZero = dataLen - 1
+  for (let i = 0; i < dataLen; i++) {
+    if (chartOption.data[i] > 0) {
+      firstNonZero = i
+      break
+    }
+  }
+  for (let i = dataLen - 1; i >= 0; i--) {
+    if (chartOption.data[i] > 0) {
+      lastNonZero = i
+      break
+    }
+  }
+
+  // 前后各留 5% 的边距，至少覆盖有数据的区间
+  const padding = Math.max(2, Math.floor(dataLen * 0.05))
+  const rangeStart = Math.max(0, firstNonZero - padding)
+  const rangeEnd = Math.min(dataLen - 1, lastNonZero + padding)
+  const startPct = Math.round((rangeStart / dataLen) * 100)
+  const endPct = Math.round(((rangeEnd + 1) / dataLen) * 100)
 
   const option = {
     tooltip: {
@@ -186,12 +205,12 @@ function generateChart(chartOption: any) {
     dataZoom: [
       {
         type: 'inside',
-        start: 0,
-        end: 10,
+        start: startPct,
+        end: endPct,
       },
       {
-        start: 0,
-        end: 10,
+        start: startPct,
+        end: endPct,
       },
     ],
     series: [
