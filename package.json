@@ -96,7 +96,7 @@
     ]
   },
   "dependencies": {
-    "@tokine/bilibili-bridge": "^1.0.2",
+    "@tokine/bilibili-bridge": "^1.0.3",
     "@tokine/shared": "workspace:*",
     "axios": "^1.16.1",
     "dayjs": "^1.11.20",
