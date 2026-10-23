@@ -115,16 +115,17 @@
         <span style="color: #ddd; margin: 0 2px">│</span>
         <span
           class="chip"
-          :class="{ on: dmStyle?.isWindowAlwaysOnTop === true }"
-          @click="toggle('dmStyle.isWindowAlwaysOnTop')"
-          >窗口置顶</span
-        >
-        <span
-          class="chip"
           :class="{ on: dmStyle?.ignoreMouseEvent === true }"
           @click="toggle('dmStyle.ignoreMouseEvent')"
           >鼠标穿透</span
         >
+      </div>
+
+      <div class="section-row">
+        <span class="label">置顶层级</span>
+        <TopLevelPicker
+          :model-value="dmStyle?.windowTopLevel"
+          @update:model-value="(v: string) => setTopLevel('dmStyle', v)" />
       </div>
 
       <div class="section-row">
@@ -464,16 +465,16 @@
       <div class="chips">
         <span
           class="chip"
-          :class="{ on: dmRawStyle?.isWindowAlwaysOnTop === true }"
-          @click="toggle('dmRawStyle.isWindowAlwaysOnTop')"
-          >窗口置顶</span
-        >
-        <span
-          class="chip"
           :class="{ on: dmRawStyle?.ignoreMouseEvent === true }"
           @click="toggle('dmRawStyle.ignoreMouseEvent')"
           >鼠标穿透</span
         >
+      </div>
+      <div class="section-row">
+        <span class="label">置顶层级</span>
+        <TopLevelPicker
+          :model-value="dmRawStyle?.windowTopLevel"
+          @update:model-value="(v: string) => setTopLevel('dmRawStyle', v)" />
       </div>
       <div class="section-row">
         <span class="label">透明度</span>
@@ -563,16 +564,16 @@
         </span>
         <span
           class="chip"
-          :class="{ on: liveConfig?.isWindowAlwaysOnTop === true }"
-          @click="toggle('liveConfig.isWindowAlwaysOnTop')">
-          窗口置顶
-        </span>
-        <span
-          class="chip"
           :class="{ on: liveConfig?.ignoreMouseEvent === true }"
           @click="toggle('liveConfig.ignoreMouseEvent')">
           鼠标穿透
         </span>
+      </div>
+      <div class="section-row">
+        <span class="label">置顶层级</span>
+        <TopLevelPicker
+          :model-value="liveConfig?.windowTopLevel"
+          @update:model-value="(v: string) => setTopLevel('liveConfig', v)" />
       </div>
       <div class="section-row">
         <span class="label">透明度</span>
@@ -930,9 +931,11 @@ import {
   IPC_DOWNLOAD_UPDATE,
   IPC_DOWNLOAD_PROGRESS,
   IPC_UPDATE_DOWNLOADED,
+  migrateTopLevel,
 } from '../../service/const'
 import QRCode from 'qrcode'
 import draggable from 'vuedraggable'
+import TopLevelPicker from './TopLevelPicker.vue'
 import { Message as $Message } from 'view-ui-plus'
 import { wait } from '@tokine/shared/service/util.js'
 
@@ -1102,6 +1105,22 @@ function setVal(path: string, value: any) {
 function toggle(path: string) {
   const cur = _get(config, path, false)
   setVal(path, !cur)
+}
+
+// 置顶层级：同时写窗口可读的 windowTopLevel 与兼容旧版本的 isWindowAlwaysOnTop 布尔
+function setTopLevel(section: 'dmStyle' | 'dmRawStyle' | 'liveConfig', level: string) {
+  const isWindowAlwaysOnTop = level !== 'off'
+  _set(config, `${section}.windowTopLevel`, level)
+  _set(config, `${section}.isWindowAlwaysOnTop`, isWindowAlwaysOnTop)
+  updateClientConfig({
+    clientId: clientId.value,
+    kvs: [
+      { key: `${section}.windowTopLevel`, value: level },
+      { key: `${section}.isWindowAlwaysOnTop`, value: isWindowAlwaysOnTop },
+    ],
+  }).catch(e => {
+    console.error(e)
+  })
 }
 
 function toggleSlot(type: string) {
@@ -1310,6 +1329,7 @@ async function restoreDmDefaults() {
 
     if (data) {
       config.dmStyle = data.dmStyle
+      migrateTopLevel(config.dmStyle)
     }
   } catch {
     /* ignore */
@@ -1839,6 +1859,10 @@ async function lightMedal() {
   user-select: none;
 }
 
+.chip:hover {
+  color: #2d8cf0;
+}
+
 .chip.on {
   background: rgba(45, 140, 240, 0.08);
   border-color: #2d8cf0;
@@ -1947,6 +1971,10 @@ async function lightMedal() {
   user-select: none;
 }
 
+.seg-item:hover {
+  color: #2d8cf0;
+}
+
 .seg-item.on {
   background: #fff;
   color: #2d8cf0;
@@ -1983,6 +2011,10 @@ async function lightMedal() {
   transition: 0.15s;
   user-select: none;
   border-radius: 6px 6px 6px 6px;
+}
+
+.lvl-tab:hover {
+  color: #2d8cf0;
 }
 
 .lvl-tab:last-child {

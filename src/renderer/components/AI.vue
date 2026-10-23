@@ -79,7 +79,8 @@
             <div class="section-row">
               <span class="label">VAD</span>
               <span class="hint"
-                >最短语音 {{ minSpeechDuration }}s / 静音断句 {{ minSilenceDuration }}s / 最长语音 {{ maxSpeechDuration }}s</span
+                >最短语音 {{ minSpeechDuration }}s / 静音断句 {{ minSilenceDuration }}s / 最长语音
+                {{ maxSpeechDuration }}s</span
               >
             </div>
           </div>
@@ -592,6 +593,9 @@ function toggleSTT() {
   cursor: pointer;
   transition: 0.15s;
   user-select: none;
+}
+.seg-item:hover {
+  color: #2d8cf0;
 }
 .seg-item.on {
   background: #fff;

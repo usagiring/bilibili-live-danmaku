@@ -659,6 +659,10 @@ onBeforeUnmount(() => {
   user-select: none;
 }
 
+.chip:hover {
+  color: #2d8cf0;
+}
+
 .chip.on {
   background: rgba(45, 140, 240, 0.08);
   border-color: #2d8cf0;

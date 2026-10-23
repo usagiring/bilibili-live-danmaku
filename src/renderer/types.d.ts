@@ -1,4 +1,4 @@
-import { DmRawStyle, LiveConfig } from '@tokine/shared/types.js'
+import { DmRawStyle, LiveConfig, WindowTopLevel } from '@tokine/shared/types.js'
 
 type StyleValue = Record<string, string>
 
@@ -75,6 +75,7 @@ interface DmStyle {
   windowOpacity: number
   windowBackground: string
   isWindowAlwaysOnTop: boolean
+  windowTopLevel?: WindowTopLevel
   ignoreMouseEvent: boolean
   emojiSize: number
   messageSlots: {
@@ -189,6 +190,8 @@ export interface ClientConfig {
   isNeedRefreshCookieCache: boolean
   waitingSpeakerCount: number
   isRoomPanelCollapsed?: boolean
+  /** 单独打开的弹幕窗/直播窗是否显示在任务栏，缺省视为 true */
+  isSubWindowShowInTaskbar?: boolean
 
   user?: User
   rooms: Room[]

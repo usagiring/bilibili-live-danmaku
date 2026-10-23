@@ -12,6 +12,9 @@ const config: ClientConfig & { set: (p: string, v: string) => void } = reactive(
   signInMessage: '...',
   isNeedRefreshCookieCache: false,
 
+  // 单独打开的窗口默认显示在任务栏
+  isSubWindowShowInTaskbar: true,
+
   waitingSpeakerCount: 0,
 
   messageConfig: {

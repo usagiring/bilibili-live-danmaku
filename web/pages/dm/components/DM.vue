@@ -225,6 +225,8 @@ const promiseQueue: PromiseQueue | null = new PromiseQueue({ limit: 2 })
 
 const roomId = ref<String>('')
 const headlines = ref<Message[]>([])
+// 礼物窗模式（?onlyGift=1）：只接收礼物 / 醒目留言，样式仍由 dmStyle 里礼物相关的配置控制
+const onlyGift = ref(false)
 
 const dmStyle = reactive<DmStyle>({
   isShowFace: true,
@@ -370,6 +372,7 @@ onMounted(async () => {
   // port.value = parseInt(params.get('port') || '8081')
   const clientId = params.get('clientId') || ''
   roomId.value = String(params.get('roomId') || '')
+  onlyGift.value = params.get('onlyGift') === '1'
 
   config.set('baseUrl', `http://127.0.0.1:${port}`)
 
@@ -434,6 +437,9 @@ function getStyleSuffix(msg: Message) {
 }
 
 function onMessage(msg: Message) {
+  // 礼物窗：非礼物类消息直接丢弃（弹幕、进场、互动都不进来）
+  if (onlyGift.value && msg.category !== 'gift' && msg.category !== 'superchat') return
+
   let isAddMessage = true
 
   // common

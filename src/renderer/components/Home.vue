@@ -191,33 +191,54 @@
                       <span class="slider-text off">未连接</span>
                     </span>
                   </label>
-                  <Button
-                    class="btn-danmaku"
-                    size="small"
-                    @click="handleShowDanmaku()">
-                    <Icon
-                      type="md-chatboxes"
-                      size="13" />
-                    弹幕窗
-                  </Button>
-                  <Button
-                    class="btn-danmaku"
-                    size="small"
-                    @click="handleShowRawDanmaku()">
-                    <Icon
-                      type="md-text"
-                      size="13" />
-                    仿原弹幕窗
-                  </Button>
-                  <Button
-                    class="btn-danmaku"
-                    size="small"
-                    @click="handleShowLiveWindow()">
-                    <Icon
-                      type="md-play"
-                      size="13" />
-                    直播窗
-                  </Button>
+                  <div class="danmaku-menu">
+                    <Button
+                      class="btn-danmaku"
+                      size="small"
+                      @click="handleShowDanmaku()">
+                      <Icon
+                        type="md-chatboxes"
+                        size="13" />
+                      弹幕窗
+                      <Icon
+                        class="danmaku-menu-arrow"
+                        type="ios-arrow-down"
+                        size="12" />
+                    </Button>
+                    <div class="danmaku-menu-list">
+                      <div
+                        class="danmaku-menu-item"
+                        @click="handleShowRawDanmaku()">
+                        <Icon
+                          type="md-text"
+                          size="13" />
+                        仿原弹幕窗
+                      </div>
+                      <div
+                        class="danmaku-menu-item"
+                        @click="handleShowLiveWindow()">
+                        <Icon
+                          type="md-play"
+                          size="13" />
+                        直播窗
+                      </div>
+                      <div
+                        class="danmaku-menu-item"
+                        @click="handleShowGiftWindow()">
+                        <svg
+                          class="danmaku-menu-svg"
+                          viewBox="0 0 24 24"
+                          width="13"
+                          height="13"
+                          fill="currentColor"
+                          aria-hidden="true">
+                          <path
+                            d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" />
+                        </svg>
+                        礼物窗
+                      </div>
+                    </div>
+                  </div>
                   <Button
                     class="btn-danmaku"
                     :class="{ 'btn-recording': activeRoom?.isRecording }"
@@ -346,6 +367,16 @@
             size="14" />
         </span>
       </div>
+
+      <div class="modal-window-footer">
+        <span class="modal-window-footer-label">显示在任务栏</span>
+        <span
+          class="modal-window-switch"
+          :class="{ on: showInTaskbar }"
+          @click="toggleShowInTaskbar">
+          <span class="modal-window-switch-dot" />
+        </span>
+      </div>
     </Modal>
   </div>
 </template>
@@ -382,6 +413,12 @@ import { DEFAULT_FACE } from '@tokine/shared'
 import { sse } from '../service/sse-client.ts'
 import { Speaker } from '../types'
 import { parseDownloadRate } from '../service/util.ts'
+import {
+  applyTopLevelById,
+  applyTopLevelByType,
+  resolveTopLevel,
+  applyShowInTaskbar,
+} from '../service/window'
 
 const store = useConfigStore()
 const activeRoom = computed(() => store.activeRoom)
@@ -656,6 +693,7 @@ async function handleShowDanmaku() {
   const height = windowConfig?.height || 600
   const x = windowConfig?.x
   const y = windowConfig?.y
+  const topLevel = resolveTopLevel(config.dmStyle)
 
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
@@ -664,7 +702,9 @@ async function handleShowDanmaku() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: config.dmStyle?.isWindowAlwaysOnTop,
+    alwaysOnTop: topLevel !== 'off',
+    alwaysOnTopLevel: topLevel,
+    skipTaskbar: config.isSubWindowShowInTaskbar === false,
     ignoreMouseEvent: config.dmStyle?.ignoreMouseEvent,
     type: 'dm',
     roomId: room.id,
@@ -684,6 +724,7 @@ async function handleShowRawDanmaku() {
   const height = windowConfig?.height || 440
   const x = windowConfig?.x
   const y = windowConfig?.y
+  const topLevel = resolveTopLevel(config.dmRawStyle)
 
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
@@ -692,7 +733,9 @@ async function handleShowRawDanmaku() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: config.dmRawStyle?.isWindowAlwaysOnTop,
+    alwaysOnTop: topLevel !== 'off',
+    alwaysOnTopLevel: topLevel,
+    skipTaskbar: config.isSubWindowShowInTaskbar === false,
     ignoreMouseEvent: config.dmRawStyle?.ignoreMouseEvent,
     type: 'dm-raw',
     roomId: room.id,
@@ -712,6 +755,7 @@ async function handleShowLiveWindow() {
   const height = windowConfig?.height || 360
   const x = windowConfig?.x
   const y = windowConfig?.y
+  const topLevel = resolveTopLevel(config.liveConfig)
 
   await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
     url,
@@ -720,9 +764,43 @@ async function handleShowLiveWindow() {
     frame: false,
     transparent: true,
     resizable: true,
-    alwaysOnTop: config.liveConfig?.isWindowAlwaysOnTop,
+    alwaysOnTop: topLevel !== 'off',
+    alwaysOnTopLevel: topLevel,
+    skipTaskbar: config.isSubWindowShowInTaskbar === false,
     ignoreMouseEvent: config.liveConfig?.ignoreMouseEvent,
     type: 'live',
+    roomId: room.id,
+    clientId: clientId.value,
+    x,
+    y,
+  })
+  fetchWindows()
+}
+
+// 礼物窗：复用 /dm 页面 + onlyGift=1，样式沿用 dmStyle 里礼物相关的配置
+async function handleShowGiftWindow() {
+  const room = activeRoom.value
+  if (!room) return
+  const url = `${baseUrl.value}/dm?clientId=${clientId.value}&roomId=${room.id}&onlyGift=1`
+  const windowConfig = config.window[`${room.id}gift`]
+  const width = windowConfig?.width || 360
+  const height = windowConfig?.height || 480
+  const x = windowConfig?.x
+  const y = windowConfig?.y
+  const topLevel = resolveTopLevel(config.dmStyle)
+
+  await window.ipcRenderer.invoke(IPC_WINDOW_CREATE, {
+    url,
+    width: width,
+    height: height,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: topLevel !== 'off',
+    alwaysOnTopLevel: topLevel,
+    skipTaskbar: config.isSubWindowShowInTaskbar === false,
+    ignoreMouseEvent: config.dmStyle?.ignoreMouseEvent,
+    type: 'gift',
     roomId: room.id,
     clientId: clientId.value,
     x,
@@ -768,6 +846,21 @@ interface WindowItem {
 }
 const dmWindows = ref<WindowItem[]>([])
 const showWindowList = ref(false)
+const showInTaskbar = computed(() => config.isSubWindowShowInTaskbar !== false)
+
+// 开关只改配置，实际应用到窗口由下面的 watcher 负责
+async function toggleShowInTaskbar() {
+  const next = !showInTaskbar.value
+  config.isSubWindowShowInTaskbar = next
+  try {
+    await updateClientConfig({
+      clientId: clientId.value,
+      kvs: [{ key: 'isSubWindowShowInTaskbar', value: next }],
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
 const autoTopWindows = ref(new Set<number>())
 const autoTopTimers = new Map<number, ReturnType<typeof setInterval>>()
 
@@ -778,16 +871,24 @@ function toggleAutoTop(windowId: number) {
     autoTopTimers.delete(windowId)
   } else {
     autoTopWindows.value.add(windowId)
+    const type = dmWindows.value.find(w => w.id === windowId)?.type
     const timer = setInterval(() => {
-      window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
-        id: windowId,
-        action: 'setAlwaysOnTop',
-        args: [true, 'floating'],
-      })
+      // 定时重提不只是「顶到最前」，还会重新执行一次任务栏后插入，
+      // 所以必须用配置的层级，不能写死 floating
+      applyTopLevelById(windowId, resolveLevelByType(type))
     }, 2000)
     autoTopTimers.set(windowId, timer)
   }
   autoTopWindows.value = new Set(autoTopWindows.value)
+}
+
+function resolveLevelByType(type?: string) {
+  let level = 'floating'
+  if (type === 'dm' || type === 'gift') level = resolveTopLevel(config.dmStyle)
+  else if (type === 'dm-raw') level = resolveTopLevel(config.dmRawStyle)
+  else if (type === 'live') level = resolveTopLevel(config.liveConfig)
+  // 自动置顶的目的是保持最前，配置为关闭时退化成普通置顶
+  return level === 'off' ? 'floating' : level
 }
 
 async function fetchWindows() {
@@ -800,6 +901,7 @@ function winTypeLabel(type: string) {
     dm: '弹幕窗',
     'dm-raw': '仿原弹幕窗',
     live: '直播窗',
+    gift: '礼物窗',
   }
   return map[type] || '窗口'
 }
@@ -826,25 +928,29 @@ onMounted(() => {
 
 // 监听 dmStyle 的 Electron 窗口配置变化，同步到 DM 窗口
 watch(
+  () => config.isSubWindowShowInTaskbar !== false,
+  show => applyShowInTaskbar(show),
+)
+
+// 礼物窗与弹幕窗共用 dmStyle，窗口级设置要一起下发
+const DM_STYLE_TYPES = ['dm', 'gift'] as const
+
+watch(
   () => config.dmStyle?.ignoreMouseEvent,
   async val => {
-    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
-      type: 'dm',
-      action: 'setIgnoreMouseEvents',
-      args: [val, { forward: false }],
-    })
+    for (const type of DM_STYLE_TYPES) {
+      await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
+        type,
+        action: 'setIgnoreMouseEvents',
+        args: [val, { forward: false }],
+      })
+    }
   },
 )
 
 watch(
-  () => config.dmStyle?.isWindowAlwaysOnTop,
-  async val => {
-    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
-      type: 'dm',
-      action: 'setAlwaysOnTop',
-      args: [val, 'floating'],
-    })
-  },
+  () => resolveTopLevel(config.dmStyle),
+  level => DM_STYLE_TYPES.forEach(type => applyTopLevelByType(type, level)),
 )
 
 watch(
@@ -859,14 +965,8 @@ watch(
 )
 
 watch(
-  () => config.dmRawStyle?.isWindowAlwaysOnTop,
-  async val => {
-    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
-      type: 'dm-raw',
-      action: 'setAlwaysOnTop',
-      args: [val, 'floating'],
-    })
-  },
+  () => resolveTopLevel(config.dmRawStyle),
+  level => applyTopLevelByType('dm-raw', level),
 )
 
 watch(
@@ -881,14 +981,8 @@ watch(
 )
 
 watch(
-  () => config.liveConfig?.isWindowAlwaysOnTop,
-  async val => {
-    await window.ipcRenderer.invoke(IPC_WINDOW_ACTION, {
-      type: 'live',
-      action: 'setAlwaysOnTop',
-      args: [val, 'floating'],
-    })
-  },
+  () => resolveTopLevel(config.liveConfig),
+  level => applyTopLevelByType('live', level),
 )
 
 function close() {
@@ -1061,7 +1155,7 @@ function hideToTray() {
   line-height: 12px;
   text-align: center;
   color: #fff;
-  background: #999;
+  background: #2d8cf0;
   border-radius: 6px;
 }
 
@@ -1485,6 +1579,7 @@ function hideToTray() {
   transition:
     color 0.25s,
     text-shadow 0.25s;
+  color: #2d8cf0;
   text-shadow:
     white 1px 0 1px,
     white 0 1px 1px,
@@ -1493,7 +1588,7 @@ function hideToTray() {
 }
 
 .room-tab.active {
-  color: #222;
+  color: #2d8cf0;
   font-weight: 600;
   border-bottom-color: #66ccff;
   text-shadow:
@@ -1583,6 +1678,83 @@ function hideToTray() {
   border-color: #fff !important;
   color: #222 !important;
   background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ── 窗口入口下拉：默认只留弹幕窗，hover 展开其余两个 ── */
+.danmaku-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.danmaku-menu-arrow {
+  margin-left: 1px;
+  transition: transform 0.2s;
+}
+
+.danmaku-menu:hover .danmaku-menu-arrow {
+  transform: rotate(180deg);
+}
+
+.danmaku-menu-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 128px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e8eaec;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.15s,
+    transform 0.15s,
+    visibility 0.15s;
+}
+
+.danmaku-menu:hover .danmaku-menu-list {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* 按钮与面板之间的 6px 缝隙也算悬停区，避免鼠标移过去时闪断 */
+.danmaku-menu-list::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
+  height: 6px;
+}
+
+.danmaku-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #555;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+
+.danmaku-menu-item:hover {
+  background: rgba(45, 140, 240, 0.08);
+  color: #2d8cf0;
+}
+
+/* 自绘图标：iconfont 里没有礼物图标，用 inline svg 继承文字颜色 */
+.danmaku-menu-svg {
+  flex: none;
+  display: block;
 }
 .btn-recording {
   background: rgba(237, 64, 20, 0.15) !important;
@@ -1784,5 +1956,47 @@ function hideToTray() {
 .modal-window-close:hover {
   color: #fff;
   background: #ed4014;
+}
+
+.modal-window-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px 12px 4px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #555;
+}
+
+.modal-window-switch {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: #dcdfe6;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modal-window-switch.on {
+  background: #2d8cf0;
+}
+
+.modal-window-switch-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.modal-window-switch.on .modal-window-switch-dot {
+  transform: translateX(14px);
 }
 </style>

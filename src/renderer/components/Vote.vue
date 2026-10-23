@@ -367,7 +367,9 @@ function pieOption() {
         avoidLabelOverlap: false,
         itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
         label: { show: false },
-        emphasis: { label: { show: true, fontSize: '24', fontWeight: 'bold', formatter: '{b}: {d}%' } },
+        emphasis: {
+          label: { show: true, fontSize: '24', fontWeight: 'bold', formatter: '{b}: {d}%' },
+        },
         labelLine: { show: false },
         data: chartData,
       },
@@ -438,7 +440,9 @@ function onMessage(msg: Message) {
     }
   }
 
-  const idx = isAccurateMatch.value ? keywords.findIndex(k => k === msg.content) : optionRegexps.findIndex(r => r.test(msg.content))
+  const idx = isAccurateMatch.value
+    ? keywords.findIndex(k => k === msg.content)
+    : optionRegexps.findIndex(r => r.test(msg.content))
   if (!~idx) return
 
   userMap.value[msg.userId || String(msg.id)] = {
@@ -711,6 +715,9 @@ function changeDuration(val: number) {
   cursor: pointer;
   transition: 0.15s;
   user-select: none;
+}
+.seg-item:hover {
+  color: #2d8cf0;
 }
 .seg-item.on {
   background: #fff;

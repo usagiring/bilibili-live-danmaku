@@ -1,3 +1,6 @@
+/** 窗口置顶层级：关闭 / 普通置顶（不遮挡任务栏）/ 压住任务栏 */
+export type WindowTopLevel = 'off' | 'floating' | 'screen-saver'
+
 export interface DmStyle {
   isShowFace: boolean
   isShowAnchorIcon: boolean
@@ -23,6 +26,7 @@ export interface DmStyle {
   isShowSuperChatJPN: boolean
   windowOpacity: number
   windowBackground: string
+  windowTopLevel?: WindowTopLevel
   emojiSize: number
   messageSlots: {
     type: string
@@ -115,6 +119,7 @@ export interface Message {
 
 export interface LiveConfig {
   isWindowAlwaysOnTop: boolean
+  windowTopLevel?: WindowTopLevel
   windowOpacity: number
   isWithCookie: boolean
   ignoreMouseEvent: boolean
@@ -122,6 +127,7 @@ export interface LiveConfig {
 
 export interface DmRawStyle {
   isWindowAlwaysOnTop: boolean
+  windowTopLevel?: WindowTopLevel
   windowOpacity: number
   windowBackground: string
   direction: 'RL' | 'LR'

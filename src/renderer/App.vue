@@ -27,6 +27,7 @@ import {
 import { sse } from './service/sse-client'
 import { useConfigStore } from './store'
 import config from './service/config'
+import { migrateTopLevel } from '../service/const'
 import { wait } from '@tokine/shared'
 
 const store = useConfigStore()
@@ -65,6 +66,11 @@ onBeforeMount(async () => {
   // 写入全局 config
   // Object.assign(config, pick(remoteConfig, Object.keys(config)))
   Object.assign(config, remoteConfig)
+
+  // 旧配置只有 isWindowAlwaysOnTop 布尔，迁移成 windowTopLevel 三档（只改内存，不写回）
+  migrateTopLevel(config.dmStyle)
+  migrateTopLevel(config.dmRawStyle)
+  migrateTopLevel(config.liveConfig)
 
   if (remoteConfig.rooms?.length) {
     // 需要 Pinia 持久化的字段同步到 store
